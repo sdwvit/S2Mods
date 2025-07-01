@@ -13,24 +13,29 @@ const bigFile = fs
   .join("\n");
 
 class ChimeraHPFix extends Struct {
+  _id = "Chimera";
   refurl = "../Chimera.cfg";
   refkey = "Chimera.VitalParams";
   MaxHP = 750;
   isRoot = true;
 }
 class TradersDontBuyWeaponsArmor extends Struct {
+  _id: "";
   refurl = "../TradePrototypes.cfg";
   refkey = 0;
   isRoot = true;
   TradeGenerators = new TradeGenerators();
 }
 class TradeGenerators extends Struct {
+  _id: "";
   "*" = new TradeGenerator();
 }
 class TradeGenerator extends Struct {
+  _id: "";
   BuyLimitations = new BuyLimitations();
 }
 class BuyLimitations extends Struct {
+  _id: "";
   [0] = "EItemType::Weapon";
   [1] = "EItemType::Armor";
 }
@@ -96,5 +101,25 @@ struct.end`;
           .join("\n"),
       ).toBe(bigFile);
     });
+
+    test("4", () => {
+      const read = Struct.fromString<{
+        _id: string;
+        ItemGenerator?: { Category?: string };
+      }>(
+        fs.readFileSync(
+          "/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/GlassCannon/Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/DynamicItemGenerator/TradersDontSellWeaponsArmor.cfg",
+          "utf-8",
+        ),
+      );
+      const modifiedSet = new Set(read);
+      for (const eachStruct of modifiedSet) {
+      }
+      const modified = [...modifiedSet];
+      fs.writeFileSync(
+        "/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/GlassCannon/Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/DynamicItemGenerator/TradersDontSellWeaponsArmor.cfg",
+        modified.map((s) => s.toString()).join("\n"),
+      );
+    }, 150060);
   });
 });

@@ -24,6 +24,9 @@ export abstract class Struct {
     if (`${ref}`.includes("*")) {
       return "[*]"; // Special case for wildcard structs
     }
+    if (`${ref}`.includes("_dupe_")) {
+      return Struct.renderKeyName(ref.slice(0, ref.indexOf("_dupe_")));
+    }
     if (Struct.isNumber(ref)) {
       return `[${parseInt(ref)}]`;
     }
@@ -95,9 +98,7 @@ export abstract class Struct {
     return JSON.stringify(this, null, 2);
   }
 
-  static fromString<IntendedType extends Struct = Struct>(
-    text: string,
-  ): IntendedType[] {
+  static fromString<IntendedType = Struct>(text: string): IntendedType[] {
     const lines = text.trim().split("\n");
 
     const parseHead = (line: string): Struct => {

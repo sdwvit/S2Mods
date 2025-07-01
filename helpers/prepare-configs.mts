@@ -101,7 +101,7 @@ const res = getCfgFiles()
     const structs = Struct.fromString(readOneFile(file)).map((s) => {
       s.refurl = "../" + pathToSave.base;
       s.refkey = s._id;
-      s._id = MOD_NAME + (s._id || "");
+      s._id = `${MOD_NAME}${s._id ? `_${s._id}` : ""}`;
       return s.toString();
     });
     fs.writeFileSync(
