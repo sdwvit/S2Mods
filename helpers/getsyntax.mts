@@ -84,7 +84,7 @@ function getCfgFiles() {
   return cfgFiles;
 }
 const MOD_NAME = "GlassCannon";
-const interestingFiles = ["ALifeDirectorScenarioPrototypes.cfg"];
+const interestingFiles = [];
 const res = getCfgFiles()
   .filter((file) => interestingFiles.some((i) => file.includes(i)))
   .map((file) => {
