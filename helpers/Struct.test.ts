@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { Struct } from "./Struct.ts";
+import { Entries, Struct, Value } from "./Struct.ts";
 import * as fs from "node:fs";
 
 const bigFile = fs
@@ -13,37 +13,35 @@ const bigFile = fs
   .join("\n");
 
 class ChimeraHPFix extends Struct {
-  _id = "Chimera";
-  refurl = "../Chimera.cfg";
-  refkey = "Chimera.VitalParams";
-  MaxHP = 750;
+  _id = "ChimeraHPFix";
+  bskipref = true;
+  entries = { MaxHP: 750 };
   isRoot = true;
 }
 class TradersDontBuyWeaponsArmor extends Struct {
-  _id: "";
+  _id = "TradersDontBuyWeaponsArmor";
   refurl = "../TradePrototypes.cfg";
   refkey = 0;
   isRoot = true;
-  TradeGenerators = new TradeGenerators();
+  entries = { TradeGenerators: new TradeGenerators() };
 }
 class TradeGenerators extends Struct {
-  _id: "";
-  "*" = new TradeGenerator();
+  _id = "TradeGenerators";
+  entries = { "*": new TradeGenerator() };
 }
 class TradeGenerator extends Struct {
-  _id: "";
-  BuyLimitations = new BuyLimitations();
+  _id = "TradeGenerator";
+  entries = { BuyLimitations: new BuyLimitations() };
 }
 class BuyLimitations extends Struct {
-  _id: "";
-  [0] = "EItemType::Weapon";
-  [1] = "EItemType::Armor";
+  _id = "BuyLimitations";
+  entries = { [0]: "EItemType::Weapon", [1]: "EItemType::Armor" };
 }
 
 describe("Struct", () => {
   test("toString()", () => {
     expect(new ChimeraHPFix().toString()).toBe(
-      `ChimeraHPFix : struct.begin {refurl=../Chimera.cfg;refkey=Chimera.VitalParams}
+      `ChimeraHPFix : struct.begin {bskipref}
    MaxHP = 750
 struct.end`,
     );
@@ -103,22 +101,50 @@ struct.end`;
     });
 
     test("4", () => {
-      const read = Struct.fromString<{
-        _id: string;
-        ItemGenerator?: { Category?: string };
-      }>(
+      const read = Struct.fromString(
         fs.readFileSync(
-          "/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/GlassCannon/Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/DynamicItemGenerator/TradersDontSellWeaponsArmor.cfg",
+          "/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/DynamicItemGenerator.cfg",
           "utf-8",
         ),
       );
-      const modifiedSet = new Set(read);
-      for (const eachStruct of modifiedSet) {
-      }
-      const modified = [...modifiedSet];
+
+      const prohibitedCategories = new Set([
+        "EItemGenerationCategory::WeaponPrimary",
+        "EItemGenerationCategory::BodyArmor",
+        "EItemGenerationCategory::WeaponPistol",
+        "EItemGenerationCategory::WeaponSecondary",
+        "EItemGenerationCategory::Head",
+      ]);
+      const modified = read
+        .filter(
+          (s) =>
+            s._id.toLowerCase().includes("trade") &&
+            s.entries.ItemGenerator &&
+            s.entries.ItemGenerator.entries?.filter &&
+            s.entries.ItemGenerator.entries.find((e) =>
+              prohibitedCategories.has(e.entries.Category),
+            ),
+        )
+        .map((s) => {
+          const useAsterisk = s.entries.ItemGenerator.entries._useAsterisk;
+          s.entries.ItemGenerator.entries = s.entries.ItemGenerator.entries
+            .filter((e) => !prohibitedCategories.has(e.entries.Category))
+            .map((e) => {
+              // e.bskipref = true;
+              //   if (e.entries.PossibleItems)
+              // e.entries.PossibleItems.bskipref = true;
+              return e;
+            });
+          s.entries.ItemGenerator.entries._useAsterisk = useAsterisk;
+          s.entries.ItemGenerator.bskipref = true;
+          s.refurl = "../DynamicItemGenerator.cfg";
+          s.refkey = s._id;
+          s._id = `TradersDontSellWeaponsArmor_${s._id}`;
+          return s;
+        });
       fs.writeFileSync(
-        "/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/GlassCannon/Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/DynamicItemGenerator/TradersDontSellWeaponsArmor.cfg",
-        modified.map((s) => s.toString()).join("\n"),
+        "/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Mods/GlassCannon/Stalker2/Content/GameLite/GameData/ItemGeneratorPrototypes/DynamicItemGenerator/TradersDontSellWeaponsArmor.cfg",
+        modified.map((s) => s.toString()).join("\n\n"),
       );
     }, 150060);
   });

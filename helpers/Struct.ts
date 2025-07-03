@@ -1,4 +1,5 @@
-type Value = Struct | string | number;
+export type Value = Omit<Struct, "toTs"> | string | number;
+export type Entries = Record<string, Value> | Value[];
 
 /**
  * This file is part of the Stalker 2 Modding Tools project.
@@ -8,9 +9,9 @@ export abstract class Struct {
   isRoot?: boolean;
   refurl?: string = undefined;
   refkey?: string | number = undefined;
-  bskipref?: boolean = false;
+  bskipref?: boolean;
   abstract _id: string;
-  entries: Record<string, Value> | Value[];
+  entries: Entries;
 
   static TAB = "   ";
   static pad(text: string): string {
@@ -110,8 +111,10 @@ export abstract class Struct {
       parent.entries ||= [];
       if (Struct.extractKeyFromBrackets(key) === "*") {
         parent.entries["_useAsterisk"] = true;
+        (parent.entries as Value[]).push(value);
+      } else {
+        (parent.entries as Value[])[Struct.extractKeyFromBrackets(key)] = value;
       }
-      (parent.entries as Value[]).push(value);
     } else {
       parent.entries ||= {};
       if (parent.entries[key] === undefined) {
@@ -122,7 +125,9 @@ export abstract class Struct {
     }
   }
 
-  static fromString<IntendedType = Struct>(text: string): IntendedType[] {
+  static fromString<IntendedType extends Partial<Struct> = Struct>(
+    text: string,
+  ): IntendedType[] {
     const lines = text.trim().split("\n");
 
     const parseHead = (line: string): Struct => {
