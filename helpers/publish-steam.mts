@@ -43,38 +43,10 @@ const cmd = (name: string, title: string, description: string, changenote = "") 
 
 childProcess.execSync(
   cmd(
-    "LongLastingBuffs",
-    "Long Lasting Buffs by sdwvit",
-    `
-This mode does only one thing: increases consumables positive effects duration.
-
-For example, Energy drink used to give extra stamina regeneration for 45 seconds, now it lasts 7.5 minutes.
-
-Meant to be used in other collections of mods. Does not conflict with any other mod.
-
----
-Full changelist:
-🔋 Limited Edition Energy Drink: Stamina buff duration increased from 30 seconds to 5 minutes
-🔋 Energy Drink: Reduced Cost of Stamina Per Action duration increased from 30 seconds to 5 minutes
-🔋 Energy Drink: Stamina buff duration increased from 45 seconds to 7.5 minutes
-😴 Energy Drink: Sleepiness reduction duration increased from 3 seconds to 30 seconds
-🔋 Water: Stamina buff duration increased from 5 seconds to 50 seconds
-🔋 Water: Reduced Cost of Stamina Per Action duration increased from 30 seconds to 5 minutes
-🩸 Bandage: Bleeding control duration increased from 2 seconds to 20 seconds
-🩸 Barvinok: Bleeding control duration increased from 3 minutes to 30 minutes
-🩸 Medkit: Bleeding control duration increased from 2 seconds to 20 seconds
-🩸 Army Medkit: Bleeding control duration increased from 2 seconds to 20 seconds
-🩸 Scientist Medkit: Bleeding control duration increased from 2 seconds to 20 seconds
-☢️ Scientist Medkit: Radiation reduction duration increased from 2 seconds to 20 seconds
-☢️ Antirad: Radiation reduction duration increased from 2 seconds to 20 seconds
-☢️ Beer: Radiation reduction duration increased from 2 seconds to 20 seconds
-☢️ Vodka: Radiation reduction duration increased from 2 seconds to 20 seconds
-☢️ Dvupalov Vodka: Radiation reduction duration increased from 10 seconds to 100 seconds
-🧠 Dvupalov Vodka: PSY Protection duration increased from 90 seconds to 15 minutes
-🧠 PSY Block: PSY Protection duration increased from 1 minute to 10 minutes
-🏋️ Hercules: Weight buff duration increased from 5 minutes to 50 minutes
-`.trim(),
-    "Remove unused effects",
+    "GlassCannon",
+    "Glass Cannon by sdwvit",
+    `This mode does only one thing: increases weapons damage by a lot. Here’s the deal, kiddo - this mod makes you a glass cannon, so you’re basically one-shotting everything, at the same time you’ll get wrecked by every bullet, every mutant, every *thing* that’s not you. It’s brutal as hell… but *so* much more satisfying when you pull through. It’s not for the weak. If you’re struggling? Just switch to Normal mode for that one fight - no shame in that. This thing’s all about fun, not suffering. Maybe you’re a noob, but you’ve got this. Now go prove it. It is meant to be used in other collections of mods. Does not conflict with anything.`,
+    "Rename the mod, and update icon",
   ),
   {
     stdio: "inherit",
