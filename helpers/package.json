@@ -11,7 +11,7 @@
     "@node-steam/vdf": "^2.2.0",
     "@types/node": "^20.11.17",
     "prettier": "^3.6.2",
-    "s2cfgtojson": "^1.0.0",
+    "s2cfgtojson": "^1.0.2",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }

@@ -6,7 +6,7 @@ import * as fs from "node:fs";
 
 // scan all local .cfg files
 const rootDir = path.join(import.meta.dirname, "..");
-const dirPath = path.join("Stalker2", "Content", "GameLite");
+const baseCfgDir = path.join("Stalker2", "Content", "GameLite");
 const readOneFile = (file) => fs.readFileSync(file, "utf8");
 
 function getCfgFiles() {
@@ -22,40 +22,41 @@ function getCfgFiles() {
   }
 
   const cfgFiles = [];
-  scanAllDirs(path.join(rootDir, dirPath), (file) => {
+  scanAllDirs(path.join(rootDir, baseCfgDir), (file) => {
     cfgFiles.push(file);
   });
   return cfgFiles;
 }
-const MOD_NAME = "LongLastingBuffs";
-const interestingFiles = ["ConsumablePrototypes"];
-
+const MOD_NAME = "";
+const interestingFiles = [""];
+const modFolder = path.join(rootDir, "Mods", MOD_NAME);
+const modFolderRaw = path.join(modFolder, "raw");
+const modFolderSteam = path.join(modFolder, "steamworkshop");
+if (!fs.existsSync(modFolderSteam)) {
+  fs.mkdirSync(modFolderSteam, { recursive: true });
+}
 getCfgFiles()
   .filter((file) => interestingFiles.some((i) => file.includes(i)))
   .map((file) => {
     console.log(`Parsing ${file}`);
-    const pathToSave = path.parse(file.slice(path.join(rootDir, dirPath).length + 1));
+    const pathToSave = path.parse(file.slice(path.join(rootDir, baseCfgDir).length + 1));
 
-    const modFileRoot = path.join(rootDir, "Mods", MOD_NAME, dirPath);
-    const modFileDir = path.join(modFileRoot, pathToSave.dir, pathToSave.name, "raw");
-    if (!fs.existsSync(modFileDir)) {
-      fs.mkdirSync(modFileDir, { recursive: true });
+    const cfgEnclosingFolder = path.join(modFolderRaw, baseCfgDir, pathToSave.dir, pathToSave.name);
+    if (!fs.existsSync(cfgEnclosingFolder)) {
+      fs.mkdirSync(cfgEnclosingFolder, { recursive: true });
     }
+
     const structs = Struct.fromString<Struct & { entries: { SID?: string } }>(readOneFile(file))
-      .filter(
-        (s) =>
-          s.entries.SID &&
-          Object.entries(s.entries).filter(([key]) => key === "ShouldShowEffects" || key === "EffectsDisplayTypes")
-            .length,
-      )
+      .filter((s) => s.entries.SID)
       .map((s) => {
         s.refurl = "../" + pathToSave.base;
         s.refkey = s.entries.SID;
-        s._id = `${MOD_NAME}${s._id ? `_${s._id}` : ""}`;
-        s.entries = Object.fromEntries(
-          Object.entries(s.entries).filter(([key]) => key === "ShouldShowEffects" || key === "EffectsDisplayTypes"),
-        );
+        s._id = `${MOD_NAME}${idIsArrayIndex(s._id) ? "" : `_${s._id}`}`;
         return s.toString();
       });
-    fs.writeFileSync(path.join(modFileDir, `${MOD_NAME}${pathToSave.base}`), structs.join("\n\n"));
+    fs.writeFileSync(path.join(cfgEnclosingFolder, `${MOD_NAME}${pathToSave.base}`), structs.join("\n\n"));
   });
+
+function idIsArrayIndex(id: string): boolean {
+  return id && Struct.isNumber(Struct.extractKeyFromBrackets(id));
+}
