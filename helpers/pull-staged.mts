@@ -13,7 +13,7 @@ const cmd = (name) => {
   return ["mkdir", "-p", destinationPath, "&&", "cp", path.join(sourcePath, "*"), destinationPath].join(" ");
 };
 
-childProcess.execSync(cmd("LongLastingBuffs"), {
+childProcess.execSync(cmd("CantBeKnockedDown"), {
   stdio: "inherit",
   cwd: MODS_PATH,
   shell: "/usr/bin/bash",

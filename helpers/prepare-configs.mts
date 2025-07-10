@@ -27,8 +27,8 @@ function getCfgFiles() {
   });
   return cfgFiles;
 }
-const MOD_NAME = "";
-const interestingFiles = [""];
+const MOD_NAME = "NoFallDamage";
+const interestingFiles = ["ObjPrototypes.cfg", "EffectPrototypes"];
 const modFolder = path.join(rootDir, "Mods", MOD_NAME);
 const modFolderRaw = path.join(modFolder, "raw");
 const modFolderSteam = path.join(modFolder, "steamworkshop");
