@@ -43,9 +43,9 @@ const cmd = (name: string, title: string, description: string, changenote = "") 
 
 childProcess.execSync(
   cmd(
-    "CantBeKnockedDown",
-    "Can't Be Knocked Down by sdwvit",
-    `This mode does only one thing: it makes you unable to be knocked down by any NPCs, including bosses. It is meant to be used in other collections of mods. Does not conflict with anything.`,
+    "NoFallDamage",
+    "No Fall Damage by sdwvit",
+    `This mode does only one thing: Eliminates all damage from falling at any height. It is meant to be used in other collections of mods. Does not conflict with anything.`,
     "Initial release",
   ),
   {
