@@ -3,6 +3,9 @@ import childProcess from "node:child_process";
 import * as fs from "node:fs";
 import * as VDF from "@node-steam/vdf";
 
+import dotEnv from "dotenv";
+
+dotEnv.config();
 const MODS_PATH = path.join(import.meta.dirname, "../Mods");
 const STALKER_STEAM_ID = "1643320";
 const vdfTemplate = (modPath, title, description, changenote = "Initial release") => `
@@ -43,9 +46,9 @@ const cmd = (name: string, title: string, description: string, changenote = "") 
 
 childProcess.execSync(
   cmd(
-    "ReduceQuestCooldown",
-    "Reduce Quest Cooldown by sdwvit",
-    `This mode does only one thing: reduces cooldown between barkeep/vendor/mechanic quests to 4 in-game hours. --- Because Waiting Is for the Weak. --- It is meant to be used in other collections of mods. Does not conflict with anything.`,
+    process.env.MOD_NAME,
+    "No Quest Cooldown by sdwvit",
+    `This mode does only one thing: completely eliminates (well, brings it down to about 30 sec - engine limitation) cooldown between barkeep/vendor/mechanic quests. --- Because Waiting Is for the Weak. --- It is meant to be used in other collections of mods. Does not conflict with anything.`,
     "Initial release",
   ),
   {

@@ -1,6 +1,9 @@
 import path from "node:path";
 import childProcess from "node:child_process";
 
+import dotEnv from "dotenv";
+
+dotEnv.config();
 const MODS_PATH = path.join(import.meta.dirname, "../Mods");
 const SDK_PATH = "/media/nvme1/STALKER2ZoneKit";
 const STAGED_PATH = path.join(SDK_PATH, "Stalker2", "SavedMods", "Staged");
@@ -13,7 +16,7 @@ const cmd = (name) => {
   return ["mkdir", "-p", destinationPath, "&&", "cp", path.join(sourcePath, "*"), destinationPath].join(" ");
 };
 
-childProcess.execSync(cmd("ReduceQuestCooldown"), {
+childProcess.execSync(cmd(process.env.MOD_NAME), {
   stdio: "inherit",
   cwd: MODS_PATH,
   shell: "/usr/bin/bash",

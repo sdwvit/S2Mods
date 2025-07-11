@@ -10,6 +10,7 @@
   "devDependencies": {
     "@node-steam/vdf": "^2.2.0",
     "@types/node": "^20.11.17",
+    "dotenv": "^17.2.0",
     "prettier": "^3.6.2",
     "s2cfgtojson": "^1.0.2",
     "typescript": "^5.8.3",

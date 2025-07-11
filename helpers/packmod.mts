@@ -1,7 +1,9 @@
 import path from "node:path";
 import childProcess from "node:child_process";
 import * as fs from "node:fs";
+import dotEnv from "dotenv";
 
+dotEnv.config();
 const root = path.join(import.meta.dirname, "../Mods");
 const stalkerModsPath =
   "'/home/sdwvit/MX500-900/games/SteamLibrary/steamapps/common/S.T.A.L.K.E.R. 2 Heart of Chornobyl/Stalker2/Content/Paks/~mods/'";
@@ -29,7 +31,7 @@ const cmd = (name) => {
   ].join(" ");
 };
 
-childProcess.execSync(cmd("IncreaseNumberOfQuests"), {
+childProcess.execSync(cmd(process.env.MOD_NAME), {
   stdio: "inherit",
   cwd: root,
   shell: "/usr/bin/bash",

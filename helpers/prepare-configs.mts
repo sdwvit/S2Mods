@@ -4,6 +4,9 @@ import { Struct } from "s2cfgtojson";
 import path from "node:path";
 import * as fs from "node:fs";
 
+import dotEnv from "dotenv";
+
+dotEnv.config();
 // scan all local .cfg files
 const rootDir = path.join(import.meta.dirname, "..");
 const baseCfgDir = path.join("Stalker2", "Content", "GameLite");
@@ -27,8 +30,8 @@ function getCfgFiles() {
   });
   return cfgFiles;
 }
-const MOD_NAME = "NoFallDamage";
-const interestingFiles = ["ObjPrototypes.cfg"];
+const MOD_NAME = process.env.MOD_NAME;
+const interestingFiles = [];
 const modFolder = path.join(rootDir, "Mods", MOD_NAME);
 const modFolderRaw = path.join(modFolder, "raw");
 const modFolderSteam = path.join(modFolder, "steamworkshop");
