@@ -29,7 +29,7 @@ const cmd = (name) => {
   ].join(" ");
 };
 
-childProcess.execSync(cmd("NoFallDamage"), {
+childProcess.execSync(cmd("IncreaseNumberOfQuests"), {
   stdio: "inherit",
   cwd: root,
   shell: "/usr/bin/bash",

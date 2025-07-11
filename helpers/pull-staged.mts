@@ -13,7 +13,7 @@ const cmd = (name) => {
   return ["mkdir", "-p", destinationPath, "&&", "cp", path.join(sourcePath, "*"), destinationPath].join(" ");
 };
 
-childProcess.execSync(cmd("NoFallDamage"), {
+childProcess.execSync(cmd("ReduceQuestCooldown"), {
   stdio: "inherit",
   cwd: MODS_PATH,
   shell: "/usr/bin/bash",
