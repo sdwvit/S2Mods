@@ -1,0 +1,10 @@
+"workshopitem"
+{
+	"appid"		"1643320"
+	"publishedfileid"		"3522665066"
+	"contentfolder"		"/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Mods/ReduceQuestCooldown/steamworkshop"
+	"previewfile"		"/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Mods/ReduceQuestCooldown/512.png"
+	"title"		"Reduce Quest Cooldown by sdwvit"
+	"description"		"This mode does only one thing: reduces cooldown between barkeep/vendor/mechanic quests to 4 in-game hours. --- Because Waiting Is for the Weak. --- It is meant to be used in other collections of mods. Does not conflict with anything."
+	"changenote"		"Initial release"
+}

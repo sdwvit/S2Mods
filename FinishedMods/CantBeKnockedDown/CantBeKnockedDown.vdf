@@ -1,0 +1,10 @@
+"workshopitem"
+{
+	"appid"		"1643320"
+	"publishedfileid"		"3521435542"
+	"contentfolder"		"/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Mods/CantBeKnockedDown/steamworkshop"
+	"previewfile"		"/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Mods/CantBeKnockedDown/512.png"
+	"title"		"Can't Be Knocked Down by sdwvit"
+	"description"		"This mode does only one thing: it makes you unable to be knocked down by any NPCs, including bosses. It is meant to be used in other collections of mods. Does not conflict with anything."
+	"changenote"		"Initial release"
+}
