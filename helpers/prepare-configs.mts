@@ -46,44 +46,35 @@ const total = getCfgFiles()
     const pathToSave = path.parse(file.slice(path.join(rootDir, baseCfgDir).length + 1));
 
     const cfgEnclosingFolder = path.join(modFolderRaw, baseCfgDir, pathToSave.dir, pathToSave.name);
-    const interestingCategories = new Set([
-      "EItemGenerationCategory::WeaponPistol",
-      "EItemGenerationCategory::WeaponPrimary",
-      "EItemGenerationCategory::WeaponSecondary",
-      "EItemGenerationCategory::Head",
-      "EItemGenerationCategory::BodyArmor",
-    ]);
+
     const structs = Struct.fromString<
-      Struct<{
-        SID: string;
-        ItemGenerator: Struct<
-          { Category?: string; ReputationThreshold?: number } & Record<
-            string,
-            Struct<{ Category?: string; ReputationThreshold?: number }>
-          >
-        >;
-      }>
+      Struct & {
+        entries: {
+          SID?: string;
+          ItemGenerator: Struct;
+        };
+      }
     >(readOneFile(file))
-      .filter((s) => s.entries.SID.includes("Trader_"))
+      .filter((s) => s.entries.SID)
       .map((s) => {
         s.refurl = "../" + pathToSave.base;
         s.refkey = s.entries.SID;
         s._id = `${MOD_NAME}${idIsArrayIndex(s._id) ? "" : `_${s._id}`}`;
-        let keep = false;
-        const itemGenerator = s.entries.ItemGenerator;
-        if (interestingCategories.has(itemGenerator.entries.Category)) {
-          itemGenerator.entries.ReputationThreshold = 1000000;
-          keep = true;
-        }
-        Object.values(itemGenerator.entries).filter((entry) => {
-          if (entry instanceof Struct && interestingCategories.has(entry.entries.Category)) {
-            entry.entries.ReputationThreshold = 1000000;
-            keep = true;
-          }
-        });
-        return keep ? s : null;
-      })
-      .filter((s) => s);
+        const interestingCategories = new Set([
+          "EItemGenerationCategory::WeaponPistol",
+          "EItemGenerationCategory::WeaponPrimary",
+          "EItemGenerationCategory::WeaponSecondary",
+          "EItemGenerationCategory::Head",
+          "EItemGenerationCategory::BodyArmor",
+        ]);
+        Object.values(s.entries.ItemGenerator.entries)
+          .filter((e) => e instanceof Struct)
+          .map((e) => e.entries)
+          .filter((e) => interestingCategories.has(e.Category))
+          .forEach((e) => (e.ReputationThreshold = "1000000"));
+
+        return s;
+      });
 
     if (structs.length) {
       if (!fs.existsSync(cfgEnclosingFolder)) {
