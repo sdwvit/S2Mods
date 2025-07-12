@@ -31,7 +31,7 @@ function getCfgFiles() {
   return cfgFiles;
 }
 const MOD_NAME = process.env.MOD_NAME;
-const interestingFiles = ["SpawnActorPrototypes/WorldMap_W"];
+const interestingFiles = ["E01_MQ01.cfg"];
 const modFolder = path.join(rootDir, "Mods", MOD_NAME);
 const modFolderRaw = path.join(modFolder, "raw");
 const modFolderSteam = path.join(modFolder, "steamworkshop");
@@ -63,10 +63,10 @@ const total = getCfgFiles()
         s.refurl = "../" + pathToSave.base;
         s.refkey = s.entries.SID;
         s._id = `${MOD_NAME}${idIsArrayIndex(s._id) ? "" : `_${s._id}`}`;
-        s.entries = { SpawnOnStart: false };
+        s.entries.SpawnOnStart = false;
         return s;
       });
-    console.log(`Parsing ${file}`);
+
     if (structs.length) {
       if (!fs.existsSync(cfgEnclosingFolder)) {
         fs.mkdirSync(cfgEnclosingFolder, { recursive: true });
@@ -80,7 +80,7 @@ const total = getCfgFiles()
   })
   .flat();
 
-console.log(`Total: ${total.length} files processed.`);
+console.log(`Total: ${total.length} structs processed.`);
 
 function idIsArrayIndex(id: string): boolean {
   return id && Struct.isNumber(Struct.extractKeyFromBrackets(id));
