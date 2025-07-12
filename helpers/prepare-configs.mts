@@ -31,34 +31,56 @@ function getCfgFiles() {
   return cfgFiles;
 }
 const MOD_NAME = process.env.MOD_NAME;
-const interestingFiles = ["QuestNodePrototypes/RSQ06_C00___SIDOROVICH"];
+const interestingFiles = ["SpawnActorPrototypes/WorldMap_W"];
 const modFolder = path.join(rootDir, "Mods", MOD_NAME);
 const modFolderRaw = path.join(modFolder, "raw");
 const modFolderSteam = path.join(modFolder, "steamworkshop");
 if (!fs.existsSync(modFolderSteam)) {
   fs.mkdirSync(modFolderSteam, { recursive: true });
 }
-getCfgFiles()
+const total = getCfgFiles()
   .filter((file) => interestingFiles.some((i) => file.includes(i)))
+  .filter((file) => readOneFile(file).toLowerCase().includes("medkit"))
   .map((file) => {
     console.log(`Parsing ${file}`);
     const pathToSave = path.parse(file.slice(path.join(rootDir, baseCfgDir).length + 1));
 
     const cfgEnclosingFolder = path.join(modFolderRaw, baseCfgDir, pathToSave.dir, pathToSave.name);
-    if (!fs.existsSync(cfgEnclosingFolder)) {
-      fs.mkdirSync(cfgEnclosingFolder, { recursive: true });
-    }
 
-    const structs = Struct.fromString<Struct & { entries: { SID?: string } }>(readOneFile(file))
+    const structs = Struct.fromString<
+      Struct & {
+        entries: {
+          SID?: string;
+          SpawnOnStart: boolean;
+          SpawnedPrototypeSID?: string;
+          ItemSID?: string;
+          PackOfItemsPrototypeSID?: string;
+        };
+      }
+    >(readOneFile(file))
       .filter((s) => s.entries.SID)
       .map((s) => {
         s.refurl = "../" + pathToSave.base;
         s.refkey = s.entries.SID;
         s._id = `${MOD_NAME}${idIsArrayIndex(s._id) ? "" : `_${s._id}`}`;
-        return s.toString();
+        s.entries = { SpawnOnStart: false };
+        return s;
       });
-    fs.writeFileSync(path.join(cfgEnclosingFolder, `${MOD_NAME}${pathToSave.base}`), structs.join("\n\n"));
-  });
+    console.log(`Parsing ${file}`);
+    if (structs.length) {
+      if (!fs.existsSync(cfgEnclosingFolder)) {
+        fs.mkdirSync(cfgEnclosingFolder, { recursive: true });
+      }
+      fs.writeFileSync(
+        path.join(cfgEnclosingFolder, `${MOD_NAME}${pathToSave.base}`),
+        structs.map((s) => s.toString()).join("\n\n"),
+      );
+    }
+    return structs;
+  })
+  .flat();
+
+console.log(`Total: ${total.length} files processed.`);
 
 function idIsArrayIndex(id: string): boolean {
   return id && Struct.isNumber(Struct.extractKeyFromBrackets(id));
