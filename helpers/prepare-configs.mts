@@ -31,7 +31,7 @@ function getCfgFiles() {
   return cfgFiles;
 }
 const MOD_NAME = process.env.MOD_NAME;
-const interestingFiles = ["E01_MQ01.cfg", "E02_MQ01.cfg"];
+const interestingFiles = ["DynamicItemGenerator"];
 const modFolder = path.join(rootDir, "Mods", MOD_NAME);
 const modFolderRaw = path.join(modFolder, "raw");
 const modFolderSteam = path.join(modFolder, "steamworkshop");
@@ -46,26 +46,40 @@ const total = getCfgFiles()
     const pathToSave = path.parse(file.slice(path.join(rootDir, baseCfgDir).length + 1));
 
     const cfgEnclosingFolder = path.join(modFolderRaw, baseCfgDir, pathToSave.dir, pathToSave.name);
-
+    const interestingCategories = new Set([
+      "EItemGenerationCategory::WeaponPistol",
+      "EItemGenerationCategory::WeaponPrimary",
+      "EItemGenerationCategory::WeaponSecondary",
+      "EItemGenerationCategory::Head",
+      "EItemGenerationCategory::BodyArmor",
+    ]);
     const structs = Struct.fromString<
       Struct & {
         entries: {
           SID?: string;
-          SpawnOnStart: boolean;
-          SpawnedPrototypeSID?: string;
-          ItemSID?: string;
-          PackOfItemsPrototypeSID?: string;
+          ItemGenerator: Struct;
         };
       }
     >(readOneFile(file))
-      .filter((s) => s.entries.SID)
+      .filter((s) => s.entries.SID && s.entries.ItemGenerator)
       .map((s) => {
         s.refurl = "../" + pathToSave.base;
         s.refkey = s.entries.SID;
         s._id = `${MOD_NAME}${idIsArrayIndex(s._id) ? "" : `_${s._id}`}`;
-        s.entries.SpawnOnStart = false;
-        return s;
-      });
+        let keep = false;
+        const itemGenEntries = s.entries.ItemGenerator.entries;
+        for (const key in itemGenEntries) {
+          if (interestingCategories.has(itemGenEntries[key].entries?.Category)) {
+            itemGenEntries[key].entries.ReputationThreshold = "1000000";
+            keep = true;
+          }
+        }
+        if (keep) {
+          return s;
+        }
+        return null;
+      })
+      .filter((s) => s);
 
     if (structs.length) {
       if (!fs.existsSync(cfgEnclosingFolder)) {
