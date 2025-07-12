@@ -46,13 +46,13 @@ const total = getCfgFiles()
     const pathToSave = path.parse(file.slice(path.join(rootDir, baseCfgDir).length + 1));
 
     const cfgEnclosingFolder = path.join(modFolderRaw, baseCfgDir, pathToSave.dir, pathToSave.name);
-    const interestingCategories = new Set([
+    const interestingCategories = [
       "EItemGenerationCategory::WeaponPistol",
       "EItemGenerationCategory::WeaponPrimary",
       "EItemGenerationCategory::WeaponSecondary",
       "EItemGenerationCategory::Head",
       "EItemGenerationCategory::BodyArmor",
-    ]);
+    ];
     const structs = Struct.fromString<
       Struct & {
         entries: {
@@ -66,15 +66,7 @@ const total = getCfgFiles()
         s.refurl = "../" + pathToSave.base;
         s.refkey = s.entries.SID;
         s._id = `${MOD_NAME}${idIsArrayIndex(s._id) ? "" : `_${s._id}`}`;
-        let keep = false;
-        const itemGenEntries = s.entries.ItemGenerator.entries;
-        for (const key in itemGenEntries) {
-          if (interestingCategories.has(itemGenEntries[key].entries?.Category)) {
-            itemGenEntries[key].entries.ReputationThreshold = "1000000";
-            keep = true;
-          }
-        }
-        if (keep) {
+        if (interestingCategories.some((e) => s.toString().includes(e))) {
           return s;
         }
         return null;
