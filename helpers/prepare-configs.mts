@@ -48,10 +48,13 @@ const prohibitedIds = [
   "Granit",
   "Sniper",
   "Bartender",
-  "_Attachments_",
+  "Attachments",
   "Ammo",
+  "Cosnsumables",
   "Medic",
   "Techician",
+  "Techncian",
+  "Techinican",
   "Technician",
 ];
 
@@ -83,11 +86,34 @@ const total = getCfgFiles()
           "EItemGenerationCategory::Head",
           "EItemGenerationCategory::BodyArmor",
         ]);
+        const interesetingItemGenerators = new Set([
+          "Trader_T1_Guns_ItemGenerator",
+          "Trader_T2_Guns_ItemGenerator",
+          "Trader_T3_Guns_ItemGenerator",
+          "Trader_T4_Guns_ItemGenerator",
+        ]);
         Object.values(s.entries.ItemGenerator.entries)
           .filter((e) => e instanceof Struct)
-          .map((e) => e.entries)
-          .filter((e) => interestingCategories.has(e.Category))
-          .forEach((e) => (e.ReputationThreshold = "1000000"));
+          .forEach((e) => {
+            if (interestingCategories.has(e.entries.Category)) {
+              e.entries = { ReputationThreshold: "1000000" };
+              return;
+            }
+            if (e.entries.Category === "EItemGenerationCategory::SubItemGenerator") {
+              // e.entries = {};
+              Object.values(e.entries.PossibleItems.entries).forEach((item) => {
+                if (item instanceof Struct) {
+                  if (interesetingItemGenerators.has(item.entries.ItemGeneratorPrototypeSID)) {
+                    item.entries.Chance = 0;
+                  } else {
+                    item.entries = {};
+                  }
+                }
+              });
+              return;
+            }
+            e.entries = {};
+          });
 
         return s;
       });
@@ -106,6 +132,9 @@ const total = getCfgFiles()
   .flat();
 
 console.log(`Total: ${total.length} structs processed.`);
+total.forEach((s) => {
+  console.log(s.refkey);
+});
 
 function idIsArrayIndex(id: string): boolean {
   return id && Struct.isNumber(Struct.extractKeyFromBrackets(id));
