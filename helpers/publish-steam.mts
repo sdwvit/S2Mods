@@ -48,7 +48,7 @@ childProcess.execSync(
   cmd(
     process.env.MOD_NAME,
     `${process.env.MOD_NAME.replace(/([A-Z])/g, " $1")} by sdwvit`,
-    `This mode does only one thing: traders no longer sell you weapons or armor. --- 🪓 Welcome to the ultimate survival challenge for Stalker 2 purists! --- It is meant to be used in other collections of mods. Does not conflict with anything.`,
+    `This mode does only one thing: removes all 1592 weapons / armour placed around the Zone --- HOBO phase is back! --- It is meant to be used in other collections of mods. Does not conflict with anything.`,
     "Initial release",
   ),
   {
