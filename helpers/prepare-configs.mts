@@ -5,7 +5,6 @@ import path from "node:path";
 import * as fs from "node:fs";
 
 import dotEnv from "dotenv";
-import { read } from "fs";
 
 dotEnv.config();
 // scan all local .cfg files
@@ -33,8 +32,12 @@ function getCfgFiles() {
 }
 const MOD_NAME = process.env.MOD_NAME;
 const interestingFiles = ["DynamicItemGenerator.cfg"];
-const prohibitedIds = [];
-const interstingIds = new Set([]);
+const prohibitedIds = ["Trader"];
+const interstingIds = new Set([
+  "EItemGenerationCategory::BodyArmor",
+  "EItemGenerationCategory::Head",
+  "EItemGenerationCategory::Attach",
+]);
 
 const modFolder = path.join(rootDir, "Mods", MOD_NAME);
 const modFolderRaw = path.join(modFolder, "raw");
@@ -55,14 +58,72 @@ const total = getCfgFiles()
 
     const cfgEnclosingFolder = path.join(modFolderRaw, baseCfgDir, pathToSave.dir, pathToSave.name);
 
-    const structs = Struct.fromString<Struct<{ SpawnOnStart?: boolean; SID?: string }>>(readOneFile(file))
+    const structs = Struct.fromString<
+      Struct<{
+        ItemGenerator: Struct<{
+          [key: `[${number | string}]`]: Struct<{
+            Category: string;
+            PossibleItems: Struct<{
+              [key: `[${number | string}]`]: Struct<{
+                ItemPrototypeSID: string;
+                Weight: number | string;
+                MinDurability?: number | string;
+                MaxDurability?: number | string;
+                AmmoMinCount?: number;
+                AmmoMaxCount?: number;
+                Chance?: number;
+              }>;
+            }>;
+          }>;
+        }>;
+        SpawnOnStart?: boolean;
+        SID?: string;
+      }>
+    >(readOneFile(file))
       .filter((s) => s.entries.SID && prohibitedIds.every((id) => !s.entries.SID.includes(id)))
       .map((s) => {
         s.refurl = "../" + pathToSave.base;
         s.refkey = s.entries.SID;
         s._id = `${MOD_NAME}${idIsArrayIndex(s._id) ? "" : `_${s._id}`}`;
-        return s;
-      });
+        let keep = false;
+        Object.values(s.entries.ItemGenerator.entries).forEach((item) => {
+          if (interstingIds.has(item.entries?.Category)) {
+            Object.values(item.entries.PossibleItems.entries).forEach((pos) => {
+              if (pos.entries) {
+                if (pos.entries.ItemPrototypeSID === "empty") {
+                  pos.entries = {} as typeof pos.entries;
+                } else {
+                  keep =
+                    pos.entries.Weight == null ||
+                    pos.entries.MinDurability == null ||
+                    pos.entries.MaxDurability == null;
+
+                  const newObj = {
+                    ItemPrototypeSID: pos.entries.ItemPrototypeSID,
+                  } as typeof pos.entries;
+                  // newObj.Weight = pos.entries.Weight || 1;
+                  if (item.entries?.Category !== "EItemGenerationCategory::Attach") {
+                    newObj.MinDurability = pos.entries.MinDurability || 0;
+                    newObj.MaxDurability =
+                      pos.entries.MaxDurability ||
+                      (Math.random() * 0.5 + parseFloat(newObj.MinDurability.toString())).toFixed(3);
+                  }
+
+                  newObj.Chance =
+                    parseFloat(pos.entries.Chance?.toString()) ||
+                    parseFloat((pos.entries.Weight || 1).toString()) / 1000;
+
+                  pos.entries = newObj;
+                }
+              }
+            });
+          } else {
+            if (item.entries) item.entries = {} as typeof item.entries; // remove non-interesting categories
+          }
+        });
+        return keep ? s : null;
+      })
+      .filter((_) => _);
 
     if (structs.length) {
       if (!fs.existsSync(cfgEnclosingFolder)) {
