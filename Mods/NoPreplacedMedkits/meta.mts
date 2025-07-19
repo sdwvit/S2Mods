@@ -50,12 +50,10 @@ export const meta = {
       console.info(
         `Found preplaced item: ${entries.ItemSID || entries.PackOfItemsPrototypeSID}. Hiding it.`,
       );
-      const newEntries: {
-        SpawnOnStart: boolean;
-        ItemSID?: string;
-        PackOfItemsPrototypeSID?: string;
-      } = {
+      const newEntries: any = {
         SpawnOnStart: false,
+        SpawnType: entries.SpawnType,
+        SID: entries.SID,
       };
       if (entries.ItemSID) {
         newEntries.ItemSID = entries.ItemSID;

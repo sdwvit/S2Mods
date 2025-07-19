@@ -38,7 +38,15 @@ export const meta = {
       entries.SpawnType === "ESpawnType::Item"
     ) {
       console.info(`Found preplaced item: ${entries.ItemSID}. Hiding it.`);
-      return { SpawnOnStart: false, ItemSID: entries.ItemSID };
+      const newEntries: any = {
+        SpawnOnStart: false,
+        SpawnType: entries.SpawnType,
+        SID: entries.SID,
+      };
+      if (entries.ItemSID) {
+        newEntries.ItemSID = entries.ItemSID;
+      }
+      return newEntries;
     }
     return null;
   },
