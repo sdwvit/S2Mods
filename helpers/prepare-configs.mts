@@ -14,7 +14,7 @@ export type Meta = {
   description: string;
   entriesTransformer(
     entries: { SID: string },
-    context: { s: Struct<typeof entries>; i: number; arr: Struct[] },
+    context: { s: Struct<typeof entries>; i: number; arr: Struct[]; file: string },
   ): Entries | null;
   interestingContents: string[];
   interestingFiles: string[];
@@ -91,7 +91,7 @@ const total = getCfgFiles()
         s.refurl = "../" + pathToSave.base;
         s.refkey = s.entries.SID;
         s._id = `${MOD_NAME}${idIsArrayIndex(s._id) ? "" : `_${s._id}`}`;
-        if (entriesTransformer) (s as Struct).entries = entriesTransformer(s.entries, { s, i, arr });
+        if (entriesTransformer) (s as Struct).entries = entriesTransformer(s.entries, { s, i, arr, file });
         if (!s.entries) {
           return null;
         }
@@ -118,8 +118,3 @@ await import("./packmod.mjs");
 function idIsArrayIndex(id: string): boolean {
   return id && Struct.isNumber(Struct.extractKeyFromBrackets(id));
 }
-
-/**
- * TODO:
- *  1.
- */

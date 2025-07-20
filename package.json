@@ -9,7 +9,7 @@
     "@types/node": "^20.11.17",
     "dotenv": "^17.2.0",
     "prettier": "^3.6.2",
-    "s2cfgtojson": "2.0.4",
+    "s2cfgtojson": "2.1.1",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }

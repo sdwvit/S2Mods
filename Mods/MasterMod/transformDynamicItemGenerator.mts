@@ -1,12 +1,78 @@
 import { Entries, GetStructType } from "s2cfgtojson";
-import { Meta } from "../../helpers/prepare-configs.mjs";
-type StructType = GetStructType<{
+
+/**
+ * Does not allow traders to sell gear.
+ * Allows NPCs to drop armor.
+ * @param entries
+ * @param file
+ */
+export function transformDynamicItemGenerator(entries: DynamicItemGenerator["entries"], { file }: { file: string }) {
+  if (!file.includes("DynamicItemGenerator.cfg")) {
+    return entries;
+  }
+
+  if (entries.SID.includes("Trade")) {
+    Object.values(entries.ItemGenerator.entries)
+      .filter((e) => e.entries)
+      .forEach((e) => {
+        if (itemGenerationCategories.has(e.entries?.Category)) {
+          e.entries = { ReputationThreshold: 1000000 } as typeof e.entries;
+        } else {
+          (e.entries as Entries) = {};
+        }
+      });
+  } else {
+    Object.values(entries.ItemGenerator.entries)
+      .filter((e) => e.entries)
+      .forEach((e) => {
+        if (e.entries?.Category === "EItemGenerationCategory::BodyArmor") {
+          Object.values(e.entries.PossibleItems.entries)
+            .filter((pi) => pi.entries)
+            .forEach((pi) => {
+              if (!armorAliasMap[pi.entries.ItemPrototypeSID] && !allArmorCosts[pi.entries.ItemPrototypeSID]) {
+                (pi.entries as Entries) = {};
+                return;
+              }
+              pi.entries.Weight ||= 1;
+              pi.entries.MinDurability = 0.01 + Math.random() * 0.04;
+              if (allArmorCosts[pi.entries.ItemPrototypeSID]) {
+                pi.entries.MaxDurability = pi.entries.MinDurability + 5000 / allArmorCosts[pi.entries.ItemPrototypeSID];
+                pi.entries.Chance = 500 / allArmorCosts[pi.entries.ItemPrototypeSID];
+              } else {
+                console.warn(`Unknown armor cost for ${pi.entries.ItemPrototypeSID}, using fallback values.`);
+
+                pi.entries.MaxDurability =
+                  pi.entries.MinDurability + 5000 / allArmorCosts[armorAliasMap[pi.entries.ItemPrototypeSID]];
+                pi.entries.Chance = 500 / allArmorCosts[armorAliasMap[pi.entries.ItemPrototypeSID]];
+                pi.entries.ItemPrototypeSID ||= armorAliasMap[pi.entries.ItemPrototypeSID];
+              }
+              pi.entries.MinDurability = Math.round(pi.entries.MinDurability * 1e5) / 1e5;
+              pi.entries.MaxDurability = Math.round(pi.entries.MaxDurability * 1e5) / 1e5;
+              pi.entries.Chance = Math.round(pi.entries.Chance * 1e5) / 1e5;
+            });
+        } else {
+          (e.entries as Entries) = {};
+        }
+      });
+  }
+  if (Object.values(entries.ItemGenerator.entries).every((e) => Object.keys(e.entries || {}).length === 0)) {
+    return null;
+  }
+  return entries;
+}
+const itemGenerationCategories = new Set([
+  "EItemGenerationCategory::WeaponPrimary",
+  "EItemGenerationCategory::BodyArmor",
+  "EItemGenerationCategory::Head",
+  "EItemGenerationCategory::WeaponPistol",
+  "EItemGenerationCategory::WeaponSecondary",
+]);
+export type DynamicItemGenerator = GetStructType<{
   SID: "GeneralNPC_Neutral_CloseCombat_ItemGenerator";
-  RefreshTime: "1d";
   ItemGenerator: {
-    Category: "EItemGenerationCategory::BodyArmor";
-    PlayerRank: "ERank::Veteran";
-    PossibleItems: {
+    Category?: "EItemGenerationCategory::BodyArmor";
+    ReputationThreshold?: number;
+    PossibleItems?: {
       ItemPrototypeSID: "SEVA_Neutral_Armor";
       Weight: 4;
       MinDurability: number;
@@ -15,7 +81,7 @@ type StructType = GetStructType<{
     }[];
   }[];
 }>;
-const allArmorCosts = {
+export const allArmorCosts = {
   Jemmy_Neutral_Armor: 11600,
   Newbee_Neutral_Armor: 13500,
   Nasos_Neutral_Armor: 21700,
@@ -100,54 +166,12 @@ const allArmorCosts = {
   Battle_Military_Helmet: 24700,
   Light_Bandit_Helmet: 7500,
   Light_Neutral_Helmet: 10500,
-  empty: 10e6,
 };
 
-const mapUnknownArmors = {
+export const armorAliasMap = {
   DutyArmor_3_U1: "Battle_Dolg_Armor",
   Exosekeleton_Neutral_Armor: "Exoskeleton_Neutral_Armor",
   Seva_Dolg_Armor: "SEVA_Dolg_Armor",
   Seva_Neutral_Armor: "SEVA_Neutral_Armor",
   Seva_Svoboda_Armor: "SEVA_Svoboda_Armor",
-};
-export const meta: Meta = {
-  interestingFiles: ["DynamicItemGenerator.cfg"],
-  interestingContents: [],
-  prohibitedIds: [],
-  interestingIds: [],
-  description: "",
-  changenote: "",
-  entriesTransformer: (entries: StructType["entries"], c) => {
-    Object.values(entries.ItemGenerator.entries)
-      .filter((e) => e.entries)
-      .forEach((e) => {
-        if (e.entries?.Category === "EItemGenerationCategory::BodyArmor") {
-          Object.values(e.entries.PossibleItems.entries)
-            .filter((pi) => pi.entries)
-            .forEach((pi) => {
-              pi.entries.Weight ||= 1;
-              pi.entries.MinDurability = 0.01 + Math.random() * 0.04;
-              if (allArmorCosts[pi.entries.ItemPrototypeSID]) {
-                pi.entries.MaxDurability = pi.entries.MinDurability + 5000 / allArmorCosts[pi.entries.ItemPrototypeSID];
-                pi.entries.Chance = 500 / allArmorCosts[pi.entries.ItemPrototypeSID];
-              } else {
-                console.warn(`Unknown armor cost for ${pi.entries.ItemPrototypeSID}, using fallback values.`);
-                pi.entries.MaxDurability =
-                  pi.entries.MinDurability + 5000 / allArmorCosts[mapUnknownArmors[pi.entries.ItemPrototypeSID]];
-                pi.entries.Chance = 500 / allArmorCosts[mapUnknownArmors[pi.entries.ItemPrototypeSID]];
-                pi.entries.ItemPrototypeSID ||= mapUnknownArmors[pi.entries.ItemPrototypeSID];
-              }
-              pi.entries.MinDurability = Math.round(pi.entries.MinDurability * 1e5) / 1e5;
-              pi.entries.MaxDurability = Math.round(pi.entries.MaxDurability * 1e5) / 1e5;
-              pi.entries.Chance = Math.round(pi.entries.Chance * 1e5) / 1e5;
-            });
-        } else {
-          (e.entries as Entries) = e.entries;
-        }
-      });
-    if (Object.values(entries.ItemGenerator.entries).every((e) => Object.keys(e.entries || {}).length === 0)) {
-      return null;
-    }
-    return entries;
-  },
 };
