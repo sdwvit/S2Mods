@@ -2,8 +2,8 @@
 {
 	"appid"		"1643320"
 	"publishedfileid"		"3532740190"
-	"contentfolder"		"/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Mods/steamworkshop"
-	"previewfile"		"/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Mods/512.png"
+	"contentfolder"		"/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Mods/NoEnemyMarkers/steamworkshop"
+	"previewfile"		"/home/sdwvit/MX500-900/games/stalker-modding/Output/Exports/Mods/NoEnemyMarkers/512.png"
 	"title"		"NoEnemyMarkers by sdwvit"
 	"description"		"This mod does only one thing: removes all enemy markers from the compas for a more immersive experience."
 	"changenote"		"Initial release."
