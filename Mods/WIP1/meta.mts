@@ -1,36 +1,16 @@
-import { GetStructType, Struct } from "s2cfgtojson";
+import {
+  EChangeValueMode,
+  EConditionComparance,
+  EDialogAction,
+  EDialogAnimationType,
+  EEmotionalFaceMasks,
+  EQuestConditionType,
+  EQuestNodeType,
+  GetStructType,
+  Struct,
+} from "s2cfgtojson";
 import { Meta } from "../../helpers/prepare-configs.mjs";
 import * as fs from "node:fs";
-
-type NodeSubType =
-  | "Random"
-  | "If"
-  | "SetDialog"
-  | "Technical"
-  | "Container"
-  | "Condition"
-  | "SetGlobalVariable"
-  | "SetTimer"
-  | "End"
-  | "SetItemGenerator"
-  | "OnTickEvent"
-  | "BridgeCleanUp"
-  | "OnJournalQuestEvent";
-type NodeType = `EQuestNodeType::${NodeSubType}`;
-type ConditionSubType = "Bridge" | "GlobalVariable" | "JournalState";
-type EQuestConditionType = `EQuestConditionType::${ConditionSubType}`;
-type EConditionComparance =
-  | "EConditionComparance::Less"
-  | "EConditionComparance::Greater"
-  | "EConditionComparance::Equal"
-  | "EConditionComparance::NotEqual";
-type EGlobalVariableType = "EGlobalVariableType::Int";
-type EDialogAction = "EDialogAction::SideQuest" | "EDialogAction::ShowMoney";
-type EEmotionalFaceMasks = "EEmotionalFaceMasks::None";
-type EDialogAnimationType =
-  | "EDialogAnimationType::NPCIdleWaitingStomachHands"
-  | "EDialogAnimationType::NPCDisapprovalDoubtStiff";
-type EChangeValueMode = "EChangeValueMode::Set" | "EChangeValueMode::Add";
 
 type StructType = GetStructType<{
   SID: string;
@@ -47,6 +27,8 @@ type StructType = GetStructType<{
             GlobalVariablePrototypeSID: "RSQ06_SidorovichQuest";
             ChangeValueMode: "EChangeValueMode::Set";
             VariableValue: 0;
+            LinkedNodePrototypeSID?: string;
+            CompletedNodeLauncherNames?: string[];
           };
         };
       };
@@ -60,7 +42,7 @@ type StructType = GetStructType<{
   };
   NodePrototypeVersion: number;
   QuestSID: "RSQ06_C00___SIDOROVICH";
-  NodeType: NodeType;
+  NodeType: EQuestNodeType;
   Launchers: {
     "0": {
       Excluding: "false";
@@ -90,7 +72,7 @@ type StructType = GetStructType<{
   }[];
   ContaineredQuestPrototypeSID?: string;
   GlobalVariablePrototypeSID?: string;
-  VariableValue?: string;
+  VariableValue?: string | number;
   ChangeValueMode?: EChangeValueMode;
 }>;
 
@@ -102,24 +84,30 @@ export const meta: Meta<StructType> = {
       if (entries.InGameHours) {
         entries.InGameHours = 0;
       }
-      /*if (entries.SID === "RSQ06_C00___SIDOROVICH_If") {
+      /**
+       * RSQ06_SidorovichQuest indicates how many tasks Sidorovich has for the player.
+       *
+       */
+
+      if (entries.SID === "RSQ06_C00___SIDOROVICH_If_LessThen3Tasks" || entries.SID === "RSQ06_C00___SIDOROVICH_If") {
         const interest = entries.Conditions.entries["0"].entries["0"].entries;
-        interest.ConditionComparance = "EConditionComparance::Greater";
-        interest.VariableValue = 5;
-      } else if (entries.SID === "RSQ06_C00___SIDOROVICH_If_LessThen3Tasks") {
-        const interest = entries.Conditions.entries["0"].entries["0"].entries;
-        interest.ConditionComparance = "EConditionComparance::Less";
-        interest.VariableValue = 5;
-      }*/
+        interest.VariableValue = 5; /** 5 - is max for now */
+      }
     }
     if (context.file.includes("RSQ06_Dialog_Sidorovich_RSQ.cfg")) {
-      /* if (entries.SID === "RSQ06_Dialog_Sidorovich_RSQ_If_1") {
+      /*if (entries.SID === "RSQ06_Dialog_Sidorovich_RSQ_If" || entries.SID === "RSQ06_Dialog_Sidorovich_RSQ_If_1") {
         const interest = entries.NextDialogOptions.entries.True.entries.Conditions.entries["0"].entries["0"].entries;
-        interest.ConditionComparance = "EConditionComparance::Less";
-        interest.VariableValue = 5;
+        interest.ConditionType = "EQuestConditionType::GlobalVariable";
+        interest.ConditionComparance = "EConditionComparance::NotEqual";
+        interest.GlobalVariablePrototypeSID = "RSQ06_SidorovichQuest";
+        interest.ChangeValueMode = "EChangeValueMode::Set";
+        interest.VariableValue = -1;
+        delete interest.LinkedNodePrototypeSID;
+        delete interest.CompletedNodeLauncherNames;
       }*/
 
       const entriesT = entries as unknown as DialogStructType["entries"];
+
       if (entriesT.VisibleOnFailedCondition !== undefined) {
         entriesT.VisibleOnFailedCondition = true;
       }
@@ -254,7 +242,7 @@ function processRSQ06_Dialog_Sidorovich_RSQ(structs: DialogStructType[]) {
           res += `${nextDialogOption.entries.NextDialogSID || "noop"}();`;
         }
         if (nextDialogOption.entries.Conditions) {
-          res += "}";
+          res += "} else ";
         }
       });
     return res;
@@ -397,9 +385,9 @@ function processRSQ06(structs: StructType[]) {
           .flat()
           .filter((e) => e._id)
           .forEach((e) => {
-            if (e.entries.ChangeValueMode) {
+            /* if (e.entries.ChangeValueMode) {
               res += `if (output) ${e.entries.GlobalVariablePrototypeSID}${getAssignment(e)}${e.entries.VariableValue};`;
-            }
+            }*/
           });
         break;
       case "EQuestNodeType::SetDialog":
