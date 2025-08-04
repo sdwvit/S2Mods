@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Map Viewer</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      canvas {
+        display: block;
+        background: #eee;
+      }
+      label {
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="display: flex">
+      <label style="display: block; flex-grow: 1" id="label">-</label>
+      <label>Points Factor:</label>
+      <input
+        type="number"
+        id="pointsFactor"
+        value="123"
+        onchange="window.pointsFactor = parseFloat(this.value); draw()"
+        step="0.5"
+      />
+      <label>Shift X:</label>
+      <input
+        type="number"
+        id="pointsShiftX"
+        value="0"
+        onchange="window.pointsShiftX = parseFloat(this.value); draw()"
+        step="1"
+      />
+      <label>Shift Y:</label>
+      <input
+        type="number"
+        id="pointsShiftY"
+        value="0"
+        onchange="window.pointsShiftY = parseFloat(this.value); draw()"
+        step="1"
+      />
+    </div>
+    <canvas id="mapCanvas"></canvas>
+    <script type="module">
+      window.pointsFactor = 123;
+      window.pointsShiftX = -265;
+      window.pointsShiftY = -967;
+      document.getElementById("pointsFactor").value = window.pointsFactor;
+      document.getElementById("pointsShiftX").value = window.pointsShiftX;
+      document.getElementById("pointsShiftY").value = window.pointsShiftY;
+      const recalculatePoints = (points) => {
+        window.newPoints = points.map((pt) => ({
+          x: pt.x / window.pointsFactor + window.pointsShiftX,
+          y: pt.y / window.pointsFactor + window.pointsShiftY,
+          description: pt.description,
+        }));
+      };
+
+      const points = await fetch("./mapPoints.json").then((response) => response.json());
+      const canvas = document.getElementById("mapCanvas");
+      const ctx = canvas.getContext("2d");
+      const label = document.getElementById("label");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const image = new Image();
+      image.src = "map.png";
+
+      let scale = 0.2;
+      let offsetX = 0;
+      let offsetY = 0;
+      let isDragging = false;
+      let dragStart = { x: 0, y: 0 };
+
+      function draw() {
+        requestAnimationFrame(() => {
+          recalculatePoints(points);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.save();
+          ctx.translate(offsetX, offsetY);
+          ctx.scale(scale, scale);
+
+          if (image.complete) ctx.drawImage(image, 0, 0);
+
+          for (const pt of newPoints) {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 5 / scale, 0, Math.PI * 2);
+            ctx.fillStyle = "red";
+            ctx.fill();
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 1 / scale;
+            ctx.stroke();
+          }
+
+          ctx.restore();
+        });
+      }
+      window.draw = draw;
+      function screenToWorld(x, y) {
+        return {
+          x: (x - offsetX) / scale,
+          y: (y - offsetY) / scale,
+        };
+      }
+
+      function worldToScreen(x, y) {
+        return {
+          x: x * scale + offsetX,
+          y: y * scale + offsetY,
+        };
+      }
+
+      canvas.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        dragStart.x = e.clientX;
+        dragStart.y = e.clientY;
+      });
+
+      canvas.addEventListener("mouseup", () => {
+        isDragging = false;
+      });
+
+      canvas.addEventListener("mousemove", (e) => {
+        if (isDragging) {
+          offsetX += e.clientX - dragStart.x;
+          offsetY += e.clientY - dragStart.y;
+          dragStart.x = e.clientX;
+          dragStart.y = e.clientY;
+          draw();
+        }
+      });
+
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
+        const worldPos = screenToWorld(mouseX, mouseY);
+        const zoom = e.deltaY < 0 ? 1.1 : 0.9;
+        scale *= zoom;
+        offsetX = mouseX - worldPos.x * scale;
+        offsetY = mouseY - worldPos.y * scale;
+        draw();
+      });
+
+      canvas.addEventListener("click", (e) => {
+        const mouse = screenToWorld(e.clientX, e.clientY);
+
+        for (const pt of newPoints) {
+          const dx = pt.x - mouse.x;
+          const dy = pt.y - mouse.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 20/scale) {
+            label.innerText = pt.description;
+            return;
+          }
+        }
+        label.innerText = "-";
+      });
+
+      image.onload = draw;
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        draw();
+      });
+    </script>
+  </body>
+</html>

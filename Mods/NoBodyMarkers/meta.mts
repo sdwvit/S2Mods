@@ -7,6 +7,6 @@ export const meta: Meta<Struct<EntriesType>> = {
   prohibitedIds: [],
   interestingIds: [],
   description: "This mod does only one thing: it removes dead body markers from the compass.",
-  changenote: "Initial release",
+  changenote: "Initial release attempt 2",
   entriesTransformer: (entries: EntriesType) => entries,
 };
