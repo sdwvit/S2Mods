@@ -298,11 +298,12 @@ function getChanceForSID(sid: string) {
 export const meta: Meta = {
   interestingFiles: ["ArmorPrototypes.cfg", "DynamicItemGenerator.cfg"],
   description: `
-    This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection. The armor has no psi protection, so players will need to rely on helmets for that.
-    NPCs can now drop armor and helmets, but traders will not sell them. The chance of NPCs dropping armor is based on the armor's overall effectiveness, with cheaper armors being more likely to drop.
-
-    For your convenience, here is a set of console commands to spawn the new headless armors directly:
-  
+    This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection.[h2][/h2]
+    The armor has no psi and reduced radiation protection, you need to rely on helmets for that.[h2][/h2]
+    NPCs can now drop armor and helmets, traders don't sell them.[h2][/h2]
+    The chance of NPCs dropping armor is based on the armor's overall effectiveness, with cheaper armors being more likely to drop.[h2][/h2]
+    [h2][/h2]
+    For your convenience, here is a set of console commands to spawn the new headless armors directly:[h2][/h2]
     [noparse]
     XSpawnItemNearPlayerBySID BattleExoskeleton_Varta_Armor_HeadlessArmors_headless
     XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Armor_HeadlessArmors_headless
@@ -322,6 +323,8 @@ export const meta: Meta = {
     XSpawnItemNearPlayerBySID HeavyExoskeleton_Svoboda_Armor_HeadlessArmors_headless
     XSpawnItemNearPlayerBySID HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless
    [/noparse]
+   [h2][/h2]
+   Modified configs: DynamicItemGenerator.cfg and ArmorPrototypes.cfg
   `,
   changenote: "Initial commit",
   entriesTransformer: (entries, context) => {

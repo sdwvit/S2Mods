@@ -12,14 +12,7 @@ const STALKER_STEAM_ID = "1643320";
 const modFolder = path.join(MODS_PATH, process.env.MOD_NAME);
 const metaPath = path.join(modFolder, "meta.mts");
 const { meta } = await import(metaPath);
-const sanitize = (str: string) =>
-  str
-    .trim()
-    .split("\n")
-    .map((e: string) => e.trim())
-    .join("[h2][/h2]")
-    .replace(/\n/g, "")
-    .replace(/"/g, '\\"');
+const sanitize = (str: string) => str.trim().replace(/\n/g, "").replace(/"/g, '\\"');
 
 const cmd = (name: string) => {
   const vdfFilePath = path.join(modFolder, `workshopitem.vdf`);
