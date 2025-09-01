@@ -113,7 +113,7 @@ export const meta: Meta<StructType> = {
   },
   interestingContents: [],
   interestingFiles: ["QuestNodePrototypes/RSQ06_C00___SIDOROVICH.cfg", "DialogPrototypes/RSQ06_Dialog_Sidorovich_RSQ.cfg"],
-  idAllowList: [],
+
   onFinish(structs: StructType[], { file }) {
     if (file.includes("QuestNodePrototypes/RSQ06_C00___SIDOROVICH.cfg")) {
       processRSQ06(structs);
@@ -122,7 +122,6 @@ export const meta: Meta<StructType> = {
       processRSQ06_Dialog_Sidorovich_RSQ(structs as unknown as DialogStructType[]);
     }
   },
-  idBlockList: [],
 };
 
 type DialogStructType = GetStructType<{

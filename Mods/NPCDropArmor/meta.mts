@@ -113,8 +113,7 @@ const mapUnknownArmors = {
 export const meta: Meta = {
   interestingFiles: ["DynamicItemGenerator.cfg"],
   interestingContents: [],
-  idBlockList: [],
-  idAllowList: [],
+
   description: "",
   changenote: "",
   entriesTransformer: (entries: StructType["entries"], c) => {

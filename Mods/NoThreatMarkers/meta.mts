@@ -1,11 +1,9 @@
-import { Struct } from "s2cfgtojson";
 import { Meta } from "../../helpers/prepare-configs.mjs";
 type EntriesType = { SID: string };
-export const meta: Meta<Struct<EntriesType>> = {
+export const meta: Meta = {
   interestingFiles: [],
   interestingContents: [],
-  idBlockList: [],
-  idAllowList: [],
+
   description: `This mod removes threat indicators. Meaning you can no longer see any markers, blue or red compass shadow indicating the presence or absence of enemies or their direction.
      ---
      Let's make the game scary again.

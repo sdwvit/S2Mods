@@ -4,8 +4,7 @@ type EntriesType = { SID: string } & ({ BaseDamage: number } | { ApplyExtraEffec
 export const meta: Meta<WithSID & Struct<EntriesType>> = {
   interestingFiles: ["NPCWeaponSettingsPrototypes.cfg", "EffectPrototypes.cfg"],
   interestingContents: [],
-  idBlockList: [],
-  idAllowList: [],
+
   description: "This mod does only one thing: it prevents border guards from killing you instantly with their weapons. Removes instakill effect.",
   changenote: "Initial release",
   entriesTransformer: (entries: EntriesType, { file, s, structsById }) => {

@@ -37,8 +37,7 @@ const spawnTypes = ["ESpawnType::DestructibleObject"];
 export const meta: Meta = {
   interestingFiles: ["WorldMap_WP"],
   interestingContents: [...items],
-  idBlockList: [],
-  idAllowList: [],
+
   description: "",
   changenote: "",
   entriesTransformer(entries, context) {

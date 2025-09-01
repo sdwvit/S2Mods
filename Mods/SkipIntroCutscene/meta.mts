@@ -1,11 +1,10 @@
 import { GetStructType, Struct } from "s2cfgtojson";
 import { Meta } from "../../helpers/prepare-configs.mjs";
 type EntriesType = { SID: string; Launchers: GetStructType<{}> };
-export const meta: Meta<Struct<EntriesType>> = {
+export const meta: Meta = {
   interestingFiles: ["E01_MQ01.cfg"],
   interestingContents: [],
-  idBlockList: [],
-  idAllowList: [],
+
   description: "",
   changenote: "",
   entriesTransformer: (entries: EntriesType) => {
