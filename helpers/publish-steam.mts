@@ -5,24 +5,28 @@ import * as VDF from "@node-steam/vdf";
 
 import dotEnv from "dotenv";
 await import("./pull-staged.mjs");
-dotEnv.config();
-const MODS_PATH = path.join(import.meta.dirname, "../Mods");
+dotEnv.config({ path: path.join(import.meta.dirname, "..", "helpers", ".env") });
+const MODS_PATH = path.join(import.meta.dirname, "..", "Mods");
 const STALKER_STEAM_ID = "1643320";
-const sanitize = (str: string) =>
-  str
-    .split("\n")
-    .map((l) => l.trim())
-    .join("[h2][/h2]");
+
 const modFolder = path.join(MODS_PATH, process.env.MOD_NAME);
 const metaPath = path.join(modFolder, "meta.mts");
 const { meta } = await import(metaPath);
+const sanitize = (str: string) =>
+  str
+    .trim()
+    .split("\n")
+    .map((e: string) => e.trim())
+    .join("[h2][/h2]")
+    .replace(/\n/g, "")
+    .replace(/"/g, '\\"');
 
 const cmd = (name: string) => {
   const vdfFilePath = path.join(modFolder, `workshopitem.vdf`);
   const vdfData = fs.existsSync(vdfFilePath) ? VDF.parse(fs.readFileSync(vdfFilePath, "utf8")) : { workshopitem: {} };
 
   vdfData.workshopitem.appid = STALKER_STEAM_ID;
-  vdfData.workshopitem.publishedfileid ||= "0"; // This will be set by SteamCMD
+  vdfData.workshopitem.publishedfileid ||= "0"; // SteamCMD sets this
   vdfData.workshopitem.contentfolder = path.join(MODS_PATH, name, "steamworkshop");
   vdfData.workshopitem.previewfile = path.join(MODS_PATH, name, "512.png");
   vdfData.workshopitem.title = sanitize(`${name.replace(/([A-Z])/g, " $1").trim()} by sdwvit`);

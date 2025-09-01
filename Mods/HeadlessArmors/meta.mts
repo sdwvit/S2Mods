@@ -299,7 +299,33 @@ export const meta: Meta = {
   onFinish(): void {},
   interestingFiles: ["ArmorPrototypes.cfg", "DynamicItemGenerator.cfg"],
   interestingContents: [],
-  description: "",
+  description: `
+    This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection. The armor has no psi protection, so players will need to rely on helmets for that.
+
+    NPCs can now drop armor and helmets, but traders will not sell them. The chance of NPCs dropping armor is based on the armor's overall effectiveness, with cheaper armors being more likely to drop.
+
+    For your convenience, here is a set of console commands to spawn the new headless armors directly:
+  
+    [noparse]
+    XSpawnItemNearPlayerBySID BattleExoskeleton_Varta_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID Heavy_Dolg_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID Heavy2_Military_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID HeavyAnomaly_Monolith_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID Exoskeleton_Dolg_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID Heavy_Svoboda_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID Heavy_Mercenaries_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID HeavyBattle_Spark_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID HeavyExoskeleton_Dolg_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID NPC_HeavyExoskeleton_Mercenaries_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID HeavyExoskeleton_Monolith_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID HeavyExoskeleton_Svoboda_Armor_HeadlessArmors_headless
+    XSpawnItemNearPlayerBySID HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless
+   [/noparse]
+  `,
   changenote: "",
   entriesTransformer: (entries, context) => {
     if (context.filePath.endsWith("ArmorPrototypes.cfg")) {
