@@ -1,4 +1,4 @@
-import { ArmorPrototype, DynamicItemGenerator, Entries, ERank, GetStructType, Struct } from "s2cfgtojson";
+import { ArmorPrototype, DynamicItemGenerator, ERank, GetStructType, Struct } from "s2cfgtojson";
 import { Meta, WithSID } from "../../helpers/prepare-configs.mjs";
 
 import { allDefaultArmorDefs, allExtraArmors, backfillArmorDef, extraArmorsByFaction, newHeadlessArmors } from "./armors.util.mjs";
@@ -296,12 +296,9 @@ function getChanceForSID(sid: string) {
 }
 
 export const meta: Meta = {
-  onFinish(): void {},
   interestingFiles: ["ArmorPrototypes.cfg", "DynamicItemGenerator.cfg"],
-  interestingContents: [],
   description: `
     This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection. The armor has no psi protection, so players will need to rely on helmets for that.
-
     NPCs can now drop armor and helmets, but traders will not sell them. The chance of NPCs dropping armor is based on the armor's overall effectiveness, with cheaper armors being more likely to drop.
 
     For your convenience, here is a set of console commands to spawn the new headless armors directly:
@@ -326,7 +323,7 @@ export const meta: Meta = {
     XSpawnItemNearPlayerBySID HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless
    [/noparse]
   `,
-  changenote: "",
+  changenote: "Initial commit",
   entriesTransformer: (entries, context) => {
     if (context.filePath.endsWith("ArmorPrototypes.cfg")) {
       return transformArmorPrototypes(entries as ArmorPrototype["entries"], context);

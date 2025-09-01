@@ -53,8 +53,7 @@ function getCfgFiles() {
   function scanAllDirs(start: string) {
     const files = fs.readdirSync(start);
     for (const file of files) {
-      // todo exclude DLCGameData until author buys DLCs himself :)
-      if (fs.lstatSync(path.join(start, file)).isDirectory() && !file.includes("DLCGameData")) {
+      if (fs.lstatSync(path.join(start, file)).isDirectory()) {
         scanAllDirs(path.join(start, file));
       } else if (file.endsWith(".cfg")) {
         cfgFiles.push(path.join(start, file));
@@ -83,7 +82,7 @@ getCfgFiles()
   .filter((file) => interestingFiles.some((i) => file.includes(`/${i}`)))
   .map((filePath, fileIndex) => {
     const rawContent = readOneFile(filePath);
-    if (interestingContents.length && !interestingContents.some((i) => rawContent.includes(i))) {
+    if (interestingContents?.length && !interestingContents.some((i) => rawContent.includes(i))) {
       return;
     }
 
