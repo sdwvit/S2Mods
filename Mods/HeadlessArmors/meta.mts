@@ -290,6 +290,7 @@ export const meta: Meta = {
     [h2][/h2]
     For your convenience, here is a set of console commands to spawn the new headless armors directly:[h2][/h2]
     [noparse]
+    Armors:
     XSpawnItemNearPlayerBySID BattleExoskeleton_Varta_Armor_HeadlessArmors_headless
     XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Armor_HeadlessArmors_headless
     XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Armor_HeadlessArmors_headless
@@ -307,11 +308,22 @@ export const meta: Meta = {
     XSpawnItemNearPlayerBySID HeavyExoskeleton_Monolith_Armor_HeadlessArmors_headless
     XSpawnItemNearPlayerBySID HeavyExoskeleton_Svoboda_Armor_HeadlessArmors_headless
     XSpawnItemNearPlayerBySID HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless
+    
+    Helmets: 
+    XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Helmet_HeadlessArmors
+    XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Helmet_HeadlessArmors
+    XSpawnItemNearPlayerBySID HeavyBattle_Merc_Helmet_HeadlessArmors
+    XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Helmet_HeadlessArmors
+    XSpawnItemNearPlayerBySID Exoskeleton_Duty_Helmet_HeadlessArmors
+    XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
+    XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Helmet_HeadlessArmors
+    XSpawnItemNearPlayerBySID Exoskeleton_Spark_Helmet_HeadlessArmors
+    XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet_HeadlessArmors
    [/noparse]
    [h2][/h2]
-   Modified configs: DynamicItemGenerator.cfg and ArmorPrototypes.cfg
+   Modified configs through refkeys: DynamicItemGenerator.cfg and ArmorPrototypes.cfg
   `,
-  changenote: "Add exoskeleton and heavy armor helmets.",
+  changenote: "Update for 1.6",
   entriesTransformer: (entries, context) => {
     if (context.filePath.endsWith("ArmorPrototypes.cfg")) {
       return transformArmorPrototypes(entries as ArmorPrototype["entries"], context);

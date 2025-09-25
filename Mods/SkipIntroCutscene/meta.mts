@@ -1,13 +1,13 @@
-import { GetStructType, Struct } from "s2cfgtojson";
+import { QuestNodePrototype, Struct } from "s2cfgtojson";
 import { Meta } from "../../helpers/prepare-configs.mjs";
-type EntriesType = { SID: string; Launchers: GetStructType<{}> };
+type EntriesType = QuestNodePrototype["entries"];
 export const meta: Meta = {
-  interestingFiles: ["E01_MQ01.cfg"],
+  interestingFiles: ["E01_MQ01.cfg", "FastTravelPrototypes.cfg"],
   interestingContents: [],
 
   description: "",
   changenote: "",
-  entriesTransformer: (entries: EntriesType) => {
+  entriesTransformer: (entries: EntriesType, context) => {
     if (entries.SID === "E01_MQ01_Technical_NoIntro") {
       entries.Launchers = Struct.fromString(`
         Launchers : struct.begin
@@ -42,6 +42,7 @@ export const meta: Meta = {
       entries.Launchers.isRoot = false;
       return entries;
     }
+
     return null;
   },
 };

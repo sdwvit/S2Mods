@@ -153,5 +153,5 @@ function idIsArrayIndex(id: string): boolean {
 
 export type WithSID<T = {}> = Struct<{ SID: string } & T> & { _refkey: Struct["refkey"] };
 
-await import("./packmod.mjs");
+//await import("./packmod.mjs");
 await import("./push-to-sdk.mts");
