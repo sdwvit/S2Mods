@@ -11,6 +11,6 @@ steamworkshop/
 /.env
 workshopitem.vdf
 GameLite
-/src/.l1.cache.json
-/src/.l2.cache.json
-/src/.l3.cache.json
+.l1.cache.json
+.l2.cache.json
+.l3.cache.json
