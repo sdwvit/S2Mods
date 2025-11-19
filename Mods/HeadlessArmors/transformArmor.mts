@@ -1,4 +1,4 @@
-import { DynamicItemGenerator, GetStructType, Struct } from "s2cfgtojson";
+import { DynamicItemGenerator, ERank, GetStructType, Struct } from "s2cfgtojson";
 import { factions } from "./factions.mjs";
 import { extraArmorsByFaction, newArmors } from "./armors.util.mjs";
 import { PossibleItem } from "./possibleItem.mjs";
@@ -7,13 +7,14 @@ import { undroppableArmors } from "./undroppableArmors.mjs";
 import { precision } from "./precision.mjs";
 import { allArmorRank } from "./allArmorRank.mjs";
 import { semiRandom } from "../../src/semi-random.mjs";
+import { allRanks } from "./addMissingCategories.mjs";
 
 /**
  * Allows NPCs to drop armor and helmets.
  */
 export const transformArmor = (
   struct: DynamicItemGenerator,
-  itemGenerator: DynamicItemGenerator["ItemGenerator"][number],
+  itemGenerator: DynamicItemGenerator["ItemGenerator"][`${number}`],
   i: number,
 ) => {
   if (
@@ -30,6 +31,9 @@ export const transformArmor = (
   fork.bAllowSameCategoryGeneration = true;
   fork.PlayerRank = itemGenerator.PlayerRank;
   fork.Category = itemGenerator.Category;
+  if (!itemGenerator.PossibleItems) {
+    return;
+  }
   fork.PossibleItems = itemGenerator.PossibleItems.filter(
     (e): e is any => !!(e[1] && allArmorRank[e[1].ItemPrototypeSID]),
   );
@@ -48,15 +52,12 @@ export const transformArmor = (
 
   extraArmors
     .filter((descriptor) => {
-      const descriptorRank = descriptor.__internal__._extras?.ItemGenerator?.PlayerRank;
-      const igRank = fork.PlayerRank;
-
-      return descriptorRank && igRank
-        ? descriptorRank
-            .split(",")
-            .map((e) => e.trim())
-            .some((r) => igRank.includes(r))
-        : true;
+      const highestRank = descriptor.__internal__._extras?.ItemGenerator?.PlayerRank?.split(",")
+        .map((e) => allRanks.indexOf(e.trim() as ERank))
+        .sort()
+        .pop();
+      const igRank = allRanks.indexOf(fork.PlayerRank as ERank);
+      return highestRank && igRank ? igRank >= highestRank : true;
     })
     .forEach((descriptor) => {
       const originalSID = descriptor.__internal__.refkey;

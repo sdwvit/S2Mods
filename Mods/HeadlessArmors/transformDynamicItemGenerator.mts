@@ -32,5 +32,5 @@ export const transformDynamicItemGenerator: EntriesTransformer<DynamicItemGenera
   return Object.assign(struct.fork(), { ItemGenerator });
 };
 
-transformDynamicItemGenerator._name = " Allows NPCs to drop armor.";
-transformDynamicItemGenerator.files = ["/DynamicItemGenerator.cfg"];
+transformDynamicItemGenerator._name = "Allows NPCs to drop armor.";
+transformDynamicItemGenerator.files = ["/DynamicItemGenerator.cfg", "QuestItemGeneratorPrototypes.cfg"];

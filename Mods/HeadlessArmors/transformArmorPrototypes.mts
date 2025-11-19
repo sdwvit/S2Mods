@@ -48,7 +48,7 @@ export const transformArmorPrototypes: EntriesTransformer<ArmorPrototype> = (str
             }
           },
         );
-        delete overrides.__internal__._extras;
+        // delete overrides.__internal__._extras;
       }
       deepMerge(newArmor, overrides);
       if (!newArmors[newSID]) {

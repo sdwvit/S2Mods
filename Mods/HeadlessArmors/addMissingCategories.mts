@@ -4,8 +4,10 @@ export function addMissingCategories(struct: DynamicItemGenerator) {
   const categories = struct.ItemGenerator.entries().map(([_k, ig]) => ig.Category);
   categories.forEach((Category) => {
     const generators = struct.ItemGenerator.entries().filter(([_k, ig]) => ig.Category === Category);
-    const genRanks = new Set(generators.flatMap(([_k, ig]) => (ig.PlayerRank ? ig.PlayerRank.split(",").map((r) => r.trim()) : [])));
-    const missingRanks = allRanks.difference(genRanks);
+    const genRanks = new Set(
+      generators.flatMap(([_k, ig]) => (ig.PlayerRank ? ig.PlayerRank.split(",").map((r) => r.trim()) : [])),
+    );
+    const missingRanks = allRanksSet.difference(genRanks);
     if (generators.length) {
       [...missingRanks].forEach((mr) => {
         struct.ItemGenerator.addNode(
@@ -23,4 +25,5 @@ export function addMissingCategories(struct: DynamicItemGenerator) {
     }
   });
 }
-const allRanks = new Set<ERank>(["ERank::Newbie", "ERank::Experienced", "ERank::Veteran", "ERank::Master"]);
+export const allRanks: ERank[] = ["ERank::Newbie", "ERank::Experienced", "ERank::Veteran", "ERank::Master"];
+export const allRanksSet = new Set(["ERank::Newbie", "ERank::Experienced", "ERank::Veteran", "ERank::Master"]);

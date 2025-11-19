@@ -4,7 +4,8 @@ import { allDefaultArmorDefs } from "./allDefaultArmorDefs.mjs";
 
 const defaultKeys = new Set(["__internal__"]);
 
-export function backfillArmorDef(armor: Struct): ArmorPrototype {
+export function backfillArmorDef(armorR: Struct): ArmorPrototype {
+  const armor = new Struct(armorR);
   const deepWalk = (obj: ArmorPrototype, cb: (s: string[]) => void, path: string[] = []) =>
     Object.entries(obj)
       .filter((e) => !defaultKeys.has(e[0]))
