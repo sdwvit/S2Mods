@@ -1,11 +1,9 @@
 import { ArmorPrototype, Struct } from "s2cfgtojson";
-
-import { allDefaultArmorDefs } from "./allDefaultArmorDefs.mjs";
-
+import { allDefaultArmorDefs } from "../../src/consts.mjs";
 const defaultKeys = new Set(["__internal__"]);
 
-export function backfillArmorDef(armorR: Struct): ArmorPrototype {
-  const armor = new Struct(armorR);
+export function backfillArmorDef<T>(armorT: T): T & ArmorPrototype {
+  const armor = armorT instanceof Struct ? armorT.clone() : new Struct(armorT as object);
   const deepWalk = (obj: ArmorPrototype, cb: (s: string[]) => void, path: string[] = []) =>
     Object.entries(obj)
       .filter((e) => !defaultKeys.has(e[0]))
@@ -34,5 +32,5 @@ export function backfillArmorDef(armorR: Struct): ArmorPrototype {
     set(armor, path, get(a, path));
   });
 
-  return armor as ArmorPrototype;
+  return armor as T & ArmorPrototype;
 }

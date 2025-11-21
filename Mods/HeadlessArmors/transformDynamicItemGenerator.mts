@@ -1,5 +1,5 @@
 import { DynamicItemGenerator, Struct } from "s2cfgtojson";
-import { transformArmor } from "./transformArmor.mjs";
+import { adjustArmorItemGenerator } from "./adjustArmorItemGenerator.mjs";
 import { addMissingCategories } from "./addMissingCategories.mjs";
 import { EntriesTransformer } from "../../src/metaType.mjs";
 
@@ -18,7 +18,7 @@ export const transformDynamicItemGenerator: EntriesTransformer<DynamicItemGenera
     switch (itemGenerator.Category) {
       case "EItemGenerationCategory::Head":
       case "EItemGenerationCategory::BodyArmor":
-        return transformArmor(struct, itemGenerator as any, i);
+        return adjustArmorItemGenerator(struct, itemGenerator as any, i);
     }
   });
 

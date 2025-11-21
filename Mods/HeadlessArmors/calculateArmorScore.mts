@@ -1,6 +1,5 @@
 import { ArmorPrototype } from "s2cfgtojson";
-
-import { allDefaultArmorDefs } from "./allDefaultArmorDefs.mjs";
+import { allDefaultArmorDefs } from "../../src/consts.mjs";
 
 const maxDurability = Math.max(...Object.values(allDefaultArmorDefs).map((a) => a.BaseDurability ?? 0));
 const minDurability = Math.min(...Object.values(allDefaultArmorDefs).map((a) => a.BaseDurability ?? 10000));

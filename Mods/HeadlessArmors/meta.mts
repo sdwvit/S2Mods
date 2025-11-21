@@ -51,6 +51,6 @@ export const meta: MetaType = {
    [h2][/h2]
    Modified configs through refkeys: DynamicItemGenerator.cfg and ArmorPrototypes.cfg
   `,
-  changenote: "Fix price for Battle_Dolg_End_Armor_HeadlessArmors_headless",
+  changenote: "Quest Characters now drop broken armor as well. More variety in armor loadouts on later difficulties.",
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };
