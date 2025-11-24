@@ -9,13 +9,14 @@ export type MetaContext<T> = {
   structsById: Record<string, T>;
 };
 export type EntriesTransformer<T> = ((entries: T, context: MetaContext<T>) => Struct | null) & {
-  contains?: true;
+  contains?: boolean;
   contents?: string[];
   files: string[];
 };
-export type MetaType<T = Struct> = {
+export type MetaType<T> = {
   changenote: string;
   description: string;
   structTransformers: EntriesTransformer<T>[];
   onFinish?(): void;
+  onTransformerFinish?(transformer: EntriesTransformer<T>): void;
 };

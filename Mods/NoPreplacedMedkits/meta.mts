@@ -1,20 +1,8 @@
-import { ESpawnType, Struct } from "s2cfgtojson";
+import { SpawnActorPrototype } from "s2cfgtojson";
+import { MetaType } from "../../src/metaType.mjs";
+import { logger } from "../../src/logger.mjs";
 
-type StructType = Struct<{
-  SpawnType: ESpawnType;
-  ItemSID?: string;
-  PackOfItemsPrototypeSID?: string;
-  SID: string;
-  SpawnOnStart: boolean;
-}>;
-
-const items = ["Medkit"];
-const spawnTypes = ["ESpawnType::Item", "ESpawnType::PackOfItems"];
-export const meta = {
-  interestingFiles: ["WorldMap_WP"],
-  interestingContents: ["ESpawnType::Item", "ESpawnType::PackOfItems", ...items],
-  prohibitedIds: [],
-  interestingIds: [],
+export const meta: MetaType<SpawnActorPrototype> = {
   description: `This mode does only one thing: removes all 650+ medkits placed around the map for more challenging gameplay.[h1][/h1]
 [hr][/hr]
 😤 Tired of those cute little medkits scattered around the map like breadcrumbs for weaklings?[h1][/h1]
@@ -25,13 +13,23 @@ export const meta = {
 It is meant to be used in other collections of mods. Does not conflict with anything.
 [hr][/hr]
 Thanks @rbwadle for suggesting how to modify map objects.`,
-  changenote: "Update for 1.6",
-  entriesTransformer: (entries: StructType["entries"]) => {
-    if (items.some((i) => entries.ItemSID?.includes(i) || entries.PackOfItemsPrototypeSID?.includes(i)) && spawnTypes.some((s) => entries.SpawnType === s)) {
-      console.info(`Found preplaced item: ${entries.ItemSID || entries.PackOfItemsPrototypeSID}. Hiding it.`);
-      entries.SpawnOnStart = false;
-      return entries;
-    }
-    return null;
-  },
+  changenote: "Update for 1.7.1",
+  structTransformers: [transformItems],
 };
+
+function transformItems(struct: SpawnActorPrototype) {
+  if (struct.SpawnType !== "ESpawnType::Item" && struct.SpawnType !== "ESpawnType::PackOfItems") {
+    return;
+  }
+  const isMedkitReplacement = struct.ItemSID?.includes("Medkit") || struct.PackOfItemsPrototypeSID?.includes("Medkit");
+
+  if (!isMedkitReplacement) {
+    return;
+  }
+  logger.info(`Found preplaced Item: ${struct.ItemSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
+
+  return Object.assign(struct.fork(), { SpawnOnStart: false }) as SpawnActorPrototype;
+}
+transformItems.files = ["GameLite/GameData/SpawnActorPrototypes/WorldMap_WP/"];
+transformItems.contains = true;
+transformItems.contents = ["Medkit"];
