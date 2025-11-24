@@ -285,7 +285,6 @@ function transformEntry(struct: QuestNodePrototype, context: MetaContext<QuestNo
   }
 }
 
-getStructTransformer._name = "digestable quest";
 getStructTransformer.files = ["/QuestNodePrototypes/RSQ07_C00_TSEMZAVOD.cfg"];
 export const meta: MetaType<QuestNodePrototype> = {
   changenote: "",

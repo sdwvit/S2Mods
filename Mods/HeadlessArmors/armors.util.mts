@@ -1,4 +1,4 @@
-import { EItemGenerationCategory, ERank, Internal } from "s2cfgtojson";
+import { EItemGenerationCategory, ERank } from "s2cfgtojson";
 import dotEnv from "dotenv";
 import path from "node:path";
 import { backfillArmorDef } from "./backfillArmorDef.mjs";
@@ -11,6 +11,7 @@ const getHeadlessArmorCommonProps = (refkey: string) => ({
   __internal__: {
     refkey,
     _extras: {
+      isDroppable: true,
       keysForRemoval: {
         UpgradePrototypeSIDs: backfillArmorDef(allDefaultArmorDefs[refkey])
           .UpgradePrototypeSIDs.entries()
@@ -26,12 +27,14 @@ const getHeadlessArmorCommonProps = (refkey: string) => ({
   SID: `${refkey}_HeadlessArmors_headless`,
   LocalizationSID: refkey,
   bBlockHead: false,
+  Protection: { PSY: 0 },
   Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_${refkey}_headless.T_IFI_${refkey}_headless'`,
 });
 
 const getHelmetInternal = (refkey: string) => ({
   refkey,
   _extras: {
+    isDroppable: true,
     ItemGenerator: {
       Category: "EItemGenerationCategory::Head" as EItemGenerationCategory,
       PlayerRank: VETERAN_MASTER_RANK as ERank,
@@ -202,6 +205,7 @@ export const newArmors = {
     __internal__: {
       refkey: "SkinJacket_Bandit_Armor",
       _extras: {
+        isDroppable: false,
         ItemGenerator: {
           Category: "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory,
           PlayerRank: ALL_RANK as ERank,

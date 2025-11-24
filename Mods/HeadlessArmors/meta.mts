@@ -16,41 +16,43 @@ export const meta: MetaType = {
     The chance of NPCs dropping armor is based on the armor's overall effectiveness, with cheaper armors being more likely to drop.[h2][/h2]
     [h2][/h2]
     For your convenience, here is a set of console commands to spawn the new headless armors directly:[h2][/h2]
-    [noparse]
+    [h1][/h1]
     Armors:
-    XSpawnItemNearPlayerBySID BattleExoskeleton_Varta_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Heavy_Dolg_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Heavy2_Military_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID HeavyAnomaly_Monolith_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Exoskeleton_Dolg_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Heavy_Svoboda_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Heavy_Mercenaries_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID HeavyBattle_Spark_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID HeavyExoskeleton_Dolg_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID NPC_HeavyExoskeleton_Mercenaries_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID HeavyExoskeleton_Monolith_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID HeavyExoskeleton_Svoboda_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless
-    XSpawnItemNearPlayerBySID Battle_Dolg_End_Armor_HeadlessArmors_headless
-    
+    [list]
+    [*] XSpawnItemNearPlayerBySID BattleExoskeleton_Varta_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Heavy_Dolg_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Heavy2_Military_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Monolith_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Dolg_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Heavy_Svoboda_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Heavy_Mercenaries_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Dolg_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Monolith_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Svoboda_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Battle_Dolg_End_Armor_HeadlessArmors_headless
+    [/list]    [h1][/h1]
     Helmets: 
-    XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Helmet_HeadlessArmors
-    XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Helmet_HeadlessArmors
-    XSpawnItemNearPlayerBySID HeavyBattle_Merc_Helmet_HeadlessArmors
-    XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Helmet_HeadlessArmors
-    XSpawnItemNearPlayerBySID Exoskeleton_Duty_Helmet_HeadlessArmors
-    XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
-    XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Helmet_HeadlessArmors
-    XSpawnItemNearPlayerBySID Exoskeleton_Spark_Helmet_HeadlessArmors
-    XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet_HeadlessArmors
-   [/noparse]
+    [list]
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Helmet_HeadlessArmors
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Helmet_HeadlessArmors
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Helmet_HeadlessArmors
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Spark_Helmet_HeadlessArmors
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Duty_Helmet_HeadlessArmors
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Helmet_HeadlessArmors
+    [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet_HeadlessArmors
+    [*] XSpawnItemNearPlayerBySID HeavyBattle_Merc_Helmet_HeadlessArmors
+    [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
+    [/list]
    [h2][/h2]
    Modified configs through refkeys: DynamicItemGenerator.cfg and ArmorPrototypes.cfg
   `,
-  changenote: "Quest Characters now drop broken armor as well. More variety in armor loadouts on later difficulties.",
+  changenote:
+    "More variety in armor loadouts on later difficulties. Reworked a lot of backend systems to support easier extension.",
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };

@@ -20,7 +20,7 @@ Mod is meant to be used in other collections of mods. Does not conflict with any
 };
 
 function structTransformer(struct: DifficultyPrototype) {
-  if (struct.SID !== "Hard") {
+  if (struct.SID !== "Hard" && struct.SID !== "Stalker") {
     return null;
   }
   return Object.assign(struct.fork(), {
@@ -30,5 +30,4 @@ function structTransformer(struct: DifficultyPrototype) {
   } as Partial<DifficultyPrototype>);
 }
 
-structTransformer._name = "GlassCannon";
 structTransformer.files = ["/DifficultyPrototypes.cfg"];

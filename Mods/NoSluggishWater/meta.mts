@@ -34,4 +34,3 @@ export function transformObjPrototypes(struct: ObjPrototype) {
 }
 
 transformObjPrototypes.files = ["/GameData/ObjPrototypes.cfg"];
-transformObjPrototypes._name = "Water does not slow you down";

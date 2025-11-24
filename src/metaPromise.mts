@@ -31,8 +31,7 @@ function structTransformer(struct: Struct) {
   }
   return Object.assign(struct.fork(), {});
 }
-
-structTransformer._name = "${modName}";
+ 
 structTransformer.files = [ todo ];`,
   );
 }

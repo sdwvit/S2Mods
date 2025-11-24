@@ -26,5 +26,4 @@ function structTransformer(struct: DifficultyPrototype, context: MetaContext<Dif
   return fork;
 }
 
-structTransformer._name = "UnMaster";
 structTransformer.files = ["/DifficultyPrototypes.cfg"];

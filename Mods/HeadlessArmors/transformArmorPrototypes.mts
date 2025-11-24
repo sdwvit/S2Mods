@@ -60,8 +60,6 @@ export const transformArmorPrototypes: EntriesTransformer<ArmorPrototype> = (str
     context.extraStructs.push(newArmor.clone());
   });
 };
-transformArmorPrototypes._name =
-  "adds armor that doesn't block head, but also removes any psy protection. Allows player to use helmets.";
 transformArmorPrototypes.files = ["ArmorPrototypes.cfg"];
 const bannedids = new Set([
   "NPC_Richter_Armor",

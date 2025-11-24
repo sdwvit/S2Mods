@@ -35,7 +35,6 @@ function transformEffectPrototypes(struct: EffectPrototype) {
 }
 
 transformEffectPrototypes.files = ["/EffectPrototypes.cfg"];
-transformEffectPrototypes._name = "transformEffectPrototypes";
 
 export const meta: MetaType<EffectPrototype> = {
   structTransformers: [transformEffectPrototypes],

@@ -12,5 +12,4 @@ function structTransformer() {
   return null;
 }
 
-structTransformer._name = "VovaVist";
 structTransformer.files = [];

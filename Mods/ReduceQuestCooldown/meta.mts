@@ -15,7 +15,6 @@ function reduceQuestCooldownTransformer(struct: QuestNodePrototype) {
   return null;
 }
 
-reduceQuestCooldownTransformer._name = "ReduceQuestCooldown";
 reduceQuestCooldownTransformer.files = [
   "/QuestNodePrototypes/BodyParts_Malahit.cfg",
   "/QuestNodePrototypes/RSQ01.cfg",

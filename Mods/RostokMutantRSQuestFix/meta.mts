@@ -35,7 +35,6 @@ function structTransformer(struct: QuestNodePrototype) {
   return null;
 }
 
-structTransformer._name = "RostokMutantRSQuestFix";
 structTransformer.files = ["/RSQ08_C01_K_M.cfg"];
 
 export const getConditions = (conditions: Partial<Condition>[]) =>

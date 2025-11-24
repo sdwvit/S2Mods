@@ -35,5 +35,4 @@ function structTransformer(struct: QuestNodePrototype) {
   }
 }
 
-structTransformer._name = "SkipIntroCutscene";
 structTransformer.files = ["/QuestNodePrototypes/E01_MQ01.cfg"];
