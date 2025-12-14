@@ -3,6 +3,7 @@ import childProcess from "node:child_process";
 import dotEnv from "dotenv";
 import { logger } from "./logger.mjs";
 import { spawnSync } from "child_process";
+import { existsSync } from "node:fs";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 const root = path.join(import.meta.dirname, "..");
@@ -32,6 +33,23 @@ export function cookMod(modName: string) {
   const UNREAL_EXE_PATH = getNTPath(
     path.join(process.env.SDK_PATH, "Stalker2", "Binaries", "Win64", "Stalker2ModEditor-Win64-Shipping-Cmd.exe"),
   );
+
+  if (!existsSync(path.join(process.env.SDK_PATH, "Stalker2", "Mods", modName))) {
+    logger.log("Mod doesn't exist, creating...");
+    const cmd = [
+      process.env.WINE,
+      `"${UAT_PATH}"`,
+      "GSCCreateEmptyMod",
+      `"-Project=${PROJECT_PATH}"`,
+      `-ModName=${modName}`,
+    ].join(" ");
+    logger.log(cmd + "\n\nExecuting...\n");
+    childProcess.execSync(cmd, {
+      stdio: "inherit",
+      cwd: root,
+      shell: "/usr/bin/bash",
+    });
+  }
 
   logger.log("Now packing the mod using command: ");
   const fullCmd = [

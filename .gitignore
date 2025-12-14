@@ -6,11 +6,10 @@ node_modules/
 /helpers/leftParts.txt
 SpawnActorPrototypes
 /Stalker2/Content/
-raw/
 steamworkshop/
 /.env
 workshopitem.vdf
-GameLite
+/GameLite
 .l1.cache.zlib
 .l2.cache.zlib
 .l3.cache.zlib

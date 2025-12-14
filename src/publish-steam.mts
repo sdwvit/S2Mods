@@ -8,6 +8,7 @@ const STALKER_STEAM_ID = "1643320";
 import { metaPromise } from "./metaPromise.mjs";
 import { spawnSync } from "child_process";
 import { modFolder, modFolderSteam, modName } from "./base-paths.mjs";
+import { writeFileSync } from "node:fs";
 const { meta } = await metaPromise;
 const sanitize = (str: string) => str.replace(/\n/g, "").replace(/"/g, '\\"');
 
@@ -21,7 +22,7 @@ const cmd = () => {
   vdfData.workshopitem.previewfile = path.join(modFolder, "512.png");
   vdfData.workshopitem.title = sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`);
   vdfData.workshopitem.description = sanitize(meta.description);
-  vdfData.workshopitem.changenote = sanitize(meta.changenote);
+  vdfData.workshopitem.changenote = process.env.CHANGENOTE || sanitize(meta.changenote);
 
   fs.writeFileSync(vdfFilePath, VDF.stringify(vdfData), "utf8");
 
