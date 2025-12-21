@@ -21,7 +21,10 @@ const cmd = () => {
   vdfData.workshopitem.contentfolder = modFolderSteam;
   vdfData.workshopitem.previewfile = path.join(modFolder, "512.png");
   vdfData.workshopitem.title = sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`);
-  vdfData.workshopitem.description = sanitize(meta.description);
+  vdfData.workshopitem.description = sanitize(
+    meta.description +
+      `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[h3][/h3]`,
+  );
   vdfData.workshopitem.changenote = process.env.CHANGENOTE || sanitize(meta.changenote);
 
   fs.writeFileSync(vdfFilePath, VDF.stringify(vdfData), "utf8");

@@ -26,6 +26,24 @@ export function getStagedPath(modName: string) {
   );
 }
 
+export function createMod(modName: string) {
+  const UAT_PATH = getNTPath(path.join(process.env.SDK_PATH, "Engine", "Build", "BatchFiles", "RunUAT.bat"));
+  const PROJECT_PATH = getNTPath(path.join(process.env.SDK_PATH, "Stalker2", "Stalker2.uproject"));
+  const cmd = [
+    process.env.WINE,
+    `"${UAT_PATH}"`,
+    "GSCCreateEmptyMod",
+    `"-Project=${PROJECT_PATH}"`,
+    `-ModName=${modName}`,
+  ].join(" ");
+  logger.log(cmd + "\n\nExecuting...\n");
+  childProcess.execSync(cmd, {
+    stdio: "inherit",
+    cwd: root,
+    shell: "/usr/bin/bash",
+  });
+}
+
 export function cookMod(modName: string) {
   const UAT_PATH = getNTPath(path.join(process.env.SDK_PATH, "Engine", "Build", "BatchFiles", "RunUAT.bat"));
   const PROJECT_PATH = getNTPath(path.join(process.env.SDK_PATH, "Stalker2", "Stalker2.uproject"));
@@ -33,26 +51,13 @@ export function cookMod(modName: string) {
   const UNREAL_EXE_PATH = getNTPath(
     path.join(process.env.SDK_PATH, "Stalker2", "Binaries", "Win64", "Stalker2ModEditor-Win64-Shipping-Cmd.exe"),
   );
-
   if (!existsSync(path.join(process.env.SDK_PATH, "Stalker2", "Mods", modName))) {
     logger.log("Mod doesn't exist, creating...");
-    const cmd = [
-      process.env.WINE,
-      `"${UAT_PATH}"`,
-      "GSCCreateEmptyMod",
-      `"-Project=${PROJECT_PATH}"`,
-      `-ModName=${modName}`,
-    ].join(" ");
-    logger.log(cmd + "\n\nExecuting...\n");
-    childProcess.execSync(cmd, {
-      stdio: "inherit",
-      cwd: root,
-      shell: "/usr/bin/bash",
-    });
+    createMod(modName);
   }
-
   logger.log("Now packing the mod using command: ");
   const fullCmd = [
+    "time",
     process.env.WINE,
     `"${UAT_PATH}"`,
     "CookMod",

@@ -50,6 +50,7 @@ export const allDefaultQuestItemPrototypes =
 export const allDefaultWeaponPrototypes = await readFileAndGetStructs<WeaponPrototype>(
   "ItemPrototypes/WeaponPrototypes.cfg",
 );
+export const allDefaultWeaponDefs = Object.fromEntries(allDefaultWeaponPrototypes.map((e) => [e.SID, e]));
 export const allDefaultAttachPrototypes = await readFileAndGetStructs<AttachPrototype>(
   "ItemPrototypes/AttachPrototypes.cfg",
 );

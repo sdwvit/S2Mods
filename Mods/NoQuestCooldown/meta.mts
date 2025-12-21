@@ -4,7 +4,7 @@ import { MetaType } from "../../src/metaType.mjs";
 export const meta: MetaType<QuestNodePrototype> = {
   description:
     "This mod does only one thing: completely eliminates cooldown between barkeep/vendor/mechanic quests.[hr][/hr]Because Waiting Is for the Weak.[hr][/hr]It is meant to be used in other collections of mods. Modifies recurring quest node InGameHours.",
-  changenote: "Rebuild for 1.7.x",
+  changenote: "Rebuild for 1.8.1",
   structTransformers: [noQuestCooldownTransformer],
 };
 

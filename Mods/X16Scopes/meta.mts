@@ -17,7 +17,7 @@ You can buy these new scopes from T4 attachment traders like the one on Yaniv.
 Unfortunately, I don't know how to do animations. You have to attach the scopes in your inventory while NOT holding a hand.[h2][/h2]
 bPatches AttachPrototypes, MeshPrototypes, DynamicItemGenerator, QuestItemGeneratorPrototypes, and WeaponGeneralSetupPrototypes.
 `,
-  changenote: "Better logo",
+  changenote: "Adjust spawn chance to 100%. Sleep or walk around for at least 24h to reroll their trade.",
   structTransformers: [structTransformer],
 };
 
@@ -159,8 +159,8 @@ function transformTrade(struct: DynamicItemGenerator, context: MetaContext<any>)
     }
     return Object.assign(e.fork(), {
       PossibleItems: Object.assign(e.PossibleItems.fork(), {
-        EN_X16Scope_1: new Struct({ ItemPrototypeSID: "EN_X16Scope_1", Chance: 0.2, MinCount: 1, MaxCount: 1 }),
-        UA_X16Scope_1: new Struct({ ItemPrototypeSID: "UA_X16Scope_1", Chance: 0.2, MinCount: 1, MaxCount: 1 }),
+        EN_X16Scope_1: new Struct({ ItemPrototypeSID: "EN_X16Scope_1", Chance: 1, MinCount: 1, MaxCount: 1 }),
+        UA_X16Scope_1: new Struct({ ItemPrototypeSID: "UA_X16Scope_1", Chance: 1, MinCount: 1, MaxCount: 1 }),
       }),
     });
   });
