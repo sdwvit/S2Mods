@@ -1,11 +1,6 @@
 /.idea/
 package-lock.json
 node_modules/
-/helpers/structs.txt
-/helpers/rightParts.txt
-/helpers/leftParts.txt
-SpawnActorPrototypes
-/Stalker2/Content/
 steamworkshop/
 /.env
 workshopitem.vdf

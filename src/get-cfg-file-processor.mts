@@ -43,7 +43,14 @@ export function getCfgFileProcessor<T extends Struct>(transformer: EntriesTransf
       clone.__internal__.refkey = id;
       clone.__internal__.refurl = "../" + pathToSave.base;
 
-      const processedStruct = transformer(clone as T, { index, fileIndex, array, filePath, structsById, extraStructs });
+      const processedStruct = await transformer(clone as T, {
+        index,
+        fileIndex,
+        array,
+        filePath,
+        structsById,
+        extraStructs,
+      });
       if (processedStruct) {
         delete processedStruct.__internal__.refkey;
         delete processedStruct.__internal__.refurl;
