@@ -16,7 +16,7 @@ if (!fs.existsSync(modFolderSteam)) fs.mkdirSync(modFolderSteam, { recursive: tr
 
 const total = await Promise.all(meta.structTransformers.map((t) => processOneTransformer(t).finally(() => meta.onTransformerFinish?.(t))));
 
-meta.onFinish?.();
+await meta.onFinish?.();
 console.timeEnd();
 
 logger.log(`Total: ${total.length} transformers processed.`);

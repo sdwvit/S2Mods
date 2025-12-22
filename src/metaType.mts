@@ -20,6 +20,6 @@ export type MetaType<T = Struct> = {
   changenote: string;
   description: string;
   structTransformers: EntriesTransformer<T>[];
-  onFinish?(): void;
+  onFinish?(): Promise<void>;
   onTransformerFinish?(transformer: EntriesTransformer<T>): void;
 };

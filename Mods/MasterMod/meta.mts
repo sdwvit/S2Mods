@@ -114,4 +114,7 @@ All changes have been tested against fresh save file. Some of these changes won'
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
   },
+  async onFinish() {
+    await import("./update-readme.mts");
+  },
 };
