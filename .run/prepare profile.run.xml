@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="prepare profile" type="NodeJSConfigurationType" path-to-js-file="prepare-configs.mts" typescript-loader="bundled" working-dir="$PROJECT_DIR$/src">
+    <EXTENSION ID="com.jetbrains.nodejs.run.NodeJSProfilingRunConfigurationExtension">
+      <profiling do-profile="true" />
+    </EXTENSION>
+    <method v="2" />
+  </configuration>
+</component>
