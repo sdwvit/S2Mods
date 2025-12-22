@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readFileSync } from "fs";
+import path from "node:path";
 
 function parseCsv<T>(csv: string): T[] {
   const lines = csv
@@ -61,7 +62,7 @@ export const QuestDataTable = parseCsv<{
   Stalker: string;
   Tushkan: string;
   Zombie: string;
-}>(readFileSync("./QuestDataTable.tsv", "utf-8"));
+}>(readFileSync(path.join(import.meta.dirname, "./QuestDataTable.tsv"), "utf-8"));
 export const QuestDataTableByQuestSID = QuestDataTable.reduce(
   (acc, curr) => {
     acc[curr["Containered Quest SID"]] ||= [];
