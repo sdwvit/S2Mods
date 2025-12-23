@@ -1,14 +1,7 @@
-import { MetaContext, MetaType } from "../../src/metaType.mjs";
-import {
-  AttachPrototype,
-  DynamicItemGenerator,
-  EffectPrototype,
-  MeshPrototype,
-  Struct,
-  WeaponGeneralSetupPrototype,
-} from "s2cfgtojson";
+import { MetaType } from "../../src/metaType.mjs";
+import { AttachPrototype, DynamicItemGenerator, EffectPrototype, MeshPrototype, Struct, WeaponGeneralSetupPrototype } from "s2cfgtojson";
 
-export const meta: MetaType<Struct> = {
+export const meta: MetaType = {
   description: `
  Adds 2 new X16 Scopes for Gvyntar / Lavina and G37.
 [hr][/hr]
@@ -18,39 +11,27 @@ Unfortunately, I don't know how to do animations. You have to attach the scopes 
 bPatches AttachPrototypes, MeshPrototypes, DynamicItemGenerator, QuestItemGeneratorPrototypes, and WeaponGeneralSetupPrototypes.
 `,
   changenote: "Adjust spawn chance to 100%. Sleep or walk around for at least 24h to reroll their trade.",
-  structTransformers: [structTransformer],
+  structTransformers: [
+    transformWeaponGeneralSetupPrototypes,
+    transformAttachPrototypes,
+    transformMeshPrototypes,
+    transformTrade,
+    transformEffectPrototypes,
+  ],
 };
-
-function structTransformer(struct: any, context: MetaContext<any>) {
-  let r;
-  if ((r = transformAttachPrototypes(struct, context))) return r;
-  if ((r = transformMeshPrototypes(struct, context))) return r;
-  if ((r = transformTrade(struct, context))) return r;
-  if ((r = transformWeaponGeneralSetupPrototypes(struct, context))) return r;
-  if ((r = transformEffectPrototypes(struct, context))) return r;
-  return null;
-}
-
-structTransformer.files = [
-  "AttachPrototypes.cfg",
-  "MeshPrototypes.cfg",
-  "DynamicItemGenerator.cfg",
-  "QuestItemGeneratorPrototypes.cfg",
-  "WeaponGeneralSetupPrototypes.cfg",
-  "EffectPrototypes.cfg",
-];
 
 let transformAttachPrototypesOncePerFile = false;
 
 /**
  * Adds two new attachments: EN_X16Scope_1 and UA_X16Scope_1.
  */
-const transformAttachPrototypes = (_, context: MetaContext<AttachPrototype>) => {
-  if (transformAttachPrototypesOncePerFile || !context.filePath.endsWith("/AttachPrototypes.cfg")) {
+function transformAttachPrototypes() {
+  if (transformAttachPrototypesOncePerFile) {
     return null;
   }
   transformAttachPrototypesOncePerFile = true;
-  context.extraStructs.push(
+  const extraStructs = [];
+  extraStructs.push(
     new Struct({
       __internal__: {
         rawName: "EN_X16Scope_1",
@@ -75,7 +56,7 @@ const transformAttachPrototypes = (_, context: MetaContext<AttachPrototype>) => 
       Icon: `Texture2D'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_en_x8scope_1/T_inv_icon_en_x16scope_1.T_inv_icon_en_x16scope_1'`,
     }) as AttachPrototype,
   );
-  context.extraStructs.push(
+  extraStructs.push(
     new Struct({
       __internal__: {
         rawName: "UA_X16Scope_1",
@@ -101,19 +82,23 @@ const transformAttachPrototypes = (_, context: MetaContext<AttachPrototype>) => 
       Icon: `Texture2D'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_ua_x16scope_1/T_inv_icon_ua_x16scope.T_inv_icon_ua_x16scope'`,
     }) as AttachPrototype,
   );
-};
+  return extraStructs;
+}
+
+transformAttachPrototypes.files = ["/AttachPrototypes.cfg"];
 
 let transformMeshPrototypesOnce = false;
 
 /**
  * Adds x16 scope mesh prototype.
  */
-const transformMeshPrototypes = (_, c: MetaContext<MeshPrototype>) => {
-  if (transformMeshPrototypesOnce || !c.filePath.endsWith("/MeshPrototypes.cfg")) {
+function transformMeshPrototypes() {
+  if (transformMeshPrototypesOnce) {
     return null;
   }
   transformMeshPrototypesOnce = true;
-  c.extraStructs.push(
+  const extraStructs = [];
+  extraStructs.push(
     new Struct({
       __internal__: {
         rawName: "EN_X16Scope_1",
@@ -122,11 +107,10 @@ const transformMeshPrototypes = (_, c: MetaContext<MeshPrototype>) => {
         refkey: "[0]",
       },
       SID: "EN_X16Scope_1",
-      MeshPath:
-        "StaticMesh'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_en_x8scope_1/SM_ss01_en_x16scope_1.SM_ss01_en_x16scope_1'",
+      MeshPath: "StaticMesh'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_en_x8scope_1/SM_ss01_en_x16scope_1.SM_ss01_en_x16scope_1'",
     }) as MeshPrototype,
   );
-  c.extraStructs.push(
+  extraStructs.push(
     new Struct({
       __internal__: {
         rawName: "UA_X16Scope_1",
@@ -135,17 +119,15 @@ const transformMeshPrototypes = (_, c: MetaContext<MeshPrototype>) => {
         refkey: "[0]",
       },
       SID: "UA_X16Scope_1",
-      MeshPath:
-        "StaticMesh'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_ua_x16scope_1/SM_ua_x16scope.SM_ua_x16scope'",
+      MeshPath: "StaticMesh'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_ua_x16scope_1/SM_ua_x16scope.SM_ua_x16scope'",
     }) as MeshPrototype,
   );
-};
+  return extraStructs;
+}
 
-function transformTrade(struct: DynamicItemGenerator, context: MetaContext<any>) {
-  const fp = context.filePath;
-  if (!(fp.endsWith("/DynamicItemGenerator.cfg") || fp.endsWith("/QuestItemGeneratorPrototypes.cfg"))) {
-    return;
-  }
+transformMeshPrototypes.files = ["/MeshPrototypes.cfg"];
+
+function transformTrade(struct: DynamicItemGenerator) {
   if (!struct.SID.includes("Trade")) {
     return;
   }
@@ -170,6 +152,7 @@ function transformTrade(struct: DynamicItemGenerator, context: MetaContext<any>)
   ItemGenerator.__internal__.bpatch = true;
   return Object.assign(fork, { ItemGenerator });
 }
+transformTrade.files = ["/DynamicItemGenerator.cfg", "/QuestItemGeneratorPrototypes.cfg"];
 
 const allCompatibleAttachmentDefs: Record<string, WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"]> = {
   EN_X16Scope_1: new Struct({
@@ -177,7 +160,7 @@ const allCompatibleAttachmentDefs: Record<string, WeaponGeneralSetupPrototype["C
     Socket: "X16ScopeSocket",
     IconPosX: 60,
     IconPosY: 0,
-    AimMuzzleVFXSocket: "X16ScopeMuzzle",
+    AimMuzzleVFXSocket: "X4ScopeMuzzle",
   }) as WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"],
 
   UA_X16Scope_1: new Struct({
@@ -192,76 +175,91 @@ const allCompatibleAttachmentDefs: Record<string, WeaponGeneralSetupPrototype["C
 const getCompatibleAttachmentDefinition = (sid: string) =>
   new Struct(allCompatibleAttachmentDefs[sid]) as WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"];
 
+const kharodDniproSharedAddMeshes = new Struct({
+  __internal__: {
+    isArray: true,
+    useAsterisk: true,
+  },
+  0: new Struct({
+    MeshPrototypeSID: "Ironsights_02_Front_Close",
+    Socket: "IronSightFront",
+  }),
+});
+
+const getCompatibleAttachments = (struct: WeaponGeneralSetupPrototype) => {
+  const enCompatibleAttachment = getCompatibleAttachmentDefinition("EN_X16Scope_1");
+  const uaCompatibleAttachment = getCompatibleAttachmentDefinition("UA_X16Scope_1");
+  switch (struct.SID) {
+    case "GunG37_ST":
+      return Object.assign(enCompatibleAttachment, {
+        WeaponSpecificIcon: `Texture2D'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_en_x8scope_1/T_inv_w_gp37_en_x16scope_1.T_inv_w_gp37_en_x16scope_1'`,
+        RequiredUpgradeIDs: new Struct({ 0: "GunG37_Upgrade_Attachment_Rail" }),
+      });
+    case "GunKharod_ST":
+      return Object.assign(enCompatibleAttachment, {
+        AdditionalMeshes: kharodDniproSharedAddMeshes,
+        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Kharod/T_inv_w_kharod_en_x4scope_1.T_inv_w_kharod_en_x4scope_1'`, // todo
+      });
+    case "GunDnipro_ST":
+    case "Gun_Sotnyk_AR_GS":
+      return Object.assign(enCompatibleAttachment, {
+        AdditionalMeshes: kharodDniproSharedAddMeshes,
+        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Dnipro/T_inv_w_dnipro_en_x4scope_1.T_inv_w_dnipro_en_x4scope_1'`, // todo
+      });
+    case "GunGvintar_ST":
+    case "Gun_Merc_AR_GS":
+    case "GunLavina_ST":
+    case "Gun_Trophy_AR_GS":
+      return Object.assign(uaCompatibleAttachment, {
+        WeaponSpecificIcon:
+          "Texture2D'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_ua_x16scope_1/T_inv_w_gvintar_ua_x16scope.T_inv_w_gvintar_ua_x16scope'",
+      });
+    case "Gun_Whip_SR_GS":
+    case "GunSVU_SP":
+      return Object.assign(uaCompatibleAttachment, {
+        WeaponSpecificIcon:
+          "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_svu_ru_x8scope_1.T_inv_w_svu_ru_x8scope_1'", // todo
+      });
+    case "Gun_Lynx_SR_GS":
+    case "GunSVDM_SP":
+      return Object.assign(uaCompatibleAttachment, {
+        WeaponSpecificIcon:
+          "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVDM/T_inv_w_svdm_ru_x4scope_1.T_inv_w_svdm_ru_x4scope_1'", // todo
+      });
+  }
+};
 /**
  * Adds X16 scopes compatibility to certain guns
  */
-function transformWeaponGeneralSetupPrototypes(
-  struct: WeaponGeneralSetupPrototype,
-  context: MetaContext<WeaponGeneralSetupPrototype>,
-) {
-  if (!context.filePath.endsWith("/WeaponGeneralSetupPrototypes.cfg")) {
-    return;
-  }
+function transformWeaponGeneralSetupPrototypes(struct: WeaponGeneralSetupPrototype) {
   const fork = struct.fork();
-
-  if (struct.SID === "GunG37_ST") {
-    fork.CompatibleAttachments ??= struct.CompatibleAttachments.fork();
-
-    fork.CompatibleAttachments.addNode(
-      Object.assign(getCompatibleAttachmentDefinition("EN_X16Scope_1"), {
-        WeaponSpecificIcon: `Texture2D'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_en_x8scope_1/T_inv_w_gp37_en_x16scope_1.T_inv_w_gp37_en_x16scope_1'`,
-      }),
-      "EN_X16Scope_1",
-    );
-
-    fork.CompatibleAttachments["EN_X16Scope_1"].RequiredUpgradeIDs = new Struct({
-      0: "GunG37_Upgrade_Attachment_Rail",
-    });
+  const comp = getCompatibleAttachments(struct);
+  if (comp) {
+    fork.CompatibleAttachments = struct.CompatibleAttachments.fork();
+    fork.CompatibleAttachments.addNode(comp, "X16");
+    return fork;
   }
-
-  if (
-    struct.SID === "GunGvintar_ST" ||
-    struct.SID === "Gun_Merc_AR_GS" ||
-    struct.SID === "GunLavina_ST" ||
-    struct.SID === "Gun_Trophy_AR_GS"
-  ) {
-    fork.CompatibleAttachments ??= struct.CompatibleAttachments.fork();
-
-    fork.CompatibleAttachments.addNode(
-      Object.assign(getCompatibleAttachmentDefinition("UA_X16Scope_1"), {
-        WeaponSpecificIcon:
-          "Texture2D'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_ua_x16scope_1/T_inv_w_gvintar_ua_x16scope.T_inv_w_gvintar_ua_x16scope'",
-      }),
-      "UA_X16Scope_1",
-    );
-    fork.CompatibleAttachments["UA_X16Scope_1"].AimMuzzleVFXSocket = "X4ScopeMuzzle";
-  }
-
-  if (!fork.entries().length) {
-    return;
-  }
-
-  return fork;
 }
+transformWeaponGeneralSetupPrototypes.files = ["/WeaponGeneralSetupPrototypes.cfg"];
 let transformEffectPrototypesOnce = false;
 
-const transformEffectPrototypes = (_, context: MetaContext<EffectPrototype>) => {
-  if (transformEffectPrototypesOnce || !context.filePath.endsWith("/EffectPrototypes.cfg")) {
-    return null;
+function transformEffectPrototypes() {
+  if (transformEffectPrototypesOnce) {
+    return;
   }
   transformEffectPrototypesOnce = true;
-  context.extraStructs.push(
-    new Struct({
-      __internal__: {
-        rawName: "AimingFOVX16Effect",
-        isRoot: true,
-      },
-      SID: "AimingFOVX16Effect",
-      Type: "EEffectType::AimingFOV",
-      ValueMin: "-85%",
-      ValueMax: "-85%",
-      bIsPermanent: true,
-      Positive: "EBeneficial::Negative",
-    }) as EffectPrototype,
-  );
-};
+  return new Struct({
+    __internal__: {
+      rawName: "AimingFOVX16Effect",
+      isRoot: true,
+    },
+    SID: "AimingFOVX16Effect",
+    Type: "EEffectType::AimingFOV",
+    ValueMin: "-85%",
+    ValueMax: "-85%",
+    bIsPermanent: true,
+    Positive: "EBeneficial::Negative",
+  }) as EffectPrototype;
+}
+
+transformEffectPrototypes.files = ["/EffectPrototypes.cfg"];
