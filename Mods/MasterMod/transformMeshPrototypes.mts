@@ -20,7 +20,7 @@ export const transformMeshPrototypes: EntriesTransformer<MeshPrototype> = async 
           refkey: "[0]",
         },
         SID: "EN_X16Scope_1",
-        MeshPath: "StaticMesh'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_en_x8scope_1/SM_ss01_en_x16scope_1.SM_ss01_en_x16scope_1'",
+        MeshPath: "StaticMesh'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_en_x16scope_1/SM_ss01_en_x16scope_1.SM_ss01_en_x16scope_1'",
       }) as MeshPrototype,
     );
     extraStructs.push(

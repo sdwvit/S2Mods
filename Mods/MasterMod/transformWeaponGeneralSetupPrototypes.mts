@@ -5,8 +5,7 @@ import {
   allCompatibleAttachmentDefsByWeaponGeneralSetupPrototypeSID,
   uniqueAttachmentsToAlternatives,
 } from "./basicAttachments.mts";
-import { deepMerge } from "../../src/deep-merge.mts";
-import { addX16ScopesToWeaponGeneralSetupPrototypes } from "../X16Scopes/meta.mts";
+import { getXnCompatibleScope } from "../X16Scopes/meta.mts";
 
 function mapUniqueAttachmentsToGeneric(
   fork: WeaponGeneralSetupPrototype,
@@ -81,61 +80,46 @@ const getCompatibleAttachmentDefinitionByWeaponSetupSID = (weaponSid: string, si
  */
 export const transformWeaponGeneralSetupPrototypes: EntriesTransformer<WeaponGeneralSetupPrototype> = async (struct, context) => {
   const fork = struct.fork();
-
-  mapUniqueAttachmentsToGeneric(fork, struct, context);
-
-  fork.OffsetAimingConditionSID = "ConstTrue";
-  fork.ToggleOffsetAimingConditionSID = "ConstTrue";
-  if (struct.SID === "GunG37_ST") {
-    fork.CompatibleAttachments ??= struct.CompatibleAttachments.fork();
-    fork.CompatibleAttachments.addNode(
-      Object.assign(getCompatibleAttachmentDefinition("EN_X8Scope_1"), {
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/GP37/T_inv_w_gp37_en_x8scope_1.T_inv_w_gp37_en_x8scope_1'`,
-      }),
-      "EN_X8Scope_1",
-    );
-
-    fork.CompatibleAttachments["EN_X8Scope_1"].RequiredUpgradeIDs = new Struct({
-      0: "GunG37_Upgrade_Attachment_Rail",
-    });
-  }
-
-  if (struct.SID === "GunUDP_Deadeye_HG") {
-    fork.UpgradePrototypeSIDs ??= struct.UpgradePrototypeSIDs.fork();
-    fork.UpgradePrototypeSIDs.addNode("GunUDP_Upgrade_Attachment_Laser", "GunUDP_Upgrade_Attachment_Laser");
-  }
-
-  if (struct.SID === "GunUDP_HG" || struct.SID === "Gun_Krivenko_HG_GS" || struct.SID === "GunUDP_Deadeye_HG") {
-    fork.CompatibleAttachments ??= struct.CompatibleAttachments.fork();
-    fork.CompatibleAttachments.addNode(getCompatibleAttachmentDefinition("EN_ColimScope_1"), "EN_ColimScope_1");
-    fork.CompatibleAttachments["EN_ColimScope_1"].Socket = "ColimScopeSocket_corrected";
-    fork.CompatibleAttachments["EN_ColimScope_1"].WeaponSpecificIcon =
-      `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/UDP/T_inv_w_en_colim_scope.T_inv_w_en_colim_scope'`;
-  }
-
-  if (struct.SID === "Gun_Sharpshooter_AR_GS") {
-    fork.CompatibleAttachments ??= struct.CompatibleAttachments.fork();
-    fork.CompatibleAttachments.addNode(getCompatibleAttachmentDefinitionByWeaponSetupSID("GunM16_ST", "EN_GoloScope_1"), "EN_GoloScope_1");
-    fork.CompatibleAttachments.addNode(getCompatibleAttachmentDefinitionByWeaponSetupSID("GunM16_ST", "EN_X4Scope_1"), "EN_X4Scope_1");
-  }
-
-  if (struct.SID === "Gun_Unknown_AR_GS" || struct.SID === "GunM16_ST" || struct.SID === "Gun_SOFMOD_AR_GS") {
-    fork.CompatibleAttachments ??= struct.CompatibleAttachments.fork();
-    fork.CompatibleAttachments.addNode(getCompatibleAttachmentDefinition("EN_X8Scope_1"), "EN_X8Scope_1");
-  }
-
-  if (struct.SID === "GunGvintar_ST" || struct.SID === "Gun_Merc_AR_GS" || struct.SID === "GunLavina_ST" || struct.SID === "Gun_Trophy_AR_GS") {
-    fork.CompatibleAttachments ??= struct.CompatibleAttachments.fork();
-    fork.CompatibleAttachments.addNode(getCompatibleAttachmentDefinition("RU_X8Scope_1"), "RU_X8Scope_1");
-    fork.CompatibleAttachments["RU_X8Scope_1"].AimMuzzleVFXSocket = "X4ScopeMuzzle";
-  }
-
-  deepMerge(fork, addX16ScopesToWeaponGeneralSetupPrototypes(struct)); // todo there is a mess with muzzles and sockets
-
-  if (!fork.entries().length) {
+  if (!struct.CompatibleAttachments) {
     return;
   }
+  mapUniqueAttachmentsToGeneric(fork, struct, context);
+  fork.CompatibleAttachments ||= struct.CompatibleAttachments.fork();
+  fork.OffsetAimingConditionSID = "ConstTrue";
+  fork.ToggleOffsetAimingConditionSID = "ConstTrue";
 
+  const compX16 = getXnCompatibleScope(struct, 16);
+  if (compX16) {
+    fork.CompatibleAttachments.addNode(compX16, "X16");
+  }
+  const compX8 = getXnCompatibleScope(struct, 8);
+  if (compX8) {
+    fork.CompatibleAttachments.addNode(compX8, "X8");
+  }
+
+  // noinspection FallThroughInSwitchStatementJS
+  switch (struct.SID) {
+    case "GunUDP_Deadeye_HG":
+      fork.UpgradePrototypeSIDs ||= struct.UpgradePrototypeSIDs.fork();
+      fork.UpgradePrototypeSIDs.addNode("GunUDP_Upgrade_Attachment_Laser", "GunUDP_Upgrade_Attachment_Laser");
+    case "GunUDP_HG":
+    case "Gun_Krivenko_HG_GS":
+      fork.CompatibleAttachments.addNode(
+        Object.assign(getCompatibleAttachmentDefinition("EN_ColimScope_1"), {
+          Socket: "ColimScopeSocket_corrected",
+          WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/UDP/T_inv_w_en_colim_scope.T_inv_w_en_colim_scope'`,
+        }),
+        "EN_ColimScope_1",
+      );
+      return fork;
+    case "Gun_Sharpshooter_AR_GS":
+      fork.CompatibleAttachments.addNode(getCompatibleAttachmentDefinitionByWeaponSetupSID("GunM16_ST", "EN_GoloScope_1"), "EN_GoloScope_1");
+      fork.CompatibleAttachments.addNode(getCompatibleAttachmentDefinitionByWeaponSetupSID("GunM16_ST", "EN_X4Scope_1"), "EN_X4Scope_1");
+      return fork;
+  }
+  if (!fork.CompatibleAttachments.entries().length) {
+    delete fork.CompatibleAttachments;
+  }
   return fork;
 };
 transformWeaponGeneralSetupPrototypes.files = ["/WeaponGeneralSetupPrototypes.cfg"];

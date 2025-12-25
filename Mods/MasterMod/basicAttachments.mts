@@ -26,38 +26,42 @@ export const allCompatibleAttachmentDefsByWeaponGeneralSetupPrototypeSID: Record
   Record<string, WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"]>
 > = {};
 
-export const allCompatibleAttachmentDefs: Record<string, WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"]> = {
+export const allCompatibleAttachmentDefs: Record<string, Struct> = {
   EN_X16Scope_1: new Struct({
     AttachPrototypeSID: "EN_X16Scope_1",
     Socket: "X16ScopeSocket",
     IconPosX: 60,
     IconPosY: 0,
-    AimMuzzleVFXSocket: "X16ScopeMuzzle",
-    WeaponSpecificIcon:
-      "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Mark/T_inv_w_mark_en_x8scope_1.T_inv_w_mark_en_x8scope_1'",
-  }) as WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"],
+    AimMuzzleVFXSocket: "X4ScopeMuzzle",
+    AimShellShutterVFXSocket: "X4ScopeShells",
+  }),
 
   UA_X16Scope_1: new Struct({
     AttachPrototypeSID: "UA_X16Scope_1",
     Socket: "X16ScopeSocket",
     IconPosX: 60,
     IconPosY: 0,
-    AimMuzzleVFXSocket: "X16ScopeMuzzle",
-    AimShellShutterVFXSocket: "X2ScopeShells",
-    WeaponSpecificIcon:
-      "Texture2D'/Game/_Stalker_2/weapons/attachments/ss/SM_ss01_ua_x16scope_1/T_inv_w_gvintar_ua_x16scope_1.T_inv_w_gvintar_ua_x16scope_1'",
-  }) as WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"],
+    AimMuzzleVFXSocket: "X4ScopeMuzzle",
+    AimShellShutterVFXSocket: "X4ScopeShells",
+  }),
 
   RU_X8Scope_1: new Struct({
     AttachPrototypeSID: "RU_X8Scope_1",
     Socket: "X8ScopeSocket",
     IconPosX: 60,
     IconPosY: 0,
-    AimMuzzleVFXSocket: "X8ScopeMuzzle",
-    AimShellShutterVFXSocket: "X2ScopeShells",
-    WeaponSpecificIcon:
-      "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_svu_ru_x8scope_1.T_inv_w_svu_ru_x8scope_1'",
-  }) as WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"],
+    AimMuzzleVFXSocket: "X4ScopeMuzzle",
+    AimShellShutterVFXSocket: "X4ScopeShells",
+  }),
+
+  EN_X8Scope_1: new Struct({
+    AttachPrototypeSID: "EN_X8Scope_1",
+    Socket: "X8ScopeSocket",
+    IconPosX: 60,
+    IconPosY: 0,
+    AimMuzzleVFXSocket: "X4ScopeMuzzle",
+    AimShellShutterVFXSocket: "X4ScopeShells",
+  }),
 };
 
 allDefaultWeaponGeneralSetupPrototypes.forEach((struct: WeaponGeneralSetupPrototype) => {
