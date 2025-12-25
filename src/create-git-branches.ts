@@ -2,14 +2,17 @@ import { modName, projectRoot, validMods } from "./base-paths.mts";
 import { spawnSync } from "child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { logger } from "./logger.mts";
 
-const cmd = (c: string) =>
-  spawnSync(c, {
+const cmd = (c: string) => {
+  logger.info("Executing command", c);
+  return spawnSync(c, {
     stdio: "inherit",
     cwd: import.meta.dirname,
     shell: "/usr/bin/bash",
     env: { ...process.env },
   });
+};
 
 validMods.forEach((mod) => {
   cmd(["git", "checkout", "master"].join(" "));
