@@ -6,6 +6,7 @@ import {
   uniqueAttachmentsToAlternatives,
 } from "./basicAttachments.mts";
 import { getXnCompatibleScope } from "../X16Scopes/meta.mts";
+import { GunDnipro_Upgrade_HoldBreathPos75Effect } from "./transformUpgradePrototypes.mts";
 
 function mapUniqueAttachmentsToGeneric(
   fork: WeaponGeneralSetupPrototype,
@@ -97,13 +98,21 @@ export const transformWeaponGeneralSetupPrototypes: EntriesTransformer<WeaponGen
     fork.CompatibleAttachments.addNode(compX8, "X8");
   }
 
-  // noinspection FallThroughInSwitchStatementJS
   switch (struct.SID) {
-    case "GunUDP_Deadeye_HG":
+    case "Gun_Sotnyk_AR_GS":
+    case "GunDnipro_ST": {
       fork.UpgradePrototypeSIDs ||= struct.UpgradePrototypeSIDs.fork();
-      fork.UpgradePrototypeSIDs.addNode("GunUDP_Upgrade_Attachment_Laser", "GunUDP_Upgrade_Attachment_Laser");
+      fork.UpgradePrototypeSIDs.addNode(GunDnipro_Upgrade_HoldBreathPos75Effect, GunDnipro_Upgrade_HoldBreathPos75Effect);
+      return fork;
+    }
+    case "GunUDP_Deadeye_HG":
     case "GunUDP_HG":
-    case "Gun_Krivenko_HG_GS":
+    case "Gun_Krivenko_HG_GS": {
+      if (struct.SID === "GunUDP_Deadeye_HG") {
+        fork.UpgradePrototypeSIDs ||= struct.UpgradePrototypeSIDs.fork();
+        fork.UpgradePrototypeSIDs.addNode("GunUDP_Upgrade_Attachment_Laser", "GunUDP_Upgrade_Attachment_Laser");
+      }
+
       fork.CompatibleAttachments.addNode(
         Object.assign(getCompatibleAttachmentDefinition("EN_ColimScope_1"), {
           Socket: "ColimScopeSocket_corrected",
@@ -112,10 +121,12 @@ export const transformWeaponGeneralSetupPrototypes: EntriesTransformer<WeaponGen
         "EN_ColimScope_1",
       );
       return fork;
-    case "Gun_Sharpshooter_AR_GS":
+    }
+    case "Gun_Sharpshooter_AR_GS": {
       fork.CompatibleAttachments.addNode(getCompatibleAttachmentDefinitionByWeaponSetupSID("GunM16_ST", "EN_GoloScope_1"), "EN_GoloScope_1");
       fork.CompatibleAttachments.addNode(getCompatibleAttachmentDefinitionByWeaponSetupSID("GunM16_ST", "EN_X4Scope_1"), "EN_X4Scope_1");
       return fork;
+    }
   }
   if (!fork.CompatibleAttachments.entries().length) {
     delete fork.CompatibleAttachments;

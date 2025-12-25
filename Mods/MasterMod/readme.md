@@ -142,6 +142,7 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
   - `ItemGeneratorPrototypes`
   - `MeshGeneratorPrototypes`
   - `MeshPrototypes`
+  - `NPCPrototypes`
   - `ObjPrototypes`
   - `RelationPrototypes`
   - `StashPrototypes`

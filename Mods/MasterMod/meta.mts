@@ -32,8 +32,12 @@ import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts
 import { transformWeaponPrototypes } from "./transformWeaponPrototypes.mts";
 import { MetaType } from "../../src/meta-type.mts";
 import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
+import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
+import { logger } from "../../src/logger.mts";
+import { MergedStructs } from "../../src/merged-structs.mts";
 
 const structTransformers = [
+  transformNPCPrototypes,
   transformAIGlobals,
   transformConsumablePrototypes,
   transformALifeDirectorScenarioPrototypes,
@@ -114,5 +118,8 @@ All changes have been tested against fresh save file. Some of these changes won'
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
+  },
+  onFinish(): void | Promise<void> {
+    logger.log(Object.keys(MergedStructs).length);
   },
 };
