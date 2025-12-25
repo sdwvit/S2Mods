@@ -6,6 +6,8 @@ import { baseCfgDir, modFolderRaw, modName, rawCfgEnclosingFolder } from "./base
 import { promisify } from "node:util";
 import { logger } from "./logger.mjs";
 import { L1Cache, L1CacheState } from "./l1-cache.mjs";
+import { deepMerge } from "./deep-merge.mts";
+import { MergedStructs } from "./merged-structs.mts";
 
 const readFile = promisify(fs.readFile);
 const exists = promisify(fs.exists);
@@ -41,7 +43,12 @@ export function getCfgFileProcessor<T extends Struct>(transformer: EntriesTransf
       const s = array[index];
       const id = s.__internal__.rawName;
       if (!id) continue;
+      if (process.env.ALLOW_MERGED_STRUCTS) {
+        const key = getKeyForMergedStructs(filePath, pathToSave);
 
+        MergedStructs[key] ||= new Struct();
+        deepMerge(MergedStructs[key], s.clone());
+      }
       promises.push(
         Promise.resolve(transformer(s as T, { index, fileIndex, array, filePath, structsById, extraStructs })).then((ps) => {
           s.__internal__.refurl = "../" + pathToSave.base;
@@ -68,4 +75,15 @@ export function getCfgFileProcessor<T extends Struct>(transformer: EntriesTransf
     }
     return processedStructs;
   };
+}
+
+function getKeyForMergedStructs(filePath: string, pathToSave: { name: string }) {
+  if (filePath.includes("SpawnActorPrototypes/")) return "SpawnActorPrototypes";
+  if (filePath.includes("DialogChainPrototypes/")) return "DialogChainPrototypes";
+  if (filePath.includes("DialogPoolPrototypes/")) return "DialogPoolPrototypes";
+  if (filePath.includes("DialogPrototypes/")) return "DialogPrototypes";
+  if (filePath.includes("JournalQuestPrototypes/")) return "JournalQuestPrototypes";
+  if (filePath.includes("QuestNodePrototypes/")) return "QuestNodePrototypes";
+  if (filePath.includes("QuestPrototypes/")) return "QuestPrototypes";
+  return pathToSave.name;
 }
