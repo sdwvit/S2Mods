@@ -12,6 +12,7 @@ const cmd = (c: string) =>
   });
 
 validMods.forEach((mod) => {
+  cmd(["git", "checkout", "master"].join(" "));
   cmd(["git", "checkout", mod].join(" "));
   const envFile = path.join(projectRoot, ".env.modname");
   fs.writeFileSync(envFile, `MOD_NAME=${modName}\n`);
