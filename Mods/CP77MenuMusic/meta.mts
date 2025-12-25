@@ -3,9 +3,7 @@ import { getModifiedFilesString } from "../../src/get-modified-files-by-folder.m
 
 export const meta: MetaType = {
   description: `
-Replaces pause menu music to a creepy one from CP
-[hr][/hr]
-${getModifiedFilesString()}
+Replaces pause menu music to a precarious one from CP77
 `,
   changenote: "Initial release",
   structTransformers: [],
