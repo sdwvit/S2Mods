@@ -16,6 +16,7 @@ validMods.forEach((mod) => {
   cmd(["git", "checkout", "master"].join(" "));
   cmd(["git", "checkout", "-b", mod].join(" "));
   cmd(["git", "branch", "--set-upstream-to=origin/master", mod].join(" "));
+  cmd(["git", "pull"].join(" "));
 });
 cmd(["git", "checkout", "master"].join(" "));
 
