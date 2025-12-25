@@ -1,4 +1,4 @@
-import { modName, projectRoot, validMods } from "./base-paths.mts";
+import { projectRoot, validMods } from "./base-paths.mts";
 import { spawnSync } from "child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -18,12 +18,12 @@ validMods.forEach((mod) => {
   cmd(["git", "checkout", "master"].join(" "));
   cmd(["git", "checkout", "-b", mod].join(" "));
   const envFile = path.join(projectRoot, ".env.modname");
-  fs.writeFileSync(envFile, `MOD_NAME=${modName}\n`);
+  fs.writeFileSync(envFile, `MOD_NAME=${mod}\n`);
   cmd(["git", "add", envFile].join(" "));
   cmd(["git", "commit", "-m", "'Add new mod'"].join(" "));
-  cmd(["git", "push", "--set-upstream", "origin", modName].join(" "));
-  cmd(["git", "checkout", "master"].join(" "));
+  cmd(["git", "push", "--set-upstream", "origin", mod].join(" "));
 });
+cmd(["git", "checkout", "master"].join(" "));
 
 spawnSync("paplay", ["./pop.wav"]);
 
