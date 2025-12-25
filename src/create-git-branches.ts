@@ -5,7 +5,7 @@ import path from "node:path";
 import { logger } from "./logger.mts";
 
 const cmd = (c: string) => {
-  logger.info("Executing command", c);
+  logger.log("-- Executing command", c);
   return spawnSync(c, {
     stdio: "inherit",
     cwd: import.meta.dirname,
