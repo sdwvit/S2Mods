@@ -1,9 +1,9 @@
-import { EntriesTransformer, MetaContext, MetaType } from "../../src/metaType.mjs";
+import { EntriesTransformer, MetaContext, MetaType } from "../../src/meta-type.mts";
 import { CluePrototype, QuestNodePrototype, SpawnActorPrototype, Struct } from "s2cfgtojson";
 import { allStashes } from "./stashes.mts";
 import { modName } from "../../src/base-paths.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
-import { waitFor } from "../../src/waitFor.mts";
+import { waitFor } from "../../src/wait-for.mts";
 import { precision } from "../../src/precision.mts";
 import { QuestDataTable } from "../MasterMod/rewardFormula.mts";
 const finishedTransformers = new Set<string>();
@@ -148,17 +148,7 @@ async function transformQuestNodePrototypes(struct: QuestNodePrototype, context:
   context.extraStructs.push(...(await Promise.all(promises).then((results) => results.flat())));
 }
 
-const recurringQuestsFilenames = [
-  "BodyParts_Malahit",
-  "RSQ01",
-  "RSQ04",
-  "RSQ05",
-  "RSQ06",
-  "RSQ07",
-  "RSQ08",
-  "RSQ09",
-  "RSQ10",
-];
+const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];
 
 transformQuestNodePrototypes.files = ["/QuestNodePrototypes/"];
 transformQuestNodePrototypes.contents = ["EQuestNodeType::ItemAdd", "EQuestNodeType::SetItemGenerator"];

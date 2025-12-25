@@ -1,4 +1,4 @@
-import { MetaType } from "../../src/metaType.mjs";
+import { MetaType } from "../../src/meta-type.mts";
 import { GetStructType, QuestNodePrototype, Struct, Condition } from "s2cfgtojson";
 
 export const meta: MetaType<QuestNodePrototype> = {

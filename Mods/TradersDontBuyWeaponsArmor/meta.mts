@@ -1,5 +1,5 @@
 import { Struct, TradePrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/metaType.mjs";
+import { MetaType } from "../../src/meta-type.mts";
 type TG = TradePrototype["TradeGenerators"]["0"];
 function entriesTransformer(struct: TradePrototype) {
   if (!struct.TradeGenerators) {

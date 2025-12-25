@@ -1,5 +1,5 @@
 import { DynamicItemGenerator } from "s2cfgtojson";
-import { MetaType } from "../../src/metaType.mjs";
+import { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType<DynamicItemGenerator> = {
   description: `
@@ -28,13 +28,11 @@ const transformTrade = (struct: DynamicItemGenerator) => {
       case "EItemGenerationCategory::WeaponSecondary":
         return Object.assign(e.fork(), { ReputationThreshold: 1000000 });
       case "EItemGenerationCategory::SubItemGenerator": {
-        const PossibleItems = (e.PossibleItems as DynamicItemGenerator["ItemGenerator"]["0"]["PossibleItems"]).map(
-          ([_k, pi]) => {
-            if (pi.ItemGeneratorPrototypeSID?.includes("Gun")) {
-              return Object.assign(pi.fork(), { Chance: 0 }); // Disable gun sell
-            }
-          },
-        );
+        const PossibleItems = (e.PossibleItems as DynamicItemGenerator["ItemGenerator"]["0"]["PossibleItems"]).map(([_k, pi]) => {
+          if (pi.ItemGeneratorPrototypeSID?.includes("Gun")) {
+            return Object.assign(pi.fork(), { Chance: 0 }); // Disable gun sell
+          }
+        });
         if (!PossibleItems.entries().length) {
           return;
         }

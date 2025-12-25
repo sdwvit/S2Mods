@@ -1,5 +1,5 @@
 import { EffectPrototype, NPCWeaponSettingsPrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/metaType.mjs";
+import { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType<NPCWeaponSettingsPrototype | EffectPrototype> = {
   structTransformers: [entriesTransformer],

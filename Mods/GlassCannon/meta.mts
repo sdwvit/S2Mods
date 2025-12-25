@@ -1,5 +1,5 @@
 import { DifficultyPrototype, MutantBase } from "s2cfgtojson";
-import { MetaType } from "../../src/metaType.mjs";
+import { MetaType } from "../../src/meta-type.mts";
 import { getTransformMobs } from "../MasterMod/transformMobs.mts";
 
 export const DIFFICULTY_FACTOR = 4;

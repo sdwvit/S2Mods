@@ -1,6 +1,6 @@
-import { MetaType } from "../../src/metaType.mjs";
+import { MetaType } from "../../src/meta-type.mts";
 import { WeaponPrototype } from "s2cfgtojson";
-import { getTemplate } from "../../src/backfillDef.mts";
+import { getTemplate } from "../../src/backfill-def.mts";
 import { allDefaultWeaponPrototypesRecord } from "../../src/consts.mts";
 
 export const meta: MetaType<WeaponPrototype> = {

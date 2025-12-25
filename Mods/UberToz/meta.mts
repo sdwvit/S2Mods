@@ -1,4 +1,4 @@
-import { MetaContext, MetaType } from "../../src/metaType.mjs";
+import { MetaContext, MetaType } from "../../src/meta-type.mts";
 import { AttachPrototype, Struct, UpgradePrototype, WeaponGeneralSetupPrototype } from "s2cfgtojson";
 
 export const meta: MetaType<WeaponGeneralSetupPrototype> = {
@@ -151,10 +151,7 @@ function structTransformer(
   if (context.filePath.endsWith("/NPCPrototypes.cfg")) {
     const structT = struct as any;
     const technicians = new Set(["Linza", "Konder", "emenyc_0", "garpia_0"]);
-    if (
-      technicians.has(structT.SID) ||
-      technicians.has(context.structsById[structT.SID]?.__internal__.refkey?.toString() ?? "")
-    ) {
+    if (technicians.has(structT.SID) || technicians.has(context.structsById[structT.SID]?.__internal__.refkey?.toString() ?? "")) {
       const fork = structT.fork();
       fork.Upgrades = structT.Upgrades?.fork() ?? new Struct();
       fork.Upgrades.__internal__.bpatch = true;
@@ -166,9 +163,4 @@ function structTransformer(
   return null;
 }
 
-structTransformer.files = [
-  "/WeaponGeneralSetupPrototypes.cfg",
-  "/UpgradePrototypes.cfg",
-  "/AttachPrototypes.cfg",
-  "/NPCPrototypes.cfg",
-];
+structTransformer.files = ["/WeaponGeneralSetupPrototypes.cfg", "/UpgradePrototypes.cfg", "/AttachPrototypes.cfg", "/NPCPrototypes.cfg"];
