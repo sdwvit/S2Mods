@@ -1,7 +1,5 @@
-import { projectRoot, validMods } from "./base-paths.mts";
+import { validMods } from "./base-paths.mts";
 import { spawnSync } from "child_process";
-import fs from "node:fs";
-import path from "node:path";
 import { logger } from "./logger.mts";
 
 const cmd = (c: string) => {
@@ -17,11 +15,7 @@ const cmd = (c: string) => {
 validMods.forEach((mod) => {
   cmd(["git", "checkout", "master"].join(" "));
   cmd(["git", "checkout", "-b", mod].join(" "));
-  const envFile = path.join(projectRoot, ".env.modname");
-  fs.writeFileSync(envFile, `MOD_NAME=${mod}\n`);
-  cmd(["git", "add", envFile].join(" "));
-  cmd(["git", "commit", "-m", "'Add new mod'"].join(" "));
-  cmd(["git", "push", "--set-upstream", "origin", mod].join(" "));
+  cmd(["git", "branch", "--set-upstream-to=origin/master", mod].join(" "));
 });
 cmd(["git", "checkout", "master"].join(" "));
 
