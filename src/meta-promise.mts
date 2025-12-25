@@ -1,6 +1,6 @@
 import { modFolder, modName } from "./base-paths.mjs";
 import path from "node:path";
-import { MetaType } from "./metaType.mjs";
+import { MetaType } from "./meta-type.mts";
 import { Struct } from "s2cfgtojson";
 import { existsSync, writeFileSync } from "node:fs";
 import { mkdirSync } from "fs";

@@ -1,14 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 
-export function recursiveCfgFindAndDelete(folder: string) {
+export function recursiveCfgFind(folder: string, cb: (f: string, folder: string, shortFile: string) => void) {
   fs.readdirSync(folder).forEach((shortFile) => {
     const file = path.join(folder, shortFile);
     if (fs.statSync(file).isDirectory()) {
-      return recursiveCfgFindAndDelete(file);
+      return recursiveCfgFind(file, cb);
     }
     if (file.endsWith(".cfg")) {
-      fs.rmSync(file, { recursive: true, force: true });
+      cb(file, folder, shortFile);
     }
   });
 }

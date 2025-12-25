@@ -1,7 +1,7 @@
 import { allDefaultArmorPrototypesRecord, allDefaultNightVisionGogglesPrototypesRecord } from "./consts.mjs";
 import { allExtraArmors, newArmors } from "./armors.util.mjs";
 import { ArmorPrototype, Struct } from "s2cfgtojson";
-import { backfillDef } from "./backfillDef.mts";
+import { backfillDef } from "./backfill-def.mts";
 
 const maxDurability = Math.max(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 0));
 const minDurability = Math.min(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 10000));
@@ -34,10 +34,7 @@ function calculateArmorScore(armor: ArmorPrototype): number {
         .filter((u) => u.toLowerCase().includes("container") || u.toLowerCase().includes("_artifact")).length) /
     10; // 1 to 2
   const preventLimping =
-    e.bPreventFromLimping &&
-    !Object.values(e.UpgradePrototypeSIDs || {}).find((u) => typeof u === "string" && u.includes("AddRunEffect"))
-      ? 0
-      : 1;
+    e.bPreventFromLimping && !Object.values(e.UpgradePrototypeSIDs || {}).find((u) => typeof u === "string" && u.includes("AddRunEffect")) ? 0 : 1;
 
   let costScore = Math.atan(10e10) - Math.atan((e.Cost + 27025) / 42000);
   if (e.SID.includes("NVG_")) {
