@@ -18,6 +18,7 @@ validMods.forEach((mod) => {
   cmd(["git", "add", envFile].join(" "));
   cmd(["git", "commit", "-m", "'Add new mod'"].join(" "));
   cmd(["git", "push", "origin", modName].join(" "));
+  cmd(["git", "checkout", "master"].join(" "));
 });
 
 spawnSync("paplay", ["./pop.wav"]);
