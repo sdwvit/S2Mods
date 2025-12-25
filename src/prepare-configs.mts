@@ -16,7 +16,9 @@ const { meta } = await metaPromise;
 if (fs.existsSync(modFolderRaw)) {
   recursiveCfgFind(modFolderRaw, (f) => rmSync(f));
 }
-if (!fs.existsSync(modFolderSteam)) fs.mkdirSync(modFolderSteam, { recursive: true });
+if (!fs.existsSync(modFolderSteam)) {
+  fs.mkdirSync(modFolderSteam, { recursive: true });
+}
 
 const total = await Promise.all(meta.structTransformers.map((t) => processOneTransformer(t).finally(() => meta.onTransformerFinish?.(t))));
 
@@ -27,6 +29,7 @@ logger.log(`Total: ${total.length} transformers processed.`);
 const writtenFiles = total.flat().filter((s) => s?.length > 0);
 logger.log(`Total: ${writtenFiles.flat().length} structs in ${writtenFiles.length} files written.`);
 
+await import("./update-readme.mts");
 await import("./push-to-sdk.mts");
 await onL1Finish();
 await onL2Finish();

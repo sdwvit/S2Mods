@@ -1,9 +1,19 @@
 {
-  "name": "get-stalker2-game-data",
+  "name": "@sdwvit/s2mods",
   "version": "1.0.0",
   "description": "Get Stalker 2 game data from ObjPrototypes",
-  "main": "getsyntax.mjs",
   "type": "module",
+  "scripts": {
+    "prepare-configs": "node ./src/prepare-configs.mts",
+    "publish-steam": "node ./src/publish-steam.mts",
+    "pack-inject": "node ./src/pack-inject.mts",
+    "cook-inject": "node ./src/cook-inject.mts",
+    "update-readme": "node ./src/update-readme.mts",
+    "repack-republish-all": "node ./src/repack-republish-all.ts",
+    "push-to-sdk": "node ./src/push-to-sdk.mts",
+    "pull-staged": "node ./src/pull-staged.mts",
+    "pull-assets": "node ./src/pull-assets.mts"
+  },
   "devDependencies": {
     "@node-steam/vdf": "^2.2.0",
     "@types/node": "^20.11.17",
