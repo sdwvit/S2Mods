@@ -17,7 +17,7 @@ validMods.forEach((mod) => {
   fs.writeFileSync(envFile, `MOD_NAME=${modName}\n`);
   cmd(["git", "add", envFile].join(" "));
   cmd(["git", "commit", "-m", "'Add new mod'"].join(" "));
-  cmd(["git", "push", "origin", modName].join(" "));
+  cmd(["git", "push", "--set-upstream", "origin", modName].join(" "));
   cmd(["git", "checkout", "master"].join(" "));
 });
 
