@@ -4,34 +4,34 @@ import { allCompatibleAttachmentDefs } from "../MasterMod/basicAttachments.mts";
 
 export const meta: MetaType = {
   description: `
-Adds 2 new X16 Scopes for Gvyntar / Lavina / SVDM / Lynx / SVU3 / Whip / G37 / Kharod / Dnipro / Sotnyk.
+Adds 2 new X16 Scopes for Gvyntar / Lavina / Merc / Trophy / SVDM / Lynx / SVU3 / Whip / G37 / G37V2 / Kharod / Dnipro / Sotnyk / AR416 / Sharpshooter / Unknown AR416 / SOFMOD.
 [hr][/hr]
 You can buy these new scopes from T4 attachment traders like the one on Yaniv.
 [hr][/hr]
 Unfortunately, I don't know how to do animations. You have to attach the scopes in your inventory while NOT holding a hand.[h2][/h2]
 bPatches AttachPrototypes, MeshPrototypes, DynamicItemGenerator, QuestItemGeneratorPrototypes, and WeaponGeneralSetupPrototypes.
 `,
-  changenote: "Add x16 compatibility to SVDM / Lynx / SVU3 / Whip / Kharod / Dnipro / Sotnyk",
+  changenote: "Add X16Scope compatibility for AR416 variants, Merc / Trophy, G37V2",
   structTransformers: [
     addX16ScopesToWeaponGeneralSetupPrototypes,
-    transformAttachPrototypes,
+    getX16AttachPrototypes,
     transformMeshPrototypes,
     transformTrade,
     transformEffectPrototypes,
   ],
 };
 
-let transformAttachPrototypesOncePerFile = false;
+let getX16AttachPrototypesOncePerFile = false;
 
 /**
  * Adds two new attachments: EN_X16Scope_1 and UA_X16Scope_1.
  */
-function transformAttachPrototypes() {
-  if (transformAttachPrototypesOncePerFile) {
+export function getX16AttachPrototypes() {
+  if (getX16AttachPrototypesOncePerFile) {
     return null;
   }
-  transformAttachPrototypesOncePerFile = true;
-  const extraStructs = [];
+  getX16AttachPrototypesOncePerFile = true;
+  const extraStructs: AttachPrototype[] = [];
   const sharedEffects = new Struct({
     "0": "ScopeIdleSwayXModifierEffect",
     "1": "ScopeIdleSwayYModifierEffect",
@@ -70,7 +70,7 @@ function transformAttachPrototypes() {
   return extraStructs;
 }
 
-transformAttachPrototypes.files = ["/AttachPrototypes.cfg"];
+getX16AttachPrototypes.files = ["/AttachPrototypes.cfg"];
 
 let transformMeshPrototypesOnce = false;
 
@@ -149,6 +149,7 @@ export const getXnCompatibleScope = (struct: WeaponGeneralSetupPrototype, X: num
 
   switch (struct.SID) {
     case "GunG37_ST":
+    case "GunG37V2_ST_Player":
       return Object.assign(enCompatibleAttachment, {
         WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/GP37/T_inv_w_gp37_en_x${X}scope_1.T_inv_w_gp37_en_x${X}scope_1'`,
         RequiredUpgradeIDs: new Struct({ 0: "GunG37_Upgrade_Attachment_Rail" }),
