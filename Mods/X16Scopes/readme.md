@@ -1,0 +1,72 @@
+### Mod compatibility:
+
+Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines):
+
+- `Modified assets`:
+  - `T_inv_icon_en_x16scope_1`
+  - `T_inv_icon_ua_x16scope`
+  - `T_inv_w_dnipro_en_x16scope_1`
+  - `T_inv_w_dnipro_en_x16scope_1_upgrade`
+  - `T_inv_w_sotnyk_en_x16scope_1`
+  - `T_inv_w_sotnyk_en_x16scope_1_upgrade`
+  - `T_inv_w_gp37_en_x16scope_1`
+  - `T_inv_w_gp37_en_x16scope_1_upgrade`
+  - `T_inv_w_gvintar_ua_x16scope_1`
+  - `T_inv_w_gvintar_ua_x16scope_1_upgrade`
+  - `T_inv_w_kharod_en_x16scope_1`
+  - `T_inv_w_kharod_en_x16scope_1_upgrade`
+  - `T_inv_w_sharpshooter_en_x16scope_1`
+  - `T_inv_w_sharpshooter_en_x16scope_1_upgrade`
+  - `T_inv_w_sharpshooter_en_x8scope_1`
+  - `T_inv_w_sharpshooter_en_x8scope_1_upgrade`
+  - `T_inv_w_lynx_ua_x16scope_1`
+  - `T_inv_w_lynx_ua_x16scope_1_upgrade`
+  - `T_inv_w_svdm_ua_x16scope_1`
+  - `T_inv_w_svdm_ua_x16scope_1_upgrade`
+  - `T_inv_w_svu_ua_x16scope_1`
+  - `T_inv_w_svu_ua_x16scope_1_upgrade`
+  - `T_inv_w_whip_ua_x16scope_1`
+  - `T_inv_w_whip_ua_x16scope_1_upgrade`
+  - `SK_dnipro`
+  - `SK_dnipro_Skeleton`
+  - `SKEL_gp37`
+  - `SK_gp37`
+  - `SK_gvi`
+  - `SK_gvi_Skeleton`
+  - `SK_kharod000`
+  - `SK_kharod000_Skeleton`
+  - `SK_lav`
+  - `SK_lav_Skeleton`
+  - `SK_m160`
+  - `SK_m160_Skeleton`
+  - `SKEL_svm`
+  - `SK_svm`
+  - `SK_svu`
+  - `SK_svu_Skeleton`
+  - `MI_ss01_en_x16scope_1_a`
+  - `SM_ss01_en_x16scope_1`
+  - `T_ss01_en_x16scope_1_a_D`
+  - `T_ss01_en_x16scope_1_a_N_1`
+  - `T_ss01_en_x16scope_1_a_RMA_1`
+  - `MI_ua_x16scope`
+  - `SM_ua_x16scope`
+  - `T_ss_pso1_D_2`
+  - `T_ss_pso1_N_2`
+  - `T_ss_pso1_RMA_2`
+  - `SM_gvintar0`
+  - `SM_svm`
+  - `SM_SVU`
+  - `SM_dnipr`
+  - `SM_GP3`
+  - `SM_kha`
+  - `SM_M16`
+  - `SM_lav`
+- `GameData`:
+  - `EffectPrototypes`
+  - `MeshPrototypes`
+- `ItemGeneratorPrototypes`:
+  - `DynamicItemGenerator`
+- `ItemPrototypes`:
+  - `AttachPrototypes`
+- `WeaponData`:
+  - `WeaponGeneralSetupPrototypes`

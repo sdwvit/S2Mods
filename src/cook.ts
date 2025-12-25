@@ -4,38 +4,20 @@ import dotEnv from "dotenv";
 import { logger } from "./logger.mjs";
 import { spawnSync } from "child_process";
 import { existsSync } from "node:fs";
+import { sdkStagedFolder, stagedFolderStruct } from "./base-paths.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 const root = path.join(import.meta.dirname, "..");
 const getNTPath = (p: string) => p.replaceAll("\\", "/").replaceAll("/media/", "U:/");
 
 export function getStagedPath(modName: string) {
-  return path.join(
-    process.env.SDK_PATH,
-    "Stalker2",
-    "SavedMods",
-    "Staged",
-    modName,
-    "Windows",
-    "Stalker2",
-    "Mods",
-    modName,
-    "Content",
-    "Paks",
-    "Windows",
-  );
+  return path.join(sdkStagedFolder, modName, "Windows", stagedFolderStruct);
 }
 
 export function createMod(modName: string) {
   const UAT_PATH = getNTPath(path.join(process.env.SDK_PATH, "Engine", "Build", "BatchFiles", "RunUAT.bat"));
   const PROJECT_PATH = getNTPath(path.join(process.env.SDK_PATH, "Stalker2", "Stalker2.uproject"));
-  const cmd = [
-    process.env.WINE,
-    `"${UAT_PATH}"`,
-    "GSCCreateEmptyMod",
-    `"-Project=${PROJECT_PATH}"`,
-    `-ModName=${modName}`,
-  ].join(" ");
+  const cmd = [process.env.WINE, `"${UAT_PATH}"`, "GSCCreateEmptyMod", `"-Project=${PROJECT_PATH}"`, `-ModName=${modName}`].join(" ");
   logger.log(cmd + "\n\nExecuting...\n");
   childProcess.execSync(cmd, {
     stdio: "inherit",
@@ -48,9 +30,7 @@ export function cookMod(modName: string) {
   const UAT_PATH = getNTPath(path.join(process.env.SDK_PATH, "Engine", "Build", "BatchFiles", "RunUAT.bat"));
   const PROJECT_PATH = getNTPath(path.join(process.env.SDK_PATH, "Stalker2", "Stalker2.uproject"));
   const PLUGIN_PATH = getNTPath(path.join(process.env.SDK_PATH, "Stalker2", "Mods", modName, `${modName}.uplugin`));
-  const UNREAL_EXE_PATH = getNTPath(
-    path.join(process.env.SDK_PATH, "Stalker2", "Binaries", "Win64", "Stalker2ModEditor-Win64-Shipping-Cmd.exe"),
-  );
+  const UNREAL_EXE_PATH = getNTPath(path.join(process.env.SDK_PATH, "Stalker2", "Binaries", "Win64", "Stalker2ModEditor-Win64-Shipping-Cmd.exe"));
   if (!existsSync(path.join(process.env.SDK_PATH, "Stalker2", "Mods", modName))) {
     logger.log("Mod doesn't exist, creating...");
     createMod(modName);
