@@ -5,21 +5,22 @@
   "type": "module",
   "scripts": {
     "prepare-configs": "node ./src/prepare-configs.mts",
-    "publish-steam": "node ./src/publish-steam.mts",
     "pack-inject": "node ./src/pack-inject.mts",
     "cook-inject": "node ./src/cook-inject.mts",
+    "publish-steam": "node ./src/publish-steam.mts",
     "update-readme": "node ./src/update-readme.mts",
     "repack-republish-all": "node ./src/repack-republish-all.ts",
     "push-to-sdk": "node ./src/push-to-sdk.mts",
     "pull-staged": "node ./src/pull-staged.mts",
-    "pull-assets": "node ./src/pull-assets.mts"
+    "pull-assets": "node ./src/pull-assets.mts",
+    "purge-caches": "find . -path '*/node_modules' -prune -o -type f -name '.*.cache.zlib' -exec rm -f {} +"
   },
   "devDependencies": {
     "@node-steam/vdf": "^2.2.0",
     "@types/node": "^20.11.17",
     "dotenv": "^17.2.0",
     "prettier": "^3.6.2",
-    "s2cfgtojson": "4.3.0",
+    "s2cfgtojson": "4.3.1",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }
