@@ -7,10 +7,17 @@ import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 import { finishedTransformers } from "./meta.mts";
 import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 import { logger } from "../../src/logger.mts";
-import { hookRewardStashClue, hookStashSpawners, injectMassiveRNGQuestNodes } from "../StashClueRework/meta.mts";
+import {
+  hookRewardStashClue,
+  hookStashSpawners,
+  injectMassiveRNGQuestNodes,
+  MalachiteMutantQuestPartsQuestsDoneDialogs,
+  MalachiteMutantQuestPartsQuestsDoneNode,
+  recurringQuestsFilenames,
+} from "../StashClueRework/meta.mts";
 
 let oncePerTransformer = false;
-
+let oncePerBodyParts_Malahit = false;
 /**
  * Removes timeout for repeating quests.
  */
@@ -99,10 +106,20 @@ export const transformQuestNodePrototypes: EntriesTransformer<QuestNodePrototype
     }
   }
 
+  if (!oncePerBodyParts_Malahit && context.filePath.endsWith("/BodyParts_Malahit.cfg")) {
+    oncePerBodyParts_Malahit = true;
+
+    promises.push(
+      Promise.resolve(
+        MalachiteMutantQuestPartsQuestsDoneDialogs.map((dialog) =>
+          hookRewardStashClue({ SID: MalachiteMutantQuestPartsQuestsDoneNode, QuestSID: struct.QuestSID }, dialog),
+        ),
+      ),
+    );
+  }
+
   return Promise.all(promises).then((results) => results.flat());
 };
-
-const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];
 
 transformQuestNodePrototypes.files = ["/QuestNodePrototypes/"];
 transformQuestNodePrototypes.contents = [

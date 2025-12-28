@@ -35,7 +35,7 @@ function transformSpawnActorPrototypes(struct: SpawnActorPrototype, context: Met
   return null;
 }
 
-function rememberAndEmptyStash(struct: SpawnActorPrototype, context: MetaContext<SpawnActorPrototype>) {
+export function rememberAndEmptyStash(struct: SpawnActorPrototype, context: MetaContext<SpawnActorPrototype>) {
   if (struct.ClueVariablePrototypeSID !== "EmptyInherited" || !containers.has(struct.SpawnedPrototypeSID)) {
     return;
   }
@@ -74,7 +74,7 @@ transformSpawnActorPrototypes.contains = true;
 transformSpawnActorPrototypes.contents = [...containers, "ESpawnType::ItemContainer"];
 
 let transformCluePrototypesOncePerFile = false;
-const getGeneratedStashSID = (i: number) => `Gen_Stash${i}`;
+export const getGeneratedStashSID = (i: number) => `Gen_Stash${i}`;
 
 // ----
 
@@ -124,6 +124,24 @@ let oncePerTransformer = false;
 const RandomStashQuestName = `RandomStashQuest`; // if you change this, also change Blueprint in SDK
 const RandomStashQuestNodePrefix = `${modName}_RandomStashQuest`;
 
+export const MalachiteMutantQuestPartsQuestsDoneNode = "BodyParts_Malahit_SetDialog_EQ197_QD_Orders";
+export const MalachiteMutantQuestPartsQuestsDoneDialogs = [
+  "EQ197_QD_Orders_Done_73061",
+  "EQ197_QD_Orders_Done2_73167",
+  "EQ197_QD_Orders_Done3_73169",
+  "EQ197_QD_Orders_Done_73061_1",
+  "EQ197_QD_Orders_Done2_73167_1",
+  "EQ197_QD_Orders_Done3_73169_1",
+  "EQ197_QD_Orders_Done_73061_2",
+  "EQ197_QD_Orders_Done2_73167_2",
+  "EQ197_QD_Orders_Done3_73169_2",
+  "EQ197_QD_Orders_Done_73061_3",
+  "EQ197_QD_Orders_Done2_73167_3",
+  "EQ197_QD_Orders_Done3_73169_3",
+  "EQ197_QD_Orders_Done_73061_4",
+  "EQ197_QD_Orders_Done2_73167_4",
+];
+let oncePerBodyParts_Malahit = false;
 /**
  * Removes timeout for repeating quests.
  */
@@ -148,10 +166,22 @@ async function transformQuestNodePrototypes(struct: QuestNodePrototype, context:
     }
   }
 
+  if (!oncePerBodyParts_Malahit && context.filePath.endsWith("/BodyParts_Malahit.cfg")) {
+    oncePerBodyParts_Malahit = true;
+
+    promises.push(
+      Promise.resolve(
+        MalachiteMutantQuestPartsQuestsDoneDialogs.map((dialog) =>
+          hookRewardStashClue({ SID: MalachiteMutantQuestPartsQuestsDoneNode, QuestSID: struct.QuestSID }, dialog),
+        ),
+      ),
+    );
+  }
+
   return Promise.all(promises).then((results) => results.flat());
 }
 
-const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];
+export const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];
 
 transformQuestNodePrototypes.files = ["/QuestNodePrototypes/"];
 transformQuestNodePrototypes.contents = ["EQuestNodeType::ItemAdd", "EQuestNodeType::SetItemGenerator"];
@@ -210,9 +240,9 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
 /**
  * ConsoleCommand start a quest node for giving a clue.
  */
-export function hookRewardStashClue(struct: QuestNodePrototype) {
+export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, Name = "") {
   const stashClueReward = new Struct(`
-      ${struct.SID}_Give_Cache : struct.begin
+      ${struct.SID}_${Name ? Name + "_" : ""}Give_Cache : struct.begin
          SID = ${struct.SID}_Give_Cache
          QuestSID = ${struct.QuestSID}
          NodeType = EQuestNodeType::ConsoleCommand
@@ -220,7 +250,7 @@ export function hookRewardStashClue(struct: QuestNodePrototype) {
       struct.end
     `) as QuestNodePrototype;
 
-  stashClueReward.Launchers = getLaunchers([{ SID: struct.SID, Name: "" }]);
+  stashClueReward.Launchers = getLaunchers([{ SID: struct.SID, Name }]);
   return stashClueReward;
 }
 
