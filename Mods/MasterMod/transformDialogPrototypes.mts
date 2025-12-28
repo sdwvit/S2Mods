@@ -1,12 +1,30 @@
-import { DialogPrototype, Struct } from "s2cfgtojson";
+import { Condition, DialogPrototype, Struct } from "s2cfgtojson";
 
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { QuestDataTableByDialogSID, rewardFormula } from "./rewardFormula.mts";
+import { logger } from "../../src/logger.mts";
 
 const MALACHITE_BRIBE = rewardFormula(50000).reduce((a, b) => a + b, 0) / 2;
 const mutantPartsVarSet = new Set(["MutantLootQuestWeak", "MutantLootQuestMedium", "MutantLootQuestStrong"]);
+
+const DialogOptionToMutantPartsMap = {
+  EQ197_QD_Orders_Dog_73040: { name: "BlinddogLoot", count: 8 },
+  EQ197_QD_Orders_Bloodsucker_73047: { name: "BloodsuckerLoot", count: 5 },
+  EQ197_QD_Orders_Boar_73042: { name: "BoarLoot", count: 5 },
+  EQ197_QD_Orders_Burer_73049: { name: "BurerLoot", count: 6 },
+  EQ197_QD_Orders_Cat_73048: { name: "CatLoot", count: 9 },
+  EQ197_QD_Orders_Chimera_73052: { name: "ChimeraLoot", count: 2 },
+  EQ197_QD_Orders_Controller_73051: { name: "ControllerLoot", count: 3 },
+  EQ197_QD_Orders_Deer_73044: { name: "DeerLoot", count: 6 },
+  EQ197_QD_Orders_Flesh_73041: { name: "FleshLoot", count: 5 },
+  EQ197_QD_Orders_Jerboa_73043: { name: "TushkanLoot", count: 10 },
+  EQ197_QD_Orders_Poltergeist_73050: { name: "PoltergeistLoot", count: 3 },
+  EQ197_QD_Orders_Pseudodog_73045: { name: "PseudodogLoot", count: 3 },
+  EQ197_QD_Orders_Pseudogiant_73053: { name: "PseudogiantLoot", count: 2 },
+  EQ197_QD_Orders_Snork_73046: { name: "SnorkLoot", count: 7 },
+};
 
 /**
  * Show the correct money reward for repeatable quests
@@ -28,14 +46,30 @@ export const transformDialogPrototypes: EntriesTransformer<DialogPrototype> = as
       fork.NextDialogOptions = new Struct() as any;
       struct.NextDialogOptions.forEach(([k, option]) => {
         const optionFork = option.fork();
+        if (!DialogOptionToMutantPartsMap[option.NextDialogSID]) {
+          logger.error("Unknown dialog option", option.NextDialogSID);
+          return;
+        }
         optionFork.Conditions = new Struct({
           "0": new Struct({
             "0": new Struct({
-              ConditionComparance: "EConditionComparance::NotEqual",
-              VariableValue: -1,
-            }),
+              ConditionType: "EQuestConditionType::ItemInInventory",
+              ConditionComparance: "EConditionComparance::GreaterOrEqual",
+              TargetCharacter: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              ItemPrototypeSID: new Struct({
+                VariableType: "EGlobalVariableType::String",
+                VariableValue: DialogOptionToMutantPartsMap[option.NextDialogSID].name,
+              }),
+              ItemsCount: new Struct({
+                VariableType: "EGlobalVariableType::Int",
+                VariableValue: DialogOptionToMutantPartsMap[option.NextDialogSID].count,
+              }),
+              WithEquipped: true,
+              WithInventory: true,
+            } as Partial<Condition>),
           }),
         }) as any;
+
         fork.NextDialogOptions.addNode(optionFork, k);
       });
       return markAsForkRecursively(fork);

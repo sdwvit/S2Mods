@@ -61,9 +61,11 @@ function transformItems(struct: SpawnActorPrototype, fork: SpawnActorPrototype) 
   if (!isGearReplacement) {
     return;
   }
-  logger.info(`Found preplaced Item: ${struct.ItemSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
   if (isGearReplacement) {
     totals.Gear++;
+    if (totals.Gear % 100 === 0) {
+      logger.info(`Found ${totals.Gear} preplaced ${struct.ItemSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
+    }
   }
   return Object.assign(fork, { SpawnOnStart: false }) as SpawnActorPrototype;
 }

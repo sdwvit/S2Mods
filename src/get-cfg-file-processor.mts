@@ -16,13 +16,10 @@ const writeFile = promisify(fs.writeFile);
 
 export function getCfgFileProcessor<T extends Struct>(transformer: EntriesTransformer<T>) {
   type OneT = Struct | T | Struct[] | T[] | void | null | void[] | null[];
-
+  logger.log(`Processing: ${transformer.name}`);
   return async function processOneCfgFile(filePath: string, fileIndex: number): Promise<Struct[]> {
     const pathToSave = path.parse(filePath.slice(baseCfgDir.length + 1));
 
-    if (!(filePath.includes("SpawnActorPrototypes/WorldMap_WP/") && !filePath.endsWith("0.cfg"))) {
-      logger.log(`Processing file: ${filePath}`);
-    }
     if (!L1Cache[filePath]) {
       L1CacheState.needsUpdate = true;
       const rawContent = await readFile(filePath, "utf8");

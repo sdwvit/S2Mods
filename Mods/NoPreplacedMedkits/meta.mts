@@ -17,6 +17,12 @@ Thanks @rbwadle for suggesting how to modify map objects.`,
   structTransformers: [transformItems],
 };
 
+export const totals = {
+  DestructibleObject: 0,
+  Gear: 0,
+  Medkit: 0,
+  ItemContainer: 0,
+};
 function transformItems(struct: SpawnActorPrototype) {
   if (struct.SpawnType !== "ESpawnType::Item" && struct.SpawnType !== "ESpawnType::PackOfItems") {
     return;
@@ -26,7 +32,10 @@ function transformItems(struct: SpawnActorPrototype) {
   if (!isMedkitReplacement) {
     return;
   }
-  logger.info(`Found preplaced Item: ${struct.ItemSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
+  totals.Medkit++;
+  if (totals.Medkit % 100 === 0) {
+    logger.info(`Found ${totals.Medkit} preplaced ${struct.ItemSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
+  }
 
   return Object.assign(struct.fork(), { SpawnOnStart: false }) as SpawnActorPrototype;
 }

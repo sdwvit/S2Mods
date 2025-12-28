@@ -1,21 +1,16 @@
 import { QuestNodePrototype, Struct } from "s2cfgtojson";
-import { modName } from "../../src/base-paths.mts";
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
 import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDs, RSQSetDialogQuestNodesSIDs } from "../../src/consts.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
-import { waitFor } from "../../src/wait-for.mts";
 import { finishedTransformers } from "./meta.mts";
-import { transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
-import { allStashes } from "../StashClueRework/stashes.mts";
-import { precision } from "../../src/precision.mts";
 import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 import { logger } from "../../src/logger.mts";
+import { hookRewardStashClue, hookStashSpawners, injectMassiveRNGQuestNodes } from "../StashClueRework/meta.mts";
 
 let oncePerTransformer = false;
-const RandomStashQuestName = `RandomStashQuest`; // if you change this, also change Blueprint in SDK
-const RandomStashQuestNodePrefix = `${modName}_RandomStashQuest`;
+
 /**
  * Removes timeout for repeating quests.
  */
@@ -23,12 +18,12 @@ export const transformQuestNodePrototypes: EntriesTransformer<QuestNodePrototype
   let promises: Promise<QuestNodePrototype[] | QuestNodePrototype>[] = [];
   // applies to all quest nodes that add items (i.e., stash clues)
   if (struct.NodeType === "EQuestNodeType::ItemAdd") {
-    promises.push(hookStashSpawners(struct));
+    promises.push(hookStashSpawners(struct, finishedTransformers));
   }
 
   if (!oncePerTransformer) {
     oncePerTransformer = true;
-    promises.push(injectMassiveRNGQuestNodes());
+    promises.push(injectMassiveRNGQuestNodes(finishedTransformers));
   }
 
   // applies only to recurring quests
@@ -117,96 +112,6 @@ transformQuestNodePrototypes.contents = [
   "RookieVillage_Hub_OnNPCCreateEvent_BP_NPC_RookieVillageGuider",
 ];
 transformQuestNodePrototypes.contains = true;
-
-export const getStashSpawnerSID = (stashKey: string) => `${RandomStashQuestNodePrefix}_Random_${stashKey}_Spawn`;
-
-async function injectMassiveRNGQuestNodes() {
-  await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
-  const extraStructs: QuestNodePrototype[] = [];
-  const stashes = Object.keys(allStashes);
-  const randomNode = new Struct(`
-    ${RandomStashQuestNodePrefix}_Random : struct.begin
-        SID = ${RandomStashQuestNodePrefix}_Random
-        QuestSID = ${RandomStashQuestName}
-        NodeType = EQuestNodeType::Random
-    struct.end`) as QuestNodePrototype;
-  extraStructs.push(randomNode);
-  stashes.forEach((key, i) => {
-    randomNode.OutputPinNames ||= new Struct() as any;
-    randomNode.OutputPinNames.addNode(i);
-    randomNode.PinWeights ||= new Struct() as any;
-    randomNode.PinWeights.addNode(precision(1 - (i + 1) / stashes.length, 1e6));
-
-    const spawnerSID = getStashSpawnerSID(key);
-    const spawner = new Struct(`
-      ${spawnerSID} : struct.begin
-         SID = ${spawnerSID}
-         QuestSID = ${RandomStashQuestName}
-         NodeType = EQuestNodeType::Spawn
-         TargetQuestGuid = ${key}
-         IgnoreDamageType = EIgnoreDamageType::None
-         SpawnHidden = false
-         SpawnNodeExcludeType = ESpawnNodeExcludeType::SeamlessDespawn
-      struct.end
-    `) as QuestNodePrototype;
-    const launcherConfig = [{ SID: `${RandomStashQuestNodePrefix}_Random`, Name: String(i) }];
-    spawner.Launchers = getLaunchers(launcherConfig);
-
-    extraStructs.push(spawner);
-    const cacheNotif = new Struct(`
-        ${RandomStashQuestNodePrefix}_Random_${i} : struct.begin
-           SID = ${RandomStashQuestNodePrefix}_Random_${i}
-           QuestSID = ${RandomStashQuestName}
-           NodeType = EQuestNodeType::GiveCache
-           TargetQuestGuid = ${key}
-        struct.end
-      `) as QuestNodePrototype;
-    cacheNotif.Launchers = getLaunchers([{ SID: `${RandomStashQuestNodePrefix}_Random`, Name: String(i) }]);
-
-    extraStructs.push(cacheNotif);
-  });
-  return extraStructs;
-}
-
-/**
- * ConsoleCommand start a quest node for giving a clue.
- */
-function hookRewardStashClue(struct: QuestNodePrototype) {
-  const stashClueReward = new Struct(`
-      ${struct.SID}_Give_Cache : struct.begin
-         SID = ${struct.SID}_Give_Cache
-         QuestSID = ${struct.QuestSID}
-         NodeType = EQuestNodeType::ConsoleCommand
-         ConsoleCommand = XStartQuestNodeBySID ${RandomStashQuestNodePrefix}_Random
-      struct.end
-    `) as QuestNodePrototype;
-
-  stashClueReward.Launchers = getLaunchers([{ SID: struct.SID, Name: "" }]);
-  return stashClueReward;
-}
-
-async function hookStashSpawners(struct: QuestNodePrototype) {
-  await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
-
-  // only quest stashes that are hidden by this mod are interesting here
-  if (!allStashes[struct.TargetQuestGuid]) {
-    return;
-  }
-
-  const spawnStash = struct.fork();
-  spawnStash.SID = `${struct.QuestSID}_Spawn_${struct.TargetQuestGuid}`;
-  spawnStash.NodeType = "EQuestNodeType::ConsoleCommand";
-  spawnStash.QuestSID = struct.QuestSID;
-  spawnStash.ConsoleCommand = `XStartQuestNodeBySID ${getStashSpawnerSID(struct.TargetQuestGuid)}`;
-  spawnStash.Launchers = struct.Launchers;
-  const fork = struct.fork();
-  fork.Launchers = getLaunchers([{ SID: spawnStash.SID, Name: "" }]);
-  spawnStash.__internal__.rawName = spawnStash.SID;
-  delete spawnStash.__internal__.bpatch;
-  delete spawnStash.__internal__.refurl;
-  delete spawnStash.__internal__.refkey;
-  return [spawnStash, fork];
-}
 
 const oncePerQuestSID = new Set<string>();
 

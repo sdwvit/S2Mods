@@ -8,7 +8,7 @@ import { precision } from "../../src/precision.mts";
 import { QuestDataTable } from "../MasterMod/rewardFormula.mts";
 const finishedTransformers = new Set<string>();
 
-export const meta: MetaType<Struct> = {
+export const meta: MetaType = {
   description: `
 This mod reworks the stash clues system and makes exploring stashes a bit more interesting.
 [hr][/hr]
@@ -128,12 +128,12 @@ async function transformQuestNodePrototypes(struct: QuestNodePrototype, context:
   let promises: Promise<QuestNodePrototype[] | QuestNodePrototype>[] = [];
   // applies to all quest nodes that add items (i.e., stash clues)
   if (struct.NodeType === "EQuestNodeType::ItemAdd") {
-    promises.push(hookStashSpawners(struct));
+    promises.push(hookStashSpawners(struct, finishedTransformers));
   }
 
   if (!oncePerTransformer) {
     oncePerTransformer = true;
-    promises.push(injectMassiveRNGQuestNodes());
+    promises.push(injectMassiveRNGQuestNodes(finishedTransformers));
   }
 
   // applies only to recurring quests
@@ -156,7 +156,7 @@ transformQuestNodePrototypes.contains = true;
 
 const getStashSpawnerSID = (stashKey: string) => `${RandomStashQuestNodePrefix}_Random_${stashKey}_Spawn`;
 
-async function injectMassiveRNGQuestNodes() {
+export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<string>) {
   await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
   const extraStructs: QuestNodePrototype[] = [];
   const stashes = Object.keys(allStashes);
@@ -207,7 +207,7 @@ async function injectMassiveRNGQuestNodes() {
 /**
  * ConsoleCommand start a quest node for giving a clue.
  */
-function hookRewardStashClue(struct: QuestNodePrototype) {
+export function hookRewardStashClue(struct: QuestNodePrototype) {
   const stashClueReward = new Struct(`
       ${struct.SID}_Give_Cache : struct.begin
          SID = ${struct.SID}_Give_Cache
@@ -221,7 +221,7 @@ function hookRewardStashClue(struct: QuestNodePrototype) {
   return stashClueReward;
 }
 
-async function hookStashSpawners(struct: QuestNodePrototype) {
+export async function hookStashSpawners(struct: QuestNodePrototype, finishedTransformers: Set<string>) {
   await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
 
   // only quest stashes that are hidden by this mod are interesting here
