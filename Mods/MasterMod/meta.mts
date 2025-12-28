@@ -5,7 +5,6 @@ import { transformArmorPrototypes } from "./transformArmorPrototypes.mts";
 import { transformArtifactPrototypes } from "./transformArtifactPrototypes.mts";
 import { transformBarbedWirePrototypes } from "./transformBarbedWirePrototypes.mts";
 import { transformAttachPrototypes } from "./transformAttachPrototypes.mts";
-import { transformCluePrototypes } from "./transformCluePrototypes.mts";
 import { transformDialogPoolPrototypes } from "./transformDialogPoolPrototypes.mts";
 import { transformDialogPrototypes } from "./transformDialogPrototypes.mts";
 import { transformDifficultyPrototypes } from "./transformDifficultyPrototypes.mts";
@@ -35,6 +34,7 @@ import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
 import { logger } from "../../src/logger.mts";
 import { MergedStructs } from "../../src/merged-structs.mts";
+import { transformCluePrototypes } from "../StashClueRework/meta.mts";
 
 const structTransformers = [
   transformNPCPrototypes,

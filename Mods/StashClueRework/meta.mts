@@ -6,6 +6,7 @@ import { getLaunchers } from "../../src/struct-utils.mts";
 import { waitFor } from "../../src/wait-for.mts";
 import { precision } from "../../src/precision.mts";
 import { QuestDataTable } from "../MasterMod/rewardFormula.mts";
+
 const finishedTransformers = new Set<string>();
 
 export const meta: MetaType = {
@@ -82,14 +83,15 @@ const getGeneratedStashSID = (i: number) => `Gen_Stash${i}`;
  * Each generated struct uses `SID` = `Gen_Stash{n}` and minimal internal metadata.
  * Returns `null` to indicate no modification to the original entries.
  */
-function transformCluePrototypes(_, context: MetaContext<CluePrototype>) {
+export function transformCluePrototypes() {
   if (transformCluePrototypesOncePerFile) {
     return null;
   }
 
   transformCluePrototypesOncePerFile = true;
+  const extraStructs: CluePrototype[] = [];
   [...new Set(QuestDataTable.map((q) => `${q.Vendor.replace(/\W/g, "")}_latest_quest_variant`))].forEach((SID) => {
-    context.extraStructs.push(
+    extraStructs.push(
       new Struct(`
           ${SID} : struct.begin {refkey=[0]}
              SID = ${SID}
@@ -100,7 +102,7 @@ function transformCluePrototypes(_, context: MetaContext<CluePrototype>) {
     );
   });
   for (let i = 1; i <= 100; i++) {
-    context.extraStructs.push(
+    extraStructs.push(
       new Struct({
         __internal__: {
           refkey: "[0]",
@@ -111,6 +113,7 @@ function transformCluePrototypes(_, context: MetaContext<CluePrototype>) {
       }) as CluePrototype,
     );
   }
+  return extraStructs;
 }
 
 transformCluePrototypes.files = ["/CluePrototypes.cfg"];
@@ -145,7 +148,7 @@ async function transformQuestNodePrototypes(struct: QuestNodePrototype, context:
     }
   }
 
-  context.extraStructs.push(...(await Promise.all(promises).then((results) => results.flat())));
+  return Promise.all(promises).then((results) => results.flat());
 }
 
 const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];

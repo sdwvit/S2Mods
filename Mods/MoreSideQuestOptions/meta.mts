@@ -22,7 +22,7 @@ bPatches:
 [*] /QuestNodePrototypes/RSQ10_C00_HARPY.cfg
 [/list]
 `,
-  changenote: "Initial release",
+  changenote: "Viktoria now shows dialog option only if you have enough mutant loot parts",
   structTransformers: [alwaysShowAllMutantQuestPartsDialog, transformQuestNodePrototypes],
 };
 
