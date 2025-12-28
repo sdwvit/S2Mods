@@ -100,8 +100,10 @@ function transformDestructibleObjects(struct: SpawnActorPrototype, fork: SpawnAc
         return;
       }
 
-      logger.info(`Found preplaced destructible object: ${ie?.PrototypeSID}. Hiding it.`);
       totals.DestructibleObject++;
+      if (totals.DestructibleObject % 1000 === 0) {
+        logger.info(`Found ${totals.DestructibleObject} preplaced ${struct.SpawnedPrototypeSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
+      }
 
       return Object.assign(ie.fork(), { PrototypeSID: "Milk" });
     });
@@ -128,12 +130,19 @@ function transformItems(struct: SpawnActorPrototype, fork: SpawnActorPrototype) 
   if (!(isGearReplacement || isMedkitReplacement)) {
     return;
   }
-  logger.info(`Found preplaced Item: ${struct.ItemSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
   if (isMedkitReplacement) {
     totals.Medkit++;
+
+    if (totals.Medkit % 100 === 0) {
+      logger.info(`Found ${totals.Medkit} preplaced ${struct.ItemSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
+    }
   }
   if (isGearReplacement) {
     totals.Gear++;
+
+    if (totals.Gear % 100 === 0) {
+      logger.info(`Found ${totals.Gear} preplaced ${struct.ItemSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
+    }
   }
   return Object.assign(fork, { SpawnOnStart: false }) as SpawnActorPrototype;
 }

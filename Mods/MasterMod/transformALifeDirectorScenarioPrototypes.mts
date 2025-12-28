@@ -64,20 +64,14 @@ export const transformALifeDirectorScenarioPrototypes: EntriesTransformer<ALifeD
   Scenarios.__internal__.useAsterisk = false;
 
   const ScenarioGroups = struct.ScenarioGroups.map(([_, v]) => {
-    if (!v.SpawnDelayMin && !v.SpawnDelayMax && !v.PostSpawnDirectorTimeoutMin && !v.PostSpawnDirectorTimeoutMax) {
-      return null;
-    }
     const fork = v.fork();
-    if (v.SpawnDelayMin) v.SpawnDelayMin = Math.ceil(v.SpawnDelayMin / factor);
-    if (v.SpawnDelayMax) v.SpawnDelayMax = Math.ceil(v.SpawnDelayMax / factor);
-    if (v.PostSpawnDirectorTimeoutMin) v.PostSpawnDirectorTimeoutMin = Math.ceil(v.PostSpawnDirectorTimeoutMin / factor);
-    if (v.PostSpawnDirectorTimeoutMax) v.PostSpawnDirectorTimeoutMax = Math.ceil(v.PostSpawnDirectorTimeoutMax / factor);
-    return Object.assign(fork, {
-      SpawnDelayMin: v.SpawnDelayMin,
-      SpawnDelayMax: v.SpawnDelayMax,
-      PostSpawnDirectorTimeoutMin: v.PostSpawnDirectorTimeoutMin,
-      PostSpawnDirectorTimeoutMax: v.PostSpawnDirectorTimeoutMax,
-    });
+    if (v.SpawnDelayMin) fork.SpawnDelayMin = Math.ceil(v.SpawnDelayMin / factor);
+    if (v.SpawnDelayMax) fork.SpawnDelayMax = Math.ceil(v.SpawnDelayMax / factor);
+    if (v.PostSpawnDirectorTimeoutMin) fork.PostSpawnDirectorTimeoutMin = Math.ceil(v.PostSpawnDirectorTimeoutMin / factor);
+    if (v.PostSpawnDirectorTimeoutMax) fork.PostSpawnDirectorTimeoutMax = Math.ceil(v.PostSpawnDirectorTimeoutMax / factor);
+    if (fork.entries().length) {
+      return fork;
+    }
   });
   ScenarioGroups.__internal__.useAsterisk = false;
 
