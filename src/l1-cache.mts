@@ -2,10 +2,10 @@ import { Struct } from "s2cfgtojson";
 import fs from "node:fs";
 import { logger } from "./logger.mjs";
 import { readWithUnzip, writeWithZip } from "./zip.mjs";
-import { modFolder } from "./base-paths.mjs";
 import path from "node:path";
+import { projectRoot } from "./base-paths.mts";
 
-const L1CacheFileName = path.join(modFolder, ".l1.cache.zlib");
+const L1CacheFileName = path.join(projectRoot, ".l1.cache.zlib");
 export const L1CacheState = {
   needsUpdate: false,
 };
