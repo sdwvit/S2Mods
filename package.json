@@ -13,7 +13,8 @@
     "push-to-sdk": "node ./src/push-to-sdk.mts",
     "pull-staged": "node ./src/pull-staged.mts",
     "pull-assets": "node ./src/pull-assets.mts",
-    "purge-caches": "find . -path '*/node_modules' -prune -o -type f -name '.*.cache.zlib' -exec rm -f {} +"
+    "purge-caches": "find . -path '*/node_modules' -prune -o -type f -name '.*.cache.zlib' -exec rm -f {} +",
+    "create-git-branches": "node src/create-git-branches.mts"
   },
   "devDependencies": {
     "@node-steam/vdf": "^2.2.0",
