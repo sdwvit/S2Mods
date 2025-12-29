@@ -2,6 +2,75 @@
 
 Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines):
 
+- `Modified assets`:
+  - `T_enemymarker`
+  - `T_quest_enemymarker`
+  - `T_NoiseIndicator`
+  - `T_compass_shadow_battle`
+  - `T_noise_line_active`
+  - `T_noise_line_bg`
+  - `T_ThreatGlowing`
+  - `T_ThreatGray`
+  - `T_IFI_BattleExoskeleton_Varta_Armor_headless`
+  - `T_IFI_BattleExoskeleton_Varta_Armor_headless_upgrade`
+  - `T_IFI_Exoskeleton_Dolg_Armor_headless`
+  - `T_IFI_Exoskeleton_Dolg_Armor_headless_upgrade`
+  - `T_IFI_Exoskeleton_Duty_Helmet`
+  - `T_IFI_Exoskeleton_Duty_Helmet_upgrade`
+  - `T_IFI_Exoskeleton_Merc_Helmet`
+  - `T_IFI_Exoskeleton_Merc_Helmet_upgrade`
+  - `T_IFI_Exoskeleton_Mercenaries_Armor_headless`
+  - `T_IFI_Exoskeleton_Mercenaries_Armor_headless_upgrade`
+  - `T_IFI_Exoskeleton_Monolith_Armor_headless`
+  - `T_IFI_Exoskeleton_Monolith_Armor_headless_upgrade`
+  - `T_IFI_Exoskeleton_Monolith_Helmet`
+  - `T_IFI_Exoskeleton_Monolith_Helmet_upgrade`
+  - `T_IFI_Exoskeleton_Neutral_Armor_headless`
+  - `T_IFI_Exoskeleton_Neutral_Armor_headless_upgrade`
+  - `T_IFI_Exoskeleton_Neutral_Helmet`
+  - `T_IFI_Exoskeleton_Neutral_Helmet_upgrade`
+  - `T_IFI_Exoskeleton_Spark_Helmet`
+  - `T_IFI_Exoskeleton_Spark_Helmet_upgrade`
+  - `T_IFI_Exoskeleton_Svoboda_Armor_headless`
+  - `T_IFI_Exoskeleton_Svoboda_Armor_headless_upgrade`
+  - `T_IFI_Exoskeleton_Svoboda_Helmet`
+  - `T_IFI_Exoskeleton_Svoboda_Helmet_upgrade`
+  - `T_IFI_Heavy2_Military_Armor_headless`
+  - `T_IFI_Heavy2_Military_Armor_headless_upgrade`
+  - `T_IFI_HeavyAnomaly_Monolith_Armor_headless`
+  - `T_IFI_HeavyAnomaly_Monolith_Armor_headless_upgrade`
+  - `T_IFI_HeavyBattle_Dolg_Helmet`
+  - `T_IFI_HeavyBattle_Dolg_Helmet_upgrade`
+  - `T_IFI_HeavyBattle_Merc_Helmet`
+  - `T_IFI_HeavyBattle_Merc_Helmet_upgrade`
+  - `T_IFI_HeavyBattle_Spark_Armor_headless`
+  - `T_IFI_HeavyBattle_Spark_Armor_headless_upgrade`
+  - `T_IFI_HeavyBattle_Spark_Helmet`
+  - `T_IFI_HeavyBattle_Spark_Helmet_upgrade`
+  - `T_IFI_HeavyExoskeleton_Dolg_Armor_headless`
+  - `T_IFI_HeavyExoskeleton_Dolg_Armor_headless_upgrade`
+  - `T_IFI_HeavyExoskeleton_Mercenaries_Armor_headless`
+  - `T_IFI_HeavyExoskeleton_Mercenaries_Armor_headless_upgrade`
+  - `T_IFI_HeavyExoskeleton_Monolith_Armor_headless`
+  - `T_IFI_HeavyExoskeleton_Monolith_Armor_headless_upgrade`
+  - `T_IFI_HeavyExoskeleton_Svoboda_Armor_headless`
+  - `T_IFI_HeavyExoskeleton_Svoboda_Armor_headless_upgrade`
+  - `T_IFI_HeavyExoskeleton_Varta_Armor_headless`
+  - `T_IFI_HeavyExoskeleton_Varta_Armor_headless_upgrade`
+  - `T_IFI_Heavy_Dolg_Armor_headless`
+  - `T_IFI_Heavy_Dolg_Armor_headless_upgrade`
+  - `T_IFI_Heavy_Mercenaries_Armor_headless`
+  - `T_IFI_Heavy_Mercenaries_Armor_headless_upgrade`
+  - `T_IFI_Heavy_Svoboda_Armor_headless`
+  - `T_IFI_Heavy_Svoboda_Armor_headless_upgrade`
+  - `T_inv_w_gp37_en_x8scope_1`
+  - `T_inv_w_gp37_en_x8scope_1_upgrade`
+  - `T_inv_w_sharpshooter_en_x8scope_1`
+  - `T_inv_w_sharpshooter_en_x8scope_1_upgrade`
+  - `T_inv_w_deadeye_body_upgrade`
+  - `T_inv_w_deadeye_scope_upgrade`
+  - `T_inv_w_en_colim_scope`
+  - `T_inv_w_en_colim_scope_upgrade`
 - `GameData`:
   - `AIGlobals`
   - `BarbedWirePrototypes`
