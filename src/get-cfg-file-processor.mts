@@ -5,7 +5,7 @@ import fs from "node:fs";
 import { baseCfgDir, modFolderRaw, modName, rawCfgEnclosingFolder } from "./base-paths.mjs";
 import { promisify } from "node:util";
 import { logger } from "./logger.mjs";
-import { L1Cache, L1CacheState } from "./l1-cache.mjs";
+import { getOrUpdateFromL1Cache } from "./l1-cache.mjs";
 import { deepMerge } from "./deep-merge.mts";
 import { MergedStructs } from "./merged-structs.mts";
 
@@ -20,13 +20,7 @@ export function getCfgFileProcessor<T extends Struct>(transformer: EntriesTransf
   return async function processOneCfgFile(filePath: string, fileIndex: number): Promise<Struct[]> {
     const pathToSave = path.parse(filePath.slice(baseCfgDir.length + 1));
 
-    if (!L1Cache[filePath]) {
-      L1CacheState.needsUpdate = true;
-      const rawContent = await readFile(filePath, "utf8");
-      L1Cache[filePath] = Struct.fromString(rawContent) as T[];
-    }
-
-    const array = L1Cache[filePath] as T[];
+    const array = await getOrUpdateFromL1Cache<T>(filePath, transformer);
     const structsById: Record<string, T> = Object.fromEntries(array.map((s) => [s.__internal__.rawName, s as T]));
     const extraStructs: T[] = [];
 

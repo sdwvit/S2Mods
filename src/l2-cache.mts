@@ -3,9 +3,9 @@ import path from "node:path";
 import { logger } from "./logger.mjs";
 import { readWithUnzip, writeWithZip } from "./zip.mjs";
 import { EntriesTransformer } from "./meta-type.mts";
-import { projectRoot } from "./base-paths.mjs";
+import { modFolder } from "./base-paths.mts";
 
-export const L2CacheFileName = path.join(projectRoot, ".l2.cache.zlib");
+export const L2CacheFileName = path.join(modFolder, ".l2.cache.zlib");
 export const L2CacheState = {
   needsUpdate: false,
 };

@@ -2,9 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { logger } from "./logger.mjs";
 import { readWithUnzip, writeWithZip } from "./zip.mjs";
-import { projectRoot } from "./base-paths.mjs";
+import { modFolder } from "./base-paths.mjs";
 
-const L3CacheFileName = path.join(projectRoot, ".l3.cache.zlib");
+const L3CacheFileName = path.join(modFolder, ".l3.cache.zlib");
 export const L3CacheState = {
   needsUpdate: false,
 };

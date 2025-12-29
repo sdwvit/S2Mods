@@ -16,20 +16,6 @@ export const transformEffectPrototypes: EntriesTransformer<EffectPrototype> = as
     extraStructs.push(
       new Struct({
         __internal__: {
-          rawName: "AimingFOVX16Effect",
-          isRoot: true,
-        },
-        SID: "AimingFOVX16Effect",
-        Type: "EEffectType::AimingFOV",
-        ValueMin: "-85%",
-        ValueMax: "-85%",
-        bIsPermanent: true,
-        Positive: "EBeneficial::Negative",
-      }) as EffectPrototype,
-    );
-    extraStructs.push(
-      new Struct({
-        __internal__: {
           rawName: MovementSpeedEffect5PSID,
           isRoot: true,
         },
