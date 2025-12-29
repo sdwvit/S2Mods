@@ -12,8 +12,8 @@ const cmd = (c: string) => {
   });
 };
 
+cmd(["git", "checkout", "master"].join(" "));
 validMods.forEach((mod) => {
-  cmd(["git", "checkout", "master"].join(" "));
   cmd(["git", "checkout", "-b", mod].join(" "));
   cmd(["git", "checkout", mod].join(" "));
   cmd(["git", "branch", "--set-upstream-to=origin/master", mod].join(" "));
