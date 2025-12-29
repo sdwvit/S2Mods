@@ -8,19 +8,6 @@ import { logger } from "../../src/logger.mts";
 export const meta: MetaType = {
   description: `
 This mod does one thing only: expands the dialogue options offered by NPCs when requesting side quests.
-[hr][/hr] 
-bPatches: 
-[list]
-[*] /DialogPrototypes/EQ197_QD_Orders.cfg
-[*] /QuestNodePrototypes/RSQ01.cfg
-[*] /QuestNodePrototypes/RSQ04.cfg
-[*] /QuestNodePrototypes/RSQ05.cfg
-[*] /QuestNodePrototypes/RSQ06_C00___SIDOROVICH.cfg
-[*] /QuestNodePrototypes/RSQ07_C00_TSEMZAVOD.cfg
-[*] /QuestNodePrototypes/RSQ08_C00_ROSTOK.cfg
-[*] /QuestNodePrototypes/RSQ09_C00_MALAHIT.cfg
-[*] /QuestNodePrototypes/RSQ10_C00_HARPY.cfg
-[/list]
 `,
   changenote: "Viktoria now shows dialog option only if you have enough mutant loot parts",
   structTransformers: [alwaysShowAllMutantQuestPartsDialog, transformQuestNodePrototypes],
