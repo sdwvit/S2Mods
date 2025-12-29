@@ -1,16 +1,6 @@
 import { validMods } from "./base-paths.mts";
 import { spawnSync } from "child_process";
-import { logger } from "./logger.mts";
-
-const cmd = (c: string) => {
-  logger.log("-- Executing command", c);
-  return spawnSync(c, {
-    stdio: "inherit",
-    cwd: import.meta.dirname,
-    shell: "/usr/bin/bash",
-    env: { ...process.env },
-  });
-};
+import { cmd } from "./cmd.mts";
 
 cmd(["git", "checkout", "master"].join(" "));
 cmd(["git", "pull"].join(" "));

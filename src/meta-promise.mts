@@ -1,4 +1,4 @@
-import { modFolder, modName } from "./base-paths.mjs";
+import { modFolder } from "./base-paths.mjs";
 import path from "node:path";
 import { MetaType } from "./meta-type.mts";
 import { Struct } from "s2cfgtojson";

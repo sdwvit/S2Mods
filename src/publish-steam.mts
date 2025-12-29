@@ -7,8 +7,8 @@ const STALKER_STEAM_ID = "1643320";
 import { metaPromise } from "./meta-promise.mts";
 import { spawnSync } from "child_process";
 import { modFolder, modFolderSteam, modName } from "./base-paths.mjs";
+import { sanitize } from "./sanitize.mts";
 const { meta } = await metaPromise;
-const sanitize = (str: string) => str.replace(/\n/g, "").replace(/"/g, '\\"');
 
 const cmd = () => {
   const vdfFilePath = path.join(modFolder, `workshopitem.vdf`);

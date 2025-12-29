@@ -1,6 +1,6 @@
 import { logger } from "./logger.mts";
 import path from "node:path";
-import { getStagedPath } from "./cook.ts";
+import { getStagedPath } from "./cook.mts";
 import { modName, projectRoot } from "./base-paths.mts";
 import childProcess from "node:child_process";
 

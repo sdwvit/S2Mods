@@ -1,5 +1,4 @@
 import path from "node:path";
-import "./ensure-dot-env.mts";
 import fs from "node:fs";
 import { projectRoot } from "./ensure-dot-env.mts";
 export { projectRoot } from "./ensure-dot-env.mts";

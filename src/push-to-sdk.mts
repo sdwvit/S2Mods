@@ -4,7 +4,7 @@ import { logger } from "./logger.mjs";
 import { modName, sdkModsFolder, modFolderRaw, modFolderSdkSrc, sdkModFolder } from "./base-paths.mjs";
 import { mkdirSync } from "fs";
 import { cpSync, existsSync, readdirSync, rmSync, symlinkSync } from "node:fs";
-import { createMod } from "./cook.ts";
+import { createMod } from "./cook.mts";
 import { recursiveCfgFind } from "./recursive-cfg-find.mts";
 
 const cmd = () => {
