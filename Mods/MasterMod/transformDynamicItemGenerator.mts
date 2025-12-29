@@ -22,8 +22,6 @@ function transformTrade(struct: DynamicItemGenerator) {
               RU_X4Scope_1: new Struct({ ItemPrototypeSID: "RU_X4Scope_1", Chance: 0.7, MinCount: 1, MaxCount: 1 }),
               RU_X8Scope_1: new Struct({ ItemPrototypeSID: "RU_X8Scope_1", Chance: 0.3, MinCount: 1, MaxCount: 1 }),
               EN_X8Scope_1: new Struct({ ItemPrototypeSID: "EN_X8Scope_1", Chance: 0.3, MinCount: 1, MaxCount: 1 }),
-              EN_X16Scope_1: new Struct({ ItemPrototypeSID: "EN_X16Scope_1", Chance: 0.2, MinCount: 1, MaxCount: 1 }),
-              UA_X16Scope_1: new Struct({ ItemPrototypeSID: "UA_X16Scope_1", Chance: 0.2, MinCount: 1, MaxCount: 1 }),
             }),
           });
         }
@@ -35,21 +33,19 @@ function transformTrade(struct: DynamicItemGenerator) {
       case "EItemGenerationCategory::WeaponSecondary":
         return Object.assign(e.fork(), { ReputationThreshold: 1000000 });
       case "EItemGenerationCategory::SubItemGenerator": {
-        const PossibleItems = (e.PossibleItems as DynamicItemGenerator["ItemGenerator"]["0"]["PossibleItems"]).map(
-          ([_k, pi]) => {
-            if (
-              generalTradersTradeItemGenerators.has(struct.SID) &&
-              (pi.ItemGeneratorPrototypeSID?.includes("Attach") ||
-                pi.ItemGeneratorPrototypeSID?.includes("Cosnsumables") ||
-                pi.ItemGeneratorPrototypeSID?.includes("Consumables"))
-            ) {
-              return Object.assign(pi.fork(), { Chance: 0 }); // Disable attachments and consumables sell for general traders
-            }
-            if (pi.ItemGeneratorPrototypeSID?.includes("Gun")) {
-              return Object.assign(pi.fork(), { Chance: 0 }); // Disable gun sell
-            }
-          },
-        );
+        const PossibleItems = (e.PossibleItems as DynamicItemGenerator["ItemGenerator"]["0"]["PossibleItems"]).map(([_k, pi]) => {
+          if (
+            generalTradersTradeItemGenerators.has(struct.SID) &&
+            (pi.ItemGeneratorPrototypeSID?.includes("Attach") ||
+              pi.ItemGeneratorPrototypeSID?.includes("Cosnsumables") ||
+              pi.ItemGeneratorPrototypeSID?.includes("Consumables"))
+          ) {
+            return Object.assign(pi.fork(), { Chance: 0 }); // Disable attachments and consumables sell for general traders
+          }
+          if (pi.ItemGeneratorPrototypeSID?.includes("Gun")) {
+            return Object.assign(pi.fork(), { Chance: 0 }); // Disable gun sell
+          }
+        });
         if (struct.SID === "YanovTrader_TradeItemGenerator") {
           PossibleItems.addNode(
             new Struct({
@@ -76,16 +72,14 @@ function transformTrade(struct: DynamicItemGenerator) {
 
 function transformConsumables(e: DynamicItemGenerator["ItemGenerator"]["0"], i: number) {
   const fork = e.fork();
-  const PossibleItems = e.PossibleItems.filter(([_k, pi]) => !pi.ItemPrototypeSID.toLowerCase().includes("key")).map(
-    ([_k, pi], j) => {
-      let chance = semiRandom(i + j); // Randomize
-      while (chance > 0.02) {
-        chance /= 2;
-      }
-      chance = precision(chance);
-      return Object.assign(pi.fork(), { Chance: chance });
-    },
-  );
+  const PossibleItems = e.PossibleItems.filter(([_k, pi]) => !pi.ItemPrototypeSID.toLowerCase().includes("key")).map(([_k, pi], j) => {
+    let chance = semiRandom(i + j); // Randomize
+    while (chance > 0.02) {
+      chance /= 2;
+    }
+    chance = precision(chance);
+    return Object.assign(pi.fork(), { Chance: chance });
+  });
   if (!PossibleItems.entries().length) {
     return;
   }
@@ -132,9 +126,7 @@ function transformCombat(struct: DynamicItemGenerator) {
 
   categories.forEach((Category) => {
     const generators = struct.ItemGenerator.entries().filter(([_k, ig]) => ig.Category === Category);
-    const genRanks = new Set(
-      generators.flatMap(([_k, ig]) => (ig.PlayerRank ? ig.PlayerRank.split(",").map((r) => r.trim()) : [])),
-    );
+    const genRanks = new Set(generators.flatMap(([_k, ig]) => (ig.PlayerRank ? ig.PlayerRank.split(",").map((r) => r.trim()) : [])));
     const missingRanks = ALL_RANKS_SET.difference(genRanks);
     if (generators.length) {
       [...missingRanks].forEach((mr) => {
@@ -178,10 +170,7 @@ function transformCombat(struct: DynamicItemGenerator) {
     }
   });
 
-  if (
-    !ItemGenerator.entries().length ||
-    !ItemGenerator.filter((e): e is any => !!(e[1].PossibleItems as Struct).entries().length).entries().length
-  ) {
+  if (!ItemGenerator.entries().length || !ItemGenerator.filter((e): e is any => !!(e[1].PossibleItems as Struct).entries().length).entries().length) {
     return;
   }
   ItemGenerator.__internal__.bpatch = true;

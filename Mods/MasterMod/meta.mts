@@ -12,7 +12,6 @@ import { transformDynamicItemGenerator } from "./transformDynamicItemGenerator.m
 import { transformEffectPrototypes } from "./transformEffectPrototypes.mts";
 import { transformItemGeneratorPrototypes } from "./transformItemGeneratorPrototypes.mts";
 import { transformLairPrototypes } from "./transformLairPrototypes.mts";
-import { transformMeshPrototypes } from "./transformMeshPrototypes.mts";
 import { transformMeshGeneratorPrototypes } from "./transformMeshGeneratorPrototypes.mts";
 import { getTransformMobs } from "./transformMobs.mts";
 import { transformNPCWeaponSettingsPrototypes } from "./transformNPCWeaponSettingsPrototypes.mts";
@@ -54,7 +53,6 @@ const structTransformers = [
   transformItemGeneratorPrototypes,
   transformLairPrototypes,
   transformMeshGeneratorPrototypes,
-  transformMeshPrototypes,
   getTransformMobs(DIFFICULTY_FACTOR),
   transformNPCWeaponSettingsPrototypes,
   transformObjPrototypes,
@@ -95,7 +93,7 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [Challenge / QoL] Way more lively zone, now spawning all mutant bosses and bigger battles.
  [*] [QoL] Prevents Player and NPCs from being knocked down. Removes Fall damage for Player and NPCs.
  [*] [QoL] Water no longer slows you down or drains your stamina.
- [*] [QoL] X8 Scope compatible with more weapons. Added X16 scopes.
+ [*] [QoL] X8 Scope compatible with more weapons. For X16 scopes use my other mod called X16Scopes.
  [*] [QoL] Unlocks blocking upgrades. 
  [*] [QoL] Satiety effect now lasts as long as on normal difficulty, as it was more like a slowdown and not a challenge.
  [*] [QoL] Unique weapons are now compatible with basic scopes.
@@ -114,7 +112,7 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
 This mods works well with UBER TOZ mod. It does include Better Ballistics mod changes.
 [hr][/hr]  
 All changes have been tested against fresh save file. Some of these changes won't work with older saves.`,
-  changenote: `Now can hold breath and offset aim with any weapon any scope at any time.`,
+  changenote: `Finished splitting out x16 scopes.`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);

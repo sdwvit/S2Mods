@@ -89,10 +89,6 @@ export const transformWeaponGeneralSetupPrototypes: EntriesTransformer<WeaponGen
   fork.OffsetAimingConditionSID = "ConstTrue";
   fork.ToggleOffsetAimingConditionSID = "ConstTrue";
 
-  const compX16 = getXnCompatibleScope(struct, 16);
-  if (compX16) {
-    fork.CompatibleAttachments.addNode(compX16, "X16");
-  }
   const compX8 = getXnCompatibleScope(struct, 8);
   if (compX8) {
     fork.CompatibleAttachments.addNode(compX8, "X8");

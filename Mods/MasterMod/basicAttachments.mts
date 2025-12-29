@@ -27,24 +27,6 @@ export const allCompatibleAttachmentDefsByWeaponGeneralSetupPrototypeSID: Record
 > = {};
 
 export const allCompatibleAttachmentDefs: Record<string, Struct> = {
-  EN_X16Scope_1: new Struct({
-    AttachPrototypeSID: "EN_X16Scope_1",
-    Socket: "X16ScopeSocket",
-    IconPosX: 60,
-    IconPosY: 0,
-    AimMuzzleVFXSocket: "X4ScopeMuzzle",
-    AimShellShutterVFXSocket: "X4ScopeShells",
-  }),
-
-  UA_X16Scope_1: new Struct({
-    AttachPrototypeSID: "UA_X16Scope_1",
-    Socket: "X16ScopeSocket",
-    IconPosX: 60,
-    IconPosY: 0,
-    AimMuzzleVFXSocket: "X4ScopeMuzzle",
-    AimShellShutterVFXSocket: "X4ScopeShells",
-  }),
-
   RU_X8Scope_1: new Struct({
     AttachPrototypeSID: "RU_X8Scope_1",
     Socket: "X8ScopeSocket",
