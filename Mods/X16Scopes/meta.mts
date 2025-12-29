@@ -11,7 +11,7 @@ You can buy these new scopes from T4 attachment traders like the one on Yaniv.
 Unfortunately, I don't know how to do animations. You have to attach the scopes in your inventory while NOT holding a hand.[h2][/h2]
 bPatches AttachPrototypes, MeshPrototypes, DynamicItemGenerator, QuestItemGeneratorPrototypes, and WeaponGeneralSetupPrototypes.
 `,
-  changenote: "Add X16Scope compatibility for AR416 variants, Merc / Trophy, G37V2",
+  changenote: "Fix G37V2 rail requirements, fix skeleton mesh for Dnipro / Lavina",
   structTransformers: [
     addX16ScopesToWeaponGeneralSetupPrototypes,
     getX16AttachPrototypes,
