@@ -13,6 +13,7 @@ const cmd = (c: string) => {
 };
 
 cmd(["git", "checkout", "master"].join(" "));
+cmd(["git", "pull"].join(" "));
 validMods.forEach((mod) => {
   cmd(["git", "checkout", "-b", mod].join(" "));
   cmd(["git", "checkout", mod].join(" "));
