@@ -125,6 +125,7 @@ function transformTrade(struct: DynamicItemGenerator) {
     return;
   }
   ItemGenerator.__internal__.bpatch = true;
+  ItemGenerator.__internal__.useAsterisk = false;
   return Object.assign(fork, { ItemGenerator });
 }
 transformTrade.files = ["/DynamicItemGenerator.cfg", "/QuestItemGeneratorPrototypes.cfg"];
@@ -148,8 +149,11 @@ export const getXnCompatibleScope = (struct: WeaponGeneralSetupPrototype, X: num
   const uaCompatibleAttachment = getCompatibleAttachmentDefinition(`${X === 8 ? "RU" : "UA"}_X${X}Scope_1`);
 
   switch (struct.SID) {
+    case "GunG37V2_ST":
+      return Object.assign(enCompatibleAttachment, {
+        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/GP37/T_inv_w_gp37_en_x${X}scope_1.T_inv_w_gp37_en_x${X}scope_1'`,
+      });
     case "GunG37_ST":
-    case "GunG37V2_ST_Player":
       return Object.assign(enCompatibleAttachment, {
         WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/GP37/T_inv_w_gp37_en_x${X}scope_1.T_inv_w_gp37_en_x${X}scope_1'`,
         RequiredUpgradeIDs: new Struct({ 0: "GunG37_Upgrade_Attachment_Rail" }),
