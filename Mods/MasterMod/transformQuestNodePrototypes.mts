@@ -126,6 +126,7 @@ transformQuestNodePrototypes.contents = [
   "EQuestNodeType::ItemAdd",
   "EQuestNodeType::SetItemGenerator",
   "InGameHours",
+  ...RSQLessThan3QuestNodesSIDs,
   "RookieVillage_Hub_OnNPCCreateEvent_BP_NPC_RookieVillageGuider",
 ];
 transformQuestNodePrototypes.contains = true;
