@@ -6,5 +6,5 @@ export const projectRoot = path.join(import.meta.dirname, "..");
 
 if (!visited) {
   visited = true;
-  dotEnv.config({ path: [path.join(projectRoot, ".env"), path.join(projectRoot, ".env.modname")] });
+  dotEnv.config({ path: path.join(projectRoot, ".env") });
 }
