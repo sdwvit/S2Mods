@@ -204,7 +204,7 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
   - `Snork`
   - `Tushkan`
 - `QuestNodePrototypes`:
-  - `ANCQ01`
+  - `A-life_interrupts`
   - `ANCQ01_P`
   - `ANCQ27`
   - `BodyParts_Malahit`
