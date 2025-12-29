@@ -241,9 +241,10 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
  * ConsoleCommand start a quest node for giving a clue.
  */
 export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, Name = "") {
+  const sid = `${struct.SID}_${Name ? Name + "_" : ""}Give_Cache`;
   const stashClueReward = new Struct(`
-      ${struct.SID}_${Name ? Name + "_" : ""}Give_Cache : struct.begin
-         SID = ${struct.SID}_Give_Cache
+      ${sid} : struct.begin
+         SID = ${sid}
          QuestSID = ${struct.QuestSID}
          NodeType = EQuestNodeType::ConsoleCommand
          ConsoleCommand = XStartQuestNodeBySID ${RandomStashQuestNodePrefix}_Random
