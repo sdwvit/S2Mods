@@ -5,9 +5,10 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `GlobalVariablePrototypes`:
   - `CluePrototypes`
 - `QuestNodePrototypes`:
-  - `ANCQ01`
+  - `A-life_interrupts`
   - `ANCQ01_P`
   - `ANCQ27`
+  - `BodyParts_Malahit`
   - `E03_MQ05`
   - `E05_SQ01`
   - `E07_MQ01`

@@ -184,7 +184,7 @@ async function transformQuestNodePrototypes(struct: QuestNodePrototype, context:
 export const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];
 
 transformQuestNodePrototypes.files = ["/QuestNodePrototypes/"];
-transformQuestNodePrototypes.contents = ["EQuestNodeType::ItemAdd", "EQuestNodeType::SetItemGenerator"];
+transformQuestNodePrototypes.contents = ["EQuestNodeType::ItemAdd", "EQuestNodeType::SetItemGenerator", "BodyParts_Malahit_Start"];
 transformQuestNodePrototypes.contains = true;
 
 const getStashSpawnerSID = (stashKey: string) => `${RandomStashQuestNodePrefix}_Random_${stashKey}_Spawn`;

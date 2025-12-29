@@ -23,10 +23,6 @@ export function getCfgFileProcessor<T extends Struct>(transformer: EntriesTransf
     if (!L1Cache[filePath]) {
       L1CacheState.needsUpdate = true;
       const rawContent = await readFile(filePath, "utf8");
-      if (transformer.contents?.length && !transformer.contents.some((c) => rawContent.includes(c))) {
-        L1Cache[filePath] = [];
-        return [];
-      }
       L1Cache[filePath] = Struct.fromString(rawContent) as T[];
     }
 
