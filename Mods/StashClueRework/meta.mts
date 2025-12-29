@@ -20,7 +20,7 @@ Once you finish any recurring quest from base vendors, apart from monetary rewar
 [hr][/hr]
 bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 `,
-  changenote: "Initial release",
+  changenote: "Mutant Quest Parts quest now gives stashes too",
   structTransformers: [transformSpawnActorPrototypes, transformCluePrototypes, transformQuestNodePrototypes],
   onTransformerFinish(transformer: EntriesTransformer<Struct>) {
     finishedTransformers.add(transformer.name);
