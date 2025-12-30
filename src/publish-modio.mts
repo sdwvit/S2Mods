@@ -39,7 +39,10 @@ async function createMod() {
       ),
     ),
   );
-  const logoPath = path.join(modFolder, "1024.png");
+  let logoPath = path.join(modFolder, "1024.png");
+  if (!fs.existsSync(logoPath)) {
+    logoPath = path.join(modFolder, "512.png");
+  }
   await getFormFile(form, "logo", logoPath, "image/png");
 
   const res = await fetch(`${API_BASE}/games/${GAME_ID}/mods`, {
@@ -104,7 +107,10 @@ async function updateMod(modId: string, makePublic = false) {
 /* UPLOAD LOGO                                         */
 /* -------------------------------------------------- */
 async function uploadModLogo(modId: string) {
-  const logoPath = path.join(modFolder, "1024.png");
+  let logoPath = path.join(modFolder, "1024.png");
+  if (!fs.existsSync(logoPath)) {
+    logoPath = path.join(modFolder, "512.png");
+  }
   if (!fs.existsSync(logoPath)) return;
 
   const form = new FormData();
@@ -201,10 +207,10 @@ export async function publishToModIO() {
     console.log("Creating mod.io mod…");
     modId = await createMod();
   } else {
-    // console.log("Updating mod metadata…");
-    // await updateMod(modId);
-    // console.log("Uploading logo…");
-    // await uploadModLogo(modId);
+    console.log("Updating mod metadata…");
+    await updateMod(modId);
+    console.log("Uploading logo…");
+    await uploadModLogo(modId);
   }
 
   const zipPath = path.join(modFolderSteam, `${modName}.zip`);
