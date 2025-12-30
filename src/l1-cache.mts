@@ -6,7 +6,6 @@ import path from "node:path";
 import { modFolder } from "./base-paths.mts";
 import { EntriesTransformer } from "./meta-type.mts";
 import { readFile } from "node:fs/promises";
-import { getOrUpdateFromL1GlobalCache, L1GlobalCache, L1GlobalCacheState } from "./l1global-cache.mts";
 
 const L1CacheFileName = path.join(modFolder, ".l1.cache.zlib");
 export const L1CacheState = {
@@ -29,7 +28,8 @@ export async function getOrUpdateFromL1Cache<T extends Struct>(filePath: string,
     return L1Cache[key] as T[];
   }
   L1CacheState.needsUpdate = true;
-  L1Cache[key] = await getOrUpdateFromL1GlobalCache(filePath);
+  const rawContent = await readFile(filePath, "utf8");
+  L1Cache[key] = Struct.fromString(rawContent);
 
   if (transformer.contents?.length) {
     L1Cache[key] = L1Cache[key].filter((s) => {

@@ -22,34 +22,43 @@ export const EXPERIENCED_MASTER_RANK = "ERank::Experienced, ERank::Veteran, ERan
 export const ALL_RANKS_ARR = ALL_RANK.split(", ") as ERank[];
 export const ALL_RANKS_SET = new Set(ALL_RANKS_ARR);
 
-export const allDefaultWeaponGeneralSetupPrototypes = await readFileAndGetStructs<WeaponGeneralSetupPrototype>(
-  "WeaponData/WeaponGeneralSetupPrototypes.cfg",
-);
-export const allDefaultPlayerWeaponSettingsPrototypes = await readFileAndGetStructs<NPCWeaponSettingsPrototype>(
-  "WeaponData/CharacterWeaponSettingsPrototypes/PlayerWeaponSettingsPrototypes.cfg",
-);
-export const allDefaultArmorPrototypes = await readFileAndGetStructs<ArmorPrototype>(
-  "ItemPrototypes/ArmorPrototypes.cfg",
-);
-export const allDefaultArtifactPrototypes = await readFileAndGetStructs<SpawnActorPrototype>(`/ArtifactPrototypes.cfg`);
-export const allDefaultNightVisionGogglesPrototypes = await readFileAndGetStructs<ArmorPrototype>(
-  "ItemPrototypes/NightVisionGogglesPrototypes.cfg",
-);
-export const allDefaultAmmoPrototypes = await readFileAndGetStructs<AmmoPrototype>("ItemPrototypes/AmmoPrototypes.cfg");
-export const allDefaultConsumablePrototypes = await readFileAndGetStructs<ConsumablePrototype>(
-  "ItemPrototypes/ConsumablePrototypes.cfg",
-);
-export const allDefaultGrenadePrototypes = await readFileAndGetStructs<GrenadePrototype>(
-  "ItemPrototypes/GrenadePrototypes.cfg",
-);
-export const allDefaultQuestItemPrototypes =
-  await readFileAndGetStructs<SpawnActorPrototype>(`/QuestItemPrototypes.cfg`);
-export const allDefaultWeaponPrototypes = await readFileAndGetStructs<WeaponPrototype>(
-  "ItemPrototypes/WeaponPrototypes.cfg",
-);
-export const allDefaultAttachPrototypes = await readFileAndGetStructs<AttachPrototype>(
-  "ItemPrototypes/AttachPrototypes.cfg",
-);
+export let allDefaultWeaponGeneralSetupPrototypes: WeaponGeneralSetupPrototype[];
+export let allDefaultPlayerWeaponSettingsPrototypes: NPCWeaponSettingsPrototype[];
+export let allDefaultArmorPrototypes: ArmorPrototype[];
+export let allDefaultArtifactPrototypes: SpawnActorPrototype[];
+export let allDefaultNightVisionGogglesPrototypes: ArmorPrototype[];
+export let allDefaultAmmoPrototypes: AmmoPrototype[];
+export let allDefaultConsumablePrototypes: ConsumablePrototype[];
+export let allDefaultGrenadePrototypes: GrenadePrototype[];
+export let allDefaultQuestItemPrototypes: SpawnActorPrototype[];
+export let allDefaultWeaponPrototypes: WeaponPrototype[];
+export let allDefaultAttachPrototypes: AttachPrototype[];
+
+[
+  allDefaultWeaponGeneralSetupPrototypes,
+  allDefaultPlayerWeaponSettingsPrototypes,
+  allDefaultArmorPrototypes,
+  allDefaultArtifactPrototypes,
+  allDefaultNightVisionGogglesPrototypes,
+  allDefaultAmmoPrototypes,
+  allDefaultConsumablePrototypes,
+  allDefaultGrenadePrototypes,
+  allDefaultQuestItemPrototypes,
+  allDefaultWeaponPrototypes,
+  allDefaultAttachPrototypes,
+] = await Promise.all([
+  readFileAndGetStructs<WeaponGeneralSetupPrototype>("WeaponData/WeaponGeneralSetupPrototypes.cfg"),
+  readFileAndGetStructs<NPCWeaponSettingsPrototype>("WeaponData/CharacterWeaponSettingsPrototypes/PlayerWeaponSettingsPrototypes.cfg"),
+  readFileAndGetStructs<ArmorPrototype>("ItemPrototypes/ArmorPrototypes.cfg"),
+  readFileAndGetStructs<SpawnActorPrototype>(`/ArtifactPrototypes.cfg`),
+  readFileAndGetStructs<ArmorPrototype>("ItemPrototypes/NightVisionGogglesPrototypes.cfg"),
+  readFileAndGetStructs<AmmoPrototype>("ItemPrototypes/AmmoPrototypes.cfg"),
+  readFileAndGetStructs<ConsumablePrototype>("ItemPrototypes/ConsumablePrototypes.cfg"),
+  readFileAndGetStructs<GrenadePrototype>("ItemPrototypes/GrenadePrototypes.cfg"),
+  readFileAndGetStructs<SpawnActorPrototype>(`/QuestItemPrototypes.cfg`),
+  readFileAndGetStructs<WeaponPrototype>("ItemPrototypes/WeaponPrototypes.cfg"),
+  readFileAndGetStructs<AttachPrototype>("ItemPrototypes/AttachPrototypes.cfg"),
+]);
 
 // Records:
 const getRecord = <T extends { SID: string }>(arr: T[]) => Object.fromEntries(arr.map((e) => [e.SID, e]));
@@ -146,10 +155,7 @@ export const allDefaultDroppableArmorsByFaction: {
   monolith: [
     getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Battle_Monolith_Armor, ALL_RANK),
     getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Monolith_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(
-      allDefaultArmorPrototypesRecord.HeavyExoskeleton_Monolith_Armor,
-      VETERAN_MASTER_RANK,
-    ),
+    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Monolith_Armor, VETERAN_MASTER_RANK),
     getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Exoskeleton_Monolith_Armor, ALL_RANK),
   ],
   neutral: [
@@ -163,10 +169,7 @@ export const allDefaultDroppableArmorsByFaction: {
   ],
   scientist: [
     getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Anomaly_Scientific_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(
-      allDefaultArmorPrototypesRecord.HeavyAnomaly_Scientific_Armor,
-      EXPERIENCED_MASTER_RANK,
-    ),
+    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Scientific_Armor, EXPERIENCED_MASTER_RANK),
     getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.SciSEVA_Scientific_Armor, VETERAN_MASTER_RANK),
   ],
   spark: [
@@ -178,10 +181,7 @@ export const allDefaultDroppableArmorsByFaction: {
   varta: [
     getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Heavy_Varta_Helmet, EXPERIENCED_MASTER_RANK),
     getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Battle_Varta_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(
-      allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor,
-      VETERAN_MASTER_RANK,
-    ),
+    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor, VETERAN_MASTER_RANK),
   ],
 };
 
