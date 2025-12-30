@@ -27,6 +27,7 @@ function storeModId(modId: string) {
 /* CREATE MOD (once)                                   */
 /* -------------------------------------------------- */
 async function createMod() {
+  console.log("Creating mod.io mod…");
   const form = new FormData();
   form.append("name", sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`));
   form.append("summary", "Mod by sdwvit");
@@ -68,6 +69,7 @@ async function createMod() {
 /* https://docs.mod.io/restapi/docs/edit-mod          */
 /* -------------------------------------------------- */
 async function updateMod(modId: string, makePublic = false) {
+  console.log("Updating mod metadata…");
   const form = new FormData();
 
   form.append("name", sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`));
@@ -107,6 +109,7 @@ async function updateMod(modId: string, makePublic = false) {
 /* UPLOAD LOGO                                         */
 /* -------------------------------------------------- */
 async function uploadModLogo(modId: string) {
+  console.log("Uploading logo…");
   let logoPath = path.join(modFolder, "1024.png");
   if (!fs.existsSync(logoPath)) {
     logoPath = path.join(modFolder, "512.png");
@@ -146,6 +149,7 @@ const convertToHtml = (str: string) => {
 /* UPLOAD MODFILE                                      */
 /* -------------------------------------------------- */
 async function uploadModfile(modId: string, zipPath: string) {
+  console.log("Uploading modfile…");
   const form = new FormData();
   await getFormFile(form, "filedata", zipPath, "application/zip");
   form.append("version", new Date().toISOString());
@@ -165,10 +169,11 @@ async function uploadModfile(modId: string, zipPath: string) {
     throw new Error(`Upload modfile failed: ${res.status} ${await res.text()}`);
   }
 
-  return res.json();
+  console.log("Uploaded, ", await res.json());
 }
 
 export async function createModZip(outZipPath: string) {
+  console.log("Creating mod ZIP…");
   const sourceDir = modFolderSteamStruct;
 
   if (!fs.existsSync(sourceDir)) {
@@ -182,8 +187,11 @@ export async function createModZip(outZipPath: string) {
     zlib: { level: 9 }, // maximum compression
   });
 
-  return new Promise<void>((resolve, reject) => {
-    output.on("close", () => resolve());
+  return new Promise<string>((resolve, reject) => {
+    output.on("close", () => {
+      console.log("ZIP ready:", outZipPath);
+      resolve(outZipPath);
+    });
     archive.on("error", reject);
 
     archive.pipe(output);
@@ -198,35 +206,13 @@ export async function createModZip(outZipPath: string) {
 /* MAIN FLOW                                           */
 /* -------------------------------------------------- */
 export async function publishToModIO() {
-  await import("./pull-assets.mjs");
-  await import("./pull-staged.mjs");
-
-  let modId = getStoredModId();
-
-  if (!modId) {
-    console.log("Creating mod.io mod…");
-    modId = await createMod();
-  } else {
-    console.log("Updating mod metadata…");
-    await updateMod(modId);
-    console.log("Uploading logo…");
-    await uploadModLogo(modId);
-  }
-
+  await Promise.allSettled([import("./pull-assets.mjs"), import("./pull-staged.mjs")]);
   const zipPath = path.join(modFolderSteam, `${modName}.zip`);
 
-  console.log("Creating mod ZIP…");
-  await createModZip(zipPath);
-  console.log("ZIP ready:", zipPath);
+  const [outputZip, modId] = await Promise.all([createModZip(zipPath), Promise.resolve(getStoredModId() || createMod())]);
+  await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
 
-  console.log("Uploading modfile…");
-  const f = await uploadModfile(modId, zipPath);
-  console.log("Uploaded, ", f);
-  rmSync(zipPath);
-
-  console.log("Making mod public…");
-  await updateMod(modId, true);
-
+  rmSync(outputZip);
   console.log(`mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-sdwvit`);
 }
 
