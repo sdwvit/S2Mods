@@ -9,7 +9,6 @@ import { getOrUpdateFromL1Cache } from "./l1-cache.mjs";
 import { deepMerge } from "./deep-merge.mts";
 import { MergedStructs } from "./merged-structs.mts";
 
-const readFile = promisify(fs.readFile);
 const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);

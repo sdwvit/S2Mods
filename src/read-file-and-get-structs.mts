@@ -22,7 +22,9 @@ export const readFileAndGetStructs = async <T extends Struct>(filePath: string, 
   if (filePreprocess) {
     return Struct.fromString<T>(filePreprocess(parsed.map((s) => s.toString()).join("\n")));
   } else {
-    logger.log(`Using L1 cache for file: ${fullPath}`);
+    if (parsed) {
+      logger.log(`Using L1 cache for file: ${fullPath}`);
+    }
     return parsed;
   }
 };

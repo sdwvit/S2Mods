@@ -1,3 +1,4 @@
+console.time();
 import * as fs from "node:fs";
 import { spawnSync } from "child_process";
 import { modFolderRaw, modFolderSteam } from "./base-paths.mjs";
@@ -9,7 +10,7 @@ import { metaPromise } from "./meta-promise.mts";
 import { processOneTransformer } from "./process-one-transformer.mjs";
 import { recursiveCfgFind } from "./recursive-cfg-find.mts";
 import { rmSync } from "node:fs";
-console.time();
+import { onL1GlobalFinish } from "./l1global-cache.mts";
 
 const { meta } = await metaPromise;
 
@@ -29,9 +30,6 @@ logger.log(`Total: ${total.length} transformers processed.`);
 const writtenFiles = total.flat().filter((s) => s?.length > 0);
 logger.log(`Total: ${writtenFiles.flat().length} structs in ${writtenFiles.length} files written.`);
 
-await import("./update-readme.mts");
-await import("./push-to-sdk.mts");
-await onL1Finish();
-await onL2Finish();
-await onL3Finish();
+await Promise.allSettled([import("./update-readme.mts"), import("./push-to-sdk.mts"), onL1Finish(), onL2Finish(), onL3Finish(), onL1GlobalFinish()]);
+
 spawnSync("paplay", ["./pop.wav"]);
