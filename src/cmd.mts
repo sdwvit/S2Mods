@@ -10,3 +10,7 @@ export const cmd = (c: string, env = {}) => {
     env: { ...process.env, ...env },
   });
 };
+
+export function node(tsFile: string, env = {}) {
+  cmd(`node --import file:${process.env.NODE_TS_TRANSFORMER} ${tsFile}`, env);
+}

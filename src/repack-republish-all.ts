@@ -1,14 +1,13 @@
 import { validMods } from "./base-paths.mts";
-import { logger } from "./logger.mts";
-import { cmd } from "./cmd.mts";
+import { cmd, node } from "./cmd.mts";
+
+import fs from "node:fs";
 
 validMods.forEach((mod) => {
   cmd(["git", "checkout", mod].join(" "));
-  spawnNode("./publish-modio.mts", { CHANGENOTE: "Initial release" });
+  const fn = `./zip${Date.now()}.mts`;
+  fs.writeFileSync(fn, `import { createModZip } from "./zip.mts"; await createModZip();`);
+  node(fn);
+  fs.rmSync(fn);
+  // spawnNode("./publish-modio.mts", { CHANGENOTE: "Initial release" });
 });
-function spawnNode(tsFile: string, env: Record<string, string>) {
-  const fullCmd = `node --import file:${process.env.NODE_TS_TRANSFORMER} ${tsFile}`;
-  logger.log("Using command: " + fullCmd + "\n\nExecuting...\n");
-
-  cmd(fullCmd, env);
-}

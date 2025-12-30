@@ -1,9 +1,9 @@
 import fs, { rmSync } from "node:fs";
 import path from "node:path";
-import archiver from "archiver";
 import { modFolder, modFolderSteam, modFolderSteamStruct, modName, stagedFolderStruct } from "./base-paths.mts";
 import { sanitize } from "./sanitize.mts";
 import { metaPromise } from "./meta-promise.mts";
+import { createModZip } from "./zip.mts";
 
 const { meta } = await metaPromise;
 
@@ -172,44 +172,13 @@ async function uploadModfile(modId: string, zipPath: string) {
   console.log("Uploaded, ", await res.json());
 }
 
-export async function createModZip(outZipPath: string) {
-  console.log("Creating mod ZIP…");
-  const sourceDir = modFolderSteamStruct;
-
-  if (!fs.existsSync(sourceDir)) {
-    throw new Error(`Source folder does not exist: ${sourceDir}`);
-  }
-
-  await fs.promises.mkdir(path.dirname(outZipPath), { recursive: true });
-
-  const output = fs.createWriteStream(outZipPath);
-  const archive = archiver.create("zip", {
-    zlib: { level: 9 }, // maximum compression
-  });
-
-  return new Promise<string>((resolve, reject) => {
-    output.on("close", () => {
-      console.log("ZIP ready:", outZipPath);
-      resolve(outZipPath);
-    });
-    archive.on("error", reject);
-
-    archive.pipe(output);
-
-    archive.directory(sourceDir, path.join("Windows", stagedFolderStruct));
-
-    archive.finalize();
-  });
-}
-
 /* -------------------------------------------------- */
 /* MAIN FLOW                                           */
 /* -------------------------------------------------- */
 export async function publishToModIO() {
   await Promise.allSettled([import("./pull-assets.mjs"), import("./pull-staged.mjs")]);
-  const zipPath = path.join(modFolderSteam, `${modName}.zip`);
 
-  const [outputZip, modId] = await Promise.all([createModZip(zipPath), Promise.resolve(getStoredModId() || createMod())]);
+  const [outputZip, modId] = await Promise.all([createModZip(), Promise.resolve(getStoredModId() || createMod())]);
   await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
 
   rmSync(outputZip);
