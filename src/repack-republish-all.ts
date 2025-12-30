@@ -5,6 +5,7 @@ import fs from "node:fs";
 
 validMods.forEach((mod) => {
   cmd(["git", "checkout", mod].join(" "));
+  cmd(["git", "pull"].join(" "));
   const fn = `./zip${Date.now()}.mts`;
   fs.writeFileSync(fn, `import { createModZip } from "./zip.mts"; await createModZip();`);
   node(fn);
