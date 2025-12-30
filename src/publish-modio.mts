@@ -4,6 +4,7 @@ import { modFolder, modFolderSteam, modFolderSteamStruct, modName, stagedFolderS
 import { sanitize } from "./sanitize.mts";
 import { metaPromise } from "./meta-promise.mts";
 import { createModZip } from "./zip.mts";
+import { logger } from "./logger.mts";
 
 const { meta } = await metaPromise;
 
@@ -175,14 +176,16 @@ async function uploadModfile(modId: string, zipPath: string) {
 /* -------------------------------------------------- */
 /* MAIN FLOW                                           */
 /* -------------------------------------------------- */
-export async function publishToModIO() {
+async function publishToModIO() {
+  if (process.env.DRY) {
+    logger.log(`${import.meta.filename} dry run`);
+    return;
+  }
   await Promise.allSettled([import("./pull-assets.mjs"), import("./pull-staged.mjs")]);
-
   const [outputZip, modId] = await Promise.all([createModZip(), Promise.resolve(getStoredModId() || createMod())]);
   await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
-
   rmSync(outputZip);
-  console.log(`mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-sdwvit`);
+  logger.log(`mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-sdwvit`);
 }
 
 async function getFormFile(form = new FormData(), field: string, filePath: string, fileType: string) {

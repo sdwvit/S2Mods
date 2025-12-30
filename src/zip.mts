@@ -19,10 +19,9 @@ export async function writeWithZip(filePath: string, data: string): Promise<void
   await writeFile(filePath, zipped);
 }
 
-export async function createModZip() {
+export async function createModZip(sourceDir = modFolderSteamStruct, dest: string | false = path.join("Windows", stagedFolderStruct)) {
   const outZipPath = path.join(projectRoot, `${modName}.zip`);
   console.log("Creating mod ZIP…");
-  const sourceDir = modFolderSteamStruct;
 
   if (!fs.existsSync(sourceDir)) {
     throw new Error(`Source folder does not exist: ${sourceDir}`);
@@ -44,7 +43,7 @@ export async function createModZip() {
 
     archive.pipe(output);
 
-    archive.directory(sourceDir, path.join("Windows", stagedFolderStruct));
+    archive.directory(sourceDir, dest);
 
     archive.finalize();
   });

@@ -8,6 +8,7 @@ import { metaPromise } from "./meta-promise.mts";
 import { spawnSync } from "child_process";
 import { modFolder, modFolderSteam, modName } from "./base-paths.mjs";
 import { sanitize } from "./sanitize.mts";
+import { logger } from "./logger.mts";
 const { meta } = await metaPromise;
 
 const cmd = () => {
@@ -37,13 +38,22 @@ const cmd = () => {
     "+quit",
   ].join(" ");
 };
-await import("./pull-assets.mjs");
-await import("./pull-staged.mjs");
-childProcess.execSync(cmd(), {
-  stdio: "inherit",
-  cwd: modFolder,
-  shell: "/usr/bin/bash",
-  env: process.env,
-});
 
-spawnSync("paplay", ["./pop.wav"]);
+async function publishToSteam() {
+  if (process.env.DRY) {
+    logger.log(`${import.meta.filename} dry run`);
+    return;
+  }
+  await import("./pull-assets.mjs");
+  await import("./pull-staged.mjs");
+  childProcess.execSync(cmd(), {
+    stdio: "inherit",
+    cwd: modFolder,
+    shell: "/usr/bin/bash",
+    env: process.env,
+  });
+
+  spawnSync("paplay", ["./pop.wav"]);
+}
+
+await publishToSteam();

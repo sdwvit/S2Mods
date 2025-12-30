@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@node-steam/vdf": "^2.2.0",
+    "@types/archiver": "^7.0.0",
     "@types/node": "^20.11.17",
     "archiver": "^7.0.1",
     "dotenv": "^17.2.0",
