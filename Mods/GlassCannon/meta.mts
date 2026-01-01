@@ -16,8 +16,8 @@ Increases damage given and damage taken to 400%
 [hr][/hr]
 Mod is meant to be used in other collections of mods. Does not conflict with anything.
 `,
-  changenote: "Now big mobs have 2x HP points",
-  structTransformers: [structTransformer, getTransformMobs(2, false)],
+  changenote: "Revert mob health modification. Install my other mod called DoubleMobHealth.",
+  structTransformers: [structTransformer],
 };
 
 function structTransformer(struct: DifficultyPrototype) {
