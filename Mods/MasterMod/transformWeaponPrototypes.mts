@@ -10,9 +10,6 @@ import { allDefaultWeaponPrototypesRecord } from "../../src/consts.mts";
 export const transformWeaponPrototypes: EntriesTransformer<WeaponPrototype> = async (struct) => {
   const fork = struct.fork();
 
-  if (getTemplate(struct, allDefaultWeaponPrototypesRecord) === "TemplateSMG") {
-    fork.ItemSlotType = "EInventoryEquipmentSlot::Pistol";
-  }
   if (struct.IsQuestItem) {
     fork.IsQuestItem = false;
   }

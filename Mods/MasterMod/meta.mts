@@ -1,7 +1,6 @@
 import { transformAIGlobals } from "./transformAIGlobals.mts";
 import { transformConsumablePrototypes } from "./transformConsumablePrototypes.mts";
 import { transformALifeDirectorScenarioPrototypes } from "./transformALifeDirectorScenarioPrototypes.mts";
-import { transformArmorPrototypes } from "./transformArmorPrototypes.mts";
 import { transformArtifactPrototypes } from "./transformArtifactPrototypes.mts";
 import { transformBarbedWirePrototypes } from "./transformBarbedWirePrototypes.mts";
 import { transformAttachPrototypes } from "./transformAttachPrototypes.mts";
@@ -19,7 +18,6 @@ import { transformQuestItemPrototypes } from "./transformQuestItemPrototypes.mts
 import { transformQuestObjPrototypes } from "./transformQuestObjPrototypes.mts";
 import { transformQuestRewardsPrototypes } from "./transformQuestRewardsPrototypes.mts";
 import { transformRelationPrototypes } from "./transformRelationPrototypes.mts";
-import { transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
 import { transformStashPrototypes } from "./transformStashPrototypes.mts";
 import { transformTradePrototypes } from "./transformTradePrototypes.mts";
 import { transformUpgradePrototypes } from "./transformUpgradePrototypes.mts";
@@ -39,7 +37,6 @@ const structTransformers = [
   transformAIGlobals,
   transformConsumablePrototypes,
   transformALifeDirectorScenarioPrototypes,
-  transformArmorPrototypes,
   transformArtifactPrototypes,
   transformAttachPrototypes,
   transformBarbedWirePrototypes,
@@ -61,7 +58,6 @@ const structTransformers = [
   transformQuestObjPrototypes,
   transformQuestRewardsPrototypes,
   transformRelationPrototypes,
-  transformSpawnActorPrototypes,
   transformStashPrototypes,
   transformTradePrototypes,
   transformUpgradePrototypes,
