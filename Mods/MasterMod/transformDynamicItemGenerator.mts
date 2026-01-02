@@ -151,9 +151,6 @@ function transformCombat(struct: DynamicItemGenerator) {
   const ItemGenerator = struct.ItemGenerator.map(([_k, itemGenerator], i) => {
     // noinspection FallThroughInSwitchStatementJS
     switch (itemGenerator.Category) {
-      case "EItemGenerationCategory::Head":
-      case "EItemGenerationCategory::BodyArmor":
-        return adjustArmorItemGenerator(struct, itemGenerator as any, i);
       /**
        * Control how many consumables are dropped.
        */

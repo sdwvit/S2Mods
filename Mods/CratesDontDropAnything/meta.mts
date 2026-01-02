@@ -12,7 +12,7 @@ bPatches SpawnActorPrototypes/WorldMap_WP/*.cfg
   changenote: "Initial release",
   structTransformers: [transformSpawnActorPrototypes],
 };
-const preplacedDestructibleItems = [
+export const preplacedDestructibleItems = [
   "D_WoodenBox_01",
   "D_WoodenBox_02",
   "D_WoodenBox_03",
@@ -37,4 +37,4 @@ export function transformSpawnActorPrototypes(struct: SpawnActorPrototype) {
 
 transformSpawnActorPrototypes.files = ["GameLite/GameData/SpawnActorPrototypes/WorldMap_WP/"];
 transformSpawnActorPrototypes.contains = true;
-transformSpawnActorPrototypes.contents = [...preplacedDestructibleItems];
+transformSpawnActorPrototypes.contents = preplacedDestructibleItems;

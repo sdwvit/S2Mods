@@ -14,7 +14,7 @@ export type DeeplyPartial<T> = {
   [P in Exclude<keyof T, Internal | "toString">]?: T[P] extends object ? DeeplyPartial<T[P]> : T[P];
 };
 
-const getHeadlessArmorCommonProps = (refkey: string) => ({
+const getHeadlessArmorCommonProps = (refkey: string, modName) => ({
   __internal__: {
     refkey,
     _extras: {
@@ -37,7 +37,6 @@ const getHeadlessArmorCommonProps = (refkey: string) => ({
   bBlockHead: false,
   Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_${refkey}_headless.T_IFI_${refkey}_headless'`,
 });
-
 const getHelmetInternal = (refkey: string) => ({
   refkey,
   _extras: {
@@ -51,87 +50,87 @@ const ICON_ROOT = "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inven
 
 export const newArmors = {
   BattleExoskeleton_Varta_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("BattleExoskeleton_Varta_Armor"),
+    ...getHeadlessArmorCommonProps("BattleExoskeleton_Varta_Armor", "MasterMod"),
     Weight: 8.5,
     Cost: 58000,
   },
   Exoskeleton_Mercenaries_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Exoskeleton_Mercenaries_Armor"),
+    ...getHeadlessArmorCommonProps("Exoskeleton_Mercenaries_Armor", "MasterMod"),
     Weight: 7.5,
     Cost: 50500,
   },
   Exoskeleton_Monolith_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Exoskeleton_Monolith_Armor"),
+    ...getHeadlessArmorCommonProps("Exoskeleton_Monolith_Armor", "MasterMod"),
     Weight: 7.5,
     Cost: 53000,
   },
   Exoskeleton_Neutral_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Exoskeleton_Neutral_Armor"),
+    ...getHeadlessArmorCommonProps("Exoskeleton_Neutral_Armor", "MasterMod"),
     Weight: 12,
     Cost: 55500,
   },
   Exoskeleton_Svoboda_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Exoskeleton_Svoboda_Armor"),
+    ...getHeadlessArmorCommonProps("Exoskeleton_Svoboda_Armor", "MasterMod"),
     Weight: 7.5,
     Cost: 80000,
   },
   Heavy_Dolg_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Heavy_Dolg_Armor"),
+    ...getHeadlessArmorCommonProps("Heavy_Dolg_Armor", "MasterMod"),
     Weight: 7,
     Cost: 35000,
   },
   Heavy2_Military_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Heavy2_Military_Armor"),
+    ...getHeadlessArmorCommonProps("Heavy2_Military_Armor", "MasterMod"),
     Weight: 6,
     Cost: 32000,
   },
   HeavyAnomaly_Monolith_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("HeavyAnomaly_Monolith_Armor"),
+    ...getHeadlessArmorCommonProps("HeavyAnomaly_Monolith_Armor", "MasterMod"),
     Weight: 7,
     Cost: 42500,
   },
   Exoskeleton_Dolg_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Exoskeleton_Dolg_Armor"),
+    ...getHeadlessArmorCommonProps("Exoskeleton_Dolg_Armor", "MasterMod"),
     Weight: 8.5,
     Cost: 70000,
   },
   Heavy_Svoboda_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Heavy_Svoboda_Armor"),
+    ...getHeadlessArmorCommonProps("Heavy_Svoboda_Armor", "MasterMod"),
     Weight: 7,
     Cost: 37000,
   },
   Heavy_Mercenaries_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Heavy_Mercenaries_Armor"),
+    ...getHeadlessArmorCommonProps("Heavy_Mercenaries_Armor", "MasterMod"),
     Weight: 5,
     Cost: 25500,
   },
   HeavyBattle_Spark_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("HeavyBattle_Spark_Armor"),
+    ...getHeadlessArmorCommonProps("HeavyBattle_Spark_Armor", "MasterMod"),
     Weight: 7,
     Cost: 40500,
   },
   HeavyExoskeleton_Dolg_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("HeavyExoskeleton_Dolg_Armor"),
+    ...getHeadlessArmorCommonProps("HeavyExoskeleton_Dolg_Armor", "MasterMod"),
     Weight: 16,
     Cost: 51000,
   },
   HeavyExoskeleton_Monolith_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("HeavyExoskeleton_Monolith_Armor"),
+    ...getHeadlessArmorCommonProps("HeavyExoskeleton_Monolith_Armor", "MasterMod"),
     Weight: 16,
     Cost: 55000,
   },
   HeavyExoskeleton_Svoboda_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("HeavyExoskeleton_Svoboda_Armor"),
+    ...getHeadlessArmorCommonProps("HeavyExoskeleton_Svoboda_Armor", "MasterMod"),
     Weight: 16,
     Cost: 50000,
   },
   HeavyExoskeleton_Varta_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("BattleExoskeleton_Varta_Armor"),
+    ...getHeadlessArmorCommonProps("BattleExoskeleton_Varta_Armor", "MasterMod"),
     Weight: 12,
     Cost: 45500,
   },
   Battle_Dolg_End_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("Battle_Dolg_End_Armor"),
+    ...getHeadlessArmorCommonProps("Battle_Dolg_End_Armor", "MasterMod"),
     Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_Battle_Dolg_End_Armor.T_IFI_Battle_Dolg_End_Armor'`,
     Cost: 70000,
   },
@@ -242,6 +241,47 @@ export const newArmors = {
     LocalizationSID: "SkinJacket_Bandit_Armor",
   },
 };
+
+Object.assign(
+  newArmors,
+  Object.fromEntries(
+    [
+      ...[
+        "BattleExoskeleton_Varta_Armor",
+        "Exoskeleton_Mercenaries_Armor",
+        "Exoskeleton_Monolith_Armor",
+        "Exoskeleton_Neutral_Armor",
+        "Exoskeleton_Svoboda_Armor",
+        "Heavy_Dolg_Armor",
+        "Heavy2_Military_Armor",
+        "HeavyAnomaly_Monolith_Armor",
+        "Exoskeleton_Dolg_Armor",
+        "Heavy_Svoboda_Armor",
+        "Heavy_Mercenaries_Armor",
+        "HeavyBattle_Spark_Armor",
+        "HeavyExoskeleton_Dolg_Armor",
+        "HeavyExoskeleton_Monolith_Armor",
+        "HeavyExoskeleton_Svoboda_Armor",
+        "HeavyExoskeleton_Varta_Armor",
+        "Battle_Dolg_End_Armor",
+        "SkinCloak_Bandit_Armor2",
+      ].map((e) => e + "_HeadlessArmors_headless"),
+      ...[
+        "Exoskeleton_Mercenaries",
+        "Exoskeleton_Monolith",
+        "Exoskeleton_Neutral",
+        "Exoskeleton_Spark",
+        "Exoskeleton_Duty",
+        "Exoskeleton_Svoboda",
+        "HeavyBattle_Spark",
+        "HeavyBattle_Merc",
+        "HeavyBattle_Dolg",
+      ].map((e) => e + "_Helmet_HeadlessArmors"),
+      "SkinCloak_Bandit_Armor_HeadlessArmors",
+    ].map((e) => [e, { SID: e, __internal__: { refkey: e.replace("HeadlessArmors", "MasterMod") } }]),
+  ),
+);
+
 const getNPCArmorDescriptor = (refkey: string, playerRanks: ERank) => ({
   __internal__: {
     refkey,

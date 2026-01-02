@@ -1,9 +1,12 @@
 import path from "node:path";
 import dotEnv from "dotenv";
 import { transformDynamicItemGenerator } from "./transformDynamicItemGenerator.mjs";
-import { MetaType } from "../../src/meta-type.mts";
-import { ArmorPrototype, DynamicItemGenerator } from "s2cfgtojson";
-import { transformArmorPrototypes } from "../MasterMod/transformArmorPrototypes.mts";
+import { MetaContext, MetaType } from "../../src/meta-type.mts";
+import { ArmorPrototype, DynamicItemGenerator, Struct } from "s2cfgtojson";
+import { allExtraArmors, newArmors } from "../../src/armors.util.mts";
+import { allDefaultArmorPrototypesRecord } from "../../src/consts.mts";
+import { backfillDef, getDots } from "../../src/backfill-def.mts";
+import { deepMerge } from "../../src/deep-merge.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 
@@ -49,10 +52,86 @@ export const meta: MetaType<ArmorPrototype | DynamicItemGenerator> = {
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet_HeadlessArmors
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Merc_Helmet_HeadlessArmors
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
-    [/list]
-   [h2][/h2]
-   Modified configs through refkeys: DynamicItemGenerator.cfg and ArmorPrototypes.cfg
+    [/list] 
   `,
   changenote: "More variety in armor loadouts on later difficulties. Reworked a lot of backend systems to support easier extension.",
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };
+
+const oncePerFile = new Set<string>();
+
+/**
+ * Adds armor that doesn't block head, but also removes any psy protection. Allows player to use helmets.
+ */
+export async function transformArmorPrototypes(struct: ArmorPrototype, context: MetaContext<ArmorPrototype>) {
+  if (bannedids.has(struct.SID)) {
+    return null;
+  }
+  const extraStructs: ArmorPrototype[] = [];
+
+  if (!oncePerFile.has(context.filePath)) {
+    oncePerFile.add(context.filePath);
+    allExtraArmors.forEach((descriptor) => {
+      const original = descriptor.__internal__.refkey;
+      const newSID = descriptor.SID;
+      if (!context.structsById[original]) {
+        return;
+      }
+      const armor = allDefaultArmorPrototypesRecord[original];
+      if (!armor) {
+        return;
+      }
+
+      const newArmor = new Struct(
+        backfillDef(
+          {
+            SID: newSID,
+            __internal__: { rawName: newSID, refkey: original, refurl: `../${path.parse(context.filePath).base}` },
+          },
+          allDefaultArmorPrototypesRecord,
+          newSID.toLowerCase().includes("helmet") ? "Light_Neutral_Helmet" : armor.SID,
+        ),
+      ) as ArmorPrototype;
+      const overrides = { ...newArmors[newSID as keyof typeof newArmors] };
+      if (overrides.__internal__?._extras && "keysForRemoval" in overrides.__internal__._extras) {
+        Object.entries(overrides.__internal__._extras.keysForRemoval).forEach(([p, v]) => {
+          const e = getDots(newArmor, p) || {};
+          if (!Array.isArray(v)) {
+            throw new Error("Expected array for keysForRemoval values");
+          }
+          const keysV = new Set(v);
+          const keyToDelete = Object.keys(e).find((k) => keysV.has(e[k]));
+
+          delete e[keyToDelete];
+        });
+      }
+      deepMerge(newArmor, overrides);
+      if (!(newArmors[newSID] && newArmors[newSID].__internal__._extras.isDroppable)) {
+        newArmor.Invisible = true;
+      }
+      const clone = newArmor.clone();
+      clone.__internal__.isRoot = true;
+      extraStructs.push(clone);
+    });
+  }
+
+  return extraStructs;
+}
+
+transformArmorPrototypes.files = ["/ArmorPrototypes.cfg"];
+
+const bannedids = new Set([
+  "NPC_Richter_Armor",
+  "NPC_Korshunov_Armor",
+  "NPC_Korshunov_Armor_2",
+  "NPC_Dalin_Armor",
+  "NPC_Agata_Armor",
+  "NPC_Faust_Armor",
+  "NPC_Kaymanov_Armor",
+  "NPC_Shram_Armor",
+  "NPC_Dekhtyarev_Armor",
+  "NPC_Sidorovich_Armor",
+  "NPC_Barmen_Armor",
+  "NPC_Batya_Armor",
+  "NPC_Tyotya_Armor",
+]);

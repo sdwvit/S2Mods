@@ -86,8 +86,6 @@ export const transformWeaponGeneralSetupPrototypes: EntriesTransformer<WeaponGen
   }
   mapUniqueAttachmentsToGeneric(fork, struct, context);
   fork.CompatibleAttachments ||= struct.CompatibleAttachments.fork();
-  fork.OffsetAimingConditionSID = "ConstTrue";
-  fork.ToggleOffsetAimingConditionSID = "ConstTrue";
 
   const compX8 = getXnCompatibleScope(struct, 8);
   if (compX8) {

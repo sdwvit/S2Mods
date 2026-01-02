@@ -7,9 +7,7 @@ const defaultKeys = new Set(["__internal__"]);
 export function backfillDef<T extends Partial<Struct>>(
   struct: T,
   referenceMap: Record<string, { __internal__: { refkey?: number | string } }> = allDefaultArmorPrototypesRecord,
-  referenceStructSID = referenceMap[struct.__internal__.refkey]
-    ? struct.__internal__.refkey
-    : allDefaultArmorPrototypes[0].SID,
+  referenceStructSID = referenceMap[struct.__internal__.refkey] ? struct.__internal__.refkey : allDefaultArmorPrototypes[0].SID,
 ): T {
   const s = new Struct(struct);
 
@@ -35,15 +33,8 @@ export function backfillDef<T extends Partial<Struct>>(
   return s as T;
 }
 
-export function getTemplate<T extends Partial<Struct & { SID: string }>>(
-  struct: T,
-  referenceMap: Record<string, T>,
-): string {
-  while (
-    struct.__internal__.refkey &&
-    !struct.SID.toLowerCase().includes("template") &&
-    referenceMap[struct.__internal__.refkey]
-  ) {
+export function getTemplate<T extends Partial<Struct & { SID: string }>>(struct: T, referenceMap: Record<string, T>): string {
+  while (struct.__internal__.refkey && !struct.SID.toLowerCase().includes("template") && referenceMap[struct.__internal__.refkey]) {
     struct = referenceMap[struct.__internal__.refkey];
   }
 
@@ -64,6 +55,10 @@ function deepWalk(obj: unknown, cb: (s: string[]) => void, path: string[] = []) 
 export function get(obj: any, path: string[]) {
   return path.reduce((o, k) => o && o[k], obj);
 }
+
+export const getDots = (obj: any, path: `${string}.${string}` | string) => {
+  return get(obj, path.split("."));
+};
 
 export function set(obj: any, path: string[], value: any) {
   const lastKey = path.pop();

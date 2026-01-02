@@ -48,7 +48,7 @@ export function rememberAndEmptyStash(struct: SpawnActorPrototype, context: Meta
   return fork;
 }
 
-const containers = new Set([
+export const containers = new Set([
   "BlueBox",
   "BigSafe",
   "SmallSafe",

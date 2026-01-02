@@ -1,7 +1,6 @@
 import { QuestNodePrototype, Struct } from "s2cfgtojson";
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
-import { RSQLessThan3QuestNodesSIDs } from "../../src/consts.mts";
 import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 import { logger } from "../../src/logger.mts";
 import { recurringQuestsFilenames } from "../StashClueRework/meta.mts";
