@@ -2,251 +2,250 @@
 
 Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines):
 
-- `Modified assets`:
-  - `T_enemymarker`
-  - `T_quest_enemymarker`
-  - `T_NoiseIndicator`
-  - `T_compass_shadow_battle`
-  - `T_noise_line_active`
-  - `T_noise_line_bg`
-  - `T_ThreatGlowing`
-  - `T_ThreatGray`
-  - `T_IFI_BattleExoskeleton_Varta_Armor_headless`
-  - `T_IFI_BattleExoskeleton_Varta_Armor_headless_upgrade`
-  - `T_IFI_Exoskeleton_Dolg_Armor_headless`
-  - `T_IFI_Exoskeleton_Dolg_Armor_headless_upgrade`
-  - `T_IFI_Exoskeleton_Duty_Helmet`
-  - `T_IFI_Exoskeleton_Duty_Helmet_upgrade`
-  - `T_IFI_Exoskeleton_Merc_Helmet`
-  - `T_IFI_Exoskeleton_Merc_Helmet_upgrade`
-  - `T_IFI_Exoskeleton_Mercenaries_Armor_headless`
-  - `T_IFI_Exoskeleton_Mercenaries_Armor_headless_upgrade`
-  - `T_IFI_Exoskeleton_Monolith_Armor_headless`
-  - `T_IFI_Exoskeleton_Monolith_Armor_headless_upgrade`
-  - `T_IFI_Exoskeleton_Monolith_Helmet`
-  - `T_IFI_Exoskeleton_Monolith_Helmet_upgrade`
-  - `T_IFI_Exoskeleton_Neutral_Armor_headless`
-  - `T_IFI_Exoskeleton_Neutral_Armor_headless_upgrade`
-  - `T_IFI_Exoskeleton_Neutral_Helmet`
-  - `T_IFI_Exoskeleton_Neutral_Helmet_upgrade`
-  - `T_IFI_Exoskeleton_Spark_Helmet`
-  - `T_IFI_Exoskeleton_Spark_Helmet_upgrade`
-  - `T_IFI_Exoskeleton_Svoboda_Armor_headless`
-  - `T_IFI_Exoskeleton_Svoboda_Armor_headless_upgrade`
-  - `T_IFI_Exoskeleton_Svoboda_Helmet`
-  - `T_IFI_Exoskeleton_Svoboda_Helmet_upgrade`
-  - `T_IFI_Heavy2_Military_Armor_headless`
-  - `T_IFI_Heavy2_Military_Armor_headless_upgrade`
-  - `T_IFI_HeavyAnomaly_Monolith_Armor_headless`
-  - `T_IFI_HeavyAnomaly_Monolith_Armor_headless_upgrade`
-  - `T_IFI_HeavyBattle_Dolg_Helmet`
-  - `T_IFI_HeavyBattle_Dolg_Helmet_upgrade`
-  - `T_IFI_HeavyBattle_Merc_Helmet`
-  - `T_IFI_HeavyBattle_Merc_Helmet_upgrade`
-  - `T_IFI_HeavyBattle_Spark_Armor_headless`
-  - `T_IFI_HeavyBattle_Spark_Armor_headless_upgrade`
-  - `T_IFI_HeavyBattle_Spark_Helmet`
-  - `T_IFI_HeavyBattle_Spark_Helmet_upgrade`
-  - `T_IFI_HeavyExoskeleton_Dolg_Armor_headless`
-  - `T_IFI_HeavyExoskeleton_Dolg_Armor_headless_upgrade`
-  - `T_IFI_HeavyExoskeleton_Mercenaries_Armor_headless`
-  - `T_IFI_HeavyExoskeleton_Mercenaries_Armor_headless_upgrade`
-  - `T_IFI_HeavyExoskeleton_Monolith_Armor_headless`
-  - `T_IFI_HeavyExoskeleton_Monolith_Armor_headless_upgrade`
-  - `T_IFI_HeavyExoskeleton_Svoboda_Armor_headless`
-  - `T_IFI_HeavyExoskeleton_Svoboda_Armor_headless_upgrade`
-  - `T_IFI_HeavyExoskeleton_Varta_Armor_headless`
-  - `T_IFI_HeavyExoskeleton_Varta_Armor_headless_upgrade`
-  - `T_IFI_Heavy_Dolg_Armor_headless`
-  - `T_IFI_Heavy_Dolg_Armor_headless_upgrade`
-  - `T_IFI_Heavy_Mercenaries_Armor_headless`
-  - `T_IFI_Heavy_Mercenaries_Armor_headless_upgrade`
-  - `T_IFI_Heavy_Svoboda_Armor_headless`
-  - `T_IFI_Heavy_Svoboda_Armor_headless_upgrade`
-  - `T_inv_w_gp37_en_x8scope_1`
-  - `T_inv_w_gp37_en_x8scope_1_upgrade`
-  - `T_inv_w_sharpshooter_en_x8scope_1`
-  - `T_inv_w_sharpshooter_en_x8scope_1_upgrade`
-  - `T_inv_w_deadeye_body_upgrade`
-  - `T_inv_w_deadeye_scope_upgrade`
-  - `T_inv_w_en_colim_scope`
-  - `T_inv_w_en_colim_scope_upgrade`
-- `GameData`:
-  - `AIGlobals`
-  - `BarbedWirePrototypes`
-  - `DifficultyPrototypes`
-  - `EffectPrototypes`
-  - `ItemGeneratorPrototypes`
-  - `MeshGeneratorPrototypes`
-  - `NPCPrototypes`
-  - `ObjPrototypes`
-  - `RelationPrototypes`
-  - `StashPrototypes`
-  - `TradePrototypes`
-  - `UpgradePrototypes`
-- `ALifePrototypes`:
-  - `ALifeDirectorScenarioPrototypes`
-- `ArtifactPrototypes`:
-  - `QuestArtifactPrototypes`
-- `DialogPoolPrototypes`:
-  - `GroupAgnostic_Army`
-  - `GroupAgnostic_Bandits`
-  - `GroupAgnostic_FreeStalkers`
-  - `GroupAgnostic_Monolith`
-- `DialogPrototypes`:
-  - `EQ197_QD_Orders`
-  - `Malahit_Hub_DialogueOnEntrance`
-  - `RSQ01_Dialog_Warlock_RSQ`
-  - `RSQ04_Dialog_Drabadan_RSQ`
-  - `RSQ05_Dialog_Sich_RSQ`
-  - `RSQ06_Dialog_Sidorovich_RSQ`
-  - `RSQ07_Dialog_Barmen_RSQ`
-  - `RSQ08_Dialog_Barmen_RSQ`
-  - `RSQ09_Dialog_Spica_RSQ`
-  - `RSQ10_Dialog_Harpy_RSQ`
-- `GlobalVariablePrototypes`:
-  - `CluePrototypes`
-- `ItemGeneratorPrototypes`:
-  - `DynamicItemGenerator`
-  - `Gamepass_ItemGenerators`
-  - `QuestItemGeneratorPrototypes`
-- `QuestRewardsPrototypes`:
-  - `RSQ00_Reward`
-- `ItemPrototypes`:
-  - `ArmorPrototypes`
-  - `ArtifactPrototypes`
-  - `AttachPrototypes`
-  - `ConsumablePrototypes`
-  - `QuestItemPrototypes`
-  - `WeaponPrototypes`
-- `LairPrototypes`:
-  - `GenericLairPrototypes`
-- `ObjPrototypes`:
-  - `BlindDog`
-  - `Bloodsucker`
-  - `Boar`
-  - `Burer`
-  - `Cat`
-  - `Chimera`
-  - `Controller`
-  - `Deer`
-  - `Flesh`
-  - `GeneralNPCObjPrototypes`
-  - `MutantBase`
-  - `Poltergeist`
-  - `PseudoDog`
-  - `Pseudogiant`
-  - `QuestObjPrototypes`
-  - `Snork`
-  - `Tushkan`
-- `QuestNodePrototypes`:
-  - `ANCQ01`
-  - `ANCQ01_P`
-  - `ANCQ27`
-  - `BodyParts_Malahit`
-  - `E03_MQ05`
-  - `E05_SQ01`
-  - `E07_MQ01`
-  - `E07_SQ01`
-  - `E09_EQ02`
-  - `E10_MQ01_C01`
-  - `E11_MQ01`
-  - `E14_MQ01_C02`
-  - `E14_MQ02`
-  - `EQ110_P`
-  - `EQ150`
-  - `EQ48`
-  - `EQ67`
-  - `RSQ01`
-  - `RSQ01_C01`
-  - `RSQ01_C02`
-  - `RSQ01_C03`
-  - `RSQ01_C04`
-  - `RSQ01_C05`
-  - `RSQ01_C06`
-  - `RSQ04`
-  - `RSQ04_C01`
-  - `RSQ04_C02`
-  - `RSQ04_C03`
-  - `RSQ04_C04`
-  - `RSQ04_C05`
-  - `RSQ04_C06`
-  - `RSQ04_C07`
-  - `RSQ04_C08`
-  - `RSQ04_C09`
-  - `RSQ04_C10`
-  - `RSQ05`
-  - `RSQ05_C01`
-  - `RSQ05_C02`
-  - `RSQ05_C04`
-  - `RSQ05_C05`
-  - `RSQ05_C07`
-  - `RSQ05_C08`
-  - `RSQ05_C09`
-  - `RSQ05_C10`
-  - `RSQ06_C00___SIDOROVICH`
-  - `RSQ06_C01___K_Z`
-  - `RSQ06_C02___K_M`
-  - `RSQ06_C03___K_B`
-  - `RSQ06_C04___K_S`
-  - `RSQ06_C05___B_B`
-  - `RSQ06_C06___B_A`
-  - `RSQ06_C07___B_A`
-  - `RSQ06_C08___B_A`
-  - `RSQ06_C09___S_P`
-  - `RSQ07_C00_TSEMZAVOD`
-  - `RSQ07_C01_K_Z`
-  - `RSQ07_C02_K_M`
-  - `RSQ07_C03_K_M`
-  - `RSQ07_C04_K_B`
-  - `RSQ07_C05_B_B`
-  - `RSQ07_C06_B_A`
-  - `RSQ07_C07_B_A`
-  - `RSQ07_C08_B_A`
-  - `RSQ07_C09_S_P`
-  - `RSQ08_C00_ROSTOK`
-  - `RSQ08_C01_K_M`
-  - `RSQ08_C02_K_B`
-  - `RSQ08_C03_K_S`
-  - `RSQ08_C04_B_B`
-  - `RSQ08_C05_B_B`
-  - `RSQ08_C06_B_A`
-  - `RSQ08_C07_B_A`
-  - `RSQ08_C08_B_A`
-  - `RSQ08_C09_S_P`
-  - `RSQ09_C00_MALAHIT`
-  - `RSQ09_C01_K_M`
-  - `RSQ09_C02_K_M`
-  - `RSQ09_C03_K_M`
-  - `RSQ09_C04_K_S`
-  - `RSQ09_C05_B_B`
-  - `RSQ09_C06_B_A`
-  - `RSQ09_C07_B_A`
-  - `RSQ09_C08_B_A`
-  - `RSQ09_C09_S_P`
-  - `RSQ10_C00_HARPY`
-  - `RSQ10_C01_K_M`
-  - `RSQ10_C02_K_M`
-  - `RSQ10_C03_K_S`
-  - `RSQ10_C04_K_S`
-  - `RSQ10_C05_B_B`
-  - `RSQ10_C06_B_A`
-  - `RSQ10_C07_B_A`
-  - `RSQ10_C08_B_A`
-  - `RSQ10_C09_S_P`
-  - `Rostok_L_ScarTemp_Camp`
-  - `SEQ09`
-  - `SQ03_P`
-  - `SQ101_C01`
-  - `SQ101_C02`
-  - `SQ102`
-  - `SQ25`
-  - `SQ87_P`
-  - `SQ94`
-  - `SQ95`
-  - `SQ96_P`
-  - `Swamp_L_E05_MQ03`
-- `CharacterWeaponSettingsPrototypes`:
-  - `NPCWeaponSettingsPrototypes`
-- `WeaponData`:
-  - `WeaponGeneralSetupPrototypes`
+`Modified assets`:
+	- `T_enemymarker`
+- `T_quest_enemymarker`
+- `T_NoiseIndicator`
+- `T_compass_shadow_battle`
+- `T_noise_line_active`
+- `T_noise_line_bg`
+- `T_ThreatGlowing`
+- `T_ThreatGray`
+- `T_IFI_BattleExoskeleton_Varta_Armor_headless`
+- `T_IFI_BattleExoskeleton_Varta_Armor_headless_upgrade`
+- `T_IFI_Exoskeleton_Dolg_Armor_headless`
+- `T_IFI_Exoskeleton_Dolg_Armor_headless_upgrade`
+- `T_IFI_Exoskeleton_Duty_Helmet`
+- `T_IFI_Exoskeleton_Duty_Helmet_upgrade`
+- `T_IFI_Exoskeleton_Merc_Helmet`
+- `T_IFI_Exoskeleton_Merc_Helmet_upgrade`
+- `T_IFI_Exoskeleton_Mercenaries_Armor_headless`
+- `T_IFI_Exoskeleton_Mercenaries_Armor_headless_upgrade`
+- `T_IFI_Exoskeleton_Monolith_Armor_headless`
+- `T_IFI_Exoskeleton_Monolith_Armor_headless_upgrade`
+- `T_IFI_Exoskeleton_Monolith_Helmet`
+- `T_IFI_Exoskeleton_Monolith_Helmet_upgrade`
+- `T_IFI_Exoskeleton_Neutral_Armor_headless`
+- `T_IFI_Exoskeleton_Neutral_Armor_headless_upgrade`
+- `T_IFI_Exoskeleton_Neutral_Helmet`
+- `T_IFI_Exoskeleton_Neutral_Helmet_upgrade`
+- `T_IFI_Exoskeleton_Spark_Helmet`
+- `T_IFI_Exoskeleton_Spark_Helmet_upgrade`
+- `T_IFI_Exoskeleton_Svoboda_Armor_headless`
+- `T_IFI_Exoskeleton_Svoboda_Armor_headless_upgrade`
+- `T_IFI_Exoskeleton_Svoboda_Helmet`
+- `T_IFI_Exoskeleton_Svoboda_Helmet_upgrade`
+- `T_IFI_Heavy2_Military_Armor_headless`
+- `T_IFI_Heavy2_Military_Armor_headless_upgrade`
+- `T_IFI_HeavyAnomaly_Monolith_Armor_headless`
+- `T_IFI_HeavyAnomaly_Monolith_Armor_headless_upgrade`
+- `T_IFI_HeavyBattle_Dolg_Helmet`
+- `T_IFI_HeavyBattle_Dolg_Helmet_upgrade`
+- `T_IFI_HeavyBattle_Merc_Helmet`
+- `T_IFI_HeavyBattle_Merc_Helmet_upgrade`
+- `T_IFI_HeavyBattle_Spark_Armor_headless`
+- `T_IFI_HeavyBattle_Spark_Armor_headless_upgrade`
+- `T_IFI_HeavyBattle_Spark_Helmet`
+- `T_IFI_HeavyBattle_Spark_Helmet_upgrade`
+- `T_IFI_HeavyExoskeleton_Dolg_Armor_headless`
+- `T_IFI_HeavyExoskeleton_Dolg_Armor_headless_upgrade`
+- `T_IFI_HeavyExoskeleton_Mercenaries_Armor_headless`
+- `T_IFI_HeavyExoskeleton_Mercenaries_Armor_headless_upgrade`
+- `T_IFI_HeavyExoskeleton_Monolith_Armor_headless`
+- `T_IFI_HeavyExoskeleton_Monolith_Armor_headless_upgrade`
+- `T_IFI_HeavyExoskeleton_Svoboda_Armor_headless`
+- `T_IFI_HeavyExoskeleton_Svoboda_Armor_headless_upgrade`
+- `T_IFI_HeavyExoskeleton_Varta_Armor_headless`
+- `T_IFI_HeavyExoskeleton_Varta_Armor_headless_upgrade`
+- `T_IFI_Heavy_Dolg_Armor_headless`
+- `T_IFI_Heavy_Dolg_Armor_headless_upgrade`
+- `T_IFI_Heavy_Mercenaries_Armor_headless`
+- `T_IFI_Heavy_Mercenaries_Armor_headless_upgrade`
+- `T_IFI_Heavy_Svoboda_Armor_headless`
+- `T_IFI_Heavy_Svoboda_Armor_headless_upgrade`
+- `T_inv_w_gp37_en_x8scope_1`
+- `T_inv_w_gp37_en_x8scope_1_upgrade`
+- `T_inv_w_sharpshooter_en_x8scope_1`
+- `T_inv_w_sharpshooter_en_x8scope_1_upgrade`
+- `T_inv_w_deadeye_body_upgrade`
+- `T_inv_w_deadeye_scope_upgrade`
+- `T_inv_w_en_colim_scope`
+- `T_inv_w_en_colim_scope_upgrade`
+`GameData`:
+	- `AIGlobals`
+- `BarbedWirePrototypes`
+- `DifficultyPrototypes`
+- `EffectPrototypes`
+- `ItemGeneratorPrototypes`
+- `MeshGeneratorPrototypes`
+- `NPCPrototypes`
+- `ObjPrototypes`
+- `RelationPrototypes`
+- `StashPrototypes`
+- `TradePrototypes`
+- `UpgradePrototypes`
+`ALifePrototypes`:
+	- `ALifeDirectorScenarioPrototypes`
+`ArtifactPrototypes`:
+	- `QuestArtifactPrototypes`
+`DialogPoolPrototypes`:
+	- `GroupAgnostic_Army`
+- `GroupAgnostic_Bandits`
+- `GroupAgnostic_FreeStalkers`
+- `GroupAgnostic_Monolith`
+`DialogPrototypes`:
+	- `EQ197_QD_Orders`
+- `Malahit_Hub_DialogueOnEntrance`
+- `RSQ01_Dialog_Warlock_RSQ`
+- `RSQ04_Dialog_Drabadan_RSQ`
+- `RSQ05_Dialog_Sich_RSQ`
+- `RSQ06_Dialog_Sidorovich_RSQ`
+- `RSQ07_Dialog_Barmen_RSQ`
+- `RSQ08_Dialog_Barmen_RSQ`
+- `RSQ09_Dialog_Spica_RSQ`
+- `RSQ10_Dialog_Harpy_RSQ`
+`GlobalVariablePrototypes`:
+	- `CluePrototypes`
+`ItemGeneratorPrototypes`:
+	- `DynamicItemGenerator`
+- `Gamepass_ItemGenerators`
+- `QuestItemGeneratorPrototypes`
+`QuestRewardsPrototypes`:
+	- `RSQ00_Reward`
+`ItemPrototypes`:
+	- `ArmorPrototypes`
+- `ArtifactPrototypes`
+- `AttachPrototypes`
+- `ConsumablePrototypes`
+- `QuestItemPrototypes`
+- `WeaponPrototypes`
+`LairPrototypes`:
+	- `GenericLairPrototypes`
+`ObjPrototypes`:
+	- `BlindDog`
+- `Bloodsucker`
+- `Boar`
+- `Burer`
+- `Cat`
+- `Chimera`
+- `Controller`
+- `Deer`
+- `Flesh`
+- `MutantBase`
+- `Poltergeist`
+- `PseudoDog`
+- `Pseudogiant`
+- `QuestObjPrototypes`
+- `Snork`
+- `Tushkan`
+`QuestNodePrototypes`:
+	- `ANCQ01`
+- `ANCQ01_P`
+- `ANCQ27`
+- `BodyParts_Malahit`
+- `E03_MQ05`
+- `E05_SQ01`
+- `E07_MQ01`
+- `E07_SQ01`
+- `E09_EQ02`
+- `E10_MQ01_C01`
+- `E11_MQ01`
+- `E14_MQ01_C02`
+- `E14_MQ02`
+- `EQ110_P`
+- `EQ150`
+- `EQ48`
+- `EQ67`
+- `RSQ01`
+- `RSQ01_C01`
+- `RSQ01_C02`
+- `RSQ01_C03`
+- `RSQ01_C04`
+- `RSQ01_C05`
+- `RSQ01_C06`
+- `RSQ04`
+- `RSQ04_C01`
+- `RSQ04_C02`
+- `RSQ04_C03`
+- `RSQ04_C04`
+- `RSQ04_C05`
+- `RSQ04_C06`
+- `RSQ04_C07`
+- `RSQ04_C08`
+- `RSQ04_C09`
+- `RSQ04_C10`
+- `RSQ05`
+- `RSQ05_C01`
+- `RSQ05_C02`
+- `RSQ05_C04`
+- `RSQ05_C05`
+- `RSQ05_C07`
+- `RSQ05_C08`
+- `RSQ05_C09`
+- `RSQ05_C10`
+- `RSQ06_C00___SIDOROVICH`
+- `RSQ06_C01___K_Z`
+- `RSQ06_C02___K_M`
+- `RSQ06_C03___K_B`
+- `RSQ06_C04___K_S`
+- `RSQ06_C05___B_B`
+- `RSQ06_C06___B_A`
+- `RSQ06_C07___B_A`
+- `RSQ06_C08___B_A`
+- `RSQ06_C09___S_P`
+- `RSQ07_C00_TSEMZAVOD`
+- `RSQ07_C01_K_Z`
+- `RSQ07_C02_K_M`
+- `RSQ07_C03_K_M`
+- `RSQ07_C04_K_B`
+- `RSQ07_C05_B_B`
+- `RSQ07_C06_B_A`
+- `RSQ07_C07_B_A`
+- `RSQ07_C08_B_A`
+- `RSQ07_C09_S_P`
+- `RSQ08_C00_ROSTOK`
+- `RSQ08_C01_K_M`
+- `RSQ08_C02_K_B`
+- `RSQ08_C03_K_S`
+- `RSQ08_C04_B_B`
+- `RSQ08_C05_B_B`
+- `RSQ08_C06_B_A`
+- `RSQ08_C07_B_A`
+- `RSQ08_C08_B_A`
+- `RSQ08_C09_S_P`
+- `RSQ09_C00_MALAHIT`
+- `RSQ09_C01_K_M`
+- `RSQ09_C02_K_M`
+- `RSQ09_C03_K_M`
+- `RSQ09_C04_K_S`
+- `RSQ09_C05_B_B`
+- `RSQ09_C06_B_A`
+- `RSQ09_C07_B_A`
+- `RSQ09_C08_B_A`
+- `RSQ09_C09_S_P`
+- `RSQ10_C00_HARPY`
+- `RSQ10_C01_K_M`
+- `RSQ10_C02_K_M`
+- `RSQ10_C03_K_S`
+- `RSQ10_C04_K_S`
+- `RSQ10_C05_B_B`
+- `RSQ10_C06_B_A`
+- `RSQ10_C07_B_A`
+- `RSQ10_C08_B_A`
+- `RSQ10_C09_S_P`
+- `Rostok_L_ScarTemp_Camp`
+- `SEQ09`
+- `SQ03_P`
+- `SQ101_C01`
+- `SQ101_C02`
+- `SQ102`
+- `SQ25`
+- `SQ87_P`
+- `SQ94`
+- `SQ95`
+- `SQ96_P`
+- `Swamp_L_E05_MQ03`
+`CharacterWeaponSettingsPrototypes`:
+	- `NPCWeaponSettingsPrototypes`
+`WeaponData`:
+	- `WeaponGeneralSetupPrototypes`

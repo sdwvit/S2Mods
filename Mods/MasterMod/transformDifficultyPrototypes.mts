@@ -1,7 +1,7 @@
 import { DifficultyPrototype, Struct } from "s2cfgtojson";
 import { EntriesTransformer } from "../../src/meta-type.mts";
+import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 
-export const DIFFICULTY_FACTOR = 4;
 /**
  * Increases cost of everything and damage on Hard and Stalker difficulty.
  */
@@ -18,9 +18,6 @@ export const transformDifficultyPrototypes: EntriesTransformer<DifficultyPrototy
     Weapon_Cost: DIFFICULTY_FACTOR,
     Artifact_Cost: DIFFICULTY_FACTOR,
     Effect_Satiety: 1,
-    Weapon_BaseDamage: DIFFICULTY_FACTOR,
-    NPC_Weapon_BaseDamage: DIFFICULTY_FACTOR,
-    Mutant_BaseDamage: DIFFICULTY_FACTOR,
 
     Reward_MainLine_Money: DIFFICULTY_FACTOR,
     //    Reward_SideLine_Money: DIFFICULTY_FACTOR,
