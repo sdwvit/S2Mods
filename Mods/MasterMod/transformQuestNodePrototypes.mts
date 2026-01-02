@@ -1,7 +1,7 @@
 import { QuestNodePrototype, Struct } from "s2cfgtojson";
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
-import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDs, RSQSetDialogQuestNodesSIDs } from "../../src/consts.mts";
+import { RSQLessThan3QuestNodesSIDs } from "../../src/consts.mts";
 import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 import { logger } from "../../src/logger.mts";
 import { recurringQuestsFilenames } from "../StashClueRework/meta.mts";
@@ -11,7 +11,6 @@ import { recurringQuestsFilenames } from "../StashClueRework/meta.mts";
  */
 export const transformQuestNodePrototypes: EntriesTransformer<QuestNodePrototype> = async (struct, context) => {
   let promises: Promise<QuestNodePrototype[] | QuestNodePrototype>[] = [];
-  // applies to all quest nodes that add items (i.e., stash clues)
   const fork = struct.fork();
 
   // applies only to recurring quests
@@ -20,44 +19,6 @@ export const transformQuestNodePrototypes: EntriesTransformer<QuestNodePrototype
       if (struct.ItemGeneratorSID.includes("reward_var")) {
         promises.push(Promise.resolve(replaceRewards(struct, fork)));
       }
-    }
-
-    if (struct.SID === "RSQ08_C01_K_M_Random_3") {
-      fork.PinWeights = struct.PinWeights.fork();
-      fork.PinWeights[0] = 0.5;
-    }
-    if (struct.SID === "RSQ08_C01_K_M_Technical_STL4939_Pin_0") {
-      fork.Conditions = getConditions([
-        {
-          ConditionType: "EQuestConditionType::NodeState",
-          ConditionComparance: "EConditionComparance::Equal",
-          TargetNode: "RSQ08_C01_K_M_SetDialog_RSQ08_Dialog_Barmen_C01_Finish",
-          NodeState: "EQuestNodeState::Finished",
-        },
-      ]);
-      fork.Conditions.__internal__.bpatch = false;
-    }
-
-    if (RSQLessThan3QuestNodesSIDs.has(struct.SID)) {
-      const total = context.structsById[RSQRandomizerQuestNodesSIDs.find((key) => !!context.structsById[key])].OutputPinNames.entries().length;
-      fork.Conditions ||= struct.Conditions.fork();
-      fork.Conditions[0] ||= struct.Conditions[0].fork();
-      fork.Conditions[0][0] ||= struct.Conditions[0][0].fork();
-      fork.Conditions[0][0].VariableValue = total;
-    }
-    if (RSQSetDialogQuestNodesSIDs.has(struct.SID)) {
-      let connectionIndex: string;
-      const [launcherIndex] = struct.Launchers.entries().find((e) => {
-        return e[1].Connections.entries().find((e1) => {
-          connectionIndex = e1[0];
-          return RSQLessThan3QuestNodesSIDs.has(e1[1].SID);
-        });
-      });
-      fork.Launchers ||= struct.Launchers.fork();
-      fork.Launchers[launcherIndex] ||= struct.Launchers[launcherIndex].fork();
-      fork.Launchers[launcherIndex].Connections ||= struct.Launchers[launcherIndex].Connections.fork();
-      fork.Launchers[launcherIndex].Connections[connectionIndex] ||= struct.Launchers[launcherIndex].Connections[connectionIndex].fork();
-      fork.Launchers[launcherIndex].Connections[connectionIndex].Name = "True";
     }
   }
 
@@ -70,13 +31,7 @@ export const transformQuestNodePrototypes: EntriesTransformer<QuestNodePrototype
 };
 
 transformQuestNodePrototypes.files = ["/QuestNodePrototypes/"];
-transformQuestNodePrototypes.contents = [
-  "EQuestNodeType::ItemAdd",
-  "EQuestNodeType::SetItemGenerator",
-  "InGameHours",
-  ...RSQLessThan3QuestNodesSIDs,
-  "RookieVillage_Hub_OnNPCCreateEvent_BP_NPC_RookieVillageGuider",
-];
+transformQuestNodePrototypes.contents = ["EQuestNodeType::SetItemGenerator"];
 transformQuestNodePrototypes.contains = true;
 
 const oncePerQuestSID = new Set<string>();

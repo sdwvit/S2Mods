@@ -134,14 +134,12 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `QuestObjPrototypes`
 - `Snork`
 `QuestNodePrototypes`:
-	- `RSQ01`
-- `RSQ01_C01`
+	- `RSQ01_C01`
 - `RSQ01_C02`
 - `RSQ01_C03`
 - `RSQ01_C04`
 - `RSQ01_C05`
 - `RSQ01_C06`
-- `RSQ04`
 - `RSQ04_C01`
 - `RSQ04_C02`
 - `RSQ04_C03`
@@ -152,7 +150,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `RSQ04_C08`
 - `RSQ04_C09`
 - `RSQ04_C10`
-- `RSQ05`
 - `RSQ05_C01`
 - `RSQ05_C02`
 - `RSQ05_C04`
@@ -161,7 +158,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `RSQ05_C08`
 - `RSQ05_C09`
 - `RSQ05_C10`
-- `RSQ06_C00___SIDOROVICH`
 - `RSQ06_C01___K_Z`
 - `RSQ06_C02___K_M`
 - `RSQ06_C03___K_B`
@@ -171,7 +167,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `RSQ06_C07___B_A`
 - `RSQ06_C08___B_A`
 - `RSQ06_C09___S_P`
-- `RSQ07_C00_TSEMZAVOD`
 - `RSQ07_C01_K_Z`
 - `RSQ07_C02_K_M`
 - `RSQ07_C03_K_M`
@@ -181,7 +176,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `RSQ07_C07_B_A`
 - `RSQ07_C08_B_A`
 - `RSQ07_C09_S_P`
-- `RSQ08_C00_ROSTOK`
 - `RSQ08_C01_K_M`
 - `RSQ08_C02_K_B`
 - `RSQ08_C03_K_S`
@@ -191,7 +185,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `RSQ08_C07_B_A`
 - `RSQ08_C08_B_A`
 - `RSQ08_C09_S_P`
-- `RSQ09_C00_MALAHIT`
 - `RSQ09_C01_K_M`
 - `RSQ09_C02_K_M`
 - `RSQ09_C03_K_M`
@@ -201,7 +194,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `RSQ09_C07_B_A`
 - `RSQ09_C08_B_A`
 - `RSQ09_C09_S_P`
-- `RSQ10_C00_HARPY`
 - `RSQ10_C01_K_M`
 - `RSQ10_C02_K_M`
 - `RSQ10_C03_K_S`
