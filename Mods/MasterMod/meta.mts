@@ -107,13 +107,25 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
 This mods works well with UBER TOZ mod. It does include Better Ballistics mod changes.
 [hr][/hr]  
 All changes have been tested against fresh save file. Some of these changes won't work with older saves.`,
-  changenote: `Integrated mods:
-- CanBeKnockedDown
-- NoFallDamage
+  changenote: `Added mod dependencies: 
 - X16Scopes
+- CantBeKnockedDown
+- GlassCannon
 - NoSluggishWater
+- NoFallDamage
+- LongLastingBuffs
 - NoAPForMobs
-- GlassCanon`,
+- StashClueRework
+- NoQuestCooldown
+- AnyWeaponFitsPistolSlot
+- AlternativeOffsetAim
+- CratesDontDropAnything
+- HeadlessArmors
+- NoPreplacedMedkits
+- NoPreplacedArmorAndWeapons
+- MoreSideQuestOptions
+- RostokMutantRSQuestFix
+`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
