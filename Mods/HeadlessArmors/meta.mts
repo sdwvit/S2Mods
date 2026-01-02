@@ -3,7 +3,7 @@ import dotEnv from "dotenv";
 import { transformDynamicItemGenerator } from "./transformDynamicItemGenerator.mjs";
 import { MetaContext, MetaType } from "../../src/meta-type.mts";
 import { ArmorPrototype, DynamicItemGenerator, Struct } from "s2cfgtojson";
-import { allExtraArmors, newArmors } from "../../src/armors.util.mts";
+import { allExtraArmors, newArmors } from "./armors.util.mts";
 import { allDefaultArmorPrototypesRecord } from "../../src/consts.mts";
 import { backfillDef, getDots } from "../../src/backfill-def.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
@@ -72,12 +72,10 @@ export async function transformArmorPrototypes(struct: ArmorPrototype, context: 
   if (!oncePerFile.has(context.filePath)) {
     oncePerFile.add(context.filePath);
     allExtraArmors.forEach((descriptor) => {
-      const original = descriptor.__internal__.refkey;
+      const refkey = descriptor.__internal__.refkey;
       const newSID = descriptor.SID;
-      if (!context.structsById[original]) {
-        return;
-      }
-      const armor = allDefaultArmorPrototypesRecord[original];
+
+      const armor = allDefaultArmorPrototypesRecord[refkey] || allDefaultArmorPrototypesRecord[newArmors[refkey].__internal__.refkey];
       if (!armor) {
         return;
       }
@@ -86,7 +84,7 @@ export async function transformArmorPrototypes(struct: ArmorPrototype, context: 
         backfillDef(
           {
             SID: newSID,
-            __internal__: { rawName: newSID, refkey: original, refurl: `../${path.parse(context.filePath).base}` },
+            __internal__: { rawName: newSID, refkey, refurl: newArmors[refkey] ? "" : `../${path.parse(context.filePath).base}` },
           },
           allDefaultArmorPrototypesRecord,
           newSID.toLowerCase().includes("helmet") ? "Light_Neutral_Helmet" : armor.SID,
@@ -106,7 +104,7 @@ export async function transformArmorPrototypes(struct: ArmorPrototype, context: 
         });
       }
       deepMerge(newArmor, overrides);
-      if (!(newArmors[newSID] && newArmors[newSID].__internal__._extras.isDroppable)) {
+      if (!(newArmors[newSID] && newArmors[newSID].__internal__._extras?.isDroppable)) {
         newArmor.Invisible = true;
       }
       const clone = newArmor.clone();

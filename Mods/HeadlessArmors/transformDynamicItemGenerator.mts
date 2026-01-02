@@ -1,6 +1,6 @@
 import { DynamicItemGenerator, Struct } from "s2cfgtojson";
 import { EntriesTransformer } from "../../src/meta-type.mts";
-import { adjustArmorItemGenerator } from "../MasterMod/adjustArmorItemGenerator.mts";
+import { adjustArmorItemGenerator } from "./adjustArmorItemGenerator.mts";
 import { addMissingCategories } from "../../src/add-missing-categories.mts";
 
 /**

@@ -7,8 +7,8 @@ import {
   ArmorDescriptor,
 } from "../../src/consts.mts";
 import { factions } from "../../src/factions.mts";
-import { extraArmorsByFaction, newArmors } from "../../src/armors.util.mts";
-import { allItemRank } from "../../src/all-item-rank.mts";
+import { extraArmorsByFaction, newArmors } from "./armors.util.mts";
+import { allItemRank } from "./all-item-rank.mts";
 import { DynamicItemGenerator, ERank, GetStructType, Struct } from "s2cfgtojson";
 import { precision } from "../../src/precision.mts";
 import { semiRandom } from "../../src/semi-random.mts";

@@ -6,14 +6,16 @@ import {
   EItemGenerationCategory,
   ERank,
   GrenadePrototype,
+  Internal,
   NPCWeaponSettingsPrototype,
   SpawnActorPrototype,
   WeaponGeneralSetupPrototype,
   WeaponPrototype,
 } from "s2cfgtojson";
 import { readFileAndGetStructs } from "./read-file-and-get-structs.mjs";
-import { DeeplyPartial } from "./armors.util.mjs";
-
+export type DeeplyPartial<T> = {
+  [P in Exclude<keyof T, Internal | "toString">]?: T[P] extends object ? DeeplyPartial<T[P]> : T[P];
+};
 export const ALL_RANK = "ERank::Newbie, ERank::Experienced, ERank::Veteran, ERank::Master" as ERank;
 export const MASTER_RANK = "ERank::Master" as ERank;
 export const VETERAN_MASTER_RANK = "ERank::Veteran, ERank::Master" as ERank;
