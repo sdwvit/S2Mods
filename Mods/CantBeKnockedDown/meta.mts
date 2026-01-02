@@ -14,13 +14,15 @@ Bloodsuckers won't bully you anymore.
 [hr][/hr]
 It is meant to be used in other collections of mods. Does not conflict with anything. It's a combo of two one-line patches: one for player and one for npcs, sets CanBeKnockedDown to false. 
   `,
-  changenote: "Update for 1.7.1",
+  changenote: "Update for 1.8.1",
   structTransformers: [entriesTransformer],
 };
 
 function entriesTransformer(struct: ObjPrototype) {
   if (struct.SID === "NPCBase" || struct.SID === "Player") {
-    return Object.assign(struct.fork(), { CanBeKnockedDown: false });
+    const fork = struct.fork();
+    fork.CanBeKnockedDown = false;
+    return fork;
   }
 }
 
