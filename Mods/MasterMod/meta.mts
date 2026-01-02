@@ -13,7 +13,6 @@ import { transformEffectPrototypes } from "./transformEffectPrototypes.mts";
 import { transformItemGeneratorPrototypes } from "./transformItemGeneratorPrototypes.mts";
 import { transformLairPrototypes } from "./transformLairPrototypes.mts";
 import { transformMeshGeneratorPrototypes } from "./transformMeshGeneratorPrototypes.mts";
-import { getTransformMobs } from "./transformMobs.mts";
 import { transformNPCWeaponSettingsPrototypes } from "./transformNPCWeaponSettingsPrototypes.mts";
 import { transformQuestArtifactPrototypes } from "./transformQuestArtifactPrototypes.mts";
 import { transformQuestItemPrototypes } from "./transformQuestItemPrototypes.mts";
@@ -29,11 +28,11 @@ import { transformObjPrototypes } from "./transformObjPrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 import { transformWeaponPrototypes } from "./transformWeaponPrototypes.mts";
 import { MetaType } from "../../src/meta-type.mts";
-import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
 import { logger } from "../../src/logger.mts";
 import { MergedStructs } from "../../src/merged-structs.mts";
 import { transformCluePrototypes } from "../StashClueRework/meta.mts";
+import { transformMobs } from "./transformMobs.mts";
 
 const structTransformers = [
   transformNPCPrototypes,
@@ -53,7 +52,7 @@ const structTransformers = [
   transformItemGeneratorPrototypes,
   transformLairPrototypes,
   transformMeshGeneratorPrototypes,
-  getTransformMobs(DIFFICULTY_FACTOR),
+  transformMobs,
   transformNPCWeaponSettingsPrototypes,
   transformObjPrototypes,
   transformQuestArtifactPrototypes,
@@ -112,7 +111,13 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
 This mods works well with UBER TOZ mod. It does include Better Ballistics mod changes.
 [hr][/hr]  
 All changes have been tested against fresh save file. Some of these changes won't work with older saves.`,
-  changenote: `Finished splitting out x16 scopes.`,
+  changenote: `Integrated mods:
+- CanBeKnockedDown
+- NoFallDamage
+- X16Scopes
+- NoSluggishWater
+- NoAPForMobs
+- GlassCanon`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);

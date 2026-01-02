@@ -122,22 +122,17 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 `LairPrototypes`:
 	- `GenericLairPrototypes`
 `ObjPrototypes`:
-	- `BlindDog`
-- `Bloodsucker`
+	- `Bloodsucker`
 - `Boar`
 - `Burer`
-- `Cat`
 - `Chimera`
 - `Controller`
 - `Deer`
 - `Flesh`
-- `MutantBase`
-- `Poltergeist`
 - `PseudoDog`
 - `Pseudogiant`
 - `QuestObjPrototypes`
 - `Snork`
-- `Tushkan`
 `QuestNodePrototypes`:
 	- `ANCQ01`
 - `ANCQ01_P`

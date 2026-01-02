@@ -64,32 +64,6 @@ export const transformEffectPrototypes: EntriesTransformer<EffectPrototype> = as
     );
   }
 
-  if (consumables.has(struct.SID)) {
-    extraStructs.push(Object.assign(struct.fork(), { Duration: struct.Duration * 10 }));
-  }
   return extraStructs;
 };
 transformEffectPrototypes.files = ["/EffectPrototypes.cfg"];
-
-const consumables = new Set([
-  "EnergeticStamina",
-  "EnergeticLimitedStamina",
-  "EnergeticSleepiness",
-  "BandageBleeding4",
-  "MedkitBleeding2",
-  "Antirad4",
-  "AnomalyVodkaRadiation",
-  "HerculesWeight",
-  "CinnamonDegenBleeding",
-  "BeerAntirad1",
-  "VodkaAntirad3",
-  "PSYBlockerIncreaseRegen",
-  "ArmyMedkitBleeding3",
-  "EcoMedkitAntirad3",
-  "EcoMedkitBleeding2",
-  "WaterStamina2",
-  "MagicVodkaPSYProtection",
-  "EnergeticStaminaPerAction1",
-  "WaterStaminaPerAction1",
-  "HerculesWeight_Penalty",
-]);

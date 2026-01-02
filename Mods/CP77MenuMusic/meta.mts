@@ -1,5 +1,4 @@
 import { MetaType } from "../../src/meta-type.mts";
-import { getModifiedFilesString } from "../../src/get-modified-files-by-folder.mts";
 
 export const meta: MetaType = {
   description: `
