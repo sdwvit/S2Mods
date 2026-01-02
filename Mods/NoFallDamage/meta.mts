@@ -16,7 +16,7 @@ export const meta: MetaType<ObjPrototype> = {
 It is meant to be used in other collections of mods. [h1][/h1]
 I consider this mod to be a bit cheaty, and/or useful for debugging other mods.
   `,
-  changenote: "Update for 1.7.1",
+  changenote: "Update for 1.8.1",
 };
 
 function entriesTransformer(struct: ObjPrototype) {
