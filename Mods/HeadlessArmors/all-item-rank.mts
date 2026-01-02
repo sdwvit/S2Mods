@@ -1,8 +1,8 @@
-import { allDefaultArmorPrototypesRecord, allDefaultNightVisionGogglesPrototypesRecord } from "./consts.mjs";
-import { allExtraArmors, newArmors } from "./armors.util.mjs";
+import { allDefaultArmorPrototypesRecord, allDefaultNightVisionGogglesPrototypesRecord } from "../../src/consts.mts";
+import { allExtraArmors, newArmors } from "./armors.util.mts";
 import { ArmorPrototype, Struct } from "s2cfgtojson";
-import { backfillDef } from "./backfill-def.mts";
-import { logger } from "./logger.mts";
+import { backfillDef } from "../../src/backfill-def.mts";
+import { logger } from "../../src/logger.mts";
 
 const maxDurability = Math.max(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 0));
 const minDurability = Math.min(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 10000));
