@@ -2,84 +2,48 @@ import { QuestNodePrototype, Struct } from "s2cfgtojson";
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
 import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDs, RSQSetDialogQuestNodesSIDs } from "../../src/consts.mts";
-import { deepMerge } from "../../src/deep-merge.mts";
-import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
-import { finishedTransformers } from "./meta.mts";
 import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 import { logger } from "../../src/logger.mts";
-import {
-  hookRewardStashClue,
-  hookStashSpawners,
-  injectMassiveRNGQuestNodes,
-  MalachiteMutantQuestPartsQuestsDoneDialogs,
-  MalachiteMutantQuestPartsQuestsDoneNode,
-  recurringQuestsFilenames,
-} from "../StashClueRework/meta.mts";
+import { recurringQuestsFilenames } from "../StashClueRework/meta.mts";
 
-let oncePerTransformer = false;
-let oncePerBodyParts_Malahit = false;
 /**
  * Removes timeout for repeating quests.
  */
 export const transformQuestNodePrototypes: EntriesTransformer<QuestNodePrototype> = async (struct, context) => {
   let promises: Promise<QuestNodePrototype[] | QuestNodePrototype>[] = [];
   // applies to all quest nodes that add items (i.e., stash clues)
-  if (struct.NodeType === "EQuestNodeType::ItemAdd") {
-    promises.push(hookStashSpawners(struct, finishedTransformers));
-  }
-
-  if (!oncePerTransformer) {
-    oncePerTransformer = true;
-    promises.push(injectMassiveRNGQuestNodes(finishedTransformers));
-  }
+  const fork = struct.fork();
 
   // applies only to recurring quests
   if (recurringQuestsFilenames.some((p) => context.filePath.includes(p))) {
     if (struct.NodeType === "EQuestNodeType::SetItemGenerator") {
       if (struct.ItemGeneratorSID.includes("reward_var")) {
-        promises.push(Promise.resolve(hookRewardStashClue(struct)));
-        promises.push(Promise.resolve(replaceRewards(struct)));
+        promises.push(Promise.resolve(replaceRewards(struct, fork)));
       }
     }
 
-    if (struct.InGameHours) {
-      promises.push(Promise.resolve(Object.assign(struct.fork(), { InGameHours: 0 })));
-    }
-
     if (struct.SID === "RSQ08_C01_K_M_Random_3") {
-      promises.push(Promise.resolve(Object.assign(struct.fork(), { PinWeights: Object.assign(struct.PinWeights.fork(), { 0: 0.5 }) })));
+      fork.PinWeights = struct.PinWeights.fork();
+      fork.PinWeights[0] = 0.5;
     }
     if (struct.SID === "RSQ08_C01_K_M_Technical_STL4939_Pin_0") {
-      const newConditions = Object.assign(struct.fork(), {
-        Conditions: getConditions([
-          {
-            ConditionType: "EQuestConditionType::NodeState",
-            ConditionComparance: "EConditionComparance::Equal",
-            TargetNode: "RSQ08_C01_K_M_SetDialog_RSQ08_Dialog_Barmen_C01_Finish",
-            NodeState: "EQuestNodeState::Finished",
-          },
-        ]),
-      });
-      newConditions.Conditions.__internal__.bpatch = false;
-      promises.push(Promise.resolve(newConditions));
+      fork.Conditions = getConditions([
+        {
+          ConditionType: "EQuestConditionType::NodeState",
+          ConditionComparance: "EConditionComparance::Equal",
+          TargetNode: "RSQ08_C01_K_M_SetDialog_RSQ08_Dialog_Barmen_C01_Finish",
+          NodeState: "EQuestNodeState::Finished",
+        },
+      ]);
+      fork.Conditions.__internal__.bpatch = false;
     }
 
     if (RSQLessThan3QuestNodesSIDs.has(struct.SID)) {
       const total = context.structsById[RSQRandomizerQuestNodesSIDs.find((key) => !!context.structsById[key])].OutputPinNames.entries().length;
-      promises.push(
-        Promise.resolve(
-          markAsForkRecursively(
-            deepMerge(struct.fork(), {
-              Conditions: new Struct({
-                // as of 1.7 all of them are [0][0]
-                0: new Struct({
-                  0: new Struct({ VariableValue: total }),
-                }),
-              }),
-            }),
-          ),
-        ),
-      );
+      fork.Conditions ||= struct.Conditions.fork();
+      fork.Conditions[0] ||= struct.Conditions[0].fork();
+      fork.Conditions[0][0] ||= struct.Conditions[0][0].fork();
+      fork.Conditions[0][0].VariableValue = total;
     }
     if (RSQSetDialogQuestNodesSIDs.has(struct.SID)) {
       let connectionIndex: string;
@@ -89,36 +53,20 @@ export const transformQuestNodePrototypes: EntriesTransformer<QuestNodePrototype
           return RSQLessThan3QuestNodesSIDs.has(e1[1].SID);
         });
       });
-      const fork = markAsForkRecursively(
-        deepMerge(struct.fork(), {
-          Launchers: new Struct({
-            [launcherIndex]: new Struct({
-              Connections: new Struct({
-                [connectionIndex]: new Struct({
-                  Name: "True",
-                }),
-              }),
-            }),
-          }),
-        }),
-      );
-      promises.push(Promise.resolve(fork));
+      fork.Launchers ||= struct.Launchers.fork();
+      fork.Launchers[launcherIndex] ||= struct.Launchers[launcherIndex].fork();
+      fork.Launchers[launcherIndex].Connections ||= struct.Launchers[launcherIndex].Connections.fork();
+      fork.Launchers[launcherIndex].Connections[connectionIndex] ||= struct.Launchers[launcherIndex].Connections[connectionIndex].fork();
+      fork.Launchers[launcherIndex].Connections[connectionIndex].Name = "True";
     }
   }
 
-  if (!oncePerBodyParts_Malahit && context.filePath.endsWith("/BodyParts_Malahit.cfg")) {
-    oncePerBodyParts_Malahit = true;
-
-    promises.push(
-      Promise.resolve(
-        MalachiteMutantQuestPartsQuestsDoneDialogs.map((dialog) =>
-          hookRewardStashClue({ SID: MalachiteMutantQuestPartsQuestsDoneNode, QuestSID: struct.QuestSID }, dialog),
-        ),
-      ),
-    );
+  const res = await Promise.all(promises).then((results) => results.flat());
+  if (fork.entries().length) {
+    res.push(fork);
   }
 
-  return Promise.all(promises).then((results) => results.flat());
+  return res;
 };
 
 transformQuestNodePrototypes.files = ["/QuestNodePrototypes/"];
@@ -133,8 +81,7 @@ transformQuestNodePrototypes.contains = true;
 
 const oncePerQuestSID = new Set<string>();
 
-function replaceRewards(structR: Struct) {
-  const struct = structR as QuestNodePrototype;
+function replaceRewards(struct: QuestNodePrototype, fork: QuestNodePrototype) {
   const extraStructs: QuestNodePrototype[] = [];
 
   if (!oncePerQuestSID.has(struct.QuestSID)) {
@@ -189,6 +136,6 @@ function replaceRewards(structR: Struct) {
       extraStructs.push(conditionNode);
     });
   }
-  extraStructs.push(Object.assign(struct.fork(), { ItemGeneratorSID: "empty" }));
+  fork.ItemGeneratorSID = "empty";
   return extraStructs;
 }

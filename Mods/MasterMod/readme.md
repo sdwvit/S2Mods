@@ -134,24 +134,7 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `QuestObjPrototypes`
 - `Snork`
 `QuestNodePrototypes`:
-	- `ANCQ01`
-- `ANCQ01_P`
-- `ANCQ27`
-- `BodyParts_Malahit`
-- `E03_MQ05`
-- `E05_SQ01`
-- `E07_MQ01`
-- `E07_SQ01`
-- `E09_EQ02`
-- `E10_MQ01_C01`
-- `E11_MQ01`
-- `E14_MQ01_C02`
-- `E14_MQ02`
-- `EQ110_P`
-- `EQ150`
-- `EQ48`
-- `EQ67`
-- `RSQ01`
+	- `RSQ01`
 - `RSQ01_C01`
 - `RSQ01_C02`
 - `RSQ01_C03`
@@ -228,18 +211,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 - `RSQ10_C07_B_A`
 - `RSQ10_C08_B_A`
 - `RSQ10_C09_S_P`
-- `Rostok_L_ScarTemp_Camp`
-- `SEQ09`
-- `SQ03_P`
-- `SQ101_C01`
-- `SQ101_C02`
-- `SQ102`
-- `SQ25`
-- `SQ87_P`
-- `SQ94`
-- `SQ95`
-- `SQ96_P`
-- `Swamp_L_E05_MQ03`
 `CharacterWeaponSettingsPrototypes`:
 	- `NPCWeaponSettingsPrototypes`
 `WeaponData`:

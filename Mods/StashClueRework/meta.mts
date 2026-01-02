@@ -147,9 +147,10 @@ let oncePerBodyParts_Malahit = false;
  */
 async function transformQuestNodePrototypes(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototype>) {
   let promises: Promise<QuestNodePrototype[] | QuestNodePrototype>[] = [];
+  const fork = struct.fork();
   // applies to all quest nodes that add items (i.e., stash clues)
   if (struct.NodeType === "EQuestNodeType::ItemAdd") {
-    promises.push(hookStashSpawners(struct, finishedTransformers));
+    promises.push(hookStashSpawners(struct, fork, finishedTransformers));
   }
 
   if (!oncePerTransformer) {
@@ -178,7 +179,12 @@ async function transformQuestNodePrototypes(struct: QuestNodePrototype, context:
     );
   }
 
-  return Promise.all(promises).then((results) => results.flat());
+  const res = await Promise.all(promises).then((results) => results.flat());
+  if (fork.entries().length) {
+    res.push(fork);
+  }
+
+  return res;
 }
 
 export const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];
@@ -255,7 +261,7 @@ export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, N
   return stashClueReward;
 }
 
-export async function hookStashSpawners(struct: QuestNodePrototype, finishedTransformers: Set<string>) {
+export async function hookStashSpawners(struct: QuestNodePrototype, fork: QuestNodePrototype, finishedTransformers: Set<string>) {
   await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
 
   // only quest stashes that are hidden by this mod are interesting here
@@ -269,11 +275,10 @@ export async function hookStashSpawners(struct: QuestNodePrototype, finishedTran
   spawnStash.QuestSID = struct.QuestSID;
   spawnStash.ConsoleCommand = `XStartQuestNodeBySID ${getStashSpawnerSID(struct.TargetQuestGuid)}`;
   spawnStash.Launchers = struct.Launchers;
-  const fork = struct.fork();
-  fork.Launchers = getLaunchers([{ SID: spawnStash.SID, Name: "" }]);
+  fork.Launchers ||= getLaunchers([{ SID: spawnStash.SID, Name: "" }]);
   spawnStash.__internal__.rawName = spawnStash.SID;
   delete spawnStash.__internal__.bpatch;
   delete spawnStash.__internal__.refurl;
   delete spawnStash.__internal__.refkey;
-  return [spawnStash, fork];
+  return spawnStash;
 }
