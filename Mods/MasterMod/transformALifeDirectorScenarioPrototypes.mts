@@ -4,7 +4,7 @@ import { SPAWN_BUBBLE_FACTOR } from "./transformAIGlobals.mts";
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { modName } from "../../src/base-paths.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
-import { DIFFICULTY_FACTOR } from "./transformDifficultyPrototypes.mts";
+import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 
 const factor = DIFFICULTY_FACTOR * SPAWN_BUBBLE_FACTOR ** 2;
 /**

@@ -2,9 +2,9 @@ import { Struct, TradePrototype } from "s2cfgtojson";
 
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { precision } from "../../src/precision.mts";
-import { DIFFICULTY_FACTOR } from "./transformDifficultyPrototypes.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { bartendersTradePrototypes, generalTradersTradePrototypes, medicsTradePrototypes, technicianTradePrototypes } from "../../src/consts.mts";
+import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 
 const oncePerFile = new Set<string>();
 /**

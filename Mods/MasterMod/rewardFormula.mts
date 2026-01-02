@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
-import { DIFFICULTY_FACTOR } from "./transformDifficultyPrototypes.mjs";
 import path from "node:path";
+import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 
 function parseCsv<T>(csv: string): T[] {
   const lines = csv
