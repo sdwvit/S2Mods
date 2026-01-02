@@ -7,7 +7,7 @@ import { addMissingCategories } from "../../src/add-missing-categories.mts";
  * Allows NPCs to drop armor.
  */
 export const transformDynamicItemGenerator: EntriesTransformer<DynamicItemGenerator> = (struct) => {
-  if (struct.SID.includes("Trade")) {
+  if (struct.SID.includes("Trade") || !struct.ItemGenerator) {
     return;
   }
 
@@ -21,6 +21,7 @@ export const transformDynamicItemGenerator: EntriesTransformer<DynamicItemGenera
         return adjustArmorItemGenerator(struct, itemGenerator as any, i);
     }
   });
+  ItemGenerator.__internal__.useAsterisk = false;
 
   if (!ItemGenerator.entries().length || !ItemGenerator.filter((e): e is any => !!(e[1].PossibleItems as Struct).entries().length).entries().length) {
     return;

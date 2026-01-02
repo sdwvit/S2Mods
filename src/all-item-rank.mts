@@ -2,6 +2,7 @@ import { allDefaultArmorPrototypesRecord, allDefaultNightVisionGogglesPrototypes
 import { allExtraArmors, newArmors } from "./armors.util.mjs";
 import { ArmorPrototype, Struct } from "s2cfgtojson";
 import { backfillDef } from "./backfill-def.mts";
+import { logger } from "./logger.mts";
 
 const maxDurability = Math.max(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 0));
 const minDurability = Math.min(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 10000));
@@ -91,6 +92,12 @@ export const allItemRank = Object.fromEntries(
         armor.SID.toLowerCase().includes("helmet") ? "Heavy_Svoboda_Helmet" : undefined,
       );
       return [armor.SID, calculateArmorScore(backfilled)] as [string, number];
+    })
+    .filter((a) => {
+      if (!a[1]) {
+        logger.warn(`${a[0]} doesn't have a valid set of properties or was not backfilled. Score = '${a[1]}'`);
+      }
+      return !!a[1];
     })
     .sort((a, b) => a[0].localeCompare(b[0])),
 );
