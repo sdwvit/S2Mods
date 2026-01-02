@@ -2,7 +2,6 @@ import { DynamicItemGenerator, Struct } from "s2cfgtojson";
 import { ALL_RANKS_SET, generalTradersTradeItemGenerators } from "../../src/consts.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { precision } from "../../src/precision.mts";
-import { adjustArmorItemGenerator } from "./adjustArmorItemGenerator.mts";
 
 function transformTrade(struct: DynamicItemGenerator) {
   const fork = struct.fork();
