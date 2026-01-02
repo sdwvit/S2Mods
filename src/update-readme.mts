@@ -1,6 +1,6 @@
 import path from "node:path";
 import { modFolder } from "./base-paths.mts";
-import { getModifiedFilesString } from "./get-modified-files-by-folder.mts";
+import { getModifiedFiles } from "./get-modified-files.mts";
 import { logger } from "./logger.mts";
 import fs from "node:fs";
 
@@ -11,7 +11,7 @@ const readmeContent = `
 
 Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines):
 
-${getModifiedFilesString()}
+${getModifiedFiles("markdown")}
 `.trim();
 
 logger.log("Updating readme.md...");

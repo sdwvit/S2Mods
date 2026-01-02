@@ -1,10 +1,11 @@
 import fs, { rmSync } from "node:fs";
 import path from "node:path";
-import { modFolder, modFolderSteam, modFolderSteamStruct, modName, stagedFolderStruct } from "./base-paths.mts";
+import { modFolder, modName } from "./base-paths.mts";
 import { sanitize } from "./sanitize.mts";
 import { metaPromise } from "./meta-promise.mts";
 import { createModZip } from "./zip.mts";
 import { logger } from "./logger.mts";
+import { getModifiedFiles } from "./get-modified-files.mts";
 
 const { meta } = await metaPromise;
 
@@ -80,7 +81,12 @@ async function updateMod(modId: string, makePublic = false) {
     sanitize(
       convertToHtml(
         meta.description +
-          `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[h3][/h3]`,
+          `<br/>This mod is open source and hosted on <a
+        href="https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}">github</a>.
+          <hr/>
+          Mod compatibility:
+          <br/>
+          Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines): ${getModifiedFiles("html")}`,
       ),
     ),
   );
@@ -106,35 +112,6 @@ async function updateMod(modId: string, makePublic = false) {
   return res.json();
 }
 
-/* -------------------------------------------------- */
-/* UPLOAD LOGO                                         */
-/* -------------------------------------------------- */
-async function uploadModLogo(modId: string) {
-  console.log("Uploading logo…");
-  let logoPath = path.join(modFolder, "1024.png");
-  if (!fs.existsSync(logoPath)) {
-    logoPath = path.join(modFolder, "512.png");
-  }
-  if (!fs.existsSync(logoPath)) return;
-
-  const form = new FormData();
-  await getFormFile(form, "logo", logoPath, "image/png");
-  const res = await fetch(`${API_BASE}/games/${GAME_ID}/mods/${modId}/media`, {
-    method: "POST",
-    headers: {
-      Authorization: AUTH_TOKEN,
-      Accept: "application/json",
-    },
-    body: form,
-  });
-
-  if (!res.ok) {
-    throw new Error(`Logo upload failed: ${res.status} ${await res.text()}`);
-  }
-
-  return res.json();
-}
-
 const convertToHtml = (str: string) => {
   return str
     .replaceAll(/\[h\d]\[\/h\d]/g, "<br/>")
@@ -155,7 +132,9 @@ async function uploadModfile(modId: string, zipPath: string) {
   await getFormFile(form, "filedata", zipPath, "application/zip");
   form.append("version", new Date().toISOString());
   form.append("changelog", sanitize(meta.changenote ?? "Update"));
-  //  form.append("platforms", [{ platform: "windows" }, { platform: "xboxseriesx" }]);
+  form.append("platforms[0]", "windows");
+  form.append("platforms[1]", "xboxseriesx");
+  form.append("active", "true");
 
   const res = await fetch(`${API_BASE}/games/${GAME_ID}/mods/${modId}/files`, {
     method: "POST",

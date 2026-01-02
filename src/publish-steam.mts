@@ -9,6 +9,7 @@ import { spawnSync } from "child_process";
 import { modFolder, modFolderSteam, modName } from "./base-paths.mjs";
 import { sanitize } from "./sanitize.mts";
 import { logger } from "./logger.mts";
+import { getModifiedFiles } from "./get-modified-files.mts";
 const { meta } = await metaPromise;
 
 const cmd = () => {
@@ -22,7 +23,11 @@ const cmd = () => {
   vdfData.workshopitem.title = sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`);
   vdfData.workshopitem.description = sanitize(
     meta.description +
-      `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[h3][/h3]`,
+      `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[hr][/hr]
+      Mod compatibility:
+
+      Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines): ${getModifiedFiles("steam")} 
+      `,
   );
   vdfData.workshopitem.changenote = process.env.CHANGENOTE || sanitize(meta.changenote);
 
