@@ -72,7 +72,6 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
 [hr][/hr]
 [h3]All changes to the base game:[/h3]
 [list]
- [*] [Challenge] No enemy markers. No threat indicators.
  [*] [Challenge] Reduced 💊 Consumables, 🔫 Ammo, and 💣 Grenades drops from bodies and stashes. 
  [*] [Challenge] 🧰 1166 instances of stashes were nerfed (10-100x less consumables). 
  [*] [Challenge] Traders are not allowed to sell gear.
