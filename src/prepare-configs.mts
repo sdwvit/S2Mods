@@ -30,6 +30,14 @@ logger.log(`Total: ${total.length} transformers processed.`);
 const writtenFiles = total.flat().filter((s) => s?.length > 0);
 logger.log(`Total: ${writtenFiles.flat().length} structs in ${writtenFiles.length} files written.`);
 
-await Promise.allSettled([import("./update-readme.mts"), import("./push-to-sdk.mts"), onL1Finish(), onL2Finish(), onL3Finish(), onL1GlobalFinish()]);
+await Promise.allSettled([
+  import("./update-readme.mts"),
+  import("./push-to-sdk.mts"),
+  import("./pull-assets.mts"),
+  onL1Finish(),
+  onL2Finish(),
+  onL3Finish(),
+  onL1GlobalFinish(),
+]);
 
 spawnSync("paplay", ["./pop.wav"]);
