@@ -5,5 +5,4 @@ allValidMods.forEach((mod) => {
   cmd(["git", "checkout", mod].join(" "));
   cmd(["git", "pull"].join(" "));
   node("./cook-inject.mts");
-  node("./zip-for-xbox.mts");
 });

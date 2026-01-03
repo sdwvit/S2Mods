@@ -7,7 +7,7 @@ import childProcess from "node:child_process";
 export function injectIntoGame(sourcePath: string) {
   logger.log("Injecting into the game using command: ");
 
-  const fullCmd = ["cp", sourcePath, `'${process.env.STALKER2_MODS_FOLDER}'`, "&&", "open", `'${process.env.STALKER2_MODS_FOLDER}'`].join(" ");
+  const fullCmd = ["cp", sourcePath, `'${process.env.STALKER2_MODS_FOLDER}'`].join(" ");
 
   logger.log(fullCmd + "\n\nExecuting...\n");
 
