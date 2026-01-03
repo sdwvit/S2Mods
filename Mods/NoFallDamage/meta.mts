@@ -1,5 +1,5 @@
-import { ObjPrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import { ObjPrototype, Struct } from "s2cfgtojson";
+import { MetaContext, MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType<ObjPrototype> = {
   structTransformers: [entriesTransformer],
@@ -16,14 +16,16 @@ export const meta: MetaType<ObjPrototype> = {
 It is meant to be used in other collections of mods. [h1][/h1]
 I consider this mod to be a bit cheaty, and/or useful for debugging other mods.
   `,
-  changenote: "Update for 1.8.1",
+  changenote: "Fixed bug with property IDs",
 };
 
-function entriesTransformer(struct: ObjPrototype) {
+function entriesTransformer(struct: ObjPrototype, c: MetaContext<ObjPrototype>) {
   if (struct.SID === "NPCBase" || struct.SID === "Player") {
-    return Object.assign(struct.fork(), {
-      Protection: Object.assign(struct.fork(), { Fall: 100 }),
-    });
+    const fork = struct.fork();
+    fork.Protection = new Struct() as ObjPrototype["Protection"];
+    fork.Protection.__internal__.bpatch = true;
+    fork.Protection.Fall = 100;
+    return fork;
   }
 }
 
