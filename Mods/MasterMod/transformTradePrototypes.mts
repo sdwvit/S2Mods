@@ -136,7 +136,7 @@ export const transformTradePrototypes: EntriesTransformer<TradePrototype> = asyn
       );
     }
 
-    limitations.forEach((l) => fork.BuyLimitations.addNode(l, l));
+    limitations.forEach((l) => fork.BuyLimitations.addNode(l));
 
     if (GeneralNPCTradePrototypesMoneyMult.has(struct.SID)) {
       fork.ArmorSellMinDurability = 0.99;
