@@ -6,7 +6,7 @@ import { modName } from "../../src/base-paths.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 
-const factor = DIFFICULTY_FACTOR * SPAWN_BUBBLE_FACTOR ** 2;
+const FACTOR = DIFFICULTY_FACTOR * SPAWN_BUBBLE_FACTOR ** 2;
 /**
  * Transforms ALifeDirectorScenarioPrototypes to adjust NPC limits and spawn parameters.
  */
@@ -65,10 +65,10 @@ export const transformALifeDirectorScenarioPrototypes: EntriesTransformer<ALifeD
 
   const ScenarioGroups = struct.ScenarioGroups.map(([_, v]) => {
     const fork = v.fork();
-    if (v.SpawnDelayMin) fork.SpawnDelayMin = Math.ceil(v.SpawnDelayMin / factor);
-    if (v.SpawnDelayMax) fork.SpawnDelayMax = Math.ceil(v.SpawnDelayMax / factor);
-    if (v.PostSpawnDirectorTimeoutMin) fork.PostSpawnDirectorTimeoutMin = Math.ceil(v.PostSpawnDirectorTimeoutMin / factor);
-    if (v.PostSpawnDirectorTimeoutMax) fork.PostSpawnDirectorTimeoutMax = Math.ceil(v.PostSpawnDirectorTimeoutMax / factor);
+    if (v.SpawnDelayMin) fork.SpawnDelayMin = Math.ceil(v.SpawnDelayMin / FACTOR);
+    if (v.SpawnDelayMax) fork.SpawnDelayMax = Math.ceil(v.SpawnDelayMax / FACTOR);
+    if (v.PostSpawnDirectorTimeoutMin) fork.PostSpawnDirectorTimeoutMin = Math.ceil(v.PostSpawnDirectorTimeoutMin / FACTOR);
+    if (v.PostSpawnDirectorTimeoutMax) fork.PostSpawnDirectorTimeoutMax = Math.ceil(v.PostSpawnDirectorTimeoutMax / FACTOR);
     if (fork.entries().length) {
       return fork;
     }

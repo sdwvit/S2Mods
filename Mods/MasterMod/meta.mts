@@ -1,7 +1,5 @@
 import { transformAIGlobals } from "./transformAIGlobals.mts";
-import { transformConsumablePrototypes } from "./transformConsumablePrototypes.mts";
 import { transformALifeDirectorScenarioPrototypes } from "./transformALifeDirectorScenarioPrototypes.mts";
-import { transformArtifactPrototypes } from "./transformArtifactPrototypes.mts";
 import { transformBarbedWirePrototypes } from "./transformBarbedWirePrototypes.mts";
 import { transformAttachPrototypes } from "./transformAttachPrototypes.mts";
 import { transformDialogPoolPrototypes } from "./transformDialogPoolPrototypes.mts";
@@ -35,9 +33,7 @@ import { transformMobs } from "./transformMobs.mts";
 const structTransformers = [
   transformNPCPrototypes,
   transformAIGlobals,
-  transformConsumablePrototypes,
   transformALifeDirectorScenarioPrototypes,
-  transformArtifactPrototypes,
   transformAttachPrototypes,
   transformBarbedWirePrototypes,
   transformCluePrototypes,

@@ -10,11 +10,11 @@ export async function transformAIGlobals(struct: AIGlobal, context: MetaContext<
     if (struct.__internal__.rawName !== "AISettings") {
       return null;
     }
-    // fork.MinALifeDespawnDistance = struct.MinALifeDespawnDistance * SPAWN_BUBBLE_FACTOR ** 2;
-    fork.MinALifeSpawnDistance = struct.MinALifeSpawnDistance * SPAWN_BUBBLE_FACTOR ** 2;
-    fork.MaxAgentsCount = struct.MaxAgentsCount * SPAWN_BUBBLE_FACTOR ** 2;
+    fork.MinALifeDespawnDistance = struct.MinALifeDespawnDistance * SPAWN_BUBBLE_FACTOR;
+    fork.MinALifeSpawnDistance = struct.MinALifeSpawnDistance * SPAWN_BUBBLE_FACTOR;
+    fork.MaxAgentsCount = struct.MaxAgentsCount * SPAWN_BUBBLE_FACTOR;
     return fork;
   }
 }
 
-transformAIGlobals.files = ["/AIGlobals.cfg", "/CoreVariables.cfg"];
+transformAIGlobals.files = ["/AIGlobals.cfg"];
