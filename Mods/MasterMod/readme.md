@@ -62,9 +62,7 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `RSQ00_Reward`
 
 `ItemPrototypes`:
- - `ArtifactPrototypes`
  - `AttachPrototypes`
- - `ConsumablePrototypes`
  - `QuestItemPrototypes`
  - `WeaponPrototypes`
 
