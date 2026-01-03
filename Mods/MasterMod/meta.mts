@@ -108,15 +108,16 @@ This mods works well with:
 [*] Unmaster
 [*] NoInstaGibByGuards
 [*] NoEnemyMarkers
-[*] NoThreatMarkers 
+[*] NoThreatMarkers
+[*] SkifOnSpeed 
 [/list]
 It does include Better Ballistics mod changes.
 [hr][/hr]  
 All changes have been tested against fresh save file. Some of these changes won't work with older saves.`,
-  changenote: `Extract mods: 
-- NoEnemyMarkers
-- NoThreatMarkers 
-`,
+  changenote: `
+- Extracted SkifOnSpeed mod
+- Fix bug with ai bubble spawns
+`.trim(),
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
