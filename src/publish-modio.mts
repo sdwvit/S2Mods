@@ -76,13 +76,13 @@ async function updateMod(modId: string, makePublic = false) {
 
   form.append("name", sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`));
   form.append("summary", "Mod by sdwvit");
+  form.append("homepage_url", `https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}`);
   form.append(
     "description",
     sanitize(
       convertToHtml(
         meta.description +
-          `<br/>This mod is open source and hosted on <a
-        href="https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}">github</a>.
+          `<br/>This mod is open source and hosted on github (click on homepage link).
           <hr/>
           Mod compatibility:
           <br/>
