@@ -9,13 +9,13 @@ const oncePerFile = new Set<string>();
 export const transformAttachPrototypes: EntriesTransformer<AttachPrototype> = async (struct, context) => {
   const extraStructs: AttachPrototype[] = [];
   const fork = struct.fork();
-  if (struct.SID === "GunThreeLine_Scope") {
-    struct.Cost = 6500.0;
-  }
+
   if (struct.Cost) {
     fork.Cost = struct.Cost * 10;
   }
-  fork.CanHoldBreath = true;
+  if (struct.SID === "GunThreeLine_Scope") {
+    fork.Cost = 65000.0;
+  }
 
   if (!oncePerFile.has(context.filePath)) {
     oncePerFile.add(context.filePath);
