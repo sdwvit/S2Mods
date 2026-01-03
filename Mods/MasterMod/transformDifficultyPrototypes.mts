@@ -1,4 +1,4 @@
-import { DifficultyPrototype, Struct } from "s2cfgtojson";
+import { DifficultyPrototype } from "s2cfgtojson";
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 
@@ -9,7 +9,8 @@ export const transformDifficultyPrototypes: EntriesTransformer<DifficultyPrototy
   if (struct.SID !== "Hard" && struct.SID !== "Stalker") {
     return null;
   }
-  const fork = Object.assign(struct.fork(), {
+
+  return Object.assign(struct.fork(), {
     Ammo_Cost: DIFFICULTY_FACTOR,
     Repair_Cost: DIFFICULTY_FACTOR,
     Upgrade_Cost: DIFFICULTY_FACTOR,
@@ -22,10 +23,5 @@ export const transformDifficultyPrototypes: EntriesTransformer<DifficultyPrototy
     Reward_MainLine_Money: DIFFICULTY_FACTOR,
     //    Reward_SideLine_Money: DIFFICULTY_FACTOR,
   } as DifficultyPrototype);
-  fork.AllowedSaveTypes = context.structsById.Hard.AllowedSaveTypes;
-  fork.TotalSaveLimits = new Struct() as any;
-  fork.bShouldDisableCompass = false;
-  fork.BlockSettings = false;
-  return fork;
 };
 transformDifficultyPrototypes.files = ["/DifficultyPrototypes.cfg"];

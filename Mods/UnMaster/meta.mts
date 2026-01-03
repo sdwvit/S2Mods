@@ -15,7 +15,7 @@ bpatches DifficultyPrototypes
 };
 
 function structTransformer(struct: DifficultyPrototype, context: MetaContext<DifficultyPrototype>) {
-  if (struct.SID !== "Stalker") {
+  if (struct.SID !== "Hard" && struct.SID !== "Stalker") {
     return null;
   }
   const fork = struct.fork();
