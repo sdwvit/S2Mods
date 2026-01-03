@@ -6,6 +6,11 @@ function getModifiedFilesInternal() {
   const modifiedFiles = new Set<string>();
   const findModifiedFiles = (p: string, parent: string) => {
     if (p.includes("WorldMap_WP")) {
+      modifiedFiles.add("SpawnActorPrototypes/");
+      return;
+    }
+    if (p.includes("/QuestNodePrototypes/")) {
+      modifiedFiles.add("QuestNodePrototypes/");
       return;
     }
     if (fs.lstatSync(p).isDirectory()) {
@@ -29,26 +34,27 @@ function getModifiedFilesInternal() {
       if (!acc[folder]) {
         acc[folder] = [];
       }
-      acc[folder].push(name);
+      if (name) {
+        acc[folder].push(name);
+      }
       return acc;
     },
     {} as Record<string, string[]>,
   );
 }
 
-const mappers: Record<string, { li: (s: string) => string; ul: (s: string[]) => string }> = {
-  markdown: { li: (s: string) => ` - ${s}`, ul: (s: string[]) => `${s.join("\n")}\n` },
-  steam: { li: (s: string) => ` [*] ${s}\n`, ul: (s: string[]) => `[list]${s.join("\n")}[/list]` },
-  html: { li: (s: string) => `<li>${s}</li>`, ul: (s: string[]) => `<ul>${s.join("\n")}</ul>` },
+const mappers: Record<string, { code: (s: string) => string; li: (s: string) => string; ul: (s: string[]) => string }> = {
+  markdown: { code: (s) => `\`${s}\``, li: (s) => ` - ${s}`, ul: (s) => `${s.join("\n")}\n` },
+  steam: { code: (s) => s, li: (s) => ` [*] ${s}\n`, ul: (s) => `[list]${s.join("\n")}[/list]` },
+  html: { code: (s) => s, li: (s) => `<li>${s}</li>`, ul: (s) => `<ul>${s.join("\n")}</ul>` },
 };
 
 export function getModifiedFiles(as: "html" | "markdown" | "steam") {
-  const { li, ul } = mappers[as];
-  const code = (s: string) => `\`${s}\``;
+  const { li, ul, code } = mappers[as];
   return ul(
     Object.entries(getModifiedFilesInternal()).map(([folder, files]) => {
       const filesMapped = files.map((file) => li(code(file)));
-      return `${code(folder)}:\n${ul(filesMapped)}`;
+      return `${code(folder)}${filesMapped.length ? `:\n${ul(filesMapped)}` : "\n"}`;
     }),
   );
 }
