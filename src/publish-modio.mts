@@ -76,6 +76,7 @@ async function updateMod(modId: string, makePublic = false) {
 
   form.append("name", sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`));
   form.append("summary", "Mod by sdwvit");
+  form.append("community_options", "131073");
   form.append("homepage_url", `https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}`);
   form.append(
     "description",

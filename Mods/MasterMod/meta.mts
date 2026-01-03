@@ -86,33 +86,40 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [QoL] Unique weapons are now compatible with basic scopes. 
  [*] [Balance] Rifles default scopes can now be detached and sold.
  [*] [QoL] Allows buying/selling/dropping quest items.
- [*] [QoL] Allow unlimited saves on Master (Stalker) difficulty (same as Veteran (Hard)). Re-enables compass, and unlocks settings.
- [*] [QoL] Removes instakill effect from invisible border guards as well as spawned guards.
  [*] [Balance] Increases cost of Attachments to 1000%.
  [*] [Balance] Repeatable Quest Rewards are increased to 400%, but are made random with 25% spread both ways.
  [*] [Balance] Unique and fair rewards for each possible variant of repeating quests.
 [/list]
-This mods works well with UBER TOZ mod. It does include Better Ballistics mod changes.
+This mods works well with:
+[list]
+[*] X16Scopes
+[*] CantBeKnockedDown
+[*] GlassCannon
+[*] NoSluggishWater
+[*] NoFallDamage
+[*] LongLastingBuffs
+[*] NoAPForMobs
+[*] StashClueRework
+[*] NoQuestCooldown
+[*] AnyWeaponFitsPistolSlot
+[*] AlternativeOffsetAim
+[*] CratesDontDropAnything
+[*] HeadlessArmors
+[*] NoPreplacedMedkits
+[*] NoPreplacedArmorAndWeapons
+[*] MoreSideQuestOptions
+[*] RostokMutantRSQuestFix
+[*] HoldYourBreath
+[*] Unmaster
+[*] NoInstaGibByGuards
+[/list]
+It does include Better Ballistics mod changes.
 [hr][/hr]  
 All changes have been tested against fresh save file. Some of these changes won't work with older saves.`,
   changenote: `Added mod dependencies: 
-- X16Scopes
-- CantBeKnockedDown
-- GlassCannon
-- NoSluggishWater
-- NoFallDamage
-- LongLastingBuffs
-- NoAPForMobs
-- StashClueRework
-- NoQuestCooldown
-- AnyWeaponFitsPistolSlot
-- AlternativeOffsetAim
-- CratesDontDropAnything
-- HeadlessArmors
-- NoPreplacedMedkits
-- NoPreplacedArmorAndWeapons
-- MoreSideQuestOptions
-- RostokMutantRSQuestFix
+- HoldYourBreath
+- Unmaster
+- NoInstaGibByGuards
 `,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
