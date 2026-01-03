@@ -72,6 +72,7 @@ export const allDefaultConsumablePrototypesRecord = getRecord(allDefaultConsumab
 export const allDefaultGrenadePrototypesRecord = getRecord(allDefaultGrenadePrototypes);
 export const allDefaultQuestItemPrototypesRecord = getRecord(allDefaultQuestItemPrototypes);
 export const allDefaultWeaponPrototypesRecord = getRecord(allDefaultWeaponPrototypes);
+export const allDefaultPlayerWeaponSettingsPrototypesRecord = getRecord(allDefaultPlayerWeaponSettingsPrototypes);
 export const allDefaultAttachPrototypesRecord = getRecord(allDefaultAttachPrototypes);
 
 export type ArmorDescriptor = {

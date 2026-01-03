@@ -1,5 +1,6 @@
 import { EffectPrototype, NPCWeaponSettingsPrototype } from "s2cfgtojson";
 import { MetaType } from "../../src/meta-type.mts";
+import { allDefaultPlayerWeaponSettingsPrototypesRecord } from "../../src/consts.mts";
 
 export const meta: MetaType<NPCWeaponSettingsPrototype | EffectPrototype> = {
   structTransformers: [entriesTransformer],
@@ -10,12 +11,16 @@ export const meta: MetaType<NPCWeaponSettingsPrototype | EffectPrototype> = {
 
 function entriesTransformer(struct: NPCWeaponSettingsPrototype | EffectPrototype, { filePath, structsById }) {
   if (filePath.endsWith("NPCWeaponSettingsPrototypes.cfg")) {
-    if (struct.SID.includes("Guard") && "BaseDamage" in struct) {
-      const fork = struct.fork();
-      let ref = struct;
-      while ((ref?.BaseDamage || 50) > 100) {
-        ref = structsById[ref.__internal__.refkey];
+    if (struct.SID.includes("Guard")) {
+      const fork = struct.fork() as NPCWeaponSettingsPrototype;
+      let ref = structsById[struct.__internal__.refkey];
+      let refkey = ref.__internal__.refkey;
+
+      while ((ref?.BaseDamage ?? 50) >= 51 && (structsById[refkey] ?? allDefaultPlayerWeaponSettingsPrototypesRecord[refkey])?.BaseDamage) {
+        ref = structsById[refkey] ?? allDefaultPlayerWeaponSettingsPrototypesRecord[refkey];
+        refkey = ref.__internal__.refkey;
       }
+
       fork.BaseDamage = (ref?.BaseDamage ?? 50) - 1;
       return fork;
     }

@@ -48,14 +48,6 @@ export const transformEffectPrototypes: EntriesTransformer<EffectPrototype> = as
     );
   }
 
-  if (struct.SID === "KillVolumeEffect") {
-    extraStructs.push(
-      Object.assign(struct.fork(), {
-        ApplyExtraEffectPrototypeSIDs: struct.ApplyExtraEffectPrototypeSIDs.map(() => "empty").fork(true),
-      }),
-    );
-  }
-
   if (struct.SID === "WaterDeadlyDamage") {
     extraStructs.push(
       Object.assign(struct.fork(), {

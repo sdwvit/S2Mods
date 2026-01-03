@@ -1,4 +1,4 @@
-import { AttachPrototype, Struct } from "s2cfgtojson";
+import { AttachPrototype } from "s2cfgtojson";
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { getX16AttachPrototypes } from "../X16Scopes/meta.mts";
 
