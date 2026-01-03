@@ -3,14 +3,6 @@
 Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines):
 
 `Modified or added assets`:
- - `T_enemymarker`
- - `T_quest_enemymarker`
- - `T_NoiseIndicator`
- - `T_compass_shadow_battle`
- - `T_noise_line_active`
- - `T_noise_line_bg`
- - `T_ThreatGlowing`
- - `T_ThreatGray`
  - `T_inv_w_gp37_en_x8scope_1`
  - `T_inv_w_gp37_en_x8scope_1_upgrade`
  - `T_inv_w_sharpshooter_en_x8scope_1`

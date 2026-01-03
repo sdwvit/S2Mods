@@ -112,14 +112,15 @@ This mods works well with:
 [*] HoldYourBreath
 [*] Unmaster
 [*] NoInstaGibByGuards
+[*] NoEnemyMarkers
+[*] NoThreatMarkers 
 [/list]
 It does include Better Ballistics mod changes.
 [hr][/hr]  
 All changes have been tested against fresh save file. Some of these changes won't work with older saves.`,
-  changenote: `Added mod dependencies: 
-- HoldYourBreath
-- Unmaster
-- NoInstaGibByGuards
+  changenote: `Extract mods: 
+- NoEnemyMarkers
+- NoThreatMarkers 
 `,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
