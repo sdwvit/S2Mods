@@ -32,8 +32,7 @@ logger.log(`Total: ${writtenFiles.flat().length} structs in ${writtenFiles.lengt
 
 await Promise.allSettled([
   import("./update-readme.mts"),
-  import("./push-to-sdk.mts"),
-  import("./pull-assets.mts"),
+  import("./push-to-sdk.mts").then(() => import("./pull-assets.mts")),
   onL1Finish(),
   onL2Finish(),
   onL3Finish(),

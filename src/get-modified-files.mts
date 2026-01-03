@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import { lstatSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { modFolder } from "./base-paths.mts";
 
@@ -13,8 +13,8 @@ function getModifiedFilesInternal() {
       modifiedFiles.add("QuestNodePrototypes/");
       return;
     }
-    if (fs.lstatSync(p).isDirectory()) {
-      for (const file of fs.readdirSync(p)) {
+    if (lstatSync(p).isDirectory()) {
+      for (const file of readdirSync(p)) {
         findModifiedFiles(path.join(p, file), p);
       }
     } else {
