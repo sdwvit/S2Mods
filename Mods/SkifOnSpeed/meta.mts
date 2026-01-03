@@ -3,7 +3,8 @@ import { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType = {
   description: `
-Skif goes brrr (finally!). Now you can speedrun main questline and easily outrun bloodsuckers.
+Drinking energy drink or wearing Thunderberry artifact increases Skif’s running speed (finally!).[h2][/h2]
+Now you can speedrun main questline and easily outrun bloodsuckers.
 [hr][/hr]
 [list]
 [*] ThunderBerry gives permanent 5% movement speed while wearing.
