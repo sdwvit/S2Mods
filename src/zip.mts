@@ -4,6 +4,7 @@ import { modFolder, modFolderSteam, modFolderSteamStruct, modName, projectRoot, 
 import archiver from "archiver";
 import fs from "node:fs";
 import path from "node:path";
+import { logger } from "./logger.mts";
 
 const resolver = (resolve, reject) => (err, result) => (err ? reject(err) : resolve(result));
 
@@ -21,7 +22,7 @@ export async function writeWithZip(filePath: string, data: string): Promise<void
 
 export async function createModZip(sourceDir = modFolderSteamStruct, dest: string | false = path.join("Windows", stagedFolderStruct)) {
   const outZipPath = path.join(projectRoot, `${modName}.zip`);
-  console.log("Creating mod ZIP…");
+  logger.log(`Creating mod ZIP ${modName}…`);
 
   if (!fs.existsSync(sourceDir)) {
     throw new Error(`Source folder does not exist: ${sourceDir}`);
@@ -36,7 +37,7 @@ export async function createModZip(sourceDir = modFolderSteamStruct, dest: strin
 
   return new Promise<string>((resolve, reject) => {
     output.on("close", () => {
-      console.log("ZIP ready:", outZipPath);
+      logger.log("ZIP ready:", outZipPath);
       resolve(outZipPath);
     });
     archive.on("error", reject);

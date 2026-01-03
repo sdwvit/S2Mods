@@ -1,10 +1,11 @@
-import { validMods } from "./base-paths.mts";
+import { allValidMods } from "./base-paths.mts";
 import { spawnSync } from "child_process";
 import { cmd } from "./cmd.mts";
 
 cmd(["git", "checkout", "master"].join(" "));
 cmd(["git", "pull"].join(" "));
-validMods.forEach((mod) => {
+
+allValidMods.forEach((mod) => {
   cmd(["git", "checkout", "-b", mod].join(" "));
   cmd(["git", "checkout", mod].join(" "));
   cmd(["git", "branch", "--set-upstream-to=origin/master", mod].join(" "));
