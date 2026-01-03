@@ -1,5 +1,5 @@
 import { ObjPrototype, Struct } from "s2cfgtojson";
-import { MetaContext, MetaType } from "../../src/meta-type.mts";
+import { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType<ObjPrototype> = {
   structTransformers: [entriesTransformer],
@@ -19,7 +19,7 @@ I consider this mod to be a bit cheaty, and/or useful for debugging other mods.
   changenote: "Fixed bug with property IDs",
 };
 
-function entriesTransformer(struct: ObjPrototype, c: MetaContext<ObjPrototype>) {
+function entriesTransformer(struct: ObjPrototype) {
   if (struct.SID === "NPCBase" || struct.SID === "Player") {
     const fork = struct.fork();
     fork.Protection = new Struct() as ObjPrototype["Protection"];

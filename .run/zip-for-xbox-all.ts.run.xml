@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="zip-for-xbox-all.ts" type="NodeJSConfigurationType" path-to-node="$USER_HOME$/.nvm/versions/node/v24.3.0/bin/node" nameIsGenerated="true" path-to-js-file="zip-for-xbox-all.ts" typescript-loader="bundled" working-dir="$PROJECT_DIR$/src">
+    <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+      <browser with-js-debugger="true" />
+    </EXTENSION>
+    <method v="2" />
+  </configuration>
+</component>
