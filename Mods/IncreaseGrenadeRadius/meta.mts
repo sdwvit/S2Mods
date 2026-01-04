@@ -6,12 +6,9 @@ import { precision } from "../../src/precision.mts";
 
 export const meta: MetaType<ExplosionPrototypes> = {
   description: `
-Title
+Changes RGD5 and F1 explosion radius to 15 and 30 meters respectively.
 [hr][/hr]
-Description 1[h1][/h1]
-Description 2[h1][/h1]
-[hr][/hr]
-Footer
+This aligns better with IRL.
 `,
   changenote: "Initial release",
   structTransformers: [structTransformer],
