@@ -24,7 +24,7 @@
     "archiver": "^7.0.1",
     "dotenv": "^17.2.0",
     "prettier": "^3.6.2",
-    "s2cfgtojson": "4.3.1",
+    "s2cfgtojson": "4.4.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }
