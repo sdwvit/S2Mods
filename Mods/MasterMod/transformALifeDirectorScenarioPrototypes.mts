@@ -81,6 +81,12 @@ export const transformALifeDirectorScenarioPrototypes: EntriesTransformer<ALifeD
     ProhibitedAgentTypes,
     Scenarios,
     ScenarioGroups,
+    DefaultALifeLairExpansionToPlayerTimeMax: Math.ceil(struct.DefaultALifeLairExpansionToPlayerTimeMax / FACTOR),
+    DefaultALifeLairExpansionToPlayerTimeMin: Math.ceil(struct.DefaultALifeLairExpansionToPlayerTimeMin / FACTOR),
+    DefaultSpawnDelayMax: Math.ceil(struct.DefaultSpawnDelayMax / FACTOR),
+    DefaultSpawnDelayMin: Math.ceil(struct.DefaultSpawnDelayMin / FACTOR),
+    //DefaultExpansionSquadNumMax: struct.DefaultExpansionSquadNumMax,
+    //DefaultExpansionSquadNumMin: struct.DefaultExpansionSquadNumMin,
   });
   return markAsForkRecursively(newStruct);
 };
