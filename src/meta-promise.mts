@@ -10,7 +10,7 @@ if (!existsSync(metaPath)) {
   writeFileSync(
     metaPath,
     `
-import { MetaType } from "../../src/metaType.mjs";
+import { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType<Struct> = {
   description: \`
@@ -26,10 +26,7 @@ Footer
 };
 
 function structTransformer(struct: Struct) {
-  if (struct.SID !== "Hard") {
-    return null;
-  }
-  return Object.assign(struct.fork(), {});
+
 }
  
 structTransformer.files = [ todo ];`,
