@@ -115,8 +115,7 @@ It does include Better Ballistics mod changes.
 [hr][/hr]  
 All changes have been tested against fresh save file. Some of these changes won't work with older saves.`,
   changenote: `
-- Extracted SkifOnSpeed mod
-- Fix bug with ai bubble spawns
+Alife spawn timer adjustment. Relationship adjustment.
 `.trim(),
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
