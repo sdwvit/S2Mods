@@ -44,8 +44,7 @@ local function run()
         log("[LuaNodeBridge] ERROR: Node.js executable not found at: " .. nodePath)
         return
     end
-
-    local command = string.format([[powershell -Command "& { & \"%s\" -e \"console.error('hello from ue4ss'); await new Promise(r => setTimeout(r, 2000));\" }"]], nodePath)
+    local command = string.format([[powershell -Command "& { & \"%s\" -e \"console.log('hello from ue4ss');\" }"]], nodePath)
 
     log("[LuaNodeBridge] Spawning Node.js process...")
     log("[LuaNodeBridge] Command: " .. command)
