@@ -1,13 +1,13 @@
 import { logger } from "./logger.mts";
 import path from "node:path";
 import { getStagedPath } from "./cook.mts";
-import { modName, projectRoot } from "./base-paths.mts";
+import { gameModsFolder, modName, projectRoot } from "./base-paths.mts";
 import childProcess from "node:child_process";
 
 export function injectIntoGame(sourcePath: string) {
   logger.log("Injecting into the game using command: ");
 
-  const fullCmd = ["cp", sourcePath, `'${process.env.STALKER2_MODS_FOLDER}'`].join(" ");
+  const fullCmd = ["cp", sourcePath, `'${gameModsFolder}'`].join(" ");
 
   logger.log(fullCmd + "\n\nExecuting...\n");
 

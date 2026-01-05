@@ -22,3 +22,7 @@ export const sdkStagedFolder = path.join(process.env.SDK_PATH, "Stalker2", "Save
 export const sdkModsFolder = path.join(process.env.SDK_PATH, "Stalker2", "Mods");
 export const sdkModFolder = path.join(sdkModsFolder, modName);
 export const allValidMods = fs.readdirSync(modsFolder).filter((file) => fs.statSync(path.join(modsFolder, file)).isDirectory());
+
+export const gameRootFolder = process.env.STALKER2_FOLDER;
+export const gameModsFolder = path.join(gameRootFolder, "Stalker2", "Content", "Paks", "~mods");
+export const gameUE4SSModsFolder = path.join(gameRootFolder, "Stalker2", "Binaries", "Win64", "ue4ss", "Mods");
