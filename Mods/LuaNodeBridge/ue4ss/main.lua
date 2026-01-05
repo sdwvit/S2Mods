@@ -45,8 +45,7 @@ local function run()
         return
     end
 
-    -- Build command: use double quotes around the path
-    local command = string.format([[cmd /c cwd ]], nodePath)
+    local command = string.format([[powershell -Command "& { & \"%s\" -e \"console.log('hello from ue4ss'); await new Promise(r => setTimeout(r, 2000)); process.exit(0)\" }"]], nodePath)
 
     log("[LuaNodeBridge] Spawning Node.js process...")
     log("[LuaNodeBridge] Command: " .. command)
@@ -67,9 +66,9 @@ local function run()
     local exitCode = handle:close()
     if exitCode ~= 0 then
         log("[LuaNodeBridge] Node.js process exited with code: " .. tostring(exitCode))
+    else
+        log("[LuaNodeBridge] Node.js process exited")
     end
-
-    log("[LuaNodeBridge] Node.js process exited")
 end
 
 ExecuteInGameThread(run)
