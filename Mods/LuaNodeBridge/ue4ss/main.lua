@@ -45,7 +45,7 @@ local function run()
         return
     end
 
-    local command = string.format([[powershell -Command "& { & \"%s\" -e \"console.log('hello from ue4ss'); await new Promise(r => setTimeout(r, 2000)); process.exit(0)\" }"]], nodePath)
+    local command = string.format([[powershell -Command "& { & \"%s\" -e \"console.error('hello from ue4ss'); await new Promise(r => setTimeout(r, 2000));\" }"]], nodePath)
 
     log("[LuaNodeBridge] Spawning Node.js process...")
     log("[LuaNodeBridge] Command: " .. command)
