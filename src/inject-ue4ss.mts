@@ -50,5 +50,3 @@ await Promise.all([
   writeFile(modsTxtPath, [...modsTxtSet].map((e) => `${e} : 1`).join("\n")),
   cpPromise,
 ]);
-
-spawnSync("paplay", ["./pop.wav"]);

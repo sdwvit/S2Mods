@@ -5,6 +5,7 @@
 local UEHelpers = require("UEHelpers")
 local Pre, Post = -1, -1
 local singletone = false
+
 local function getScriptDir()
     local info = debug.getinfo(1, "S")
     if not info or not info.source then
@@ -12,21 +13,16 @@ local function getScriptDir()
     end
 
     local source = info.source
-
-    -- Must be a file path
     if source:sub(1, 1) ~= "@" then
         return nil
     end
 
-    -- Strip leading '@'
     source = source:sub(2)
-
-    -- Match both Windows '\' and Unix '/'
     return source:match("^(.*[\\/])")
 end
 
 local function log(...)
-    print(..., "\n")
+    print(..., '\n')
 end
 
 --########################
@@ -34,43 +30,55 @@ end
 --########################
 
 local function run()
-        local modDir = getScriptDir()
-        if not modDir then
-            log("[LuaNodeBridge] ERROR: could not resolve script directory")
-            log("[LuaNodeBridge] debug.source =", debug.getinfo(1, "S").source)
-            return
-        end
-        local nodePath = modDir .. "nodejs\\node.exe"
+    local modDir = getScriptDir()
+    if not modDir then
+        log("[LuaNodeBridge] ERROR: could not resolve script directory")
+        log("[LuaNodeBridge] debug.source =", debug.getinfo(1, "S").source)
+        return
+    end
 
-        local command = string.format(
-            [["%s" -e "console.log(process.cwd())"]],
-            nodePath
-        )
+    local nodePath = modDir .. "nodejs\\node.exe"
 
-        log("[LuaNodeBridge] Spawning Node.js process...")
-        log("[LuaNodeBridge] Command: " .. command)
+    -- Check if node.exe exists
+    if not io.open(nodePath, "r") then
+        log("[LuaNodeBridge] ERROR: Node.js executable not found at: " .. nodePath)
+        return
+    end
 
-        local handle = io.popen(command, "r")
-        if not handle then
-            log("[LuaNodeBridge] Failed to spawn process")
-            return
-        end
+    -- Build command: use double quotes around the path
+    local command = string.format([[cmd /c cwd ]], nodePath)
 
-        for line in handle:lines() do
-            log("[Node] " .. line)
-        end
+    log("[LuaNodeBridge] Spawning Node.js process...")
+    log("[LuaNodeBridge] Command: " .. command)
 
-        handle:close()
+    -- Use io.popen to execute command and read output
+    local handle = io.popen(command, "r")
+    if not handle then
+        log("[LuaNodeBridge] Failed to spawn process")
+        return
+    end
 
-        log("[LuaNodeBridge] Node.js process exited")
+    -- Read all output
+    for line in handle:lines() do
+        log("[LuaNodeBridge-Node] " .. line)
+    end
+
+    -- Close and get exit code
+    local exitCode = handle:close()
+    if exitCode ~= 0 then
+        log("[LuaNodeBridge] Node.js process exited with code: " .. tostring(exitCode))
+    end
+
+    log("[LuaNodeBridge] Node.js process exited")
 end
 
 ExecuteInGameThread(run)
 
---- We only need to create mod once since it is a VP singleton
+-- Hook to run once
 Pre, Post = RegisterHook("/Script/Engine.PlayerController:ClientRestart", function(Context)
-    if (not singletone) then
+    if not singletone then
         run()
+        singletone = true
     else
         UnregisterHook("/Script/Engine.PlayerController:ClientRestart", Pre, Post)
     end
