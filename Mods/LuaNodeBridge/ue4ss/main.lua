@@ -38,13 +38,14 @@ local function run()
     end
 
     local nodePath = modDir .. "nodejs\\node.exe"
+    local mainjsPath = modDir .. "main.js"
 
     -- Check if node.exe exists
     if not io.open(nodePath, "r") then
         log("[LuaNodeBridge] ERROR: Node.js executable not found at: " .. nodePath)
         return
     end
-    local command = string.format([[powershell -Command "& { & \"%s\" -e \"console.log('hello from ue4ss');\" }"]], nodePath)
+    local command = string.format([[powershell -Command "& { & \"%s\" \"%s\" }"]], nodePath, mainjsPath)
 
     log("[LuaNodeBridge] Spawning Node.js process...")
     log("[LuaNodeBridge] Command: " .. command)
