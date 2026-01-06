@@ -4,11 +4,10 @@ import dotEnv from "dotenv";
 import { logger } from "./logger.mjs";
 import { spawnSync } from "child_process";
 import { existsSync } from "node:fs";
-import { sdkStagedFolder, stagedFolderStruct } from "./base-paths.mts";
+import { projectRoot, sdkStagedFolder, stagedFolderStruct } from "./base-paths.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
-const root = path.join(import.meta.dirname, "..");
-const getNTPath = (p: string) => p.replaceAll("\\", "/").replaceAll("/media/", "U:/");
+ export const getNTPath = (p: string) => p.replaceAll("\\", "/").replaceAll("/media/", "U:/");
 
 export function getStagedPath(modName: string) {
   return path.join(sdkStagedFolder, modName, "Windows", stagedFolderStruct);
@@ -21,7 +20,7 @@ export function createMod(modName: string) {
   logger.log(cmd + "\n\nExecuting...\n");
   childProcess.execSync(cmd, {
     stdio: "inherit",
-    cwd: root,
+    cwd: projectRoot,
     shell: "/usr/bin/bash",
   });
 }
@@ -49,7 +48,7 @@ export function cookMod(modName: string) {
   logger.log(fullCmd + "\n\nExecuting...\n");
   childProcess.execSync(fullCmd, {
     stdio: "inherit",
-    cwd: root,
+    cwd: projectRoot,
     shell: "/usr/bin/bash",
   });
   spawnSync("paplay", ["./pop.wav"]);
