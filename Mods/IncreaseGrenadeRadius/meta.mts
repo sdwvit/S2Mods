@@ -10,7 +10,7 @@ Changes RGD5 and F1 explosion radius to 15 and 30 meters respectively.
 [hr][/hr]
 This aligns better with IRL.
 `,
-  changenote: "Initial release",
+  changenote: "Update concussion radius.",
   structTransformers: [structTransformer],
   onFinish(): void | Promise<void> {
     logger.log(Object.keys(MergedStructs).length);
@@ -22,14 +22,14 @@ function structTransformer(struct: ExplosionPrototypes) {
     const fork = struct.fork();
     fork.Radius = 1500; // 15m
     fork.DamagePlayer = Math.max(struct.DamagePlayer, struct.DamageNPC);
-    fork.ConcussionRadius = precision((struct.ConcussionRadius * fork.Radius) / struct.Radius);
+    fork.ConcussionRadius = precision(struct.ConcussionRadius * (1 + fork.Radius / struct.Radius));
     return fork;
   }
   if (struct.SID === "ExplosionF1") {
     const fork = struct.fork();
     fork.Radius = 3000; // 30m
     fork.DamagePlayer = Math.max(struct.DamagePlayer, struct.DamageNPC);
-    fork.ConcussionRadius = precision((struct.ConcussionRadius * fork.Radius) / struct.Radius);
+    fork.ConcussionRadius = precision(struct.ConcussionRadius * (1 + fork.Radius / struct.Radius));
     return fork;
   }
 }
