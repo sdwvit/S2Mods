@@ -11,13 +11,13 @@ const cmd = () => {
   const destinationPath = path.join(sdkModsFolder, modName, "Content");
   const sourcePath = path.join(modFolderRaw, "Stalker2", "Content");
   logger.log(`Pushing raw mod from ${sourcePath} to ${destinationPath}...`);
-  if (readdirSync(sourcePath).length === 0) {
-    console.error(`No files found in source path: ${sourcePath}`);
-    process.exit(1);
-  }
   if (!existsSync(path.join(process.env.SDK_PATH, "Stalker2", "Mods", modName))) {
     logger.log("Mod doesn't exist, creating...");
     createMod(modName);
+  }
+  if (readdirSync(sourcePath).length === 0) {
+    console.error(`No files found in source path: ${sourcePath}`);
+    process.exit(1);
   }
   if (!existsSync(modFolderSdkSrc)) {
     symlinkSync(sdkModFolder, modFolderSdkSrc);
