@@ -30,6 +30,7 @@ end
 --########################
 
 local function run()
+    return
     local modDir = getScriptDir()
     if not modDir then
         log("[LuaNodeBridge] ERROR: could not resolve script directory")
