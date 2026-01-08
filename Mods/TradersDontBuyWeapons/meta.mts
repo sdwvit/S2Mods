@@ -1,5 +1,6 @@
 import { MetaType } from "../../src/meta-type.mts";
 import { Struct, TradePrototype } from "s2cfgtojson";
+import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 
 export const meta: MetaType<TradePrototype> = {
   description: `
@@ -7,7 +8,7 @@ This mod makes traders refuse to purchase Weapons.
 [hr][/hr]  
 bPatches TradePrototypes.cfg
    `,
-  changenote: "Initial release",
+  changenote: "Fix an issue with overriding structs",
   structTransformers: [entriesTransformer],
 };
 
@@ -23,7 +24,7 @@ function entriesTransformer(struct: TradePrototype) {
     return fork;
   });
 
-  return fork;
+  return markAsForkRecursively(fork);
 }
 
 entriesTransformer.files = ["/TradePrototypes.cfg"];

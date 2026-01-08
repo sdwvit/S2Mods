@@ -1,5 +1,6 @@
 import { Struct, TradePrototype } from "s2cfgtojson";
 import { MetaType } from "../../src/meta-type.mts";
+import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 type TG = TradePrototype["TradeGenerators"]["0"];
 function entriesTransformer(struct: TradePrototype) {
   if (!struct.TradeGenerators) {
@@ -14,7 +15,7 @@ function entriesTransformer(struct: TradePrototype) {
     return tg;
   });
   fork.TradeGenerators.__internal__.bpatch = true;
-  return fork;
+  return markAsForkRecursively(fork);
 }
 
 entriesTransformer.files = ["/TradePrototypes.cfg"];
@@ -28,6 +29,6 @@ No more loot goblin.
 Warning: this makes the game more difficult and interesting.[h1][/h1]
 Meant to be used in other collections of mods.
    `,
-  changenote: "Updated to 1.7.x",
+  changenote: "Fix an issue with overriding structs",
   structTransformers: [entriesTransformer],
 };
