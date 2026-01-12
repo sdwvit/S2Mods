@@ -17,6 +17,8 @@ export type EntriesTransformer<T> = ((
   files: string[];
 };
 export type MetaType<T = Struct> = {
+  nameOverride?: string;
+  notOwned?: boolean;
   changenote: string;
   description: string;
   structTransformers: EntriesTransformer<T>[];

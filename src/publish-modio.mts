@@ -1,5 +1,6 @@
 import fs, { rmSync } from "node:fs";
 import path from "node:path";
+import "./ensure-dot-env.mts";
 import { modFolder, modName } from "./base-paths.mts";
 import { sanitize } from "./sanitize.mts";
 import { metaPromise } from "./meta-promise.mts";
@@ -25,23 +26,33 @@ function storeModId(modId: string) {
   fs.writeFileSync(MODIO_FILE, modId, "utf8");
 }
 
-/* -------------------------------------------------- */
-/* CREATE MOD (once)                                   */
-/* -------------------------------------------------- */
-async function createMod() {
-  console.log("Creating mod.io mod…");
-  const form = new FormData();
-  form.append("name", sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`));
-  form.append("summary", "Mod by sdwvit");
+function setNameSummaryDescription(form: FormData) {
+  form.append("name", sanitize(`${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} ${meta.notOwned ? "" : "by sdwvit"}`));
+  form.append("summary", `${meta.notOwned ? "" : "Mod by sdwvit"}`);
   form.append(
     "description",
     sanitize(
       convertToHtml(
         meta.description +
-          `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[h3][/h3]`,
+          `<br/>This mod is open source and hosted on github (click on homepage link).
+          <hr/>
+          Mod compatibility:
+          <br/>
+          Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines): ${getModifiedFiles("html")}`,
       ),
     ),
   );
+
+  return form;
+}
+
+/* -------------------------------------------------- */
+/* CREATE MOD (once)                                   */
+/* -------------------------------------------------- */
+async function createMod() {
+  console.log("Creating mod.io mod…");
+  const form = setNameSummaryDescription(new FormData());
+
   let logoPath = path.join(modFolder, "1024.png");
   if (!fs.existsSync(logoPath)) {
     logoPath = path.join(modFolder, "512.png");
@@ -72,25 +83,10 @@ async function createMod() {
 /* -------------------------------------------------- */
 async function updateMod(modId: string, makePublic = false) {
   console.log("Updating mod metadata…");
-  const form = new FormData();
+  const form = setNameSummaryDescription(new FormData());
 
-  form.append("name", sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`));
-  form.append("summary", "Mod by sdwvit");
   form.append("community_options", "131073");
   form.append("homepage_url", `https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}`);
-  form.append(
-    "description",
-    sanitize(
-      convertToHtml(
-        meta.description +
-          `<br/>This mod is open source and hosted on github (click on homepage link).
-          <hr/>
-          Mod compatibility:
-          <br/>
-          Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines): ${getModifiedFiles("html")}`,
-      ),
-    ),
-  );
 
   if (makePublic) {
     form.append("visible", "1");

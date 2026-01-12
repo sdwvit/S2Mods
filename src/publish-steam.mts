@@ -2,7 +2,7 @@ import path from "node:path";
 import childProcess from "node:child_process";
 import * as fs from "node:fs";
 import * as VDF from "@node-steam/vdf";
-
+import "./ensure-dot-env.mts";
 const STALKER_STEAM_ID = "1643320";
 import { metaPromise } from "./meta-promise.mts";
 import { spawnSync } from "child_process";
@@ -20,7 +20,7 @@ const cmd = () => {
   vdfData.workshopitem.publishedfileid ||= "0"; // This will be set by SteamCMD
   vdfData.workshopitem.contentfolder = modFolderSteam;
   vdfData.workshopitem.previewfile = path.join(modFolder, "512.png");
-  vdfData.workshopitem.title = sanitize(`${modName.replace(/([A-Z]\w])/g, " $1").trim()} by sdwvit`);
+  vdfData.workshopitem.title = sanitize(`${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} ${meta.notOwned ? "" : "by sdwvit"}`);
   vdfData.workshopitem.description = sanitize(
     meta.description +
       `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[hr][/hr]
