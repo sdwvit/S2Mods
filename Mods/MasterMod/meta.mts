@@ -1,5 +1,3 @@
-import { transformAIGlobals } from "./transformAIGlobals.mts";
-import { transformALifeDirectorScenarioPrototypes } from "./transformALifeDirectorScenarioPrototypes.mts";
 import { transformBarbedWirePrototypes } from "./transformBarbedWirePrototypes.mts";
 import { transformAttachPrototypes } from "./transformAttachPrototypes.mts";
 import { transformDialogPoolPrototypes } from "./transformDialogPoolPrototypes.mts";
@@ -32,8 +30,6 @@ import { transformMobs } from "./transformMobs.mts";
 
 const structTransformers = [
   transformNPCPrototypes,
-  transformAIGlobals,
-  transformALifeDirectorScenarioPrototypes,
   transformAttachPrototypes,
   transformBarbedWirePrototypes,
   transformCluePrototypes,
@@ -74,7 +70,6 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [Challenge] Increases cost of everything to 400% (💣 ammo, 🛠️ repair, ⚙️ upgrade, 🍺 consumables, 🛡️ armor, 🔫 weapon, 🔮 artifact).
  [*] [Challenge] Traders or Bartenders are not allowed to buy gear. Regular stalkers can buy gear, but only at almost full or better durability and at 0.15x price.
  [*] [Challenge] Enemy's weapons damage is increased to be on par with player's weapons.
- [*] [Challenge / QoL] Way more lively zone, now spawning all mutant bosses and bigger battles.
  [*] [QoL] X8 Scope compatible with more weapons. For X16 scopes use my other mod called X16Scopes.
  [*] [QoL] Unlocks blocking upgrades. 
  [*] [QoL] Satiety effect now lasts as long as on normal difficulty, as it was more like a slowdown and not a challenge.
@@ -110,12 +105,13 @@ This mods works well with:
 [*] NoEnemyMarkers
 [*] NoThreatMarkers
 [*] SkifOnSpeed 
+[*] DistantHorizons250mALifeExtension
 [/list]
 It does include Better Ballistics mod changes.
 [hr][/hr]  
 All changes have been tested against fresh save file. Some of these changes won't work with older saves.`,
   changenote: `
-Alife spawn timer adjustment. Relationship adjustment.
+Extracted DistantHorizons250mALifeExtension mod changes to a separate mod to reduce conflicts.
 `.trim(),
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {

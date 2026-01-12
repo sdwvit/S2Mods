@@ -12,8 +12,10 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `T_inv_w_en_colim_scope`
  - `T_inv_w_en_colim_scope_upgrade`
 
+`ArtifactPrototypes`:
+ - `QuestArtifactPrototypes`
+
 `GameData`:
- - `AIGlobals`
  - `BarbedWirePrototypes`
  - `DifficultyPrototypes`
  - `EffectPrototypes`
@@ -25,12 +27,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `StashPrototypes`
  - `TradePrototypes`
  - `UpgradePrototypes`
-
-`ALifePrototypes`:
- - `ALifeDirectorScenarioPrototypes`
-
-`ArtifactPrototypes`:
- - `QuestArtifactPrototypes`
 
 `DialogPoolPrototypes`:
  - `GroupAgnostic_Army`
