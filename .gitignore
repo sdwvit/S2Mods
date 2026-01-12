@@ -4,7 +4,7 @@ package-lock.json
 node_modules/
 steamworkshop/
 /.env
-workshopitem.vdf
+workshopitem*.vdf
 /GameLite
 .l1.cache.zlib
 .l2.cache.zlib
