@@ -4,9 +4,8 @@ import { SPAWN_BUBBLE_FACTOR } from "./transformAIGlobals.mts";
 import { EntriesTransformer } from "../../src/meta-type.mts";
 import { modName } from "../../src/base-paths.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
-import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 
-const FACTOR = DIFFICULTY_FACTOR * SPAWN_BUBBLE_FACTOR ** 2;
+const FACTOR = SPAWN_BUBBLE_FACTOR ** 2;
 /**
  * Transforms ALifeDirectorScenarioPrototypes to adjust NPC limits and spawn parameters.
  */
@@ -22,46 +21,21 @@ export const transformALifeDirectorScenarioPrototypes: EntriesTransformer<ALifeD
   const ProhibitedAgentTypes = struct.ProhibitedAgentTypes.map(() => "EAgentType::RatSwarm");
   ProhibitedAgentTypes.__internal__.useAsterisk = false;
 
-  const ALifeScenarioNPCArchetypesLimitsPerPlayerRank = struct.ALifeScenarioNPCArchetypesLimitsPerPlayerRank.map(([_k, e]) => {
+  const ALifeScenarioNPCArchetypesLimitsPerPlayerRank = struct.ALifeScenarioNPCArchetypesLimitsPerPlayerRank.map(([_k, e], i) => {
+    if (!i) {
+      return;
+    }
     const fork = e.fork();
-    fork.Restrictions = e.Restrictions.map(([_k, e]) => {
-      const fork = e.fork();
-      fork.MaxCount = e.MaxCount || 1;
-      fork.MaxCount *= 2;
-      return fork;
-    });
+    fork.Restrictions = e.Restrictions.fork();
     fork.Restrictions.__internal__.useAsterisk = false;
     fork.Restrictions.addNode(
-      new Struct({ AgentType: "EAgentType::Pseudogiant", MaxCount: 1.5, __internal__: { rawName: "_" } }),
+      new Struct({ AgentType: "EAgentType::Pseudogiant", MaxCount: i, __internal__: { rawName: "_" } }),
       `${modName}_Pseudogiant`,
     );
 
     return fork;
   });
   ALifeScenarioNPCArchetypesLimitsPerPlayerRank.__internal__.useAsterisk = false;
-
-  const Scenarios = struct.Scenarios.map(([_, v]) => {
-    const fork = v.fork();
-    const ScenarioSquads = v.ScenarioSquads.map(([_, e]) => {
-      if (e.bPlayerEnemy) {
-        const fork = e.fork();
-        fork.AliveMultiplierMin = e.AliveMultiplierMin * DIFFICULTY_FACTOR;
-        fork.AliveMultiplierMax = e.AliveMultiplierMax * DIFFICULTY_FACTOR;
-        return fork;
-      }
-    });
-    ScenarioSquads.__internal__.useAsterisk = false;
-    if (v.ScenarioSquads.entries().filter(([_, v]) => v.bPlayerEnemy).length) {
-      fork.ScenarioSquads = ScenarioSquads;
-    }
-
-    if (v.ExpansionSquadNumMin) fork.ExpansionSquadNumMin = v.ExpansionSquadNumMin * DIFFICULTY_FACTOR;
-    if (v.ExpansionSquadNumMax) fork.ExpansionSquadNumMax = v.ExpansionSquadNumMax * DIFFICULTY_FACTOR;
-    if (fork.entries().length) {
-      return fork;
-    }
-  });
-  Scenarios.__internal__.useAsterisk = false;
 
   const ScenarioGroups = struct.ScenarioGroups.map(([_, v]) => {
     const fork = v.fork();
@@ -79,14 +53,11 @@ export const transformALifeDirectorScenarioPrototypes: EntriesTransformer<ALifeD
     ALifeScenarioNPCArchetypesLimitsPerPlayerRank,
     RestrictedObjPrototypeSIDs,
     ProhibitedAgentTypes,
-    Scenarios,
     ScenarioGroups,
     DefaultALifeLairExpansionToPlayerTimeMax: Math.ceil(struct.DefaultALifeLairExpansionToPlayerTimeMax / FACTOR),
     DefaultALifeLairExpansionToPlayerTimeMin: Math.ceil(struct.DefaultALifeLairExpansionToPlayerTimeMin / FACTOR),
     DefaultSpawnDelayMax: Math.ceil(struct.DefaultSpawnDelayMax / FACTOR),
     DefaultSpawnDelayMin: Math.ceil(struct.DefaultSpawnDelayMin / FACTOR),
-    //DefaultExpansionSquadNumMax: struct.DefaultExpansionSquadNumMax,
-    //DefaultExpansionSquadNumMin: struct.DefaultExpansionSquadNumMin,
   });
   return markAsForkRecursively(newStruct);
 };
