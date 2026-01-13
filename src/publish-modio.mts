@@ -27,8 +27,11 @@ function storeModId(modId: string) {
 }
 
 function setNameSummaryDescription(form: FormData) {
-  form.append("name", sanitize(`${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} ${meta.notOwned ? "" : "by sdwvit"}`));
-  form.append("summary", `${meta.notOwned ? "" : "Mod by sdwvit"}`);
+  form.append(
+    "name",
+    sanitize(`${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} by ${meta.originalAuthor || process.env.STEAM_USER}`),
+  );
+  form.append("summary", `Mod by ${meta.originalAuthor || process.env.STEAM_USER}`);
   form.append(
     "description",
     sanitize(
@@ -161,7 +164,7 @@ async function publishToModIO() {
   const [outputZip, modId] = await Promise.all([createModZip(), Promise.resolve(getStoredModId() || createMod())]);
   await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
   rmSync(outputZip);
-  logger.log(`mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-sdwvit`);
+  logger.log(`mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-${meta.originalAuthor || process.env.STEAM_USER}`);
 }
 
 async function getFormFile(form = new FormData(), field: string, filePath: string, fileType: string) {

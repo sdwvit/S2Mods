@@ -18,7 +18,7 @@ export type EntriesTransformer<T> = ((
 };
 export type MetaType<T = Struct> = {
   nameOverride?: string;
-  notOwned?: boolean;
+  originalAuthor?: string;
   changenote: string;
   description: string;
   structTransformers: EntriesTransformer<T>[];
