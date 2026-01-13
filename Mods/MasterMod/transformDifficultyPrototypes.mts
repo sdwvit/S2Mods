@@ -1,11 +1,11 @@
 import { DifficultyPrototype } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 
 /**
  * Increases cost of everything and damage on Hard and Stalker difficulty.
  */
-export const transformDifficultyPrototypes: EntriesTransformer<DifficultyPrototype> = async (struct, context) => {
+export const transformDifficultyPrototypes: StructTransformer<DifficultyPrototype> = async (struct, context) => {
   if (struct.SID !== "Hard" && struct.SID !== "Stalker") {
     return null;
   }

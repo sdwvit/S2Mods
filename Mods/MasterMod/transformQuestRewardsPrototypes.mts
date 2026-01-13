@@ -1,13 +1,13 @@
 import { ItemGeneratorPrototype, Struct } from "s2cfgtojson";
 
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { QuestDataTable, rewardFormula } from "./rewardFormula.mts";
 
 let oncePerTransformer = false;
 /**
  * Increase reward for repeatable quests
  */
-export const transformQuestRewardsPrototypes: EntriesTransformer<ItemGeneratorPrototype> = async (struct, context) => {
+export const transformQuestRewardsPrototypes: StructTransformer<ItemGeneratorPrototype> = async (struct, context) => {
   if (!oncePerTransformer) {
     oncePerTransformer = true;
     const extraStructs: ItemGeneratorPrototype[] = [];

@@ -1,5 +1,5 @@
 import { Struct, WeaponGeneralSetupPrototype } from "s2cfgtojson";
-import { EntriesTransformer, MetaContext } from "../../src/meta-type.mts";
+import { StructTransformer, MetaContext } from "../../src/meta-type.mts";
 import {
   allCompatibleAttachmentDefs,
   allCompatibleAttachmentDefsByWeaponGeneralSetupPrototypeSID,
@@ -79,7 +79,7 @@ const getCompatibleAttachmentDefinitionByWeaponSetupSID = (weaponSid: string, si
 /**
  * Enables removing attachments from unique weapons, as well as makes them compatible with ref weapon attachments.
  */
-export const transformWeaponGeneralSetupPrototypes: EntriesTransformer<WeaponGeneralSetupPrototype> = async (struct, context) => {
+export const transformWeaponGeneralSetupPrototypes: StructTransformer<WeaponGeneralSetupPrototype> = async (struct, context) => {
   const fork = struct.fork();
   if (!struct.CompatibleAttachments) {
     return;

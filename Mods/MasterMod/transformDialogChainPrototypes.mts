@@ -1,12 +1,12 @@
 import { DialogChainPrototype } from "s2cfgtojson";
 
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 
 let oncePerTransformer = false;
 
 /**
  */
-export const transformDialogChainPrototypes: EntriesTransformer<DialogChainPrototype> = async (struct) => {
+export const transformDialogChainPrototypes: StructTransformer<DialogChainPrototype> = async (struct) => {
   if (!oncePerTransformer) {
     oncePerTransformer = true;
   }

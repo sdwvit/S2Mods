@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { logger } from "./logger.mjs";
 import { readWithUnzip, writeWithZip } from "./zip.mjs";
-import { EntriesTransformer } from "./meta-type.mts";
+import { StructTransformer } from "./meta-type.mts";
 import { modFolder } from "./base-paths.mts";
 
 export const L2CacheFileName = path.join(modFolder, ".l2.cache.zlib");
@@ -16,7 +16,7 @@ export const L2CacheState = {
  * Value: List of .cfg files to be processed by that transformer
  */
 export const L2Cache = fs.existsSync(L2CacheFileName) ? JSON.parse(await readWithUnzip(L2CacheFileName)) : {};
-export const getL2CacheKey = (transformer: EntriesTransformer<any>) =>
+export const getL2CacheKey = (transformer: StructTransformer<any>) =>
   `${transformer.files.sort().join()}:${transformer.contains}:${transformer.contents ? transformer.contents.sort().join() : ""}`;
 
 export const onL2Finish = () => {

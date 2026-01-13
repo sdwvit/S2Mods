@@ -1,12 +1,12 @@
 import { ObjPrototype } from "s2cfgtojson";
 
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { guideQuestObjectPrototypeSIDs } from "../../src/consts.mts";
 
 /**
  * Adds trade prototypes to all technicians and guides.
  */
-export const transformQuestObjPrototypes: EntriesTransformer<ObjPrototype> = async (struct) => {
+export const transformQuestObjPrototypes: StructTransformer<ObjPrototype> = async (struct) => {
   if (techniciansAndTheirTradePrototypes.has(struct.SID)) {
     const fork = Object.assign(struct.fork(), {
       TradePrototypeSID: techniciansAndTheirTradePrototypes.get(struct.SID),

@@ -1,10 +1,10 @@
 import { QuestItemPrototype } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 
 /**
  * Remove an essential flag from various items
  */
-export const transformQuestItemPrototypes: EntriesTransformer<QuestItemPrototype> = async (struct) => {
+export const transformQuestItemPrototypes: StructTransformer<QuestItemPrototype> = async (struct) => {
   if (struct.IsQuestItem) {
     return Object.assign(struct.fork(), { IsQuestItem: false });
   }

@@ -1,10 +1,10 @@
 import { LairPrototype } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 
 /**
  * increase zombie population in lairs, also add controllers occasionally
  */
-export const transformLairPrototypes: EntriesTransformer<LairPrototype> = async (struct) => {
+export const transformLairPrototypes: StructTransformer<LairPrototype> = async (struct) => {
   if (struct.Preset.InitialInhabitantFaction !== "Zombie") {
     return null;
   }

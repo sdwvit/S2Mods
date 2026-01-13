@@ -1,6 +1,6 @@
 import { Struct, TradePrototype } from "s2cfgtojson";
 
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { precision } from "../../src/precision.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { bartendersTradePrototypes, generalTradersTradePrototypes, medicsTradePrototypes, technicianTradePrototypes } from "../../src/consts.mts";
@@ -10,7 +10,7 @@ const oncePerFile = new Set<string>();
 /**
  * Don't allow traders to buy weapons and armor.
  */
-export const transformTradePrototypes: EntriesTransformer<TradePrototype> = async (struct, context) => {
+export const transformTradePrototypes: StructTransformer<TradePrototype> = async (struct, context) => {
   const extraStructs: TradePrototype[] = [];
   if (!oncePerFile.has(context.filePath)) {
     oncePerFile.add(context.filePath);

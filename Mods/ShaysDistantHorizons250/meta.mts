@@ -9,7 +9,8 @@ This is an approved release of Shay's Distant Horizons mod, which increases spaw
 More info here: [url=https://www.nexusmods.com/stalker2heartofchornobyl/mods/1879?tab=description]nexus[/url]
 `,
   nameOverride: "Distant Horizons - 250m",
-  originalAuthor: 'Shay',
+  sdkModNameOverride: "Release_Render",
+  originalAuthor: "Shay",
   changenote: "Initial release",
   structTransformers: [],
 };

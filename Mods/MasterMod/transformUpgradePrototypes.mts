@@ -1,5 +1,5 @@
 import { Struct, UpgradePrototype } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 
 let once = false;
 
@@ -7,7 +7,7 @@ export const GunDnipro_Upgrade_HoldBreathPos75Effect = "GunDnipro_Upgrade_HoldBr
 /**
  * Unlocks blocking upgrades.
  */
-export const transformUpgradePrototypes: EntriesTransformer<UpgradePrototype> = async (struct) => {
+export const transformUpgradePrototypes: StructTransformer<UpgradePrototype> = async (struct) => {
   if (struct.SID === "empty") {
     return Object.assign(struct.fork(), {
       RepairCostModifier: `0.02f`,

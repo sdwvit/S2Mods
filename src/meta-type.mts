@@ -8,7 +8,7 @@ export type MetaContext<T> = {
   filePath: string;
   structsById: Record<string, T>;
 };
-export type EntriesTransformer<T> = ((
+export type StructTransformer<T> = ((
   entries: T,
   context: MetaContext<T>,
 ) => Struct | Struct[] | null | void | Promise<void | Struct | Struct[] | null>) & {
@@ -18,10 +18,11 @@ export type EntriesTransformer<T> = ((
 };
 export type MetaType<T = Struct> = {
   nameOverride?: string;
+  sdkModNameOverride?: string;
   originalAuthor?: string;
   changenote: string;
   description: string;
-  structTransformers: EntriesTransformer<T>[];
+  structTransformers: StructTransformer<T>[];
   onFinish?(): void | Promise<void>;
-  onTransformerFinish?(transformer: EntriesTransformer<T>): void;
+  onTransformerFinish?(transformer: StructTransformer<T>): void;
 };

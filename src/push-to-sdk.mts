@@ -6,7 +6,8 @@ import { mkdirSync } from "fs";
 import { cpSync, existsSync, readdirSync, rmSync, symlinkSync } from "node:fs";
 import { createMod } from "./cook.mts";
 import { recursiveCfgFind } from "./recursive-cfg-find.mts";
-
+import { metaPromise } from "./meta-promise.mts";
+const { meta } = await metaPromise;
 const cmd = () => {
   const destinationPath = path.join(sdkModsFolder, modName, "Content");
   const sourcePath = path.join(modFolderRaw, "Stalker2", "Content");
@@ -20,7 +21,9 @@ const cmd = () => {
     process.exit(1);
   }
   if (!existsSync(modFolderSdkSrc)) {
-    symlinkSync(sdkModFolder, modFolderSdkSrc);
+    const resolvedSdkModFolder = path.join(sdkModsFolder, meta.sdkModNameOverride) || sdkModFolder;
+
+    symlinkSync(resolvedSdkModFolder, modFolderSdkSrc);
   }
   if (existsSync(destinationPath)) {
     logger.log(`Destination path ${destinationPath} exists... cleaning up`);

@@ -1,5 +1,5 @@
 import { Struct } from "s2cfgtojson";
-import { EntriesTransformer } from "./meta-type.mts";
+import { StructTransformer } from "./meta-type.mts";
 import path from "node:path";
 import fs from "node:fs";
 import { baseCfgDir, modFolderRaw, modName, rawCfgEnclosingFolder } from "./base-paths.mjs";
@@ -13,7 +13,7 @@ const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
 const writeFile = promisify(fs.writeFile);
 
-export function getCfgFileProcessor<T extends Struct>(transformer: EntriesTransformer<T>) {
+export function getCfgFileProcessor<T extends Struct>(transformer: StructTransformer<T>) {
   type OneT = Struct | T | Struct[] | T[] | void | null | void[] | null[];
   logger.log(`Processing: ${transformer.name}`);
   return async function processOneCfgFile(filePath: string, fileIndex: number): Promise<Struct[]> {

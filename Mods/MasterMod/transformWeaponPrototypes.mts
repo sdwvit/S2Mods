@@ -1,5 +1,5 @@
 import { WeaponPrototype } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { getTemplate } from "../../src/backfill-def.mts";
 import { allDefaultWeaponPrototypesRecord } from "../../src/consts.mts";
 
@@ -7,7 +7,7 @@ import { allDefaultWeaponPrototypesRecord } from "../../src/consts.mts";
  * Remove an essential flag from various items
  * And allow smgs to go into a pistol slot
  */
-export const transformWeaponPrototypes: EntriesTransformer<WeaponPrototype> = async (struct) => {
+export const transformWeaponPrototypes: StructTransformer<WeaponPrototype> = async (struct) => {
   const fork = struct.fork();
 
   if (struct.IsQuestItem) {

@@ -1,6 +1,6 @@
 import { DialogPrototype, Struct } from "s2cfgtojson";
 
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { QuestDataTableByDialogSID, rewardFormula } from "./rewardFormula.mts";
 import { alwaysShowAllMutantQuestPartsDialog } from "../MoreSideQuestOptions/meta.mts";
@@ -10,7 +10,7 @@ const MALACHITE_BRIBE = rewardFormula(50000).reduce((a, b) => a + b, 0) / 2;
 /**
  * Show the correct money reward for repeatable quests
  */
-export const transformDialogPrototypes: EntriesTransformer<DialogPrototype> = async (struct, context) => {
+export const transformDialogPrototypes: StructTransformer<DialogPrototype> = async (struct, context) => {
   if (struct.SID === "Malahit_Hub_DialogueOnEntrance_Bribe_62758") {
     return adjustMalahitBribe(struct);
   }

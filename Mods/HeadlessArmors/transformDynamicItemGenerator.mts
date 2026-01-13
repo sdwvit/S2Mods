@@ -1,12 +1,12 @@
 import { DynamicItemGenerator, Struct } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { adjustArmorItemGenerator } from "./adjustArmorItemGenerator.mts";
 import { addMissingCategories } from "../../src/add-missing-categories.mts";
 
 /**
  * Allows NPCs to drop armor.
  */
-export const transformDynamicItemGenerator: EntriesTransformer<DynamicItemGenerator> = (struct) => {
+export const transformDynamicItemGenerator: StructTransformer<DynamicItemGenerator> = (struct) => {
   if (struct.SID.includes("Trade") || !struct.ItemGenerator) {
     return;
   }

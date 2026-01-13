@@ -1,5 +1,5 @@
 import { GetStructType } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 
 type MeshGeneratorPrototype = GetStructType<{
@@ -13,7 +13,7 @@ type MeshGeneratorPrototype = GetStructType<{
 /**
  * Sets bullet (Strike) protection to 0 for all mobs.
  */
-export const transformMeshGeneratorPrototypes: EntriesTransformer<MeshGeneratorPrototype> = async (struct, c) => {
+export const transformMeshGeneratorPrototypes: StructTransformer<MeshGeneratorPrototype> = async (struct, c) => {
   if (struct.SID === "BAN_03_a_MeshGenerator" || struct.SID === "BAN_04_a_MeshGenerator") {
     const fork = struct.fork();
 

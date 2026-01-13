@@ -4,7 +4,7 @@ import { logger } from "./logger.mjs";
 import { readWithUnzip, writeWithZip } from "./zip.mjs";
 import path from "node:path";
 import { modFolder } from "./base-paths.mts";
-import { EntriesTransformer } from "./meta-type.mts";
+import { StructTransformer } from "./meta-type.mts";
 import { readFile } from "node:fs/promises";
 
 const L1CacheFileName = path.join(modFolder, ".l1.cache.zlib");
@@ -22,7 +22,7 @@ export const L1Cache: Record<string, Struct[]> = fs.existsSync(L1CacheFileName)
     )
   : {};
 
-export async function getOrUpdateFromL1Cache<T extends Struct>(filePath: string, transformer: EntriesTransformer<T>) {
+export async function getOrUpdateFromL1Cache<T extends Struct>(filePath: string, transformer: StructTransformer<T>) {
   const key = getL1Key(filePath, transformer);
   if (L1Cache[key]) {
     return L1Cache[key] as T[];
@@ -40,11 +40,11 @@ export async function getOrUpdateFromL1Cache<T extends Struct>(filePath: string,
   return L1Cache[key] as T[];
 }
 
-export function getFromL1Cache<T extends Struct>(filePath: string, transformer: EntriesTransformer<T>) {
+export function getFromL1Cache<T extends Struct>(filePath: string, transformer: StructTransformer<T>) {
   return L1Cache[getL1Key(filePath, transformer)];
 }
 
-export const getL1Key = (filePath: string, transformer: EntriesTransformer<any>) =>
+export const getL1Key = (filePath: string, transformer: StructTransformer<any>) =>
   `${filePath}${transformer.contents ? `:${transformer.contents.sort().join()}` : ""}`;
 
 export const onL1Finish = () => {

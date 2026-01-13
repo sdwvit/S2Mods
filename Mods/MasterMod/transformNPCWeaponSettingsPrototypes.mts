@@ -1,5 +1,5 @@
 import { NPCWeaponSettingsPrototype } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import {
   allDefaultPlayerWeaponSettingsPrototypes,
   allDefaultPlayerWeaponSettingsPrototypesRecord,
@@ -15,7 +15,7 @@ const weaponPrototypesByNPCSettingsMap = Object.fromEntries(
 /**
  * Transforms NPC Weapon Settings Prototypes to set default BaseDamage for Guard NPCs.
  */
-export const transformNPCWeaponSettingsPrototypes: EntriesTransformer<NPCWeaponSettingsPrototype> = async (struct, { structsById }) => {
+export const transformNPCWeaponSettingsPrototypes: StructTransformer<NPCWeaponSettingsPrototype> = async (struct, { structsById }) => {
   if (struct.SID === "GunAK74_Strelok_ST_NPC") {
     return Object.assign(struct.fork(), { BaseDamage: 9, ArmorPiercing: 3 });
   }

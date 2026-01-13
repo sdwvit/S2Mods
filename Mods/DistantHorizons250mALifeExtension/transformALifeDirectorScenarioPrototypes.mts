@@ -1,7 +1,7 @@
 import { ALifeDirectorScenarioPrototype, Struct } from "s2cfgtojson";
 
 import { SPAWN_BUBBLE_FACTOR } from "./transformAIGlobals.mts";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { modName } from "../../src/base-paths.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 
@@ -9,7 +9,7 @@ const FACTOR = SPAWN_BUBBLE_FACTOR ** 2;
 /**
  * Transforms ALifeDirectorScenarioPrototypes to adjust NPC limits and spawn parameters.
  */
-export const transformALifeDirectorScenarioPrototypes: EntriesTransformer<ALifeDirectorScenarioPrototype> = async (struct, {}) => {
+export const transformALifeDirectorScenarioPrototypes: StructTransformer<ALifeDirectorScenarioPrototype> = async (struct, {}) => {
   const newStruct = struct.fork();
   const RestrictedObjPrototypeSIDs = struct.RestrictedObjPrototypeSIDs.map(([k, v]) => {
     if (v.startsWith("GeneralNPC_Spark") || v.startsWith("GeneralNPC_Scientists")) {
@@ -28,10 +28,7 @@ export const transformALifeDirectorScenarioPrototypes: EntriesTransformer<ALifeD
     const fork = e.fork();
     fork.Restrictions = e.Restrictions.fork();
     fork.Restrictions.__internal__.useAsterisk = false;
-    fork.Restrictions.addNode(
-      new Struct({ AgentType: "EAgentType::Pseudogiant", MaxCount: i, __internal__: { rawName: "_" } }),
-      `${modName}_Pseudogiant`,
-    );
+    fork.Restrictions.addNode(new Struct({ AgentType: "EAgentType::Pseudogiant", MaxCount: i, __internal__: { rawName: "_" } }), `Pseudogiant`);
 
     return fork;
   });

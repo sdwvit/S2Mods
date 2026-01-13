@@ -1,10 +1,10 @@
 import { BarbedWirePrototype } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 
 /**
  * Remove barbed wire bleeding and armor damage
  */
-export const transformBarbedWirePrototypes: EntriesTransformer<BarbedWirePrototype> = async (struct) => {
+export const transformBarbedWirePrototypes: StructTransformer<BarbedWirePrototype> = async (struct) => {
   if (struct.SID !== "Empty") return null;
   const fork = struct.fork();
 

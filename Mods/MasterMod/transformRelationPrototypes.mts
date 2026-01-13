@@ -1,10 +1,10 @@
 import { RelationPrototype } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 
 /**
  * Fixes some of the relationships
  */
-export const transformRelationPrototypes: EntriesTransformer<RelationPrototype> = async (struct) => {
+export const transformRelationPrototypes: StructTransformer<RelationPrototype> = async (struct) => {
   const fork = struct.fork();
 
   fork.Relations = struct.Relations.fork();

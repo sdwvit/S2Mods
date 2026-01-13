@@ -1,10 +1,10 @@
 import { ItemGeneratorPrototype } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 import { allDefaultAmmoPrototypesRecord, allDefaultConsumablePrototypesRecord, allDefaultGrenadePrototypesRecord } from "../../src/consts.mts";
 
-export const transformItemGeneratorPrototypes: EntriesTransformer<ItemGeneratorPrototype> = async (struct, context) => {
+export const transformItemGeneratorPrototypes: StructTransformer<ItemGeneratorPrototype> = async (struct, context) => {
   if (prohibitedIds.some((id) => struct.SID.includes(id))) {
     return null;
   }

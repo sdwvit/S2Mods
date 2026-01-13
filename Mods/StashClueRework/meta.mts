@@ -1,4 +1,4 @@
-import { EntriesTransformer, MetaContext, MetaType } from "../../src/meta-type.mts";
+import { StructTransformer, MetaContext, MetaType } from "../../src/meta-type.mts";
 import { CluePrototype, QuestNodePrototype, SpawnActorPrototype, Struct } from "s2cfgtojson";
 import { allStashes } from "./stashes.mts";
 import { modName } from "../../src/base-paths.mts";
@@ -22,7 +22,7 @@ bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 `,
   changenote: "Mutant Quest Parts quest now gives stashes too",
   structTransformers: [transformSpawnActorPrototypes, transformCluePrototypes, transformQuestNodePrototypes],
-  onTransformerFinish(transformer: EntriesTransformer<Struct>) {
+  onTransformerFinish(transformer: StructTransformer<Struct>) {
     finishedTransformers.add(transformer.name);
   },
 };
@@ -122,7 +122,7 @@ transformCluePrototypes.files = ["/CluePrototypes.cfg"];
 
 let oncePerTransformer = false;
 const RandomStashQuestName = `RandomStashQuest`; // if you change this, also change Blueprint in SDK
-const RandomStashQuestNodePrefix = `${modName}_RandomStashQuest`;
+const RandomStashQuestNodePrefix = RandomStashQuestName;
 
 export const MalachiteMutantQuestPartsQuestsDoneNode = "BodyParts_Malahit_SetDialog_EQ197_QD_Orders";
 export const MalachiteMutantQuestPartsQuestsDoneDialogs = [

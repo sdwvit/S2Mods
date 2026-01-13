@@ -1,5 +1,5 @@
 import { QuestNodePrototype, Struct } from "s2cfgtojson";
-import { EntriesTransformer } from "../../src/meta-type.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
 import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 import { logger } from "../../src/logger.mts";
@@ -8,7 +8,7 @@ import { recurringQuestsFilenames } from "../StashClueRework/meta.mts";
 /**
  * Removes timeout for repeating quests.
  */
-export const transformQuestNodePrototypes: EntriesTransformer<QuestNodePrototype> = async (struct, context) => {
+export const transformQuestNodePrototypes: StructTransformer<QuestNodePrototype> = async (struct, context) => {
   let promises: Promise<QuestNodePrototype[] | QuestNodePrototype>[] = [];
   const fork = struct.fork();
 

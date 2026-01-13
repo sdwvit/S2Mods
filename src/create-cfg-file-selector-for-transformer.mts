@@ -1,9 +1,9 @@
-import { EntriesTransformer } from "./meta-type.mts";
+import { StructTransformer } from "./meta-type.mts";
 import { logger } from "./logger.mjs";
 import { getCfgFiles } from "./get-cfg-files.mjs";
 import { getL2CacheKey, L2Cache, L2CacheState } from "./l2-cache.mjs";
 
-export async function getFilesForTransformer<T>(transformer: EntriesTransformer<T>): Promise<string[]> {
+export async function getFilesForTransformer<T>(transformer: StructTransformer<T>): Promise<string[]> {
   if (!transformer?.files?.length) {
     logger.warn(`Transformer ${transformer.name} has no files specified.`);
     return [];
