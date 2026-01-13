@@ -11,7 +11,7 @@ async function pullAssets() {
   logger.log(`Pulling mod assets from ${sourcePath}...`);
   if (fs.readdirSync(sourcePath).length === 0) {
     console.error(`No files found in source path: ${sourcePath}`);
-    process.exit(1);
+    return;
   }
 
   cpSync(sourcePath, destinationPath, { recursive: true, force: true });

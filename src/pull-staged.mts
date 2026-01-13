@@ -12,7 +12,7 @@ const copyPaks = async () => {
   logger.log(`Pulling staged mod from ${sourcePath}...`);
   if (fs.readdirSync(sourcePath).length === 0) {
     console.error(`No files found in source path: ${sourcePath}`);
-    process.exit(1);
+    return;
   }
 
   childProcess.execSync(["mkdir", "-p", destinationPath, "&&", "cp", path.join(sourcePath, "*"), destinationPath].join(" "), {
