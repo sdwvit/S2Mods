@@ -3,11 +3,11 @@ import childProcess from "node:child_process";
 
 import * as fs from "node:fs";
 import { logger } from "./logger.mjs";
-import { modFolder, modName, sdkStagedFolder } from "./base-paths.mjs";
+import { modFolder, sdkStagedPakFolder, stagedFolderStruct } from "./base-paths.mjs";
 
-const copyPaks = () => {
-  const folderStructure = path.join("Stalker2", "Mods", modName, "Content", "Paks", "Windows");
-  const sourcePath = path.join(sdkStagedFolder, modName, "Windows", folderStructure);
+const copyPaks = async () => {
+  const folderStructure = await stagedFolderStruct;
+  const sourcePath = await sdkStagedPakFolder;
   const destinationPath = path.join(modFolder, "steamworkshop", folderStructure);
   logger.log(`Pulling staged mod from ${sourcePath}...`);
   if (fs.readdirSync(sourcePath).length === 0) {
@@ -22,4 +22,4 @@ const copyPaks = () => {
   });
 };
 
-copyPaks();
+await copyPaks();

@@ -32,4 +32,3 @@ function structTransformer(struct: Struct) {
 structTransformer.files = [ todo ];`,
   );
 }
-export const metaPromise = import(path.join(modFolder, "meta.mts")) as Promise<{ meta: MetaType<Struct> }>;

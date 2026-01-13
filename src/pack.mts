@@ -2,21 +2,28 @@ import path from "node:path";
 import fs from "node:fs";
 import { logger } from "./logger.mts";
 import childProcess from "node:child_process";
-import { modFolderRaw, modFolderSteamStruct, projectRoot } from "./base-paths.mts";
+import { modFolderRaw, modFolderSteamStruct, projectRoot, sdkModName } from "./base-paths.mts";
 
-export function getPackFileName(modName: string) {
-  return `${modName}Stalker2-Windows.pak`;
+export async function getPackFileName() {
+  return `${await sdkModName}Stalker2-Windows.pak`;
 }
 
-export function pack(modName: string) {
-  const packName = getPackFileName(modName);
+export async function pack() {
+  const packName = await getPackFileName();
 
-  if (!fs.existsSync(modFolderSteamStruct)) {
-    fs.mkdirSync(modFolderSteamStruct, { recursive: true });
+  if (!fs.existsSync(await modFolderSteamStruct)) {
+    fs.mkdirSync(await modFolderSteamStruct, { recursive: true });
   }
-  const fullCmd = [process.env.REPAK_PATH, "pack", modFolderRaw, packName, "&&", "mv", path.join(projectRoot, packName), modFolderSteamStruct].join(
-    " ",
-  );
+  const fullCmd = [
+    process.env.REPAK_PATH,
+    "pack",
+    modFolderRaw,
+    packName,
+    "&&",
+    "mv",
+    path.join(projectRoot, packName),
+    await modFolderSteamStruct,
+  ].join(" ");
 
   logger.log("Now packing the resource mod...");
 

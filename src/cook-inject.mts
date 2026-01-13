@@ -1,12 +1,12 @@
 import "./ensure-dot-env.mts";
-import { modName } from "./base-paths.mjs";
+import { sdkStagedPakFolder } from "./base-paths.mjs";
 import { spawnSync } from "child_process";
-import { cookMod, getStagedPath } from "./cook.mts";
+import { cookMod } from "./cook.mts";
 import { injectIntoGame } from "./inject-into-game.mts";
 import path from "node:path";
 
-cookMod(modName);
+await cookMod();
 
-injectIntoGame(path.join(getStagedPath(modName), "*"));
+injectIntoGame(path.join(await sdkStagedPakFolder, "*"));
 
 spawnSync("paplay", ["./pop.wav"]);

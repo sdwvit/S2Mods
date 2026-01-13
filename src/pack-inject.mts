@@ -5,8 +5,8 @@ import { injectIntoGame } from "./inject-into-game.mts";
 import { getPackFileName, pack } from "./pack.mts";
 import path from "path";
 
-pack(modName);
+await pack();
 
-injectIntoGame(path.join(modFolderSteamStruct, getPackFileName(modName)));
+injectIntoGame(path.join(await modFolderSteamStruct, await getPackFileName()));
 
 spawnSync("paplay", ["./pop.wav"]);

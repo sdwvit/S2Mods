@@ -4,14 +4,12 @@ import * as fs from "node:fs";
 import * as VDF from "@node-steam/vdf";
 import "./ensure-dot-env.mts";
 const STALKER_STEAM_ID = "1643320";
-import { metaPromise } from "./meta-promise.mts";
 import { spawnSync } from "child_process";
-import { modFolder, modFolderSteam, modName } from "./base-paths.mjs";
+import { modFolder, modFolderSteam, modMeta, modName } from "./base-paths.mjs";
 import { sanitize } from "./sanitize.mts";
 import { logger } from "./logger.mts";
 import { getModifiedFiles } from "./get-modified-files.mts";
-const { meta } = await metaPromise;
-
+const meta = await modMeta;
 const cmd = () => {
   const vdfFilePath = path.join(modFolder, `workshopitem.vdf`);
   const vdfData = fs.existsSync(vdfFilePath) ? VDF.parse(fs.readFileSync(vdfFilePath, "utf8")) : { workshopitem: {} };

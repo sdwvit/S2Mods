@@ -1,14 +1,13 @@
 import fs, { rmSync } from "node:fs";
 import path from "node:path";
 import "./ensure-dot-env.mts";
-import { modFolder, modName } from "./base-paths.mts";
+import { modFolder, modMeta, modName } from "./base-paths.mts";
 import { sanitize } from "./sanitize.mts";
-import { metaPromise } from "./meta-promise.mts";
 import { createModZip } from "./zip.mts";
 import { logger } from "./logger.mts";
 import { getModifiedFiles } from "./get-modified-files.mts";
 
-const { meta } = await metaPromise;
+const meta = await modMeta;
 
 const API_BASE = process.env.MODIO_API!;
 const GAME_ID = "5761";

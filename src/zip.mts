@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { deflate, inflate } from "node:zlib";
-import { modFolder, modFolderSteam, modFolderSteamStruct, modName, projectRoot, stagedFolderStruct } from "./base-paths.mts";
+import { modFolderSteamStruct, modName, projectRoot, stagedFolderStruct } from "./base-paths.mts";
 import archiver from "archiver";
 import fs from "node:fs";
 import path from "node:path";
@@ -20,7 +20,13 @@ export async function writeWithZip(filePath: string, data: string): Promise<void
   await writeFile(filePath, zipped);
 }
 
-export async function createModZip(sourceDir = modFolderSteamStruct, dest: string | false = path.join("Windows", stagedFolderStruct)) {
+export async function createModZip(sourceDir?: string, dest?: string | false) {
+  if (!sourceDir) {
+    sourceDir = await modFolderSteamStruct;
+  }
+  if (dest === undefined) {
+    dest = path.join("Windows", await stagedFolderStruct);
+  }
   const outZipPath = path.join(projectRoot, `${modName}.zip`);
   logger.log(`Creating mod ZIP ${modName}…`);
 
