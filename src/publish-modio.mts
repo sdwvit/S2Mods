@@ -89,7 +89,11 @@ async function updateMod(modId: string, makePublic = false) {
 
   form.append("community_options", "131073");
   form.append("homepage_url", `https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}`);
-
+  let logoPath = path.join(modFolder, "1024.png");
+  if (!fs.existsSync(logoPath)) {
+    logoPath = path.join(modFolder, "512.png");
+  }
+  await getFormFile(form, "logo", logoPath, "image/png");
   if (makePublic) {
     form.append("visible", "1");
   }
