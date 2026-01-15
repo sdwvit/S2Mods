@@ -66,7 +66,7 @@ function calculateArmorScore(armor: ArmorPrototype): number {
   const score = Object.keys(scoreKeys).reduce((sum, e) => sum + scoreKeys[e] * scoreScales[e], 0);
   return score / 100; // 0 to 1
 }
-
+const backfillCache: Record<string, ArmorPrototype> = {};
 export const allItemRank = Object.fromEntries(
   Object.values({
     ...allDefaultNightVisionGogglesPrototypesRecord,
@@ -88,9 +88,10 @@ export const allItemRank = Object.fromEntries(
     .map((armor) => {
       const backfilled = backfillDef(
         armor as any,
-        allDefaultArmorPrototypesRecord,
+        { ...allDefaultArmorPrototypesRecord, ...backfillCache },
         armor.SID.toLowerCase().includes("helmet") ? "Heavy_Svoboda_Helmet" : undefined,
       );
+      backfillCache[armor.SID] = backfilled;
       return [armor.SID, calculateArmorScore(backfilled)] as [string, number];
     })
     .filter((a) => {
