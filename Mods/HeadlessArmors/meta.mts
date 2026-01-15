@@ -54,7 +54,8 @@ export const meta: MetaType<ArmorPrototype | DynamicItemGenerator> = {
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
     [/list] 
   `,
-  changenote: "More variety in armor loadouts on later difficulties. Reworked a lot of backend systems to support easier extension.",
+  changenote: `Set ItemGenerator.__internal__.bpatch = true; and relax the early-return guard to
+  require PossibleItems to have more than 1 entry instead of just non-empty. Remove accidentally checked out skeleton meshes.`,
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };
 

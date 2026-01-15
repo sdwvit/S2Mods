@@ -22,8 +22,9 @@ export const transformDynamicItemGenerator: StructTransformer<DynamicItemGenerat
     }
   });
   ItemGenerator.__internal__.useAsterisk = false;
+  ItemGenerator.__internal__.bpatch = true;
 
-  if (!ItemGenerator.entries().length || !ItemGenerator.filter((e): e is any => !!(e[1].PossibleItems as Struct).entries().length).entries().length) {
+  if (!ItemGenerator.entries().length || !ItemGenerator.filter((e): e is any => (e[1].PossibleItems as Struct).entries().length > 1).entries().length) {
     return;
   }
 
