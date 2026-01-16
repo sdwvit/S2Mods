@@ -91,7 +91,9 @@ export async function transformArmorPrototypes(struct: ArmorPrototype, context: 
           newSID.toLowerCase().includes("helmet") ? "Light_Neutral_Helmet" : armor.SID,
         ),
       ) as ArmorPrototype;
-      const overrides = { ...newArmors[newSID as keyof typeof newArmors] };
+      const overrides = { ...newArmors[newSID as keyof typeof newArmors] } as ArmorPrototype & {
+        __internal__?: { _extras?: { keysForRemoval?: Record<string, string[]>; isDroppable?: boolean } };
+      };
       if (overrides.__internal__?._extras && "keysForRemoval" in overrides.__internal__._extras) {
         Object.entries(overrides.__internal__._extras.keysForRemoval).forEach(([p, v]) => {
           const e = getDots(newArmor, p) || {};
