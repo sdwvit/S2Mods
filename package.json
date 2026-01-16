@@ -9,6 +9,7 @@
     "cook-inject": "node ./src/cook-inject.mts",
     "publish-steam": "node ./src/publish-steam.mts",
     "publish-modio": "node ./src/publish-modio.mts",
+    "publish-nexusmods": "node ./src/publish-nexusmods.mts",
     "update-readme": "node ./src/update-readme.mts",
     "repack-republish-all": "node src/cook-inject-all.ts",
     "push-to-sdk": "node ./src/push-to-sdk.mts",

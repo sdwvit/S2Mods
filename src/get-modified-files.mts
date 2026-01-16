@@ -46,10 +46,11 @@ function getModifiedFilesInternal() {
 const mappers: Record<string, { code: (s: string) => string; li: (s: string) => string; ul: (s: string[]) => string }> = {
   markdown: { code: (s) => `\`${s}\``, li: (s) => ` - ${s}`, ul: (s) => `${s.join("\n")}\n` },
   steam: { code: (s) => s, li: (s) => ` [*] ${s}\n`, ul: (s) => `[list]${s.join("\n")}[/list]` },
+  nexus: { code: (s) => s, li: (s) => ` [*] ${s}\n`, ul: (s) => `[list]${s.join("\n")}[/list]` },
   html: { code: (s) => s, li: (s) => `<li>${s}</li>`, ul: (s) => `<ul>${s.join("\n")}</ul>` },
 };
 
-export function getModifiedFiles(as: "html" | "markdown" | "steam") {
+export function getModifiedFiles(as: "html" | "markdown" | "steam" | "nexus") {
   const { li, ul, code } = mappers[as];
   return ul(
     Object.entries(getModifiedFilesInternal()).map(([folder, files]) => {
