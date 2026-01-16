@@ -1,9 +1,10 @@
 import path from "node:path";
-import fs from "node:fs";
+import fs, { existsSync, writeFileSync } from "node:fs";
 import { projectRoot } from "./ensure-dot-env.mts";
 export { projectRoot } from "./ensure-dot-env.mts";
 import { execSync } from "node:child_process";
 import { MetaType } from "./meta-type.mts";
+import { mkdirSync } from "fs";
 
 export const rawCfgEnclosingFolder = path.join("Stalker2", "Content", "GameLite");
 export const baseCfgDir = path.join(process.env.SDK_PATH, rawCfgEnclosingFolder);
@@ -26,7 +27,32 @@ export const allValidMods = fs.readdirSync(modsFolder).filter((file) => fs.statS
 export const gameRootFolder = process.env.STALKER2_FOLDER;
 export const gameModsFolder = path.join(gameRootFolder, "Stalker2", "Content", "Paks", "~mods");
 export const gameUE4SSModsFolder = path.join(gameRootFolder, "Stalker2", "Binaries", "Win64", "ue4ss", "Mods");
+const metaPath = path.join(modFolder, "meta.mts");
+if (!existsSync(metaPath)) {
+  mkdirSync(modFolder, { recursive: true });
+  writeFileSync(
+    metaPath,
+    `
+import { Struct } from "s2cfgtojson";
+import { MetaType } from "../../src/meta-type.mts";
 
+export const meta: MetaType = {
+  description: \`
+Title
+[hr][/hr]
+Description[h1][/h1]
+\`,
+  changenote: "Initial release",
+  structTransformers: [structTransformer],
+};
+
+function structTransformer(struct: Struct) {
+
+}
+ 
+structTransformer.files = [ todo ];`,
+  );
+}
 const metaPromise = import(path.join(modFolder, "meta.mts")) as Promise<{ meta: MetaType }>;
 
 export const modMeta = metaPromise.then(({ meta }) => meta);
