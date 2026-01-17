@@ -11,17 +11,12 @@ export const transformDifficultyPrototypes: StructTransformer<DifficultyPrototyp
   }
 
   return Object.assign(struct.fork(), {
-    Ammo_Cost: DIFFICULTY_FACTOR,
     Repair_Cost: DIFFICULTY_FACTOR,
     Upgrade_Cost: DIFFICULTY_FACTOR,
-    Consumable_Cost: DIFFICULTY_FACTOR,
-    Armor_Cost: DIFFICULTY_FACTOR,
-    Weapon_Cost: DIFFICULTY_FACTOR,
-    Artifact_Cost: DIFFICULTY_FACTOR,
     Effect_Satiety: 1,
 
-    Reward_MainLine_Money: DIFFICULTY_FACTOR,
-    //    Reward_SideLine_Money: DIFFICULTY_FACTOR,
+    // Reward_MainLine_Money: DIFFICULTY_FACTOR,
+    // Reward_SideLine_Money: DIFFICULTY_FACTOR,
   } as DifficultyPrototype);
 };
 transformDifficultyPrototypes.files = ["/DifficultyPrototypes.cfg"];

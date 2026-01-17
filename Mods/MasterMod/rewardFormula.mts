@@ -83,4 +83,4 @@ export const QuestDataTableByDialogSID = QuestDataTable.reduce(
 
 const spread = [0.8, 1.2];
 
-export const rewardFormula = (base: number) => spread.map((factor) => Math.round(base * factor * DIFFICULTY_FACTOR));
+export const rewardFormula = (base: number) => spread.map((factor) => Math.round(base * factor));
