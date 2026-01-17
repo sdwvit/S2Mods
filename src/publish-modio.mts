@@ -1,7 +1,7 @@
 import fs, { rmSync } from "node:fs";
 import path from "node:path";
 import "./ensure-dot-env.mts";
-import { modFolder, modMeta, modName } from "./base-paths.mts";
+import { modFolder, modFolderSteamStruct, modMeta, modName } from "./base-paths.mts";
 import { sanitize } from "./sanitize.mts";
 import { createModZip } from "./zip.mts";
 import { logger } from "./logger.mts";
@@ -164,7 +164,7 @@ async function publishToModIO() {
     return;
   }
   await Promise.allSettled([import("./pull-assets.mjs"), import("./pull-staged.mjs")]);
-  const [outputZip, modId] = await Promise.all([createModZip(), Promise.resolve(getStoredModId() || createMod())]);
+  const [outputZip, modId] = await Promise.all([createModZip(await modFolderSteamStruct), Promise.resolve(getStoredModId() || createMod())]);
   await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
   rmSync(outputZip);
   logger.log(`mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-${meta.originalAuthor || process.env.STEAM_USER}`);
