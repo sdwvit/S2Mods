@@ -10,7 +10,7 @@ Changes RGD5, F1, VOG-25, and M203 explosion radius to 12, 20, 10, and 10 meters
 [hr][/hr]
 This aligns better with IRL danger/injury radii.
 `,
-  changenote: "Update grenade radii.",
+  changenote: "Update grenade/vog/m203 radii.",
   structTransformers: [structTransformer],
   onFinish(): void | Promise<void> {
     logger.log(Object.keys(MergedStructs).length);
@@ -24,7 +24,7 @@ function structTransformer(struct: ExplosionPrototypes) {
   if (struct.SID === "ExplosionM203") return withRadius(struct, 10);
 }
 
-structTransformer.files = ["ExplosionPrototypes.cfg"];
+structTransformer.files = ["ExplosionPrototypes.cfg"]; //
 
 function withRadius(struct: ExplosionPrototypes, radiusMeters: number) {
   const fork = struct.fork();
