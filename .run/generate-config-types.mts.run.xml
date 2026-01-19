@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="generate-config-types.mts" type="NodeJSConfigurationType" path-to-node="$USER_HOME$/.nvm/versions/node/v24.3.0/bin/node" nameIsGenerated="true" path-to-js-file="generate-config-types.mts" typescript-loader="bundled" working-dir="$PROJECT_DIR$/src">
+    <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+      <browser name="35837b5c-3dc9-4c9f-8f33-503d7e702d71" with-js-debugger="true" />
+    </EXTENSION>
+    <EXTENSION ID="com.jetbrains.nodejs.run.NodeJSProfilingRunConfigurationExtension">
+      <profiling one-log-file="true" />
+    </EXTENSION>
+    <method v="2" />
+  </configuration>
+</component>

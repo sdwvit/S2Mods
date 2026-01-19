@@ -1,0 +1,33 @@
+export const EVENTS = [
+  "OnAbilityEndedEvent",
+  "OnAbilityUsedEvent",
+  "OnDialogStartEvent",
+  "OnEmissionFinishEvent",
+  "OnEmissionStageActivated",
+  "OnEmissionStageFinished",
+  "OnEmissionStartEvent",
+  "OnFactionBecomeEnemyEvent",
+  "OnFactionBecomeFriendEvent",
+  "OnGetCompatibleAttachEvent",
+  "OnHitEvent",
+  "OnInfotopicFinishEvent",
+  "OnInteractEvent",
+  "OnJournalQuestEvent",
+  "OnKillerCheckEvent",
+  "OnMoneyAmountReachedEvent",
+  "OnNPCDeathEvent",
+  "OnTickEvent",
+  "OnNPCBecomeEnemyEvent",
+  "OnNPCBecomeFriendEvent",
+  "OnNPCCreateEvent",
+  "OnNPCDefeatEvent",
+  "OnPlayerGetItemEvent",
+  "OnPlayerLostItemEvent",
+  "OnPlayerNoticedEvent",
+  "OnPlayerRankReachedEvent",
+  "OnUpgradeInstallEvent",
+  "OnSignalReceived",
+];
+
+export const EVENTS_INTERESTING_PROPS = new Set(["ExpectedItemsCount", "ItemsCount"]);
+export const EVENTS_INTERESTING_SIDS = new Set(["TargetQuestGuid", "ItemPrototypeSID", "ItemSID", "SignalSenderGuid", "ContaineredQuestPrototypeSID"]);

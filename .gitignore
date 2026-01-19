@@ -16,3 +16,4 @@ sdk
 *.zip
 nodejs/
 .nexusmods
+/types.mts

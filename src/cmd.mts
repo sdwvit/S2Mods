@@ -15,6 +15,9 @@ export const cmdSync = (c: string, env = {}) => {
 export function nodeSync(tsFile: string, env = {}) {
   cmdSync(`node --import file:${process.env.NODE_TS_TRANSFORMER} ${tsFile}`, env);
 }
+export function node(tsFile: string, env = {}) {
+  return cmd(`node --import file:${process.env.NODE_TS_TRANSFORMER} ${tsFile}`, env);
+}
 
 export async function cmd(c: string, env = {}) {
   logger.log("-- Executing command", c);
