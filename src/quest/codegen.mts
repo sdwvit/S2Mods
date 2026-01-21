@@ -1,6 +1,7 @@
 import { QuestNodePrototype, Struct } from "s2cfgtojson";
 import { EVENTS, EVENTS_INTERESTING_PROPS, EVENTS_INTERESTING_SIDS } from "./constants.mts";
 import { QuestIr, QuestIrNode } from "./ir.mts";
+import { QuestNodePrototypeConditionsItemItem } from "../../types.mts";
 
 export function buildQuestScriptParts(ir: QuestIr) {
   const globalVars = new Set<string>();
@@ -196,7 +197,7 @@ function questNodeToJavascript(
         .entries()
         .map(([k]) => {
           if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(struct[k]);
+            questActors.add(String(struct[k]));
             return `questActors['${struct[k]}']`;
           }
 
@@ -214,7 +215,7 @@ function questNodeToJavascript(
         .entries()
         .map(([k]) => {
           if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(struct[k]);
+            questActors.add(String(struct[k]));
             return `questActors['${struct[k]}']`;
           }
 
@@ -311,8 +312,13 @@ function processConditionNode(
       if (typeof cond === "string") {
         return;
       }
-      return cond 
-        .map(([_k, c]) => {
+      return cond
+        .entries()
+        .map(([_k, cR]) => {
+          if (typeof cR !== "object") {
+            return;
+          }
+          const c = cR as QuestNodePrototypeConditionsItemItem;
           const subType = c.ConditionType.split("::").pop();
           switch (subType) {
             case "Weather": {
@@ -572,7 +578,7 @@ function processConditionNode(
                 questActors.add(target);
               }
               if (itemSid) {
-                globalVars.add(itemSid);
+                globalVars.add(String(itemSid));
               }
               globalFunctions.set(f, "() => false;");
               return `${f}(${target ? `questActors['${target}']` : ""}, ${itemSid ? itemSid : "null"}, ${JSON.stringify(equipment)}) ${comp} true`;
@@ -588,13 +594,6 @@ function processConditionNode(
               }
               globalFunctions.set(f, "() => 'Neutral';");
               return `${f}(${target ? `questActors['${target}']` : ""}, ${JSON.stringify(faction)}) ${comp} '${relation}'`;
-            }
-            case "FastTravelMoney": {
-              const f = "getFastTravelMoney";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const val = c.FastTravelMoney?.VariableValue ?? c.NumericValue ?? 0;
-              globalFunctions.set(f, "() => 0;");
-              return `${f}() ${comp} ${val}`;
             }
             case "GlobalVariable":
               globalVars.add(c.GlobalVariablePrototypeSID);
@@ -623,16 +622,7 @@ function processConditionNode(
               );
               questActors.add(c.TargetPlaceholder);
               return `${getConditionComparance(c.ConditionComparance) === "===" ? "" : "!"}IsCreated(questActors['${c.TargetPlaceholder}'])`;
-            case "IsDialogMemberValid": {
-              const f = "isDialogMemberValid";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter || c.DialogMember;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => true;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} true`;
-            }
+
             case "IsEnoughAmmo": {
               const f = "isEnoughAmmo";
               const comp = getConditionComparance(c.ConditionComparance);
@@ -674,7 +664,7 @@ function processConditionNode(
               const comp = getConditionComparance(c.ConditionComparance);
 
               globalFunctions.set(f, "() => true;");
-              globalVars.add(ItemPrototypeSID);
+              globalVars.add(String(ItemPrototypeSID));
               questActors.add(TargetItemContainer);
 
               return `${f}(questActors['${TargetItemContainer}'], ${ItemPrototypeSID}, ${ItemsCount}) ${comp} true`;
@@ -686,7 +676,7 @@ function processConditionNode(
               const comp = getConditionComparance(c.ConditionComparance);
 
               globalFunctions.set(f, "() => true;");
-              globalVars.add(ItemPrototypeSID);
+              globalVars.add(String(ItemPrototypeSID));
 
               return `${f}(${ItemPrototypeSID}, ${ItemsCount}) ${comp} true`;
             }
@@ -839,7 +829,7 @@ function getContent(
           .filter(([k]) => EVENTS_INTERESTING_PROPS.has(k) || EVENTS_INTERESTING_SIDS.has(k))
           .map(([_k, v]) => {
             if (EVENTS_INTERESTING_SIDS.has(_k) && v) {
-              questActors.add(v);
+              questActors.add(String(v));
               return `questActors['${v}']`;
             }
             return v;
