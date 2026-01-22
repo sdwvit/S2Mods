@@ -121,11 +121,11 @@ export const newArmors = {
     Weight: 16,
     Cost: 50000,
   },
-  HeavyExoskeleton_Varta_Armor_MasterMod_headless: {
+  /*  HeavyExoskeleton_Varta_Armor_MasterMod_headless: {
     ...getHeadlessArmorCommonProps("BattleExoskeleton_Varta_Armor"),
     Weight: 12,
     Cost: 45500,
-  },
+  },*/
   Battle_Dolg_End_Armor_MasterMod_headless: {
     ...getHeadlessArmorCommonProps("Battle_Dolg_End_Armor"),
     Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_Battle_Dolg_End_Armor.T_IFI_Battle_Dolg_End_Armor'`,
@@ -300,10 +300,10 @@ export const newArmors = {
     SID: "HeavyExoskeleton_Svoboda_Armor_HeadlessArmors_headless",
     __internal__: { refkey: "HeavyExoskeleton_Svoboda_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
-  HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless: {
+  /*  HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless: {
     SID: "HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless",
     __internal__: { refkey: "HeavyExoskeleton_Varta_Armor_MasterMod_headless", _extras: { isDroppable: true } },
-  },
+  },*/
   Battle_Dolg_End_Armor_HeadlessArmors_headless: {
     SID: "Battle_Dolg_End_Armor_HeadlessArmors_headless",
     __internal__: { refkey: "Battle_Dolg_End_Armor_MasterMod_headless", _extras: { isDroppable: true } },
@@ -468,15 +468,16 @@ export const extraArmorsByFaction: {
   varta: [
     newArmors.BattleExoskeleton_Varta_Armor_MasterMod_headless,
     newArmors.BattleExoskeleton_Varta_Armor_HeadlessArmors_headless,
-    newArmors.HeavyExoskeleton_Varta_Armor_MasterMod_headless,
-    newArmors.HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless,
+    // newArmors.HeavyExoskeleton_Varta_Armor_MasterMod_headless,
+    // newArmors.HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless,
   ],
 };
 
 Object.entries(allDefaultDroppableArmorsByFaction).forEach(([faction, defs]) => {
-  extraArmorsByFaction[faction].push(
+  extraArmorsByFaction[faction] = [
+    ...extraArmorsByFaction[faction],
     ...defs.map((def) => getNPCArmorDescriptor(def.SID, def.__internal__._extras?.ItemGenerator?.PlayerRank as ERank)),
-  );
+  ];
 });
 
 export const allExtraArmors = [

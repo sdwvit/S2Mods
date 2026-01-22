@@ -444,6 +444,9 @@ function renderTypesFile(mergedByCategory: Record<string, Struct>) {
   const entries = Object.entries(deduplicated).sort(([a], [b]) => a.localeCompare(b));
   for (const [category, merged] of entries) {
     const typeName = toTypeName(category);
+    if (typeName.includes("_dupe_")) {
+      continue;
+    }
     const typeLiteral = structToTypeLiteral(merged, 0);
     lines.push(`export type ${typeName} = GetStructType<${typeLiteral}>;`);
     lines.push("");
@@ -464,16 +467,23 @@ function toTypeName(category: string) {
 }
 
 function structToTypeLiteral(struct: Struct, indent: number): string {
-  if (struct.__internal__?.isArray) {
-    const elementTypes = new Set<string>();
-    struct.entries().forEach(([, value]) => elementTypes.add(valueToTypeLiteral(value, indent)));
+  let type = "";
+  const elementTypes = new Set<string>();
+  struct
+    .entries()
+    .filter(([k]) => Number(k).toString() === k)
+    .forEach(([, value]) => elementTypes.add(valueToTypeLiteral(value, indent)));
+  if (elementTypes.size) {
     const union = unionTypes([...elementTypes]);
     const wrapped = union.includes(" | ") ? `(${union})` : union;
-    return `${wrapped}[]`;
+    type += `${wrapped}[]`;
   }
 
-  const entries = struct.entries().sort(([a], [b]) => String(a).localeCompare(String(b)));
-  if (!entries.length) return "{}";
+  const entries = struct
+    .entries()
+    .filter(([k]) => Number(k).toString() !== k)
+    .sort(([a], [b]) => String(a).localeCompare(String(b)));
+  if (!entries.length) return type || "{}";
 
   const indentStr = "  ".repeat(indent);
   const innerIndent = "  ".repeat(indent + 1);
@@ -482,11 +492,13 @@ function structToTypeLiteral(struct: Struct, indent: number): string {
   for (const [key, value] of entries) {
     const propName = renderKey(key);
     const typeLiteral = valueToTypeLiteral(value, indent + 1);
-    lines.push(`${innerIndent}${propName}: ${typeLiteral};`);
+    if (!elementTypes.has(typeLiteral) && !propName.includes("_dupe_")) {
+      lines.push(`${innerIndent}${propName}: ${typeLiteral};`);
+    }
   }
 
   lines.push(`${indentStr}}`);
-  return lines.join("\n");
+  return type + " & " + lines.join("\n");
 }
 
 function valueToTypeLiteral(value: unknown, indent: number): string {

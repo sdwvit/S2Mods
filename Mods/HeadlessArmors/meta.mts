@@ -2,7 +2,7 @@ import path from "node:path";
 import dotEnv from "dotenv";
 import { transformDynamicItemGenerator } from "./transformDynamicItemGenerator.mjs";
 import { MetaContext, MetaType } from "../../src/meta-type.mts";
-import { ArmorPrototype, DynamicItemGenerator, Struct } from "s2cfgtojson";
+import { ArmorPrototype, ItemGeneratorPrototype, Struct } from "s2cfgtojson";
 import { allExtraArmors, newArmors } from "./armors.util.mts";
 import { allDefaultArmorPrototypesRecord } from "../../src/consts.mts";
 import { backfillDef, getDots } from "../../src/backfill-def.mts";
@@ -10,7 +10,7 @@ import { deepMerge } from "../../src/deep-merge.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 
-export const meta: MetaType<ArmorPrototype | DynamicItemGenerator> = {
+export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype> = {
   description: `
     This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection.[h2][/h2]
     It also adds corresponding helmets for exoskeleton and heavy armors, to balance things out.[h2][/h2]
@@ -54,8 +54,7 @@ export const meta: MetaType<ArmorPrototype | DynamicItemGenerator> = {
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
     [/list] 
   `,
-  changenote: `Fix armor spawns, Set ItemGenerator.__internal__.bpatch = true; and relax the early-return guard to
-  require PossibleItems to have more than 1 entry instead of just non-empty. Remove accidentally checked out skeleton meshes.`,
+  changenote: `Fix varta DLC armor included by accident. Fix probability calculations because of that.`,
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };
 

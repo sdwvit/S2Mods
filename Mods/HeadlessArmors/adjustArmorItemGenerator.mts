@@ -9,7 +9,7 @@ import {
 import { factions } from "../../src/factions.mts";
 import { extraArmorsByFaction, newArmors } from "./armors.util.mts";
 import { allItemRank } from "./all-item-rank.mts";
-import { DynamicItemGenerator, ERank, GetStructType, Struct } from "s2cfgtojson";
+import { ItemGeneratorPrototype, ERank, GetStructType, Struct, ItemGeneratorPrototypeItemGeneratorItem } from "s2cfgtojson";
 import { precision } from "../../src/precision.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
@@ -68,7 +68,7 @@ const nvgsByFaction = {
 /**
  * Allows NPCs to drop armor and helmets.
  */
-export const adjustArmorItemGenerator = (struct: DynamicItemGenerator, itemGenerator: DynamicItemGenerator["ItemGenerator"]["0"], i: number) => {
+export const adjustArmorItemGenerator = (struct: ItemGeneratorPrototype, itemGenerator: ItemGeneratorPrototypeItemGeneratorItem, i: number) => {
   if (
     struct.SID.includes("WeaponPistol") ||
     struct.SID.includes("Consumables") ||
@@ -136,7 +136,6 @@ export const adjustArmorItemGenerator = (struct: DynamicItemGenerator, itemGener
           descriptor.__internal__._extras.isDroppable ||
           (allDefaultArmorPrototypesRecord[newItemSID] && !undroppableArmors.has(newItemSID))
         ) {
-          // todo this shit doesn't drop default armors
           droppableArmors.push(dummyPossibleItem as any);
         } else {
           invisibleArmors.push(dummyPossibleItem as any);
