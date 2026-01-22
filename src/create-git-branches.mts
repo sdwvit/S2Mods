@@ -9,7 +9,7 @@ allValidMods.forEach((mod) => {
   cmdSync(["git", "checkout", "-b", mod].join(" "));
   cmdSync(["git", "checkout", mod].join(" "));
   cmdSync(["git", "branch", "--set-upstream-to=origin/master", mod].join(" "));
-  cmdSync(["git", "pull"].join(" "));
+  // cmdSync(["git", "pull"].join(" "));
 });
 cmdSync(["git", "checkout", "master"].join(" "));
 
