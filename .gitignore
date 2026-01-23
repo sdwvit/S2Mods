@@ -9,6 +9,7 @@ workshopitem*.vdf
 .l1.cache.zlib
 .l2.cache.zlib
 .l3.cache.zlib
+.l1.type-gen.cache.zlib
 /DLCGameData/
 sdk
 .modio
