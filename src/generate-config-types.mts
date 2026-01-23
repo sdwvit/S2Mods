@@ -1,12 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { GetStructType, Struct } from "s2cfgtojson";
+import { GetStructType, QuestNodePrototype, Struct } from "s2cfgtojson";
 import { getCfgFiles } from "./get-cfg-files.mjs";
 import { deepMerge } from "./deep-merge.mts";
 import { logger } from "./logger.mjs";
-import { node } from "./cmd.mts";
 import { projectRoot } from "./base-paths.mts";
+import { getFromL1GlobalTypeGenCache, L1GlobalTypeGenCache, L1GlobalTypeGenCacheState, onL1GlobalTypeGenFinish } from "./l1type-gen-cache.mts";
+import { node } from "./cmd.mts";
+import { onL3Finish } from "./l3-cache.mts";
 
 const DEFAULT_OUTPUT = path.join(projectRoot, "types.mts");
 const CATEGORY_PREFIX = "$cat_";
@@ -87,8 +89,21 @@ async function loadStructsWithNode(
   setCurrentFile: (file: string) => void,
 ) {
   if (!filePaths.length) return;
-  const workerCount = Math.max(1, Math.min(os.cpus().length, filePaths.length));
-  const queue = filePaths.slice();
+
+  const queue = filePaths
+    .filter((fp) => {
+      if (getFromL1GlobalTypeGenCache(fp)) {
+        onResult(fp, getFromL1GlobalTypeGenCache(fp));
+        return false;
+      }
+      return true;
+    })
+    .slice();
+  if (!queue.length) {
+    return;
+  }
+
+  const workerCount = Math.max(1, Math.min(os.cpus().length, queue.length));
   const batchSize = 1000;
   const batches: string[][] = [];
   while (queue.length) {
@@ -457,7 +472,7 @@ function renderTypesFile(mergedByCategory: Record<string, Struct>) {
     lines[1] = `import type { ${updatedImports.join(", ")} } from "s2cfgtojson";`;
   }
 
-  return lines.join("\n");
+  return lines.reduce((mem, l) => mem + l + "\n", "");
 }
 
 function toTypeName(category: string) {
@@ -483,7 +498,9 @@ function structToTypeLiteral(struct: Struct, indent: number): string {
     .entries()
     .filter(([k]) => Number(k).toString() !== k)
     .sort(([a], [b]) => String(a).localeCompare(String(b)));
-  if (!entries.length) return type || "{}";
+  if (!entries.length) {
+    return type || "{}";
+  }
 
   const indentStr = "  ".repeat(indent);
   const innerIndent = "  ".repeat(indent + 1);
@@ -546,6 +563,9 @@ function stringToTypeLiteral(value: string) {
     const enumType = match[1];
     if (knownEnums.has(enumType)) {
       usedEnums.add(enumType);
+      if (enumType === "EQuestNodeType") {
+        return `'${value}' & EQuestNodeType`;
+      }
       return enumType;
     }
   }
@@ -585,4 +605,6 @@ function deserializeWorkerError(error: WorkerMessage["error"]) {
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   await generateConfigTypes();
+  await onL1GlobalTypeGenFinish();
+  await onL3Finish();
 }
