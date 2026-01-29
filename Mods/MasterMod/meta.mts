@@ -24,14 +24,12 @@ import { MetaType } from "../../src/meta-type.mts";
 import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
 import { logger } from "../../src/logger.mts";
 import { MergedStructs } from "../../src/merged-structs.mts";
-import { transformCluePrototypes } from "../StashClueRework/meta.mts";
 import { transformMobs } from "./transformMobs.mts";
 
 const structTransformers = [
   transformNPCPrototypes,
   transformAttachPrototypes,
   transformBarbedWirePrototypes,
-  transformCluePrototypes,
   transformDialogPoolPrototypes,
   transformDialogPrototypes,
   transformDifficultyPrototypes,

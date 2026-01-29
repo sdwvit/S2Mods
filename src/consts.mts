@@ -393,3 +393,21 @@ export const technicianTradePrototypes = new Set([
   "PowerPlugTechnician_TradeItemGenerator",
   "VartaTechnician_TradeItemGenerator",
 ]);
+
+export const MalachiteMutantQuestPartsQuestsDoneNode = "BodyParts_Malahit_SetDialog_EQ197_QD_Orders";
+export const MalachiteMutantQuestPartsQuestsDoneDialogs = [
+  "EQ197_QD_Orders_Done_73061",
+  "EQ197_QD_Orders_Done2_73167",
+  "EQ197_QD_Orders_Done3_73169",
+  "EQ197_QD_Orders_Done_73061_1",
+  "EQ197_QD_Orders_Done2_73167_1",
+  "EQ197_QD_Orders_Done3_73169_1",
+  "EQ197_QD_Orders_Done_73061_2",
+  "EQ197_QD_Orders_Done2_73167_2",
+  "EQ197_QD_Orders_Done3_73169_2",
+  "EQ197_QD_Orders_Done_73061_3",
+  "EQ197_QD_Orders_Done2_73167_3",
+  "EQ197_QD_Orders_Done3_73169_3",
+  "EQ197_QD_Orders_Done_73061_4",
+  "EQ197_QD_Orders_Done2_73167_4",
+];

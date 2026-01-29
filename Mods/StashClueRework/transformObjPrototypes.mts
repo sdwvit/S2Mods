@@ -1,11 +1,6 @@
 import { ObjPrototype } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
 
-/**
- * Prevents NPCs from being knocked down.
- * Also removes Fall damage.
- * @param struct
- */
 export const transformObjPrototypes: StructTransformer<ObjPrototype> = async (struct) => {
   if (struct.ShouldGenerateStashClues) {
     const fork = struct.fork();
