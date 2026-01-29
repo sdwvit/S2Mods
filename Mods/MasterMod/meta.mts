@@ -18,7 +18,6 @@ import { transformStashPrototypes } from "./transformStashPrototypes.mts";
 import { transformTradePrototypes } from "./transformTradePrototypes.mts";
 import { transformUpgradePrototypes } from "./transformUpgradePrototypes.mts";
 import { transformWeaponGeneralSetupPrototypes } from "./transformWeaponGeneralSetupPrototypes.mts";
-import { transformObjPrototypes } from "./transformObjPrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 import { transformWeaponPrototypes } from "./transformWeaponPrototypes.mts";
 import { MetaType } from "../../src/meta-type.mts";
@@ -43,7 +42,6 @@ const structTransformers = [
   transformMeshGeneratorPrototypes,
   transformMobs,
   transformNPCWeaponSettingsPrototypes,
-  transformObjPrototypes,
   transformQuestArtifactPrototypes,
   transformQuestItemPrototypes,
   transformQuestNodePrototypes,

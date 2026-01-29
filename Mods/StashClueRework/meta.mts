@@ -1,11 +1,21 @@
 import { StructTransformer, MetaContext, MetaType } from "../../src/meta-type.mts";
-import { CluePrototype, QuestNodePrototype, SpawnActorPrototype, Struct } from "s2cfgtojson";
+import {
+  CluePrototype,
+  QuestNodePrototype,
+  QuestNodePrototypeConsoleCommand,
+  QuestNodePrototypeGiveCache,
+  QuestNodePrototypeItemAdd,
+  QuestNodePrototypeRandom,
+  QuestNodePrototypeSpawn,
+  SpawnActorPrototype,
+  Struct,
+} from "s2cfgtojson";
 import { allStashes } from "./stashes.mts";
-import { modName } from "../../src/base-paths.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
 import { waitFor } from "../../src/wait-for.mts";
 import { precision } from "../../src/precision.mts";
 import { QuestDataTable } from "../MasterMod/rewardFormula.mts";
+import { transformObjPrototypes } from "./transformObjPrototypes.mts";
 
 const finishedTransformers = new Set<string>();
 
@@ -21,7 +31,7 @@ Once you finish any recurring quest from base vendors, apart from monetary rewar
 bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 `,
   changenote: "Mutant Quest Parts quest now gives stashes too",
-  structTransformers: [transformSpawnActorPrototypes, transformCluePrototypes, transformQuestNodePrototypes],
+  structTransformers: [transformSpawnActorPrototypes, transformCluePrototypes, transformQuestNodePrototypes, transformObjPrototypes],
   onTransformerFinish(transformer: StructTransformer<Struct>) {
     finishedTransformers.add(transformer.name);
   },
@@ -150,7 +160,7 @@ async function transformQuestNodePrototypes(struct: QuestNodePrototype, context:
   const fork = struct.fork();
   // applies to all quest nodes that add items (i.e., stash clues)
   if (struct.NodeType === "EQuestNodeType::ItemAdd") {
-    promises.push(hookStashSpawners(struct, fork, finishedTransformers));
+    promises.push(hookStashSpawners(struct as QuestNodePrototypeItemAdd, fork as QuestNodePrototypeConsoleCommand, finishedTransformers));
   }
 
   if (!oncePerTransformer) {
@@ -180,7 +190,7 @@ async function transformQuestNodePrototypes(struct: QuestNodePrototype, context:
   }
 
   const res = await Promise.all(promises).then((results) => results.flat());
-  if (fork.entries().length) {
+  if ((fork as Struct).entries().length) {
     res.push(fork);
   }
 
@@ -204,7 +214,7 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
         SID = ${RandomStashQuestNodePrefix}_Random
         QuestSID = ${RandomStashQuestName}
         NodeType = EQuestNodeType::Random
-    struct.end`) as QuestNodePrototype;
+    struct.end`) as QuestNodePrototypeRandom;
   extraStructs.push(randomNode);
   stashes.forEach((key, i) => {
     randomNode.OutputPinNames ||= new Struct() as any;
@@ -223,7 +233,7 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
          SpawnHidden = false
          SpawnNodeExcludeType = ESpawnNodeExcludeType::SeamlessDespawn
       struct.end
-    `) as QuestNodePrototype;
+    `) as QuestNodePrototypeSpawn;
     const launcherConfig = [{ SID: `${RandomStashQuestNodePrefix}_Random`, Name: String(i) }];
     spawner.Launchers = getLaunchers(launcherConfig);
 
@@ -235,7 +245,7 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
            NodeType = EQuestNodeType::GiveCache
            TargetQuestGuid = ${key}
         struct.end
-      `) as QuestNodePrototype;
+      `) as QuestNodePrototypeGiveCache;
     cacheNotif.Launchers = getLaunchers([{ SID: `${RandomStashQuestNodePrefix}_Random`, Name: String(i) }]);
 
     extraStructs.push(cacheNotif);
@@ -255,13 +265,17 @@ export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, N
          NodeType = EQuestNodeType::ConsoleCommand
          ConsoleCommand = XStartQuestNodeBySID ${RandomStashQuestNodePrefix}_Random
       struct.end
-    `) as QuestNodePrototype;
+    `) as QuestNodePrototypeConsoleCommand;
 
   stashClueReward.Launchers = getLaunchers([{ SID: struct.SID, Name }]);
   return stashClueReward;
 }
 
-export async function hookStashSpawners(struct: QuestNodePrototype, fork: QuestNodePrototype, finishedTransformers: Set<string>) {
+export async function hookStashSpawners(
+  struct: QuestNodePrototypeItemAdd,
+  fork: QuestNodePrototypeConsoleCommand,
+  finishedTransformers: Set<string>,
+) {
   await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
 
   // only quest stashes that are hidden by this mod are interesting here
@@ -269,7 +283,7 @@ export async function hookStashSpawners(struct: QuestNodePrototype, fork: QuestN
     return;
   }
 
-  const spawnStash = struct.fork();
+  const spawnStash = struct.fork() as QuestNodePrototype as QuestNodePrototypeConsoleCommand;
   spawnStash.SID = `${struct.QuestSID}_Spawn_${struct.TargetQuestGuid}`;
   spawnStash.NodeType = "EQuestNodeType::ConsoleCommand";
   spawnStash.QuestSID = struct.QuestSID;
