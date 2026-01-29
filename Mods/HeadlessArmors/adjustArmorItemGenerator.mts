@@ -13,6 +13,7 @@ import { ItemGeneratorPrototype, ERank, GetStructType, Struct, ItemGeneratorProt
 import { precision } from "../../src/precision.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
+import { logger } from "../../src/logger.mts";
 
 const minimumArmorCost = Object.values(allItemRank).reduce((a, b) => Math.min(a, b), Infinity);
 const maximumArmorCost = Object.values(allItemRank).reduce((a, b) => Math.max(a, b), -Infinity);
@@ -75,17 +76,17 @@ export const adjustArmorItemGenerator = (struct: ItemGeneratorPrototype, itemGen
     struct.SID.includes("Attachments") ||
     struct.SID.includes("Zombie") ||
     struct.SID.includes("No_Armor") ||
-    struct.SID.includes("DeadBody")
+    struct.SID.includes("DeadBody") ||
+    !itemGenerator.PossibleItems ||
+    !itemGenerator.PlayerRank
   ) {
     return;
   }
   const fork = itemGenerator.fork();
   fork.bAllowSameCategoryGeneration = true;
-  if (itemGenerator.PlayerRank) fork.PlayerRank = itemGenerator.PlayerRank;
+
+  fork.PlayerRank = itemGenerator.PlayerRank;
   fork.Category = itemGenerator.Category;
-  if (!itemGenerator.PossibleItems) {
-    return;
-  }
   fork.PossibleItems = itemGenerator.PossibleItems.filter((e): e is any => !!(e[1] && allItemRank[e[1].ItemPrototypeSID]));
   const options = fork.PossibleItems.entries().map(([_k, v]) => v);
   const optionsBySID = Object.fromEntries(options.map((pi) => [pi.ItemPrototypeSID, pi]));
