@@ -1,7 +1,6 @@
-import { QuestNodePrototype, Struct } from "s2cfgtojson";
+import { QuestNodePrototype, QuestNodePrototypeActivateRestrictor, Struct } from "s2cfgtojson";
 import { EVENTS, EVENTS_INTERESTING_PROPS, EVENTS_INTERESTING_SIDS } from "./constants.mts";
 import { QuestIr, QuestIrNode } from "./ir.mts";
-import { QuestNodePrototypeConditionsItemItem } from "../../types.mts";
 
 export function buildQuestScriptParts(ir: QuestIr) {
   const globalVars = new Set<string>();
@@ -58,7 +57,7 @@ function questNodeToJavascript(
   switch (subType) {
     case "ActivateRestrictor":
       globalFunctions.set("activateRestrictor", "");
-      return `activateRestrictor('${struct.VolumeGuid}');`;
+      return `activateRestrictor('${(struct as QuestNodePrototypeActivateRestrictor).VolumeGuid}');`;
 
     case "ChangeRelationships":
       globalFunctions.set("setFactionRelationship", "");

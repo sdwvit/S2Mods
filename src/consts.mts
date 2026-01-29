@@ -9,6 +9,7 @@ import {
   Internal,
   NPCWeaponSettingsPrototype,
   SpawnActorPrototype,
+  Struct,
   WeaponGeneralSetupPrototype,
   WeaponPrototype,
 } from "s2cfgtojson";
@@ -86,21 +87,30 @@ export type ArmorDescriptor = {
   };
 } & DeeplyPartial<ArmorPrototype>;
 
-const getDefaultDroppableArmorDescriptor = (struct: ArmorPrototype, PlayerRank: ERank) => {
+const getDescriptor = (
+  isDroppable = true,
+  Category: EItemGenerationCategory = "EItemGenerationCategory::BodyArmor",
+  struct: ArmorPrototype,
+  PlayerRank: ERank = VETERAN_MASTER_RANK,
+  extras: ArmorDescriptor["__internal__"]["_extras"] = {},
+) => {
+  if (!(struct instanceof Struct)) {
+    struct = new Struct(struct) as ArmorPrototype;
+  }
   const clone = struct.clone();
   clone.__internal__.isRoot = true;
+  clone.__internal__.rawName = struct.SID;
   return Object.assign(clone, {
-    __internal__: Object.assign(clone.__internal__, {
-      _extras: {
-        isDroppable: true,
-        ItemGenerator: {
-          Category: "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory,
-          PlayerRank,
-        },
-      },
-    }),
+    __internal__: Object.assign(clone.__internal__, { _extras: { isDroppable, ItemGenerator: { Category, PlayerRank }, ...extras } }),
   });
 };
+
+export type DescriptorFn = (s: ArmorPrototype | any, pr?: ERank, e?: ArmorDescriptor["__internal__"]["_extras"]) => ArmorPrototype;
+
+export const getDroppableArmor: DescriptorFn = getDescriptor.bind(null, true, "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory);
+export const getNonDroppableArmor: DescriptorFn = getDescriptor.bind(null, false, "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory);
+export const getDroppableHelmet: DescriptorFn = getDescriptor.bind(null, true, "EItemGenerationCategory::Head" as EItemGenerationCategory);
+
 export const allDefaultDroppableArmorsByFaction: {
   bandit: ArmorDescriptor[];
   corpus: ArmorDescriptor[];
@@ -115,76 +125,76 @@ export const allDefaultDroppableArmorsByFaction: {
   varta: ArmorDescriptor[];
 } = {
   bandit: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Light_Bandit_Helmet, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.SkinJacket_Bandit_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Jacket_Bandit_Armor, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Middle_Bandit_Armor, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Bandit_Helmet, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.SkinJacket_Bandit_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Jacket_Bandit_Armor, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Middle_Bandit_Armor, EXPERIENCED_MASTER_RANK),
   ],
   corpus: [],
   duty: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Light_Duty_Helmet, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Heavy_Duty_Helmet, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Duty_Helmet, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Duty_Helmet, EXPERIENCED_MASTER_RANK),
 
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Rook_Dolg_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Battle_Dolg_Armor, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.SEVA_Dolg_Armor, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Heavy_Dolg_Armor, VETERAN_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Dolg_Armor, MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Exoskeleton_Dolg_Armor, MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Battle_Dolg_End_Armor, MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Rook_Dolg_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Dolg_Armor, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Dolg_Armor, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Dolg_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Dolg_Armor, MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Dolg_Armor, MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Dolg_End_Armor, MASTER_RANK),
   ],
   freedom: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Heavy_Svoboda_Helmet, VETERAN_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Rook_Svoboda_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Battle_Svoboda_Armor, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.SEVA_Svoboda_Armor, VETERAN_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Heavy_Svoboda_Armor, VETERAN_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Svoboda_Armor, MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Exoskeleton_Svoboda_Armor, MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Svoboda_Helmet, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Rook_Svoboda_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Svoboda_Armor, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Svoboda_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Svoboda_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Svoboda_Armor, MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Svoboda_Armor, MASTER_RANK),
   ],
   mercenary: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Light_Mercenaries_Helmet, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Light_Mercenaries_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Heavy_Mercenaries_Armor, VETERAN_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Exoskeleton_Mercenaries_Armor, MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Mercenaries_Helmet, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Mercenaries_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Mercenaries_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Mercenaries_Armor, MASTER_RANK),
   ],
   military: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Heavy_Military_Helmet, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Light_Military_Helmet, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Battle_Military_Helmet, VETERAN_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Default_Military_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Heavy2_Military_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Military_Helmet, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Military_Helmet, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Military_Helmet, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Default_Military_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy2_Military_Armor, VETERAN_MASTER_RANK),
   ],
   monolith: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Battle_Monolith_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Monolith_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Monolith_Armor, VETERAN_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Exoskeleton_Monolith_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Monolith_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Monolith_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Monolith_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Monolith_Armor, ALL_RANK),
   ],
   neutral: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Light_Neutral_Helmet, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Jemmy_Neutral_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Newbee_Neutral_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Nasos_Neutral_Armor, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Zorya_Neutral_Armor, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.SEVA_Neutral_Armor, VETERAN_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Exoskeleton_Neutral_Armor, MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Neutral_Helmet, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Jemmy_Neutral_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Newbee_Neutral_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Nasos_Neutral_Armor, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Zorya_Neutral_Armor, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Neutral_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Neutral_Armor, MASTER_RANK),
   ],
   scientist: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Anomaly_Scientific_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Scientific_Armor, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.SciSEVA_Scientific_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Anomaly_Scientific_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Scientific_Armor, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.SciSEVA_Scientific_Armor, VETERAN_MASTER_RANK),
   ],
   spark: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Battle_Spark_Armor, VETERAN_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.SEVA_Spark_Armor, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Spark_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.HeavyBattle_Spark_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Spark_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Spark_Armor, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Spark_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyBattle_Spark_Armor, VETERAN_MASTER_RANK),
   ],
   varta: [
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Heavy_Varta_Helmet, EXPERIENCED_MASTER_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.Battle_Varta_Armor, ALL_RANK),
-    getDefaultDroppableArmorDescriptor(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor, VETERAN_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Varta_Helmet, EXPERIENCED_MASTER_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Varta_Armor, ALL_RANK),
+    getDroppableArmor(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor, VETERAN_MASTER_RANK),
   ],
 };
 

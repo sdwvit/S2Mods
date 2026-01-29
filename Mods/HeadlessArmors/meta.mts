@@ -54,7 +54,7 @@ export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype> = {
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
     [/list] 
   `,
-  changenote: `Fix ordering of armors, fix spawning exoskeletons on quest characters`,
+  changenote: `Fix ordering of armors, fix spawning exoskeletons on quest and incorrect rank characters`,
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };
 
@@ -94,7 +94,7 @@ export async function transformArmorPrototypes(struct: ArmorPrototype, context: 
         __internal__?: { _extras?: { keysForRemoval?: Record<string, string[]>; isDroppable?: boolean } };
       };
       if (overrides.__internal__?._extras && "keysForRemoval" in overrides.__internal__._extras) {
-        Object.entries(overrides.__internal__._extras.keysForRemoval).forEach(([p, v]) => {
+        Object.entries(overrides.__internal__._extras.keysForRemoval || {}).forEach(([p, v]) => {
           const e = getDots(newArmor, p) || {};
           if (!Array.isArray(v)) {
             throw new Error("Expected array for keysForRemoval values");
