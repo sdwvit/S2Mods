@@ -10,10 +10,10 @@ export const transformDynamicItemGenerator: StructTransformer<ItemGeneratorProto
   if (struct.SID.includes("Trade") || !struct.ItemGenerator) {
     return;
   }
+  const ig = struct.ItemGenerator.filter(([_k, ig]) => !!ig.PlayerRank);
+  addMissingCategories(ig);
 
-  addMissingCategories(struct);
-
-  const ItemGenerator = struct.ItemGenerator.map(([_k, itemGenerator], i) => {
+  const ItemGenerator = ig.map(([_k, itemGenerator], i) => {
     // noinspection FallThroughInSwitchStatementJS
     switch (itemGenerator.Category) {
       case "EItemGenerationCategory::Head":

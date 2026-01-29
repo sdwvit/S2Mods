@@ -10,9 +10,10 @@ import {
   VETERAN_MASTER_RANK,
 } from "../../src/consts.mts";
 import { backfillDef } from "../../src/backfill-def.mts";
+import { logger } from "../../src/logger.mts";
 
-const getHeadlessArmorCommonProps = (refkey: string) => ({
-  __internal__: {
+const getHeadlessArmorInternal = (refkey: string, rank: ERank = VETERAN_MASTER_RANK) =>
+  ({
     refkey,
     _extras: {
       isDroppable: true,
@@ -24,109 +25,127 @@ const getHeadlessArmorCommonProps = (refkey: string) => ({
       },
       ItemGenerator: {
         Category: "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory,
-        PlayerRank: VETERAN_MASTER_RANK as ERank,
+        PlayerRank: rank,
       },
     },
-  },
-  SID: `${refkey}_MasterMod_headless`,
-  LocalizationSID: refkey,
-  Protection: { PSY: 0 },
-  bBlockHead: false,
-  Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_${refkey}_headless.T_IFI_${refkey}_headless'`,
-});
-const getHelmetInternal = (refkey: string) => ({
-  refkey,
-  _extras: {
-    ItemGenerator: {
-      Category: "EItemGenerationCategory::Head" as EItemGenerationCategory,
-      PlayerRank: VETERAN_MASTER_RANK as ERank,
+  }) as ArmorDescriptor["__internal__"];
+
+const getHeadlessArmorCommonProps = (refkey: string) =>
+  ({
+    SID: `${refkey}_MasterMod_headless`,
+    LocalizationSID: refkey,
+    Protection: { PSY: 0 },
+    bBlockHead: false,
+    Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_${refkey}_headless.T_IFI_${refkey}_headless'`,
+  }) satisfies Omit<ArmorDescriptor, "__internal__">;
+
+const getHelmetInternal = (refkey: string, rank: ERank = VETERAN_MASTER_RANK) =>
+  ({
+    refkey,
+    _extras: {
+      isDroppable: true,
+      ItemGenerator: {
+        Category: "EItemGenerationCategory::Head" as EItemGenerationCategory,
+        PlayerRank: rank,
+      },
     },
-  },
-});
+  }) satisfies ArmorDescriptor["__internal__"];
 const ICON_ROOT = "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_";
 
 export const newArmors = {
   BattleExoskeleton_Varta_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Varta_Armor"),
     ...getHeadlessArmorCommonProps("BattleExoskeleton_Varta_Armor"),
     Weight: 8.5,
     Cost: 58000,
   },
   Exoskeleton_Mercenaries_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("leton_Mercenaries_Armor"),
     ...getHeadlessArmorCommonProps("Exoskeleton_Mercenaries_Armor"),
     Weight: 7.5,
     Cost: 50500,
   },
   Exoskeleton_Monolith_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Monolith_Armor"),
     ...getHeadlessArmorCommonProps("Exoskeleton_Monolith_Armor"),
     Weight: 7.5,
     Cost: 53000,
   },
   Exoskeleton_Neutral_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Neutral_Armor"),
     ...getHeadlessArmorCommonProps("Exoskeleton_Neutral_Armor"),
     Weight: 12,
     Cost: 55500,
   },
   Exoskeleton_Svoboda_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Svoboda_Armor"),
     ...getHeadlessArmorCommonProps("Exoskeleton_Svoboda_Armor"),
     Weight: 7.5,
     Cost: 80000,
   },
   Heavy_Dolg_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Heavy_Dolg_Armor"),
     ...getHeadlessArmorCommonProps("Heavy_Dolg_Armor"),
     Weight: 7,
     Cost: 35000,
   },
   Heavy2_Military_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Heavy2_Military_Armor"),
     ...getHeadlessArmorCommonProps("Heavy2_Military_Armor"),
     Weight: 6,
     Cost: 32000,
   },
   HeavyAnomaly_Monolith_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyAnomaly_Monolith_Armor"),
     ...getHeadlessArmorCommonProps("HeavyAnomaly_Monolith_Armor"),
     Weight: 7,
     Cost: 42500,
   },
   Exoskeleton_Dolg_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Dolg_Armor"),
     ...getHeadlessArmorCommonProps("Exoskeleton_Dolg_Armor"),
     Weight: 8.5,
     Cost: 70000,
   },
   Heavy_Svoboda_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Heavy_Svoboda_Armor"),
     ...getHeadlessArmorCommonProps("Heavy_Svoboda_Armor"),
     Weight: 7,
     Cost: 37000,
   },
   Heavy_Mercenaries_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Heavy_Mercenaries_Armor"),
     ...getHeadlessArmorCommonProps("Heavy_Mercenaries_Armor"),
     Weight: 5,
     Cost: 25500,
   },
   HeavyBattle_Spark_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyBattle_Spark_Armor"),
     ...getHeadlessArmorCommonProps("HeavyBattle_Spark_Armor"),
     Weight: 7,
     Cost: 40500,
   },
   HeavyExoskeleton_Dolg_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyExoskeleton_Dolg_Armor"),
     ...getHeadlessArmorCommonProps("HeavyExoskeleton_Dolg_Armor"),
     Weight: 16,
     Cost: 51000,
   },
   HeavyExoskeleton_Monolith_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyExoskeleton_Monolith_Armor"),
     ...getHeadlessArmorCommonProps("HeavyExoskeleton_Monolith_Armor"),
     Weight: 16,
     Cost: 55000,
   },
   HeavyExoskeleton_Svoboda_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyExoskeleton_Svoboda_Armor"),
     ...getHeadlessArmorCommonProps("HeavyExoskeleton_Svoboda_Armor"),
     Weight: 16,
     Cost: 50000,
   },
-  /*  HeavyExoskeleton_Varta_Armor_MasterMod_headless: {
-    ...getHeadlessArmorCommonProps("BattleExoskeleton_Varta_Armor"),
-    Weight: 12,
-    Cost: 45500,
-  },*/
+
   Battle_Dolg_End_Armor_MasterMod_headless: {
+    __internal__: getHeadlessArmorInternal("Battle_Dolg_End_Armor"),
     ...getHeadlessArmorCommonProps("Battle_Dolg_End_Armor"),
     Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_Battle_Dolg_End_Armor.T_IFI_Battle_Dolg_End_Armor'`,
     Cost: 70000,
@@ -204,153 +223,108 @@ export const newArmors = {
     LocalizationSID: "Battle_Military_Helmet",
     Icon: `${ICON_ROOT}HeavyBattle_Dolg_Helmet.T_IFI_HeavyBattle_Dolg_Helmet'`,
   },
-  SkinCloak_Bandit_Armor_MasterMod: {
-    __internal__: {
-      refkey: "SkinJacket_Bandit_Armor",
-      _extras: {
-        ItemGenerator: {
-          Category: "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory,
-          PlayerRank: ALL_RANK as ERank,
-        },
-      },
-    },
-    SID: `SkinCloak_Bandit_Armor_MasterMod`,
-    LocalizationSID: "SkinJacket_Bandit_Armor",
-    bBlockHead: true,
-  },
-  SkinCloak_Bandit_Armor2_MasterMod_headless: {
-    __internal__: {
-      refkey: "SkinJacket_Bandit_Armor",
-      _extras: {
-        isDroppable: false,
-        keysForRemoval: {
-          UpgradePrototypeSIDs: allDefaultArmorPrototypesRecord["SkinJacket_Bandit_Armor"].UpgradePrototypeSIDs.entries()
-            .map(([_, k]) => k)
-            .filter((k) => !!k.toLowerCase().match(/psyresist|_ps[iy]_/g)),
-        },
-        ItemGenerator: {
-          Category: "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory,
-          PlayerRank: ALL_RANK,
-        },
-      },
-    },
-    SID: `SkinCloak_Bandit_Armor2_MasterMod_headless`,
-    LocalizationSID: "SkinJacket_Bandit_Armor",
-  },
 
   // ---- HeadlessArmors refs
 
   BattleExoskeleton_Varta_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("BattleExoskeleton_Varta_Armor_MasterMod_headless"),
     SID: "BattleExoskeleton_Varta_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "BattleExoskeleton_Varta_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   Exoskeleton_Mercenaries_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Mercenaries_Armor_MasterMod_headless"),
     SID: "Exoskeleton_Mercenaries_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Exoskeleton_Mercenaries_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   Exoskeleton_Monolith_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Monolith_Armor_MasterMod_headless"),
     SID: "Exoskeleton_Monolith_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Exoskeleton_Monolith_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   Exoskeleton_Neutral_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Neutral_Armor_MasterMod_headless"),
     SID: "Exoskeleton_Neutral_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Exoskeleton_Neutral_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   Exoskeleton_Svoboda_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Svoboda_Armor_MasterMod_headless"),
     SID: "Exoskeleton_Svoboda_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Exoskeleton_Svoboda_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   Heavy_Dolg_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Heavy_Dolg_Armor_MasterMod_headless"),
     SID: "Heavy_Dolg_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Heavy_Dolg_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   Heavy2_Military_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Heavy2_Military_Armor_MasterMod_headless"),
     SID: "Heavy2_Military_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Heavy2_Military_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   HeavyAnomaly_Monolith_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyAnomaly_Monolith_Armor_MasterMod_headless"),
     SID: "HeavyAnomaly_Monolith_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "HeavyAnomaly_Monolith_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   Exoskeleton_Dolg_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Exoskeleton_Dolg_Armor_MasterMod_headless"),
     SID: "Exoskeleton_Dolg_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Exoskeleton_Dolg_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   Heavy_Svoboda_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Heavy_Svoboda_Armor_MasterMod_headless"),
     SID: "Heavy_Svoboda_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Heavy_Svoboda_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   Heavy_Mercenaries_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Heavy_Mercenaries_Armor_MasterMod_headless"),
     SID: "Heavy_Mercenaries_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Heavy_Mercenaries_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   HeavyBattle_Spark_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyBattle_Spark_Armor_MasterMod_headless"),
     SID: "HeavyBattle_Spark_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "HeavyBattle_Spark_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   HeavyExoskeleton_Dolg_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyExoskeleton_Dolg_Armor_MasterMod_headless"),
     SID: "HeavyExoskeleton_Dolg_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "HeavyExoskeleton_Dolg_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   HeavyExoskeleton_Monolith_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyExoskeleton_Monolith_Armor_MasterMod_headless"),
     SID: "HeavyExoskeleton_Monolith_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "HeavyExoskeleton_Monolith_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
   HeavyExoskeleton_Svoboda_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("HeavyExoskeleton_Svoboda_Armor_MasterMod_headless"),
     SID: "HeavyExoskeleton_Svoboda_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "HeavyExoskeleton_Svoboda_Armor_MasterMod_headless", _extras: { isDroppable: true } },
   },
-  /*  HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless: {
-    SID: "HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "HeavyExoskeleton_Varta_Armor_MasterMod_headless", _extras: { isDroppable: true } },
-  },*/
   Battle_Dolg_End_Armor_HeadlessArmors_headless: {
+    __internal__: getHeadlessArmorInternal("Battle_Dolg_End_Armor_MasterMod_headless"),
     SID: "Battle_Dolg_End_Armor_HeadlessArmors_headless",
-    __internal__: { refkey: "Battle_Dolg_End_Armor_MasterMod_headless", _extras: { isDroppable: true } },
-  },
-  SkinCloak_Bandit_Armor2_HeadlessArmors_headless: {
-    SID: "SkinCloak_Bandit_Armor2_HeadlessArmors_headless",
-    __internal__: { refkey: "SkinCloak_Bandit_Armor2_MasterMod_headless" },
   },
   Exoskeleton_Mercenaries_Helmet_HeadlessArmors: {
+    __internal__: getHelmetInternal("Exoskeleton_Mercenaries_Helmet_MasterMod"),
     SID: "Exoskeleton_Mercenaries_Helmet_HeadlessArmors",
-    __internal__: { refkey: "Exoskeleton_Mercenaries_Helmet_MasterMod", _extras: { isDroppable: true } },
   },
   Exoskeleton_Monolith_Helmet_HeadlessArmors: {
+    __internal__: getHelmetInternal("Exoskeleton_Monolith_Helmet_MasterMod"),
     SID: "Exoskeleton_Monolith_Helmet_HeadlessArmors",
-    __internal__: { refkey: "Exoskeleton_Monolith_Helmet_MasterMod", _extras: { isDroppable: true } },
   },
   Exoskeleton_Neutral_Helmet_HeadlessArmors: {
+    __internal__: getHelmetInternal("Exoskeleton_Neutral_Helmet_MasterMod"),
     SID: "Exoskeleton_Neutral_Helmet_HeadlessArmors",
-    __internal__: { refkey: "Exoskeleton_Neutral_Helmet_MasterMod", _extras: { isDroppable: true } },
   },
   Exoskeleton_Spark_Helmet_HeadlessArmors: {
+    __internal__: getHelmetInternal("Exoskeleton_Spark_Helmet_MasterMod"),
     SID: "Exoskeleton_Spark_Helmet_HeadlessArmors",
-    __internal__: { refkey: "Exoskeleton_Spark_Helmet_MasterMod", _extras: { isDroppable: true } },
   },
   Exoskeleton_Duty_Helmet_HeadlessArmors: {
+    __internal__: getHelmetInternal("Exoskeleton_Duty_Helmet_MasterMod"),
     SID: "Exoskeleton_Duty_Helmet_HeadlessArmors",
-    __internal__: { refkey: "Exoskeleton_Duty_Helmet_MasterMod", _extras: { isDroppable: true } },
   },
   Exoskeleton_Svoboda_Helmet_HeadlessArmors: {
+    __internal__: getHelmetInternal("Exoskeleton_Svoboda_Helmet_MasterMod"),
     SID: "Exoskeleton_Svoboda_Helmet_HeadlessArmors",
-    __internal__: { refkey: "Exoskeleton_Svoboda_Helmet_MasterMod", _extras: { isDroppable: true } },
   },
   HeavyBattle_Spark_Helmet_HeadlessArmors: {
+    __internal__: getHelmetInternal("HeavyBattle_Spark_Helmet_MasterMod"),
     SID: "HeavyBattle_Spark_Helmet_HeadlessArmors",
-    __internal__: { refkey: "HeavyBattle_Spark_Helmet_MasterMod", _extras: { isDroppable: true } },
   },
   HeavyBattle_Merc_Helmet_HeadlessArmors: {
+    __internal__: getHelmetInternal("HeavyBattle_Merc_Helmet_MasterMod"),
     SID: "HeavyBattle_Merc_Helmet_HeadlessArmors",
-    __internal__: { refkey: "HeavyBattle_Merc_Helmet_MasterMod", _extras: { isDroppable: true } },
   },
   HeavyBattle_Dolg_Helmet_HeadlessArmors: {
+    __internal__: getHelmetInternal("HeavyBattle_Dolg_Helmet_MasterMod"),
     SID: "HeavyBattle_Dolg_Helmet_HeadlessArmors",
-    __internal__: { refkey: "HeavyBattle_Dolg_Helmet_MasterMod", _extras: { isDroppable: true } },
-  },
-  SkinCloak_Bandit_Armor_HeadlessArmors: {
-    SID: "SkinCloak_Bandit_Armor_HeadlessArmors",
-    __internal__: { refkey: "SkinCloak_Bandit_Armor_MasterMod" },
   },
 };
 
@@ -381,7 +355,9 @@ export const extraArmorsByFaction: {
   spark: ArmorDescriptor[];
   varta: ArmorDescriptor[];
 } = {
-  bandit: [newArmors.SkinCloak_Bandit_Armor_MasterMod, newArmors.SkinCloak_Bandit_Armor2_MasterMod_headless],
+  bandit: [
+    /*newArmors.SkinCloak_Bandit_Armor_MasterMod, newArmors.SkinCloak_Bandit_Armor2_MasterMod_headless*/
+  ],
   corpus: [
     getNPCArmorDescriptor("NPC_Heavy_Corps_Armor", VETERAN_MASTER_RANK),
     getNPCArmorDescriptor("NPC_Heavy3_Corps_Armor", VETERAN_MASTER_RANK),
@@ -465,12 +441,7 @@ export const extraArmorsByFaction: {
     newArmors.HeavyBattle_Spark_Helmet_MasterMod,
     newArmors.HeavyBattle_Spark_Helmet_HeadlessArmors,
   ],
-  varta: [
-    newArmors.BattleExoskeleton_Varta_Armor_MasterMod_headless,
-    newArmors.BattleExoskeleton_Varta_Armor_HeadlessArmors_headless,
-    // newArmors.HeavyExoskeleton_Varta_Armor_MasterMod_headless,
-    // newArmors.HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless,
-  ],
+  varta: [newArmors.BattleExoskeleton_Varta_Armor_MasterMod_headless, newArmors.BattleExoskeleton_Varta_Armor_HeadlessArmors_headless],
 };
 
 Object.entries(allDefaultDroppableArmorsByFaction).forEach(([faction, defs]) => {
@@ -492,4 +463,34 @@ export const allExtraArmors = [
   ...extraArmorsByFaction.monolith,
   ...extraArmorsByFaction.varta,
   ...extraArmorsByFaction.spark,
-];
+]
+  .filter((a) => {
+    const check = !allDefaultArmorPrototypesRecord[a.__internal__.refkey] && !newArmors[a.__internal__.refkey];
+    if (check) {
+      logger.warn(`Can't find default armor for id '${a.__internal__.refkey}'`);
+    }
+    return !check;
+  })
+  .sort((a, b) => {
+    if (allDefaultArmorPrototypesRecord[a.__internal__.refkey] && allDefaultArmorPrototypesRecord[b.__internal__.refkey]) {
+      return 0;
+    }
+    if (allDefaultArmorPrototypesRecord[a.__internal__.refkey]) {
+      return -1;
+    }
+    if (allDefaultArmorPrototypesRecord[b.__internal__.refkey]) {
+      return 1;
+    }
+
+    if (a.__internal__.refkey === b.__internal__.refkey) {
+      return 0;
+    }
+    if (a.__internal__.refkey === b.SID) {
+      return 1;
+    }
+    if (b.__internal__.refkey === a.SID) {
+      return -1;
+    }
+
+    return 0;
+  });

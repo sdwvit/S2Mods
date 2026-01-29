@@ -67,24 +67,24 @@ function calculateArmorScore(armor: ArmorPrototype): number {
   return score / 100; // 0 to 1
 }
 const backfillCache: Record<string, ArmorPrototype> = {};
-export const allItemRank = Object.fromEntries(
-  Object.values({
-    ...allDefaultNightVisionGogglesPrototypesRecord,
-    ...allDefaultArmorPrototypesRecord,
-    ...Object.fromEntries(
-      allExtraArmors.map((e) => {
-        const SID = e.SID;
-        const refkey = e.__internal__.refkey;
-        const dummy = new Struct({ SID }) as ArmorPrototype;
-        dummy.SID = SID;
-        dummy.__internal__.refkey = refkey;
+const allItems = Object.values({
+  ...allDefaultNightVisionGogglesPrototypesRecord,
+  ...allDefaultArmorPrototypesRecord,
+  ...Object.fromEntries(
+    allExtraArmors.map((e) => {
+      const SID = e.SID;
+      const refkey = e.__internal__.refkey;
+      const dummy = new Struct({ SID }) as ArmorPrototype;
+      dummy.SID = SID;
+      dummy.__internal__.refkey = refkey;
 
-        return [SID, dummy] as [string, ArmorPrototype];
-      }),
-    ),
-    ...newArmors,
-  })
-    .filter((armor) => !armor.SID.includes("Template"))
+      return [SID, dummy] as [string, ArmorPrototype];
+    }),
+  ),
+  ...newArmors,
+}).filter((armor) => !armor.SID.includes("Template"));
+export const allItemRank = Object.fromEntries(
+  allItems
     .map((armor) => {
       const backfilled = backfillDef(
         armor as any,

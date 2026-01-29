@@ -54,7 +54,7 @@ export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype> = {
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
     [/list] 
   `,
-  changenote: `Fix varta DLC armor included by accident. Fix probability calculations because of that.`,
+  changenote: `Fix ordering of armors, fix spawning exoskeletons on quest characters`,
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };
 
