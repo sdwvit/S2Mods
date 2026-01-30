@@ -1,16 +1,16 @@
-import { QuestNodePrototype, Struct } from "s2cfgtojson";
+import { QuestNodePrototype, QuestNodePrototypeCondition, QuestNodePrototypeSetItemGenerator, Struct } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
 import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 import { logger } from "../../src/logger.mts";
-import { recurringQuestsFilenames } from "../StashClueRework/meta.mts";
+import { recurringQuestsFilenames } from "../StashClueRework/transformQuestNodePrototypes.mts";
 
 /**
  * Removes timeout for repeating quests.
  */
 export const transformQuestNodePrototypes: StructTransformer<QuestNodePrototype> = async (struct, context) => {
   let promises: Promise<QuestNodePrototype[] | QuestNodePrototype>[] = [];
-  const fork = struct.fork();
+  const fork = struct.fork() as QuestNodePrototypeSetItemGenerator;
 
   // applies only to recurring quests
   if (recurringQuestsFilenames.some((p) => context.filePath.includes(p))) {
@@ -22,7 +22,7 @@ export const transformQuestNodePrototypes: StructTransformer<QuestNodePrototype>
   }
 
   const res = await Promise.all(promises).then((results) => results.flat());
-  if (fork.entries().length) {
+  if ((fork as any).entries().length) {
     res.push(fork);
   }
 
@@ -35,7 +35,7 @@ transformQuestNodePrototypes.contains = true;
 
 const oncePerQuestSID = new Set<string>();
 
-function replaceRewards(struct: QuestNodePrototype, fork: QuestNodePrototype) {
+function replaceRewards(struct: QuestNodePrototypeSetItemGenerator, fork: QuestNodePrototypeSetItemGenerator) {
   const extraStructs: QuestNodePrototype[] = [];
 
   if (!oncePerQuestSID.has(struct.QuestSID)) {
@@ -70,7 +70,7 @@ function replaceRewards(struct: QuestNodePrototype, fork: QuestNodePrototype) {
       setLatestQuestVarNode.__internal__.rawName = setLatestQuestVarNode.SID;
       setLatestQuestVarNode.__internal__.isRoot = true;
       extraStructs.push(setLatestQuestVarNode);
-      const conditionNode = new Struct() as QuestNodePrototype;
+      const conditionNode = new Struct() as QuestNodePrototypeCondition;
       conditionNode.SID = `${qv["Reward Gen SID"]}_Condition`;
       conditionNode.__internal__.rawName = conditionNode.SID;
       conditionNode.__internal__.isRoot = true;
