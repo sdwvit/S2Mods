@@ -24,7 +24,7 @@ const mutantLootSet = new Set([
 ]);
 
 function structTransformer(struct: ItemGeneratorPrototype) {
-  if (mutantLootSet.has(struct.SID)) {
+  if (mutantLootSet.has(struct.SID) && struct.ItemGenerator[0].PossibleItems[0].Chance !== 1) {
     const fork = struct.fork();
 
     fork.ItemGenerator = struct.ItemGenerator.fork();
