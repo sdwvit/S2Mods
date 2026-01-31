@@ -19,6 +19,6 @@ Replaces BP_100_Rads_Bar_120 Blueprint.
 
 📻 Track: Addaraya - Gurza Dreaming
 `,
-  changenote: "Reduce volume to 75%",
+  changenote: "Reduce volume to 50%",
   structTransformers: [],
 };
