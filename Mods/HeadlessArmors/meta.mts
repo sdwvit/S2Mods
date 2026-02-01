@@ -10,6 +10,55 @@ import { deepMerge } from "../../src/deep-merge.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 
+const UPGRADE_SID_FIXUPS: Record<string, string> = {
+  Battle_Monolith_Armor_rad_container_Left_3_2: "Battle_Monolith_Armor_radiationAbsorption_Left_3_2",
+  Exoskeleton_Neutral_Armor_protectionChemical_protectionTherma_Left_3_2:
+    "Exoskeleton_Neutral_Armor_protectionChemical_protectionElectrical_Left_3_2",
+  HeavyExoskeleton_Monolith_Armor_protectionChemical_protectionTherma_Left_3_2:
+    "HeavyExoskeleton_Monolith_Armor_protectionChemical_protectionElectrical_Left_3_2",
+  Light_Mercenaries_Armor_protectionThermal_protectionElectrical_Left_2_1: "Light_Mercenaries_Armor_protectionChemical_protectionElectrical_Left_2_1",
+  SEVA_Dolg_Armor_carryingCapacity_Left_2_2: "SEVA_Dolg_Armor_Backpack_Left_2_2",
+};
+
+function fixUpgradePrototypeSIDs(armor: ArmorPrototype) {
+  const upgrades = (armor as any).UpgradePrototypeSIDs;
+  if (!upgrades || typeof upgrades.entries !== "function") {
+    return;
+  }
+  for (const [key, value] of upgrades.entries()) {
+    if (typeof value !== "string") {
+      continue;
+    }
+    const replacement = UPGRADE_SID_FIXUPS[value];
+    if (replacement && replacement !== value) {
+      upgrades[key] = replacement;
+    }
+  }
+}
+
+function dedupeUpgradePrototypeSIDs(armor: ArmorPrototype) {
+  const upgrades = (armor as any).UpgradePrototypeSIDs?.fork(true);
+  if (!upgrades || typeof upgrades.entries !== "function") {
+    return;
+  }
+  const seen = new Set<string>();
+  for (const [key, value] of upgrades.entries()) {
+    if (typeof value !== "string") {
+      continue;
+    }
+    if (seen.has(value)) {
+      if (typeof upgrades.removeNode === "function") {
+        upgrades.removeNode(key);
+      } else {
+        delete upgrades[key];
+      }
+      continue;
+    }
+    seen.add(value);
+  }
+  armor.UpgradePrototypeSIDs = upgrades
+}
+
 export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype> = {
   description: `
     This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection.[h2][/h2]
@@ -106,6 +155,8 @@ export async function transformArmorPrototypes(struct: ArmorPrototype, context: 
         });
       }
       deepMerge(newArmor, overrides);
+      fixUpgradePrototypeSIDs(newArmor);
+      dedupeUpgradePrototypeSIDs(newArmor);
       if (!(newArmors[newSID] && newArmors[newSID].__internal__._extras?.isDroppable)) {
         newArmor.Invisible = true;
       }
