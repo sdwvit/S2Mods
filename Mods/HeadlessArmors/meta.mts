@@ -56,7 +56,7 @@ function dedupeUpgradePrototypeSIDs(armor: ArmorPrototype) {
     }
     seen.add(value);
   }
-  armor.UpgradePrototypeSIDs = upgrades
+  armor.UpgradePrototypeSIDs = upgrades;
 }
 
 export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype> = {
@@ -131,10 +131,7 @@ export async function transformArmorPrototypes(struct: ArmorPrototype, context: 
 
       const newArmor = new Struct(
         backfillDef(
-          {
-            SID: newSID,
-            __internal__: { rawName: newSID, refkey, refurl: newArmors[refkey] ? "" : `../${path.parse(context.filePath).base}` },
-          },
+          { SID: newSID, __internal__: { rawName: newSID, refkey } },
           allDefaultArmorPrototypesRecord,
           newSID.toLowerCase().includes("helmet") ? "Light_Neutral_Helmet" : armor.SID,
         ),
