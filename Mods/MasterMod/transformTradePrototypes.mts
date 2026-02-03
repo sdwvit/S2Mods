@@ -5,7 +5,7 @@ import { precision } from "../../src/precision.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { bartendersTradePrototypes, generalTradersTradePrototypes, medicsTradePrototypes, technicianTradePrototypes } from "../../src/consts.mts";
 import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
-
+const GAMMA_FACTOR = DIFFICULTY_FACTOR / 1.6;
 const oncePerFile = new Set<string>();
 /**
  * Don't allow traders to buy weapons and armor.
@@ -29,7 +29,7 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
             ConditionSID: "ConstTrue",
             ItemGeneratorPrototypeSID: "empty",
             BuyModifier: 10,
-            SellModifier: 10,
+            SellModifier: 10 * 2.5,
             BuyLimitations: {
               __internal__: { isArray: true },
               0: "EItemType::Weapon",
@@ -79,7 +79,7 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
   }
   const TradeGenerators = struct.TradeGenerators.map(([_k, tg]) => {
     const fork = tg.fork();
-    fork.SellModifier = DIFFICULTY_FACTOR;
+    fork.SellModifier = GAMMA_FACTOR;
     fork.BuyLimitations = tg.BuyLimitations?.fork?.() || (new Struct({ __internal__: { isArray: true, bpatch: true } }) as any);
 
     const limitations = ["EItemType::MutantLoot"];
@@ -136,7 +136,6 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
       limitations.push(
         ...["EItemType::Artifact", "EItemType::Armor", "EItemType::Weapon", "EItemType::Ammo", "EItemType::Consumable", "EItemType::Other"],
       );
-      fork.SellModifier = DIFFICULTY_FACTOR * 2.5;
     }
 
     limitations.forEach((l) => fork.BuyLimitations.addNode(l));
