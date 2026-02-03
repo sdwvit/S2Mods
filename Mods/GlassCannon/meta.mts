@@ -1,8 +1,8 @@
-import { DifficultyPrototype, MutantBase } from "s2cfgtojson";
+import { DifficultyPrototype } from "s2cfgtojson";
 import { MetaType } from "../../src/meta-type.mts";
 
 export const DIFFICULTY_FACTOR = 4;
-export const meta: MetaType<DifficultyPrototype | MutantBase> = {
+export const meta: MetaType<DifficultyPrototype> = {
   description: `
 This mode does only one thing: increases weapons damage quite a bit on Hard/Master difficulty.
 [hr][/hr]

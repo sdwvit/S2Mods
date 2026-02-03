@@ -1,7 +1,7 @@
-import { DynamicItemGenerator } from "s2cfgtojson";
 import { MetaType } from "../../src/meta-type.mts";
+import { ItemGeneratorPrototype } from "s2cfgtojson";
 
-export const meta: MetaType<DynamicItemGenerator> = {
+export const meta: MetaType<ItemGeneratorPrototype> = {
   description: `
     This mode does only one thing: traders no longer sell you weapons or armor.
 [hr][/hr]
@@ -13,7 +13,7 @@ It is meant to be used in other collections of mods.
   structTransformers: [transformDynamicItemGenerator],
 };
 
-const transformTrade = (struct: DynamicItemGenerator) => {
+const transformTrade = (struct: ItemGeneratorPrototype) => {
   const fork = struct.fork();
   if (!struct.RefreshTime) {
     fork.RefreshTime = "1d";
@@ -28,7 +28,7 @@ const transformTrade = (struct: DynamicItemGenerator) => {
       case "EItemGenerationCategory::WeaponSecondary":
         return Object.assign(e.fork(), { ReputationThreshold: 1000000 });
       case "EItemGenerationCategory::SubItemGenerator": {
-        const PossibleItems = (e.PossibleItems as DynamicItemGenerator["ItemGenerator"]["0"]["PossibleItems"]).map(([_k, pi]) => {
+        const PossibleItems = (e.PossibleItems as ItemGeneratorPrototype["ItemGenerator"]["0"]["PossibleItems"]).map(([_k, pi]) => {
           if (pi.ItemGeneratorPrototypeSID?.includes("Gun")) {
             return Object.assign(pi.fork(), { Chance: 0 }); // Disable gun sell
           }
@@ -52,7 +52,7 @@ const transformTrade = (struct: DynamicItemGenerator) => {
  * Does not allow traders to sell gear.
  * Allows NPCs to drop armor.
  */
-export function transformDynamicItemGenerator(struct: DynamicItemGenerator) {
+export function transformDynamicItemGenerator(struct: ItemGeneratorPrototype) {
   /**
    * Does not allow traders to sell gear.
    */
