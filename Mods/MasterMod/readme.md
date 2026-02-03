@@ -22,7 +22,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `ItemGeneratorPrototypes`
  - `MeshGeneratorPrototypes`
  - `NPCPrototypes`
- - `ObjPrototypes`
  - `RelationPrototypes`
  - `StashPrototypes`
  - `TradePrototypes`
@@ -45,9 +44,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `RSQ08_Dialog_Barmen_RSQ`
  - `RSQ09_Dialog_Spica_RSQ`
  - `RSQ10_Dialog_Harpy_RSQ`
-
-`GlobalVariablePrototypes`:
- - `CluePrototypes`
 
 `ItemGeneratorPrototypes`:
  - `DynamicItemGenerator`
@@ -79,8 +75,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `Snork`
 
 `QuestNodePrototypes`
-
-`SpawnActorPrototypes`
 
 `CharacterWeaponSettingsPrototypes`:
  - `NPCWeaponSettingsPrototypes`

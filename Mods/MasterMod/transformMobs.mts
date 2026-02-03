@@ -1,9 +1,9 @@
-import { MutantBase } from "s2cfgtojson";
+import { GeneralNPCObjPrototype } from "s2cfgtojson";
 import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 /**
  * Sets bullet (Strike) protection to 0 for all mobs.
  */
-export async function transformMobs(struct: MutantBase) {
+export async function transformMobs(struct: GeneralNPCObjPrototype) {
   if (!struct.VitalParams) {
     return;
   }
@@ -24,3 +24,4 @@ transformMobs.files = [
   "/Pseudogiant.cfg",
   "/Snork.cfg",
 ];
+2

@@ -1,9 +1,9 @@
-import { DynamicItemGenerator, Struct } from "s2cfgtojson";
+import { ItemGeneratorPrototype, Struct } from "s2cfgtojson";
 import { ALL_RANKS_SET, generalTradersTradeItemGenerators } from "../../src/consts.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { precision } from "../../src/precision.mts";
 
-function transformTrade(struct: DynamicItemGenerator) {
+function transformTrade(struct: ItemGeneratorPrototype) {
   const fork = struct.fork();
   if (!struct.RefreshTime) {
     fork.RefreshTime = "1d";
@@ -25,14 +25,8 @@ function transformTrade(struct: DynamicItemGenerator) {
           });
         }
         break;
-      case "EItemGenerationCategory::BodyArmor":
-      case "EItemGenerationCategory::Head":
-      case "EItemGenerationCategory::WeaponPrimary":
-      case "EItemGenerationCategory::WeaponPistol":
-      case "EItemGenerationCategory::WeaponSecondary":
-        return Object.assign(e.fork(), { ReputationThreshold: 1000000 });
       case "EItemGenerationCategory::SubItemGenerator": {
-        const PossibleItems = (e.PossibleItems as DynamicItemGenerator["ItemGenerator"]["0"]["PossibleItems"]).map(([_k, pi]) => {
+        const PossibleItems = (e.PossibleItems as ItemGeneratorPrototype["ItemGenerator"]["0"]["PossibleItems"]).map(([_k, pi]) => {
           if (
             generalTradersTradeItemGenerators.has(struct.SID) &&
             (pi.ItemGeneratorPrototypeSID?.includes("Attach") ||
@@ -69,7 +63,7 @@ function transformTrade(struct: DynamicItemGenerator) {
   return Object.assign(fork, { ItemGenerator });
 }
 
-function transformConsumables(e: DynamicItemGenerator["ItemGenerator"]["0"], i: number) {
+function transformConsumables(e: ItemGeneratorPrototype["ItemGenerator"]["0"], i: number) {
   const fork = e.fork();
   const PossibleItems = e.PossibleItems.filter(([_k, pi]) => !pi.ItemPrototypeSID.toLowerCase().includes("key")).map(([_k, pi], j) => {
     let chance = semiRandom(i + j); // Randomize
@@ -86,7 +80,7 @@ function transformConsumables(e: DynamicItemGenerator["ItemGenerator"]["0"], i: 
   return Object.assign(fork, { PossibleItems });
 }
 
-function transformWeapons(e: DynamicItemGenerator["ItemGenerator"]["0"], i: number) {
+function transformWeapons(e: ItemGeneratorPrototype["ItemGenerator"]["0"], i: number) {
   const fork = e.fork();
   const minMaxAmmo = (pi, j) => ({
     AmmoMinCount: 0,
@@ -114,7 +108,7 @@ function transformWeapons(e: DynamicItemGenerator["ItemGenerator"]["0"], i: numb
   return Object.assign(fork, { PossibleItems });
 }
 
-function transformCombat(struct: DynamicItemGenerator) {
+function transformCombat(struct: ItemGeneratorPrototype) {
   const fork = struct.fork();
   if (!struct.ItemGenerator) {
     return;
@@ -177,7 +171,7 @@ function transformCombat(struct: DynamicItemGenerator) {
  * Does not allow traders to sell gear.
  * Allows NPCs to drop armor.
  */
-export async function transformDynamicItemGenerator(struct: DynamicItemGenerator) {
+export async function transformDynamicItemGenerator(struct: ItemGeneratorPrototype) {
   /**
    * Does not allow traders to sell gear.
    */

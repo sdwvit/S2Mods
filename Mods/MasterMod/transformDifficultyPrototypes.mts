@@ -14,9 +14,6 @@ export const transformDifficultyPrototypes: StructTransformer<DifficultyPrototyp
     Repair_Cost: DIFFICULTY_FACTOR,
     Upgrade_Cost: DIFFICULTY_FACTOR,
     Effect_Satiety: 1,
-
-    // Reward_MainLine_Money: DIFFICULTY_FACTOR,
-    // Reward_SideLine_Money: DIFFICULTY_FACTOR,
   } as DifficultyPrototype);
 };
 transformDifficultyPrototypes.files = ["/DifficultyPrototypes.cfg"];

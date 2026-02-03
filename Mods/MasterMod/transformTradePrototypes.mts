@@ -70,6 +70,7 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
     return extraStructs.length ? extraStructs : null;
   }
   const fork = struct.fork();
+
   if (GeneralNPCTradePrototypesMoneyMult.has(struct.SID)) {
     fork.Money = precision(
       GeneralNPCTradePrototypesMoneyMult.get(struct.SID) * DIFFICULTY_FACTOR * (struct.Money ?? 1000) * (semiRandom(context.index) + 1),
@@ -78,7 +79,9 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
   }
   const TradeGenerators = struct.TradeGenerators.map(([_k, tg]) => {
     const fork = tg.fork();
+    fork.SellModifier = DIFFICULTY_FACTOR;
     fork.BuyLimitations = tg.BuyLimitations?.fork?.() || (new Struct({ __internal__: { isArray: true, bpatch: true } }) as any);
+
     const limitations = ["EItemType::MutantLoot"];
 
     if (bartendersTradePrototypes.has(struct.SID)) {
@@ -98,7 +101,6 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
     }
 
     if (medicsTradePrototypes.has(struct.SID)) {
-      fork.BuyModifier = 0.7;
       limitations.push(
         ...[
           "EItemType::Armor",
@@ -134,6 +136,7 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
       limitations.push(
         ...["EItemType::Artifact", "EItemType::Armor", "EItemType::Weapon", "EItemType::Ammo", "EItemType::Consumable", "EItemType::Other"],
       );
+      fork.SellModifier = DIFFICULTY_FACTOR * 2.5;
     }
 
     limitations.forEach((l) => fork.BuyLimitations.addNode(l));
@@ -142,9 +145,6 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
       fork.ArmorSellMinDurability = 0.99;
       fork.WeaponSellMinDurability = 0.99;
       fork.BuyLimitations = new Struct() as any;
-    }
-    if (tg.BuyModifier > 0.3) {
-      fork.BuyModifier = 0.3;
     }
     return fork;
   });

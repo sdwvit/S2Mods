@@ -1,4 +1,4 @@
-import { LairPrototype } from "s2cfgtojson";
+import { LairPrototype, LairPrototypeMaster, LairPrototypePossibleInhabitantFactionsItem } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
 
 /**
@@ -12,12 +12,12 @@ export const transformLairPrototypes: StructTransformer<LairPrototype> = async (
   const fork = struct.fork();
   fork.Preset = struct.fork() as any;
   fork.Preset.PossibleInhabitantFactions = struct.fork() as any;
-  struct.Preset.PossibleInhabitantFactions.forEach(([faction, v]) => {
-    const inhabitantFork = v.fork();
+  struct.Preset.PossibleInhabitantFactions.forEach(([faction, v]: [`${number}`, LairPrototypePossibleInhabitantFactionsItem]) => {
+    const inhabitantFork = v.fork() as any;
     inhabitantFork.SpawnSettingsPerPlayerRanks = struct.fork() as any;
     fork.Preset.PossibleInhabitantFactions[faction] = inhabitantFork;
     v.SpawnSettingsPerPlayerRanks.forEach(([rankKey, rankValue]) => {
-      const newRv = rankValue.fork();
+      const newRv = rankValue.fork() as LairPrototypeMaster;
       newRv.MaxSpawnQuantity = rankValue.MaxSpawnQuantity * 2;
       newRv.SpawnSettingsPerArchetypes = rankValue.fork() as any;
       newRv.SpawnSettingsPerArchetypes.Controller = rankValue.SpawnSettingsPerArchetypes.entries()[0][1].fork(true);
