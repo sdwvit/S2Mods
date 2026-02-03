@@ -13,7 +13,6 @@ import { ItemGeneratorPrototype, ERank, GetStructType, Struct, ItemGeneratorProt
 import { precision } from "../../src/precision.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
-import { logger } from "../../src/logger.mts";
 
 const minimumArmorCost = Object.values(allItemRank).reduce((a, b) => Math.min(a, b), Infinity);
 const maximumArmorCost = Object.values(allItemRank).reduce((a, b) => Math.max(a, b), -Infinity);
