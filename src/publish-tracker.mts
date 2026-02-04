@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { projectRoot } from "./base-paths.mts";
+import { modName, projectRoot } from "./base-paths.mts";
 import { logger } from "./logger.mts";
 
 type PublishPlatform = "steam" | "modio";
@@ -46,7 +46,7 @@ export function commitAndPushIfDirty(platform: PublishPlatform, publishedAt = ne
   }
   const isoTimestamp = publishedAt.toISOString();
   runGit("git add -A");
-  runGit(`git commit -m "publish: ${platform} ${isoTimestamp}"`);
+  runGit(`git commit -m "publish: ${modName} ${platform} ${isoTimestamp}"`);
   runGit("git push");
 }
 
