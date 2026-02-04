@@ -9,6 +9,7 @@ import { modFolder, modFolderSteam, modMeta, modName } from "./base-paths.mjs";
 import { sanitize } from "./sanitize.mts";
 import { logger } from "./logger.mts";
 import { getModifiedFiles } from "./get-modified-files.mts";
+import { finalizePublish } from "./publish-tracker.mts";
 const meta = await modMeta;
 const cmd = () => {
   const vdfFilePath = path.join(modFolder, `workshopitem.vdf`);
@@ -47,6 +48,8 @@ async function publishToSteam() {
     logger.log(`${import.meta.filename} dry run`);
     return;
   }
+  const publishedAt = new Date();
+  const publishNote = process.env.CHANGENOTE || meta.changenote || "Update";
   await import("./pull-assets.mjs");
   await import("./pull-staged.mjs");
   childProcess.execSync(cmd(), {
@@ -57,6 +60,7 @@ async function publishToSteam() {
   });
 
   spawnSync("paplay", ["./pop.wav"]);
+  finalizePublish("steam", publishNote, publishedAt);
 }
 
 await publishToSteam();

@@ -6,6 +6,7 @@ import { sanitize } from "./sanitize.mts";
 import { createModZip } from "./zip.mts";
 import { logger } from "./logger.mts";
 import { getModifiedFiles } from "./get-modified-files.mts";
+import { finalizePublish } from "./publish-tracker.mts";
 
 const meta = await modMeta;
 
@@ -163,11 +164,14 @@ async function publishToModIO() {
     logger.log(`${import.meta.filename} dry run`);
     return;
   }
+  const publishedAt = new Date();
+  const publishNote = process.env.CHANGENOTE || meta.changenote || "Update";
   await Promise.allSettled([import("./pull-assets.mjs"), import("./pull-staged.mjs")]);
   const [outputZip, modId] = await Promise.all([createModZip(await modFolderSteamStruct), Promise.resolve(getStoredModId() || createMod())]);
   await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
   rmSync(outputZip);
   logger.log(`mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-${meta.originalAuthor || process.env.STEAM_USER}`);
+  finalizePublish("modio", publishNote, publishedAt);
 }
 
 async function getFormFile(form = new FormData(), field: string, filePath: string, fileType: string) {
