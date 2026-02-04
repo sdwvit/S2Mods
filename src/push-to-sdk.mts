@@ -2,8 +2,7 @@ import path from "node:path";
 
 import { logger } from "./logger.mjs";
 import { modFolderRaw, modFolderSdkLink, modMeta, sdkModFolder } from "./base-paths.mjs";
-import { mkdirSync } from "fs";
-import { cpSync, existsSync, readdirSync, rmSync, symlinkSync } from "node:fs";
+import { mkdirSync, cpSync, existsSync, readdirSync, rmSync, symlinkSync } from "node:fs";
 import { createMod } from "./cook.mts";
 import { recursiveCfgFind } from "./recursive-cfg-find.mts";
 

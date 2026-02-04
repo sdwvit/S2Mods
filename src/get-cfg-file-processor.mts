@@ -53,10 +53,18 @@ export function getCfgFileProcessor<T extends Struct>(transformer: StructTransfo
       .filter(Boolean) as Struct[];
 
     if (processedStructs.length) {
-      const cfgEnclosingFolder = path.join(modFolderRaw, rawCfgEnclosingFolder, pathToSave.dir, pathToSave.name);
+      const cfgEnclosingFolder = path.join(
+        modFolderRaw,
+        rawCfgEnclosingFolder,
+        pathToSave.dir,
+        pathToSave.base === "CoreVariables.cfg" ? "" : pathToSave.name,
+      );
 
       if (!(await exists(cfgEnclosingFolder))) await mkdir(cfgEnclosingFolder, { recursive: true });
-      const resultingFilename = path.join(cfgEnclosingFolder, `${pathToSave.name}_patch_${modName}.cfg`);
+      const resultingFilename = path.join(
+        cfgEnclosingFolder,
+        pathToSave.base === "CoreVariables.cfg" ? `${pathToSave.name}.cfg_patch_${modName}` : `${pathToSave.name}_patch_${modName}.cfg`,
+      );
       await writeFile(resultingFilename, processedStructs.map((s) => s.toString()).join("\n\n"));
     }
     return processedStructs;
