@@ -1,6 +1,10 @@
 import { EItemGenerationCategory, ItemGeneratorPrototype, Struct } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
-import { allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID, Factions } from "../../src/consts.mts";
+import {
+  allDefaultGeneralNPCObjPrototypesRecord,
+  allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
+  Factions,
+} from "../../src/consts.mts";
 import { logger } from "../../src/logger.mts";
 import { FactionPatch, patchDefsRecord } from "./addFactionPatchItems.mts";
 
@@ -15,19 +19,23 @@ export const addFactionPatchesToItemGenerators: StructTransformer<ItemGeneratorP
   const fork = struct.fork();
 
   fork.ItemGenerator = new Struct() as ItemGeneratorPrototype["ItemGenerator"];
-  const generalNPCObjPrototype = allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
+  let generalNPCObjPrototype = allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
   if (!generalNPCObjPrototype) {
     return;
   }
+  while (!!allDefaultGeneralNPCObjPrototypesRecord[generalNPCObjPrototype.__internal__.refkey] && !generalNPCObjPrototype.Faction) {
+    generalNPCObjPrototype = allDefaultGeneralNPCObjPrototypesRecord[generalNPCObjPrototype.__internal__.refkey];
+  }
+
   const coreFaction = Factions[generalNPCObjPrototype.Faction];
   if (!coreFaction) {
-    logger.warn(`Unknown faction '${generalNPCObjPrototype.Faction}'`);
+    logger.warn(`Unknown generalNPCObjPrototype.Faction '${generalNPCObjPrototype.Faction}'`);
     return;
   }
   const patch = patchDefsRecord[`${FactionPatch}${coreFaction}`];
 
   if (!patch) {
-    logger.warn(`Unknown faction '${coreFaction}'`);
+    logger.warn(`Unknown coreFaction '${coreFaction}'`);
     return;
   }
   fork.ItemGenerator.addNode(
@@ -38,6 +46,8 @@ export const addFactionPatchesToItemGenerators: StructTransformer<ItemGeneratorP
       PossibleItems: {
         Chance: 1,
         ItemPrototypeSID: patch.SID,
+        MaxCount: 1,
+        MinCount: 1,
       },
     }),
     "FactionPatch",
