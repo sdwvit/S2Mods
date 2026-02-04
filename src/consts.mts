@@ -5,6 +5,7 @@ import {
   ConsumablePrototype,
   EItemGenerationCategory,
   ERank,
+  GeneralNPCObjPrototype,
   GrenadePrototype,
   Internal,
   NPCWeaponSettingsPrototype,
@@ -36,6 +37,7 @@ export let allDefaultGrenadePrototypes: GrenadePrototype[];
 export let allDefaultQuestItemPrototypes: SpawnActorPrototype[];
 export let allDefaultWeaponPrototypes: WeaponPrototype[];
 export let allDefaultAttachPrototypes: AttachPrototype[];
+export let allDefaultGeneralNPCObjPrototypes: GeneralNPCObjPrototype[];
 
 [
   allDefaultWeaponGeneralSetupPrototypes,
@@ -49,6 +51,7 @@ export let allDefaultAttachPrototypes: AttachPrototype[];
   allDefaultQuestItemPrototypes,
   allDefaultWeaponPrototypes,
   allDefaultAttachPrototypes,
+  allDefaultGeneralNPCObjPrototypes,
 ] = await Promise.all([
   readFileAndGetStructs<WeaponGeneralSetupPrototype>("WeaponData/WeaponGeneralSetupPrototypes.cfg"),
   readFileAndGetStructs<NPCWeaponSettingsPrototype>("WeaponData/CharacterWeaponSettingsPrototypes/PlayerWeaponSettingsPrototypes.cfg"),
@@ -61,10 +64,12 @@ export let allDefaultAttachPrototypes: AttachPrototype[];
   readFileAndGetStructs<SpawnActorPrototype>(`/QuestItemPrototypes.cfg`),
   readFileAndGetStructs<WeaponPrototype>("ItemPrototypes/WeaponPrototypes.cfg"),
   readFileAndGetStructs<AttachPrototype>("ItemPrototypes/AttachPrototypes.cfg"),
+  readFileAndGetStructs<GeneralNPCObjPrototype>("ObjPrototypes/GeneralNPCObjPrototypes.cfg"),
 ]);
 
 // Records:
-const getRecord = <T extends { SID: string }>(arr: T[]) => Object.fromEntries(arr.map((e) => [e.SID, e]));
+export const getRecord = <T extends { SID: string }>(arr: T[]) => Object.fromEntries(arr.map((e) => [e.SID, e]));
+export const getRecordByKey = <const K extends string, T extends Record<K, string>>(arr: T[], key: K) => Object.fromEntries(arr.map((e) => [e[key], e]));
 export const allDefaultArmorPrototypesRecord = getRecord(allDefaultArmorPrototypes);
 export const allDefaultArtifactPrototypesRecord = getRecord(allDefaultArtifactPrototypes);
 export const allDefaultNightVisionGogglesPrototypesRecord = getRecord(allDefaultNightVisionGogglesPrototypes);
@@ -75,6 +80,11 @@ export const allDefaultQuestItemPrototypesRecord = getRecord(allDefaultQuestItem
 export const allDefaultWeaponPrototypesRecord = getRecord(allDefaultWeaponPrototypes);
 export const allDefaultPlayerWeaponSettingsPrototypesRecord = getRecord(allDefaultPlayerWeaponSettingsPrototypes);
 export const allDefaultAttachPrototypesRecord = getRecord(allDefaultAttachPrototypes);
+export const allDefaultGeneralNPCObjPrototypesRecord = getRecord(allDefaultGeneralNPCObjPrototypes);
+export const allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID = getRecordByKey(
+  allDefaultGeneralNPCObjPrototypes,
+  "ItemGeneratorPrototypeSID",
+);
 
 export type ArmorDescriptor = {
   __internal__: {
@@ -411,3 +421,97 @@ export const MalachiteMutantQuestPartsQuestsDoneDialogs = [
   "EQ197_QD_Orders_Done_73061_4",
   "EQ197_QD_Orders_Done2_73167_4",
 ];
+
+export const Factions = {
+  // core factions
+  Bandits: "Bandits",
+  Monolith: "Monolith",
+  FreeStalkers: "FreeStalkers",
+  Duty: "Duty",
+  Freedom: "Freedom",
+  Varta: "Varta",
+  Neutrals: "Neutrals",
+  Militaries: "Militaries",
+  Noon: "Noon",
+  Scientists: "Scientists",
+  Mercenaries: "Mercenaries",
+  Spark: "Spark",
+  Corpus: "Corpus",
+  Mutant: "Mutant",
+  // derived
+  Army: "Militaries",
+  Player: "Neutrals",
+  Flame: "FreeStalkers",
+  Law: "Militaries",
+  WildBandits: "Bandits",
+  GarmataMilitaries: "Militaries",
+  SphereMilitaries: "Militaries",
+  NeutralBandits: "Bandits",
+  VaranBandits: "Bandits",
+  RooseveltBandits: "Bandits",
+  ShahBandits: "Bandits",
+  LokotBandits: "Bandits",
+  DepoBandits: "Bandits",
+  DepoVictims: "Neutrals",
+  DocentBandits: "Bandits",
+  VaranStashBandits: "Bandits",
+  Diggers: "Neutrals",
+  KosakBandits: "Bandits",
+  AzimutVarta: "Varta",
+  UdavMercenaries: "Mercenaries",
+  SafariHunters: "Neutrals",
+  AzimuthMilitaries: "Militaries",
+  SultanBandits: "Bandits",
+  ShevchenkoStalkers: "Neutrals",
+  VartaLesnichestvo: "Varta",
+  SparkLesnichestvo: "Spark",
+  IkarVarta: "Varta",
+  KabanBandits: "Bandits",
+  CrazyGuardians: "Spark",
+  ArenaEnemy: "Neutrals",
+  ArenaFriend: "Neutrals",
+  DrozdMilitaries: "Militaries",
+  EnemyVarta: "Varta",
+  NeutralMSOP: "Militaries",
+  YanovCorpus: "Corpus",
+  MoleStalkers: "Neutrals",
+  Controller: "Mutant",
+  Poltergeist: "Mutant",
+  Bloodsucker: "Mutant",
+  Zombie: "Mutant",
+  Chimera: "Mutant",
+  Burer: "Mutant",
+  Pseudogiant: "Mutant",
+  Anamorph: "Mutant",
+  Sinister: "Mutant",
+  Pseudobear: "Mutant",
+  Snork: "Mutant",
+  Pseudodog: "Mutant",
+  Boar: "Mutant",
+  Flesh: "Mutant",
+  Beaver: "Mutant",
+  Ratwolf: "Mutant",
+  Deer: "Mutant",
+  Rat: "Mutant",
+  Tushkan: "Mutant",
+  Stickman: "Mutant",
+  Blinddog: "Mutant",
+  Bayun: "Mutant",
+  CorpusStorm: "Corpus",
+  DocileLabMutants: "Mutant",
+  VartaSIRCAA: "Varta",
+  YantarZombie: "Mutant",
+  FriendlyBlinddog: "Mutant",
+  Lessy: "Mutant",
+  AlliedMutants: "Mutant",
+  NoahLesya: "Neutrals",
+  KlenMercenaries: "Mercenaries",
+  SIRCAA_Scientist: "Scientists",
+  MALACHITE_Scientist: "Scientists",
+  NoonFaustians: "Noon",
+  SQ89_SidorMercs: "Bandits",
+  ScarBoss_Faction: "Spark",
+  KorshunovBoss_Faction: "Varta",
+  StrelokBoss_Faction: "Mutant",
+  FaustBoss_Faction: "Monolith",
+} as const;
