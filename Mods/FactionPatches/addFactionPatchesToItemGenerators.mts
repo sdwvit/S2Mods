@@ -18,7 +18,6 @@ export const addFactionPatchesToItemGenerators: StructTransformer<ItemGeneratorP
 
   const fork = struct.fork();
 
-  fork.ItemGenerator = new Struct() as ItemGeneratorPrototype["ItemGenerator"];
   let generalNPCObjPrototype = allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
   if (!generalNPCObjPrototype) {
     return;
@@ -38,16 +37,22 @@ export const addFactionPatchesToItemGenerators: StructTransformer<ItemGeneratorP
     logger.warn(`Unknown coreFaction '${coreFaction}'`);
     return;
   }
+
+  fork.ItemGenerator = new Struct() as ItemGeneratorPrototype["ItemGenerator"];
+  fork.ItemGenerator.__internal__.bpatch = true;
   fork.ItemGenerator.addNode(
     new Struct({
       bAllowSameCategoryGeneration: true,
-      Category: "EItemGenerationCategory::Junk" satisfies EItemGenerationCategory,
-      RefreshTime: "365d",
+      Category: "EItemGenerationCategory::Artifact" satisfies EItemGenerationCategory,
+      RefreshTime: "1h",
       PossibleItems: {
-        Chance: 1,
-        ItemPrototypeSID: patch.SID,
-        MaxCount: 1,
-        MinCount: 1,
+        FactionPatch: {
+          Chance: 1,
+          Weight: 1,
+          ItemPrototypeSID: patch.SID,
+          MaxCount: 1,
+          MinCount: 1,
+        },
       },
     }),
     "FactionPatch",
