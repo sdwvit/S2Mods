@@ -9,12 +9,14 @@ import {
   GrenadePrototype,
   Internal,
   NPCWeaponSettingsPrototype,
+  QuestObjPrototype,
   SpawnActorPrototype,
   Struct,
   WeaponGeneralSetupPrototype,
   WeaponPrototype,
 } from "s2cfgtojson";
 import { readFileAndGetStructs } from "./read-file-and-get-structs.mjs";
+
 export type DeeplyPartial<T> = {
   [P in Exclude<keyof T, Internal | "toString">]?: T[P] extends object ? DeeplyPartial<T[P]> : T[P];
 };
@@ -38,7 +40,7 @@ export let allDefaultQuestItemPrototypes: SpawnActorPrototype[];
 export let allDefaultWeaponPrototypes: WeaponPrototype[];
 export let allDefaultAttachPrototypes: AttachPrototype[];
 export let allDefaultGeneralNPCObjPrototypes: GeneralNPCObjPrototype[];
-
+export let allDefaultQuestObjPrototypes: QuestObjPrototype[];
 [
   allDefaultWeaponGeneralSetupPrototypes,
   allDefaultPlayerWeaponSettingsPrototypes,
@@ -52,6 +54,7 @@ export let allDefaultGeneralNPCObjPrototypes: GeneralNPCObjPrototype[];
   allDefaultWeaponPrototypes,
   allDefaultAttachPrototypes,
   allDefaultGeneralNPCObjPrototypes,
+  allDefaultQuestObjPrototypes,
 ] = await Promise.all([
   readFileAndGetStructs<WeaponGeneralSetupPrototype>("WeaponData/WeaponGeneralSetupPrototypes.cfg"),
   readFileAndGetStructs<NPCWeaponSettingsPrototype>("WeaponData/CharacterWeaponSettingsPrototypes/PlayerWeaponSettingsPrototypes.cfg"),
@@ -65,11 +68,13 @@ export let allDefaultGeneralNPCObjPrototypes: GeneralNPCObjPrototype[];
   readFileAndGetStructs<WeaponPrototype>("ItemPrototypes/WeaponPrototypes.cfg"),
   readFileAndGetStructs<AttachPrototype>("ItemPrototypes/AttachPrototypes.cfg"),
   readFileAndGetStructs<GeneralNPCObjPrototype>("ObjPrototypes/GeneralNPCObjPrototypes.cfg"),
+  readFileAndGetStructs<QuestObjPrototype>("ObjPrototypes/QuestObjPrototypes.cfg"),
 ]);
 
 // Records:
 export const getRecord = <T extends { SID: string }>(arr: T[]) => Object.fromEntries(arr.map((e) => [e.SID, e]));
-export const getRecordByKey = <const K extends string, T extends Record<K, string>>(arr: T[], key: K) => Object.fromEntries(arr.map((e) => [e[key], e]));
+export const getRecordByKey = <const K extends string, T extends Record<K, string>>(arr: T[], key: K) =>
+  Object.fromEntries(arr.map((e) => [e[key], e]));
 export const allDefaultArmorPrototypesRecord = getRecord(allDefaultArmorPrototypes);
 export const allDefaultArtifactPrototypesRecord = getRecord(allDefaultArtifactPrototypes);
 export const allDefaultNightVisionGogglesPrototypesRecord = getRecord(allDefaultNightVisionGogglesPrototypes);
@@ -85,6 +90,11 @@ export const allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID 
   allDefaultGeneralNPCObjPrototypes,
   "ItemGeneratorPrototypeSID",
 );
+export const allDefaultQuestObjPrototypesRecord = getRecord(allDefaultQuestObjPrototypes);
+export const allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID = getRecordByKey(
+  allDefaultQuestObjPrototypes,
+  "ItemGeneratorPrototypeSID",
+);
 
 export type ArmorDescriptor = {
   __internal__: {
@@ -95,7 +105,7 @@ export type ArmorDescriptor = {
       isDroppable?: boolean;
     };
   };
-} & DeeplyPartial<ArmorPrototype>;
+} & DeeplyPartial<ArmorPrototype> & { SID: string };
 
 const getDescriptor = (
   isDroppable = true,
@@ -121,27 +131,15 @@ export const getDroppableArmor: DescriptorFn = getDescriptor.bind(null, true, "E
 export const getNonDroppableArmor: DescriptorFn = getDescriptor.bind(null, false, "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory);
 export const getDroppableHelmet: DescriptorFn = getDescriptor.bind(null, true, "EItemGenerationCategory::Head" as EItemGenerationCategory);
 
-export const allDefaultDroppableArmorsByFaction: {
-  bandit: ArmorDescriptor[];
-  corpus: ArmorDescriptor[];
-  duty: ArmorDescriptor[];
-  freedom: ArmorDescriptor[];
-  mercenary: ArmorDescriptor[];
-  military: ArmorDescriptor[];
-  monolith: ArmorDescriptor[];
-  neutral: ArmorDescriptor[];
-  scientist: ArmorDescriptor[];
-  spark: ArmorDescriptor[];
-  varta: ArmorDescriptor[];
-} = {
-  bandit: [
+export const allDefaultDroppableArmorsByFaction: Record<Exclude<CoreFaction, "Mutant">, ArmorDescriptor[]> = {
+  Bandits: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Bandit_Helmet, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.SkinJacket_Bandit_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Jacket_Bandit_Armor, EXPERIENCED_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Middle_Bandit_Armor, EXPERIENCED_MASTER_RANK),
   ],
-  corpus: [],
-  duty: [
+  Corpus: [],
+  Duty: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Duty_Helmet, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Duty_Helmet, EXPERIENCED_MASTER_RANK),
 
@@ -153,7 +151,8 @@ export const allDefaultDroppableArmorsByFaction: {
     getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Dolg_Armor, MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Dolg_End_Armor, MASTER_RANK),
   ],
-  freedom: [
+  FreeStalkers: [],
+  Freedom: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Svoboda_Helmet, VETERAN_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Rook_Svoboda_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Svoboda_Armor, EXPERIENCED_MASTER_RANK),
@@ -162,26 +161,26 @@ export const allDefaultDroppableArmorsByFaction: {
     getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Svoboda_Armor, MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Svoboda_Armor, MASTER_RANK),
   ],
-  mercenary: [
+  Mercenaries: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Mercenaries_Helmet, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Mercenaries_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Mercenaries_Armor, VETERAN_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Mercenaries_Armor, MASTER_RANK),
   ],
-  military: [
+  Militaries: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Military_Helmet, EXPERIENCED_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Military_Helmet, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Military_Helmet, VETERAN_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Default_Military_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy2_Military_Armor, VETERAN_MASTER_RANK),
   ],
-  monolith: [
+  Monolith: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Monolith_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Monolith_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Monolith_Armor, VETERAN_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Monolith_Armor, ALL_RANK),
   ],
-  neutral: [
+  Neutrals: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Neutral_Helmet, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Jemmy_Neutral_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Newbee_Neutral_Armor, ALL_RANK),
@@ -190,23 +189,26 @@ export const allDefaultDroppableArmorsByFaction: {
     getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Neutral_Armor, VETERAN_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Neutral_Armor, MASTER_RANK),
   ],
-  scientist: [
+  Noon: [],
+  Scientists: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Anomaly_Scientific_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Scientific_Armor, EXPERIENCED_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.SciSEVA_Scientific_Armor, VETERAN_MASTER_RANK),
   ],
-  spark: [
+  Spark: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Spark_Armor, VETERAN_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Spark_Armor, EXPERIENCED_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Spark_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyBattle_Spark_Armor, VETERAN_MASTER_RANK),
   ],
-  varta: [
+  Varta: [
     getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Varta_Helmet, EXPERIENCED_MASTER_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Varta_Armor, ALL_RANK),
     getDroppableArmor(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor, VETERAN_MASTER_RANK),
   ],
 };
+allDefaultDroppableArmorsByFaction.FreeStalkers = allDefaultDroppableArmorsByFaction.Neutrals;
+allDefaultDroppableArmorsByFaction.Noon = allDefaultDroppableArmorsByFaction.Monolith;
 
 export const RSQLessThan3QuestNodesSIDs = new Set([
   "RSQ01_If_LessThen3Tasks",
@@ -515,3 +517,185 @@ export const Factions = {
   StrelokBoss_Faction: "Mutant",
   FaustBoss_Faction: "Monolith",
 } as const;
+
+export type CoreFaction = (typeof Factions)[keyof typeof Factions];
+
+function guessGeneralNPC(itemGeneratorPrototypeSID: string) {
+  let npc = allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[itemGeneratorPrototypeSID];
+  if (!npc) {
+    return;
+  }
+  while (!!allDefaultGeneralNPCObjPrototypesRecord[npc.__internal__.refkey] && !npc.Faction) {
+    npc = allDefaultGeneralNPCObjPrototypesRecord[npc.__internal__.refkey];
+  }
+  return npc;
+}
+function guessQuestNPC(itemGeneratorPrototypeSID: string) {
+  let npc = allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[itemGeneratorPrototypeSID];
+  if (!npc) {
+    return;
+  }
+  while (!!allDefaultQuestObjPrototypes[npc.__internal__.refkey] && !npc.Faction) {
+    npc = allDefaultQuestObjPrototypes[npc.__internal__.refkey];
+  }
+  return npc;
+}
+
+export function getFactionFromItemGeneratorSID(itemGeneratorPrototypeSID: string): CoreFaction | undefined {
+  if (itemGeneratorFactionMapFallback[itemGeneratorPrototypeSID]) {
+    return itemGeneratorFactionMapFallback[itemGeneratorPrototypeSID];
+  }
+
+  const npc = guessGeneralNPC(itemGeneratorPrototypeSID) || guessQuestNPC(itemGeneratorPrototypeSID);
+
+  if (!npc) {
+    // this may happen if quest npc gets assigned item generator. at this point we can just skip these.
+    return;
+  }
+
+  const coreFaction = Factions[npc.Faction];
+  if (!coreFaction) {
+    return;
+  }
+  return coreFaction;
+}
+
+const itemGeneratorFactionMapFallback: Record<string, CoreFaction> = {
+  BanditExperiencedItemGenerator: "Bandits",
+  BanditGosan_ItemGenerator: "Bandits",
+  BanditKesaOtbitok_ItemGenerator: "Bandits",
+  BanditMasterItemGenerator: "Bandits",
+  BanditNewbieItemGenerator: "Bandits",
+  BanditVentil_ItemGenerator: "Bandits",
+  BanditVeteranItemGenerator: "Bandits",
+  BartenderNoon_Cosnsumables_ItemGenerator: "Noon",
+  CorpusExperiencedItemGenerator: "Corpus",
+  CorpusMasterItemGenerator: "Corpus",
+  CorpusNewbieItemGenerator: "Corpus",
+  CorpusVeteranItemGenerator: "Corpus",
+  DutyExperiencedItemGenerator: "Duty",
+  DutyMasterItemGenerator: "Duty",
+  DutyNewbieItemGenerator: "Duty",
+  DutyVeteranItemGenerator: "Duty",
+  E07_SQ01_MykolaichStash1: "Neutrals",
+  E07_SQ01_MykolaichStash2: "Neutrals",
+  E07_SQ01_MykolaichStash3: "Neutrals",
+  EmptyQuest: "Neutrals",
+  FreedomExperiencedItemGenerator: "Freedom",
+  FreedomMasterItemGenerator: "Freedom",
+  FreedomNewbieItemGenerator: "Freedom",
+  FreedomShurup_technican_ItemGenerator: "Freedom",
+  FreedomVeteranItemGenerator: "Freedom",
+  GeneralNPC_Bandit_Armor: "Bandits",
+  GeneralNPC_Bandit_NVG: "Bandits",
+  GeneralNPC_Corpus_Armor: "Corpus",
+  GeneralNPC_Corpus_NVG: "Corpus",
+  GeneralNPC_Duty_Armor: "Duty",
+  GeneralNPC_Duty_Armor_Experienced_var1: "Duty",
+  GeneralNPC_Duty_Armor_Experienced_var2: "Duty",
+  GeneralNPC_Duty_NVG: "Duty",
+  GeneralNPC_Freedom_Armor: "Freedom",
+  GeneralNPC_Freedom_NVG: "Freedom",
+  GeneralNPC_Mercenaries_Armor: "Mercenaries",
+  GeneralNPC_Mercenaries_NVG: "Mercenaries",
+  GeneralNPC_Militaries_Armor: "Militaries",
+  GeneralNPC_Militaries_Armor_var1: "Militaries",
+  GeneralNPC_Militaries_Armor_var2: "Militaries",
+  GeneralNPC_Militaries_NVG: "Militaries",
+  GeneralNPC_Monolith_Armor: "Monolith",
+  GeneralNPC_Monolith_NVG: "Monolith",
+  GeneralNPC_Neutral_CloseCombat_ItemGenerator_Prolog_Medkit: "Neutrals",
+  GeneralNPC_Neutral_NVG: "Neutrals",
+  GeneralNPC_Noon_Armor: "Noon",
+  GeneralNPC_Scientists_Armor: "Scientists",
+  GeneralNPC_Spark_Armor: "Spark",
+  GeneralNPC_Spark_NVG: "Spark",
+  GeneralNPC_Varta_Armor: "Varta",
+  GeneralNPC_Varta_NVG: "Varta",
+  General_Neutral_Experienced: "Neutrals",
+  General_Neutral_Newbie: "Neutrals",
+  Gonta_ItemGenerator: "Neutrals",
+  Granit_CloseCombat_ItemGenerator: "Monolith",
+  Granit_Sniper_Itemgenerator: "Monolith",
+  Granit_Stormtrooper_ItemGenerator: "Monolith",
+  HAVAYEC_01_ItemGenerator: "Neutrals",
+  IKAR_DoctorKrivenko_ItemGenerator: "Scientists",
+  IskraKogut_ItemGenerator: "Spark",
+  LabPetrushko_ItemGenerator: "Scientists",
+  LieutenantBudnik_ItemGenerator: "Militaries",
+  MainNPCItemGenerator: "Neutrals",
+  MercenaryExperiencedItemGenerator: "Mercenaries",
+  MercenaryMasterItemGenerator: "Mercenaries",
+
+  MercenaryNewbieItemGenerator: "Mercenaries",
+  MercenaryVeteranItemGenerator: "Mercenaries",
+  MilitaryExperiencedItemGenerator: "Militaries",
+  MilitaryMasterItemGenerator: "Militaries",
+  MilitaryNewbieItemGenerator: "Militaries",
+  MilitaryVeteranItemGenerator: "Militaries",
+  MonolithExperiencedItemGenerator: "Monolith",
+  MonolithMasterItemGenerator: "Monolith",
+  MonolithNewbieItemGenerator: "Monolith",
+  MonolithVeteranItemGenerator: "Monolith",
+  NeutralExperiencedItemGenerator: "Neutrals",
+  NeutralMasterItemGenerator: "Neutrals",
+  NeutralNewbieItemGenerator: "Neutrals",
+  NeutralTaktik_ItemGenerator: "Neutrals",
+  NeutralVeteranItemGenerator: "Neutrals",
+  NoonExperiencedItemGenerator: "Noon",
+  NoonFaustianFoma_ItemGenerator: "Noon",
+  NoonMasterItemGenerator: "Noon",
+  NoonNewbieItemGenerator: "Noon",
+  NoonVeteranItemGenerator: "Noon",
+  Richter_ItemGenerator: "Neutrals",
+  RoosveltE11Itemgen: "Duty",
+  ScientistExperiencedItemGenerator: "Scientists",
+  ScientistMasterItemGenerator: "Scientists",
+  ScientistNewbieItemGenerator: "Scientists",
+  ScientistVeteranItemGenerator: "Scientists",
+  SolderItemGen: "Militaries",
+  SparkExperiencedItemGenerator: "Spark",
+  SparkLeaderZmeevik_ItemGenerator: "Spark",
+  SparkMasterItemGenerator: "Spark",
+  SparkNewbieItemGenerator: "Spark",
+  SparkVeteranItemGenerator: "Spark",
+  Strelok_ItemGenerator: "Neutrals",
+  VartaColonelKorshunovBoss_ItemGenerator: "Varta",
+  VartaExperiencedItemGenerator: "Varta",
+  VartaMasterItemGenerator: "Varta",
+  VartaNewbieItemGenerator: "Varta",
+  VartaVeteranItemGenerator: "Varta",
+  ZalesieBartender_ItemGenerator: "Neutrals",
+  Zhuzha_ItemGenerator: "Neutrals",
+  ZombieFoster_ItemGenerator: "Bandits",
+  ZombieIgor_petrusko_ItemGenerator: "Militaries",
+  ZombieLevsa_ItemGenerator: "Bandits",
+  ZombiePetkaBelak_ItemGenerator: "Bandits",
+  ZombieZombirovannyj_1_ItemGenerator: "Neutrals",
+  AllHeadsGenerator: 'Neutrals',
+   _ItemGenerator: "Neutrals",
+  elma_0_ItemGenerator: "Neutrals",
+  upack_guide_vozatyj_0_ItemGenerator: "Mercenaries",
+  upack_trader_selma_0_ItemGenerator: "Neutrals",
+};
+
+function guessArmor(SID: string | number, refkey?: string | number) {
+  if (allDefaultArmorPrototypesRecord[SID]) {
+    return allDefaultArmorPrototypesRecord[SID];
+  }
+
+  return allDefaultArmorPrototypesRecord[refkey];
+}
+function guessNVG(SID: string | number, refkey?: string | number) {
+  if (allDefaultNightVisionGogglesPrototypesRecord[SID]) {
+    return allDefaultNightVisionGogglesPrototypesRecord[SID];
+  }
+
+  return allDefaultNightVisionGogglesPrototypesRecord[refkey];
+}
+
+export function getCorePrototype(descriptor: { SID: string | number; __internal__: { refkey?: string | number } }) {
+  const SID = descriptor.SID;
+  const refkey = descriptor.__internal__.refkey;
+  return guessArmor(SID, refkey) || guessNVG(SID, refkey);
+}

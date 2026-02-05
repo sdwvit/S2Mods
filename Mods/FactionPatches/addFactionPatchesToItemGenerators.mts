@@ -1,12 +1,8 @@
 import { EItemGenerationCategory, ItemGeneratorPrototype, Struct } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
-import {
-  allDefaultGeneralNPCObjPrototypesRecord,
-  allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
-  Factions,
-} from "../../src/consts.mts";
 import { logger } from "../../src/logger.mts";
 import { FactionPatch, patchDefsRecord } from "./addFactionPatchItems.mts";
+import { getFactionFromItemGeneratorSID } from "../../src/consts.mts";
 
 /**
  * Add faction patches to drops
@@ -18,19 +14,13 @@ export const addFactionPatchesToItemGenerators: StructTransformer<ItemGeneratorP
 
   const fork = struct.fork();
 
-  let generalNPCObjPrototype = allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
-  if (!generalNPCObjPrototype) {
+  const coreFaction = getFactionFromItemGeneratorSID(struct.SID);
+
+  if (!coreFaction) {
+    logger.warn(`Unknown coreFaction from '${struct.SID}'`);
     return;
-  }
-  while (!!allDefaultGeneralNPCObjPrototypesRecord[generalNPCObjPrototype.__internal__.refkey] && !generalNPCObjPrototype.Faction) {
-    generalNPCObjPrototype = allDefaultGeneralNPCObjPrototypesRecord[generalNPCObjPrototype.__internal__.refkey];
   }
 
-  const coreFaction = Factions[generalNPCObjPrototype.Faction];
-  if (!coreFaction) {
-    logger.warn(`Unknown generalNPCObjPrototype.Faction '${generalNPCObjPrototype.Faction}'`);
-    return;
-  }
   const patch = patchDefsRecord[`${FactionPatch}${coreFaction}`];
 
   if (!patch) {

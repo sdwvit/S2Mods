@@ -4,15 +4,21 @@ import {
   allDefaultArmorPrototypesRecord,
   allDefaultDroppableArmorsByFaction,
   allDefaultNightVisionGogglesPrototypes,
+  allDefaultNightVisionGogglesPrototypesRecord,
   ArmorDescriptor,
+  CoreFaction,
+  Factions,
+  getCorePrototype,
+  getFactionFromItemGeneratorSID,
 } from "../../src/consts.mts";
-import { factions } from "../../src/factions.mts";
+
 import { extraArmorsByFaction, newArmors } from "./armors.util.mts";
 import { allItemRank } from "./all-item-rank.mts";
-import { ItemGeneratorPrototype, ERank, GetStructType, Struct, ItemGeneratorPrototypeItemGeneratorItem } from "s2cfgtojson";
+import { ItemGeneratorPrototype, ERank, GetStructType, Struct, ItemGeneratorPrototypeItemGeneratorItem, Refs } from "s2cfgtojson";
 import { precision } from "../../src/precision.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
+import { logger } from "../../src/logger.mts";
 
 const minimumArmorCost = Object.values(allItemRank).reduce((a, b) => Math.min(a, b), Infinity);
 const maximumArmorCost = Object.values(allItemRank).reduce((a, b) => Math.max(a, b), -Infinity);
@@ -46,123 +52,133 @@ export const nvgs = allDefaultNightVisionGogglesPrototypes
     };
     return e;
   });
-const nvgsDescriptors = nvgs.map((e) => {
+const nvgsDescriptors: { __internal__: Refs; SID: string }[] = nvgs.map((e) => {
   return {
     __internal__: e.__internal__,
     SID: e.SID,
   };
 });
-const nvgsByFaction = {
-  neutral: nvgsDescriptors.slice(0, 3),
-  bandit: nvgsDescriptors.slice(0, 2),
-  mercenary: nvgsDescriptors.slice(0, 4),
-  military: nvgsDescriptors.slice(0, 3),
-  corpus: nvgsDescriptors.slice(0, 4),
-  scientist: nvgsDescriptors.slice(0, 3),
-  freedom: nvgsDescriptors.slice(0, 4),
-  duty: nvgsDescriptors.slice(0, 3),
-  monolith: nvgsDescriptors.slice(0, 4),
-  varta: nvgsDescriptors.slice(0, 3),
-  spark: nvgsDescriptors.slice(0, 4),
+const nvgsByFaction: Record<CoreFaction, typeof nvgsDescriptors> = {
+  FreeStalkers: nvgsDescriptors.slice(0, 3),
+  Mutant: [],
+  Noon: nvgsDescriptors.slice(0, 4),
+  Neutrals: nvgsDescriptors.slice(0, 3),
+  Bandits: nvgsDescriptors.slice(0, 2),
+  Mercenaries: nvgsDescriptors.slice(0, 4),
+  Militaries: nvgsDescriptors.slice(0, 3),
+  Corpus: nvgsDescriptors.slice(0, 4),
+  Scientists: nvgsDescriptors.slice(0, 3),
+  Freedom: nvgsDescriptors.slice(0, 4),
+  Duty: nvgsDescriptors.slice(0, 3),
+  Monolith: nvgsDescriptors.slice(0, 4),
+  Varta: nvgsDescriptors.slice(0, 3),
+  Spark: nvgsDescriptors.slice(0, 4),
 };
+
 /**
  * Allows NPCs to drop armor and helmets.
  */
-export const adjustArmorItemGenerator = (struct: ItemGeneratorPrototype, itemGenerator: ItemGeneratorPrototypeItemGeneratorItem, i: number) => {
+export const adjustArmorItemGenerator = (fork: ItemGeneratorPrototype, structSID: string) => {
+  const SID = fork.__internal__.rawName;
   if (
-    struct.SID.includes("WeaponPistol") ||
-    struct.SID.includes("Consumables") ||
-    struct.SID.includes("Attachments") ||
-    struct.SID.includes("Zombie") ||
-    struct.SID.includes("No_Armor") ||
-    struct.SID.includes("DeadBody") ||
-    !itemGenerator.PossibleItems ||
-    !itemGenerator.PlayerRank
+    SID.includes("WeaponPistol") ||
+    SID.includes("Consumables") ||
+    SID.includes("Attachments") ||
+    SID.includes("No_Armor") ||
+    SID.includes("DeadBody")
   ) {
     return;
   }
-  const fork = itemGenerator.fork();
-  fork.bAllowSameCategoryGeneration = true;
 
-  fork.PlayerRank = itemGenerator.PlayerRank;
-  fork.Category = itemGenerator.Category;
-  fork.PossibleItems = itemGenerator.PossibleItems.filter((e): e is any => !!(e[1] && allItemRank[e[1].ItemPrototypeSID]));
-  const options = fork.PossibleItems.entries().map(([_k, v]) => v);
-  const optionsBySID = Object.fromEntries(options.map((pi) => [pi.ItemPrototypeSID, pi]));
-  const weights = Object.fromEntries(
-    options.map((pi) => {
-      const key = pi.ItemPrototypeSID;
-      return [key, getChanceForSID(key)];
-    }),
-  );
-  const droppableArmors = options.filter((pi) => !undroppableArmors.has(pi.ItemPrototypeSID));
-  const invisibleArmors = options.filter((pi) => undroppableArmors.has(pi.ItemPrototypeSID));
-  const faction =
-    factions[
-      struct.SID.split("_")
-        .find((f) => factions[f.toLowerCase()])
-        ?.toLowerCase() || "neutral"
-    ];
-  const defaultArmors = allDefaultDroppableArmorsByFaction[faction];
-  const extraArmors = extraArmorsByFaction[faction];
-  const nvgsForFaction = nvgsByFaction[faction] || [];
+  const forkIG = fork.ItemGenerator;
 
-  [...defaultArmors, ...extraArmors, ...nvgsForFaction]
-    .filter((descriptor: ArmorDescriptor): descriptor is ArmorDescriptor => {
-      if (optionsBySID[descriptor.SID]) {
-        return false; // already exists
-      }
-      const lowestRank = descriptor.__internal__._extras?.ItemGenerator?.PlayerRank?.split(",")
-        .map((e) => ALL_RANKS_ARR.indexOf(e.trim() as ERank))
-        .sort()[0];
-      const igRank = ALL_RANKS_ARR.indexOf(fork.PlayerRank as ERank);
-      return Number.isInteger(lowestRank) && Number.isInteger(igRank) ? igRank >= lowestRank : true;
-    })
-    .forEach((descriptor) => {
-      const originalSID = descriptor.__internal__.refkey.toString();
-      const newItemSID = descriptor.SID as string;
-      const dummyPossibleItem = new Struct({
-        ItemPrototypeSID: newItemSID,
-        __internal__: { rawName: "_" },
-      }) as GetStructType<PossibleItem>;
-
-      weights[newItemSID] = getChanceForSID(allItemRank[newItemSID] ? newItemSID : originalSID);
-      const maybeNewArmor = newArmors[newItemSID] as typeof descriptor;
-
-      if (fork.Category === (maybeNewArmor?.__internal__._extras?.ItemGenerator?.Category || "EItemGenerationCategory::BodyArmor")) {
-        fork.PossibleItems.addNode(dummyPossibleItem, newItemSID);
-        if (
-          maybeNewArmor ||
-          descriptor.__internal__._extras.isDroppable ||
-          (allDefaultArmorPrototypesRecord[newItemSID] && !undroppableArmors.has(newItemSID))
-        ) {
-          droppableArmors.push(dummyPossibleItem as any);
-        } else {
-          invisibleArmors.push(dummyPossibleItem as any);
-        }
-      }
-    });
-  const maxAB = Math.max(0, ...droppableArmors.map((pi) => weights[pi.ItemPrototypeSID]));
-
-  const abSum = droppableArmors.reduce((acc, pi) => acc + weights[pi.ItemPrototypeSID], 0);
-  const cdSum = invisibleArmors.reduce((acc, pi) => acc + weights[pi.ItemPrototypeSID], 0);
-
-  const x = cdSum ? abSum / maxAB : abSum;
-  const y = cdSum / (1 - maxAB);
-  droppableArmors.forEach((pi) => {
-    pi.Chance = precision(weights[pi.ItemPrototypeSID]);
-    pi.Weight = precision(weights[pi.ItemPrototypeSID] / x);
-    pi.MinDurability = precision(semiRandom(i) * 0.1 + minDropDurability);
-    pi.MaxDurability = precision(pi.MinDurability + semiRandom(i) * maxDropDurability);
-  });
-  invisibleArmors.forEach((pi) => {
-    pi.Chance = 1; // make sure it always spawns on npc
-    pi.Weight = precision(weights[pi.ItemPrototypeSID] / y);
-  });
-  fork.PossibleItems = fork.PossibleItems.filter((e): e is any => !!(e[1] && allItemRank[e[1].ItemPrototypeSID]));
-  if (!fork.PossibleItems.entries().length) {
+  const faction = getFactionFromItemGeneratorSID(SID) || getFactionFromItemGeneratorSID(structSID);
+  if (!faction) {
+    logger.warn(`${SID}${SID !== structSID ? `/${structSID}` : ''} has no proper faction: '${faction}'`);
     return;
   }
 
-  return markAsForkRecursively(fork);
+  forkIG.forEach(([forkIGKey, forkIG], i) => {
+    forkIG.bAllowSameCategoryGeneration = true;
+    if (!forkIG.Category) {
+      return;
+    }
+
+    const weights = {};
+    const droppableArmors = [];
+    const invisibleArmors = [];
+
+    const defaultArmors = allDefaultDroppableArmorsByFaction[faction];
+    const extraArmors = extraArmorsByFaction[faction];
+    const nvgsForFaction = nvgsByFaction[faction] || [];
+
+    [...defaultArmors, ...extraArmors, ...nvgsForFaction]
+      .filter((descriptor: ArmorDescriptor): descriptor is ArmorDescriptor => {
+        const lowestItemRank = descriptor.__internal__._extras?.ItemGenerator?.PlayerRank?.split(",")
+          .map((e) => ALL_RANKS_ARR.indexOf(e.trim() as ERank))
+          .sort()[0];
+        const lowestIGRank = forkIG.PlayerRank.split(",")
+          .map((e) => ALL_RANKS_ARR.indexOf(e.trim() as ERank))
+          .sort()[0];
+        return Number.isInteger(lowestItemRank) && Number.isInteger(lowestIGRank) ? lowestIGRank >= lowestItemRank : true;
+      })
+      .forEach((descriptor) => {
+        const originalSID = (getCorePrototype(descriptor) || newArmors[descriptor.__internal__.refkey])?.SID;
+        if (!originalSID) {
+          logger.warn(`Can't find original SID: '${descriptor.SID}', '${descriptor.__internal__.refkey}'`);
+          return;
+        }
+        const newItemSID = descriptor.SID as string;
+        const dummyPossibleItem = new Struct({
+          ItemPrototypeSID: newItemSID,
+          __internal__: { rawName: "_" },
+        }) as GetStructType<PossibleItem>;
+
+        weights[newItemSID] = getChanceForSID(allItemRank[newItemSID] ? newItemSID : originalSID);
+        const maybeNewArmor = newArmors[newItemSID] as typeof descriptor;
+
+        if (forkIG.Category === (maybeNewArmor?.__internal__._extras?.ItemGenerator?.Category || "EItemGenerationCategory::BodyArmor")) {
+          forkIG.PossibleItems.addNode(dummyPossibleItem, newItemSID);
+          if (
+            maybeNewArmor ||
+            descriptor.__internal__._extras.isDroppable ||
+            (allDefaultArmorPrototypesRecord[newItemSID] && !undroppableArmors.has(newItemSID))
+          ) {
+            droppableArmors.push(dummyPossibleItem as any);
+          } else {
+            invisibleArmors.push(dummyPossibleItem as any);
+          }
+        }
+      });
+    const maxAB = Math.max(0, ...droppableArmors.map((pi) => weights[pi.ItemPrototypeSID]));
+
+    const abSum = droppableArmors.reduce((acc, pi) => acc + weights[pi.ItemPrototypeSID], 0);
+    const cdSum = invisibleArmors.reduce((acc, pi) => acc + weights[pi.ItemPrototypeSID], 0);
+
+    const x = cdSum ? abSum / maxAB : abSum;
+    const y = cdSum / (1 - maxAB);
+    droppableArmors.forEach((pi) => {
+      pi.Chance = precision(weights[pi.ItemPrototypeSID]);
+      if (allDefaultNightVisionGogglesPrototypesRecord[pi.ItemPrototypeSID]) {
+        pi.Weight = precision(weights[pi.ItemPrototypeSID]);
+      } else {
+        pi.Weight = precision(weights[pi.ItemPrototypeSID] / x);
+        pi.MinDurability = precision(semiRandom(i) * 0.1 + minDropDurability);
+        pi.MaxDurability = precision(pi.MinDurability + semiRandom(i) * maxDropDurability);
+      }
+    });
+    invisibleArmors.forEach((pi) => {
+      pi.Chance = 1; // make sure it always spawns on npc
+      pi.Weight = precision(weights[pi.ItemPrototypeSID] / y);
+      // i know this is not needed, but sometimes game decides to ignore the fact these are invisible
+      pi.MinDurability = precision(semiRandom(i) * 0.1 + minDropDurability);
+      pi.MaxDurability = precision(pi.MinDurability + semiRandom(i) * maxDropDurability);
+    });
+    // forkIG.PossibleItems = forkIG.PossibleItems.filter((e): e is any => !!(e[1] && allItemRank[e[1].ItemPrototypeSID]));
+    if (!forkIG.PossibleItems.entries().length) {
+      return;
+    }
+
+    return forkIG;
+  });
 };

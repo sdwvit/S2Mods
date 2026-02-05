@@ -6,6 +6,7 @@ import {
   allDefaultArmorPrototypesRecord,
   allDefaultDroppableArmorsByFaction,
   ArmorDescriptor,
+  CoreFaction,
   DescriptorFn,
   getDroppableArmor,
   getDroppableHelmet,
@@ -40,6 +41,9 @@ const createItem = (
   fn: DescriptorFn,
   suffix: string,
   iconFn: (r: string) => string,
+  costFactor: number,
+  weightFactorA: number,
+  weightAdditionC: number,
   ref: ArmorPrototype,
   s: any,
   extras = getArmorExtras(ref),
@@ -53,96 +57,66 @@ const createItem = (
   return fn(
     {
       LocalizationSID: refSID,
-      __internal__: { refkey: refSID, refurl: "../ArmorPrototypes.cfg" },
+      __internal__: { refkey: refSID },
       Icon: iconFn(refSID),
       SID: `${refSID}${suffix}`,
       Protection: { PSY: 0 },
       bBlockHead: false,
+      Cost: costFactor * ref.Cost,
+      Weight: weightFactorA * ref.Weight + weightAdditionC,
       ...s,
     },
     rank,
     extras,
   );
 };
-type CreateFn = (ref: ArmorPrototype, s: any, extras?: ArmorDescriptor["__internal__"]["_extras"], rank?: ERank) => ArmorPrototype;
-const createHeadlessArmor: CreateFn = createItem.bind(null, getDroppableArmor, "_MasterMod_headless", getArmorIcon);
-const createHelmet: CreateFn = createItem.bind(null, getDroppableHelmet, "_Helmet_MasterMod", getHelmetIcon);
+type CreateFn = (ref: ArmorPrototype, s?: any, extras?: ArmorDescriptor["__internal__"]["_extras"], rank?: ERank) => ArmorPrototype;
+const createHeadlessArmor: CreateFn = createItem.bind(null, getDroppableArmor, "_MasterMod_headless", getArmorIcon, 0.8, 1, -5);
+const createHelmet: CreateFn = createItem.bind(null, getDroppableHelmet, "_Helmet_MasterMod", getHelmetIcon, 1.45, 1, 0);
 
 export const newArmors = {
-  BattleExoskeleton_Varta_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor, {
-    Weight: 8.5,
-    Cost: 58000,
-  }),
-  Exoskeleton_Mercenaries_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Mercenaries_Armor, {
-    Weight: 7.5,
-    Cost: 50500,
-  }),
-  Exoskeleton_Monolith_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Monolith_Armor, {
-    Weight: 7.5,
-    Cost: 53000,
-  }),
-  Exoskeleton_Neutral_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Neutral_Armor, {
-    Weight: 12,
-    Cost: 55500,
-  }),
-  Exoskeleton_Svoboda_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Svoboda_Armor, {
-    Weight: 7.5,
-    Cost: 80000,
-  }),
+  BattleExoskeleton_Varta_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor),
+  Exoskeleton_Mercenaries_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Mercenaries_Armor),
+  Exoskeleton_Monolith_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Monolith_Armor),
+  Exoskeleton_Neutral_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Neutral_Armor),
+  Exoskeleton_Svoboda_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Svoboda_Armor),
+  Exoskeleton_Dolg_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Dolg_Armor),
+  HeavyExoskeleton_Dolg_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Dolg_Armor),
+  HeavyExoskeleton_Monolith_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Monolith_Armor),
+  HeavyExoskeleton_Svoboda_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Svoboda_Armor),
+
   Heavy_Dolg_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Heavy_Dolg_Armor, {
-    Weight: 7,
-    Cost: 35000,
+    Weight: allDefaultArmorPrototypesRecord.Heavy_Dolg_Armor.Weight - 3,
   }),
   Heavy2_Military_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Heavy2_Military_Armor, {
-    Weight: 6,
-    Cost: 32000,
+    Weight: allDefaultArmorPrototypesRecord.Heavy2_Military_Armor.Weight - 3,
   }),
   HeavyAnomaly_Monolith_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Monolith_Armor, {
-    Weight: 7,
-    Cost: 42500,
-  }),
-  Exoskeleton_Dolg_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Dolg_Armor, {
-    Weight: 8.5,
-    Cost: 70000,
+    Weight: allDefaultArmorPrototypesRecord.HeavyAnomaly_Monolith_Armor.Weight - 3,
   }),
   Heavy_Svoboda_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Heavy_Svoboda_Armor, {
-    Weight: 7,
-    Cost: 37000,
+    Weight: allDefaultArmorPrototypesRecord.Heavy_Svoboda_Armor.Weight - 3,
   }),
   Heavy_Mercenaries_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Heavy_Mercenaries_Armor, {
-    Weight: 5,
-    Cost: 25500,
+    Weight: allDefaultArmorPrototypesRecord.Heavy_Mercenaries_Armor.Weight - 3,
   }),
   HeavyBattle_Spark_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.HeavyBattle_Spark_Armor, {
-    Weight: 7,
-    Cost: 40500,
-  }),
-  HeavyExoskeleton_Dolg_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Dolg_Armor, {
-    Weight: 16,
-    Cost: 51000,
-  }),
-  HeavyExoskeleton_Monolith_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Monolith_Armor, {
-    Weight: 16,
-    Cost: 55000,
-  }),
-  HeavyExoskeleton_Svoboda_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Svoboda_Armor, {
-    Weight: 16,
-    Cost: 50000,
+    Weight: allDefaultArmorPrototypesRecord.HeavyBattle_Spark_Armor.Weight - 3,
   }),
 
   Battle_Dolg_End_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Battle_Dolg_End_Armor, {
     Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_Battle_Dolg_End_Armor.T_IFI_Battle_Dolg_End_Armor'`,
-    Cost: 70000,
+    Cost: allDefaultArmorPrototypesRecord.Battle_Dolg_End_Armor.Cost,
   }),
-  // helme, ts
+
+  // helmets
   Exoskeleton_Mercenaries_Helmet_MasterMod: createHelmet(
     allDefaultArmorPrototypesRecord.Heavy_Svoboda_Helmet,
     {
       Icon: `${ICON_ROOT}Exoskeleton_Merc_Helmet.T_IFI_Exoskeleton_Merc_Helmet'`,
       SID: "Exoskeleton_Mercenaries_Helmet_MasterMod",
       Weight: 5,
-      Cost: 45000,
-      Protection: { Radiation: 40, PSY: 20, Strike: 4 },
+      Protection: { Radiation: 40, PSY: 20, Strike: 3.6 },
     },
     {},
   ),
@@ -152,8 +126,7 @@ export const newArmors = {
       Icon: `${ICON_ROOT}Exoskeleton_Monolith_Helmet.T_IFI_Exoskeleton_Monolith_Helmet'`,
       SID: "Exoskeleton_Monolith_Helmet_MasterMod",
       Weight: 5,
-      Cost: 45000,
-      Protection: { Radiation: 50, PSY: 20, Strike: 4 },
+      Protection: { Radiation: 50, PSY: 20, Strike: 3.4 },
     },
     {},
   ),
@@ -163,7 +136,6 @@ export const newArmors = {
       Icon: `${ICON_ROOT}Exoskeleton_Neutral_Helmet.T_IFI_Exoskeleton_Neutral_Helmet'`,
       SID: "Exoskeleton_Neutral_Helmet_MasterMod",
       Weight: 5,
-      Cost: 40000,
       Protection: { Radiation: 40, PSY: 50, Strike: 4 },
     },
     {},
@@ -174,7 +146,6 @@ export const newArmors = {
       Icon: `${ICON_ROOT}Exoskeleton_Spark_Helmet.T_IFI_Exoskeleton_Spark_Helmet'`,
       SID: "Exoskeleton_Spark_Helmet_MasterMod",
       Weight: 5,
-      Cost: 40000,
       Protection: { Radiation: 35, PSY: 40, Strike: 4 },
     },
     {},
@@ -185,10 +156,9 @@ export const newArmors = {
       Icon: `${ICON_ROOT}Exoskeleton_Duty_Helmet.T_IFI_Exoskeleton_Duty_Helmet'`,
       SID: "Exoskeleton_Duty_Helmet_MasterMod",
       Weight: 5,
-      Cost: 40000,
       Protection: { Radiation: 40, PSY: 20, Strike: 4 },
     },
-    {},
+    {}, // do not remove
   ),
   Exoskeleton_Svoboda_Helmet_MasterMod: createHelmet(
     allDefaultArmorPrototypesRecord.Heavy_Svoboda_Helmet,
@@ -196,10 +166,9 @@ export const newArmors = {
       Icon: `${ICON_ROOT}Exoskeleton_Svoboda_Helmet.T_IFI_Exoskeleton_Svoboda_Helmet'`,
       SID: "Exoskeleton_Svoboda_Helmet_MasterMod",
       Weight: 5,
-      Cost: 40000,
       Protection: { Radiation: 45, PSY: 40, Strike: 4 },
     },
-    {},
+    {}, // do not remove
   ),
   HeavyBattle_Spark_Helmet_MasterMod: createHelmet(
     allDefaultArmorPrototypesRecord.Battle_Military_Helmet,
@@ -208,7 +177,7 @@ export const newArmors = {
       SID: "HeavyBattle_Spark_Helmet_MasterMod",
       Protection: allDefaultArmorPrototypesRecord.Battle_Military_Helmet.Protection,
     },
-    {},
+    {}, // do not remove
   ),
   HeavyBattle_Merc_Helmet_MasterMod: createHelmet(
     allDefaultArmorPrototypesRecord.Battle_Military_Helmet,
@@ -217,7 +186,7 @@ export const newArmors = {
       SID: "HeavyBattle_Merc_Helmet_MasterMod",
       Protection: allDefaultArmorPrototypesRecord.Battle_Military_Helmet.Protection,
     },
-    {},
+    {}, // do not remove
   ),
   HeavyBattle_Dolg_Helmet_MasterMod: createHelmet(
     allDefaultArmorPrototypesRecord.Battle_Military_Helmet,
@@ -226,8 +195,9 @@ export const newArmors = {
       SID: "HeavyBattle_Dolg_Helmet_MasterMod",
       Protection: allDefaultArmorPrototypesRecord.Battle_Military_Helmet.Protection,
     },
-    {},
+    {}, // do not remove
   ),
+
   // copies of headless
   BattleExoskeleton_Varta_Armor_HeadlessArmors_headless: getDroppableArmor({
     __internal__: { refkey: "BattleExoskeleton_Varta_Armor_MasterMod_headless" },
@@ -334,21 +304,11 @@ export const newArmors = {
 const getNPCArmorDescriptor = (refkey: string, playerRanks: ERank) =>
   getNonDroppableArmor(new Struct({ __internal__: { refkey }, SID: `${refkey}_MasterMod_NPC` }) as ArmorPrototype, playerRanks);
 
-export const extraArmorsByFaction: {
-  bandit: ArmorDescriptor[];
-  corpus: ArmorDescriptor[];
-  duty: ArmorDescriptor[];
-  freedom: ArmorDescriptor[];
-  mercenary: ArmorDescriptor[];
-  military: ArmorDescriptor[];
-  monolith: ArmorDescriptor[];
-  neutral: ArmorDescriptor[];
-  scientist: ArmorDescriptor[];
-  spark: ArmorDescriptor[];
-  varta: ArmorDescriptor[];
-} = {
-  bandit: [],
-  corpus: [
+export const extraArmorsByFaction: typeof allDefaultDroppableArmorsByFaction = {
+  Bandits: [],
+  FreeStalkers: [],
+  Noon: [],
+  Corpus: [
     getNPCArmorDescriptor("NPC_Heavy_Corps_Armor", VETERAN_MASTER_RANK),
     getNPCArmorDescriptor("NPC_Heavy3_Corps_Armor", VETERAN_MASTER_RANK),
     getNPCArmorDescriptor("NPC_Heavy2_Coprs_Armor", VETERAN_MASTER_RANK),
@@ -356,7 +316,7 @@ export const extraArmorsByFaction: {
     getNPCArmorDescriptor("NPC_Exoskeleton_Coprs_Armor", VETERAN_MASTER_RANK),
     getNPCArmorDescriptor("Battle_Dolg_End_Armor", MASTER_RANK),
   ],
-  duty: [
+  Duty: [
     newArmors.Exoskeleton_Dolg_Armor_MasterMod_headless,
     newArmors.Exoskeleton_Dolg_Armor_HeadlessArmors_headless,
     newArmors.HeavyExoskeleton_Dolg_Armor_MasterMod_headless,
@@ -370,7 +330,7 @@ export const extraArmorsByFaction: {
     newArmors.Battle_Dolg_End_Armor_MasterMod_headless,
     newArmors.Battle_Dolg_End_Armor_HeadlessArmors_headless,
   ],
-  freedom: [
+  Freedom: [
     newArmors.Exoskeleton_Svoboda_Armor_MasterMod_headless,
     newArmors.Exoskeleton_Svoboda_Armor_HeadlessArmors_headless,
     newArmors.HeavyExoskeleton_Svoboda_Armor_MasterMod_headless,
@@ -380,7 +340,7 @@ export const extraArmorsByFaction: {
     newArmors.Exoskeleton_Svoboda_Helmet_MasterMod,
     newArmors.Exoskeleton_Svoboda_Helmet_HeadlessArmors,
   ],
-  mercenary: [
+  Mercenaries: [
     getNPCArmorDescriptor("NPC_HeavyExoskeleton_Mercenaries_Armor", MASTER_RANK),
     newArmors.Heavy_Mercenaries_Armor_MasterMod_headless,
     newArmors.Heavy_Mercenaries_Armor_HeadlessArmors_headless,
@@ -391,13 +351,13 @@ export const extraArmorsByFaction: {
     newArmors.HeavyBattle_Merc_Helmet_MasterMod,
     newArmors.HeavyBattle_Merc_Helmet_HeadlessArmors,
   ],
-  military: [
+  Militaries: [
     getNPCArmorDescriptor("NPC_Heavy_Military_Armor", VETERAN_MASTER_RANK),
     getNPCArmorDescriptor("NPC_Cloak_Heavy_Military_Armor", VETERAN_MASTER_RANK),
     newArmors.Heavy2_Military_Armor_MasterMod_headless,
     newArmors.Heavy2_Military_Armor_HeadlessArmors_headless,
   ],
-  monolith: [
+  Monolith: [
     getNPCArmorDescriptor("NPC_Battle_Noon_Armor", ALL_RANK),
     getNPCArmorDescriptor("NPC_HeavyAnomaly_Noon_Armor", VETERAN_MASTER_RANK),
     getNPCArmorDescriptor("NPC_HeavyExoskeleton_Noon_Armor", MASTER_RANK),
@@ -411,7 +371,7 @@ export const extraArmorsByFaction: {
     newArmors.Exoskeleton_Monolith_Helmet_MasterMod,
     newArmors.Exoskeleton_Monolith_Helmet_HeadlessArmors,
   ],
-  neutral: [
+  Neutrals: [
     getNPCArmorDescriptor("NPC_Sel_Neutral_Armor", ALL_RANK),
     getNPCArmorDescriptor("NPC_Cloak_Heavy_Neutral_Armor", VETERAN_MASTER_RANK),
     newArmors.Exoskeleton_Neutral_Armor_MasterMod_headless,
@@ -419,8 +379,8 @@ export const extraArmorsByFaction: {
     newArmors.Exoskeleton_Neutral_Helmet_MasterMod,
     newArmors.Exoskeleton_Neutral_Helmet_HeadlessArmors,
   ],
-  scientist: [getNPCArmorDescriptor("NPC_Sci_Armor", ALL_RANK)],
-  spark: [
+  Scientists: [getNPCArmorDescriptor("NPC_Sci_Armor", ALL_RANK)],
+  Spark: [
     getNPCArmorDescriptor("NPC_HeavyExoskeleton_Spark_Armor", MASTER_RANK),
     getNPCArmorDescriptor("NPC_Spark_Armor", ALL_RANK),
     getNPCArmorDescriptor("NPC_Anomaly_Spark_Armor", ALL_RANK),
@@ -431,8 +391,10 @@ export const extraArmorsByFaction: {
     newArmors.HeavyBattle_Spark_Helmet_MasterMod,
     newArmors.HeavyBattle_Spark_Helmet_HeadlessArmors,
   ],
-  varta: [newArmors.BattleExoskeleton_Varta_Armor_MasterMod_headless, newArmors.BattleExoskeleton_Varta_Armor_HeadlessArmors_headless],
+  Varta: [newArmors.BattleExoskeleton_Varta_Armor_MasterMod_headless, newArmors.BattleExoskeleton_Varta_Armor_HeadlessArmors_headless],
 };
+extraArmorsByFaction.FreeStalkers = extraArmorsByFaction.Neutrals;
+extraArmorsByFaction.Noon = extraArmorsByFaction.Monolith;
 
 Object.entries(allDefaultDroppableArmorsByFaction).forEach(([faction, defs]) => {
   extraArmorsByFaction[faction] = [
@@ -442,17 +404,17 @@ Object.entries(allDefaultDroppableArmorsByFaction).forEach(([faction, defs]) => 
 });
 
 export const allExtraArmors = [
-  ...extraArmorsByFaction.neutral,
-  ...extraArmorsByFaction.bandit,
-  ...extraArmorsByFaction.mercenary,
-  ...extraArmorsByFaction.military,
-  ...extraArmorsByFaction.corpus,
-  ...extraArmorsByFaction.scientist,
-  ...extraArmorsByFaction.freedom,
-  ...extraArmorsByFaction.duty,
-  ...extraArmorsByFaction.monolith,
-  ...extraArmorsByFaction.varta,
-  ...extraArmorsByFaction.spark,
+  ...extraArmorsByFaction.Neutrals,
+  ...extraArmorsByFaction.Bandits,
+  ...extraArmorsByFaction.Mercenaries,
+  ...extraArmorsByFaction.Militaries,
+  ...extraArmorsByFaction.Corpus,
+  ...extraArmorsByFaction.Scientists,
+  ...extraArmorsByFaction.Freedom,
+  ...extraArmorsByFaction.Duty,
+  ...extraArmorsByFaction.Monolith,
+  ...extraArmorsByFaction.Varta,
+  ...extraArmorsByFaction.Spark,
 ]
   .filter((a) => {
     const check = !allDefaultArmorPrototypesRecord[a.__internal__.refkey] && !newArmors[a.__internal__.refkey];

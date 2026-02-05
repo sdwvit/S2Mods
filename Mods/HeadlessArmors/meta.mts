@@ -103,7 +103,7 @@ export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype> = {
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
     [/list] 
   `,
-  changenote: `Fix ordering of armors, fix spawning exoskeletons on quest and incorrect rank characters`,
+  changenote: `Fix some helmets accidentally made invisible`,
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };
 
