@@ -13,7 +13,7 @@ export const meta: MetaType<SpawnActorPrototype> = {
 It is meant to be used in other collections of mods. Does not conflict with anything.
 [hr][/hr]
 Thanks @rbwadle for suggesting how to modify map objects.`,
-  changenote: "Update for 1.7.1",
+  changenote: "Update for 1.8.1",
   structTransformers: [transformItems],
 };
 
