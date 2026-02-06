@@ -1,7 +1,9 @@
 import {
   EConditionComparance,
+  GetStructType,
   QuestNodePrototype,
   QuestNodePrototypeActivateRestrictor,
+  QuestNodePrototypeCondition,
   QuestNodePrototypeConditionsItemItem,
   Struct,
 } from "s2cfgtojson";
@@ -57,6 +59,23 @@ function questNodeToJavascript(
 ): string {
   const struct = structr as QuestNodePrototype;
   const subType = struct.NodeType.split("::").pop();
+
+  const renderSubType = <T extends QuestNodePrototype>(subType: string) =>
+    `${subType}(${(struct as T as any)
+      .entries()
+      .map(([k]) => {
+        if (EVENTS_INTERESTING_SIDS.has(k)) {
+          questActors.add(String(struct[k]));
+          return `questActors['${struct[k]}']`;
+        }
+
+        if (EVENTS_INTERESTING_PROPS.has(k)) {
+          return struct[k];
+        }
+
+        return "";
+      })
+      .filter((k) => k)});`;
 
   // noinspection FallThroughInSwitchStatementJS
   switch (struct.NodeType) {
@@ -161,1179 +180,212 @@ function questNodeToJavascript(
       return "";
     case "EQuestNodeType::ItemAdd":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ConsoleCommand":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::LookAt":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ALifeDirectorZoneSwitch":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::AchievementUnlock":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ActivateAnomaly":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ActivateInteractableObject":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ActivateDataLayerCombination":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::AddNote":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::AddOrRemoveFromSquad":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::AddTechnicianSkillOrUpgrade":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::AddTutorialToPDA":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::BridgeCleanUp":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::BridgeEvent":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::CancelAllSideQuests":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ChangeFaction":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::DeactivateZone":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::PlayEffect":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::PlayPostProcess":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::PlaySound":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::PlayVideo":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ProtectLairNPCSquadItem":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ReputationLocker":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ResetAI":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::RestrictSave":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::RestrictionArea":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SaveGame":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ScheduledContainer":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SearchPoint":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SendSignal":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SequenceStart":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetCharacterEffect":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetCharacterParam":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetDurabilityParam":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetFactionRestriction":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetHubOwner":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetLocationName":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetMeshGenerator":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetNPCSequentialAbility":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetName":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetPersonalRestriction":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetQuestGiver":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetSpaceRestrictor":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetTime":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetTimer":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetWeather":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::SetWounded":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ShowFadeScreen":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ShowLoadingScreen":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ShowMarker":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ShowTutorialWidget":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::TeleportCharacter":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::TimeLock":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ToggleLairActivity":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ToggleNPCHidden":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::TrackJournal":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::TrackShelter":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::Trigger":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::DisableNPCBark":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::DisableNPCInteraction":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::EmissionScheduleControl":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::EmissionStart":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::EnableDataLayer":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::EquipItemInHands":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::FlashlightOnOff":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::ForceInteract":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::GiveCache":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     case "EQuestNodeType::HideLoadingScreen":
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
     default:
       globalFunctions.set(subType, "");
-      return `${subType}(${struct
-        .entries()
-        .map(([k]) => {
-          if (EVENTS_INTERESTING_SIDS.has(k)) {
-            questActors.add(String(struct[k]));
-            return `questActors['${struct[k]}']`;
-          }
-
-          if (EVENTS_INTERESTING_PROPS.has(k)) {
-            return struct[k];
-          }
-
-          return "";
-        })
-        .filter((k) => k)});`;
+      return renderSubType(subType);
   }
-  return "";
 }
 
 function processConditionNode(
@@ -1343,7 +395,7 @@ function processConditionNode(
   questActors: Set<string>,
   getNodeSid: (sid: string) => string,
 ) {
-  const struct = structT as QuestNodePrototype;
+  const struct = structT as QuestNodePrototypeCondition;
   const andOr = struct.Conditions.ConditionCheckType === "EConditionCheckType::Or" ? " || " : " && ";
   const conditionSubType = struct.NodeType.split("::").pop();
   return `result = ${struct.Conditions.entries()
