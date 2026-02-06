@@ -1,4 +1,4 @@
-console.time();
+console.time('Took');
 import * as fs from "node:fs";
 import { spawnSync } from "child_process";
 import { modFolderRaw, modFolderSteam, modMeta } from "./base-paths.mjs";
@@ -21,7 +21,7 @@ const meta = await modMeta;
 const total = await Promise.all(meta.structTransformers.map((t) => processOneTransformer(t).finally(() => meta.onTransformerFinish?.(t))));
 
 await meta.onFinish?.();
-console.timeEnd();
+console.timeEnd('Took');
 
 logger.log(`Total: ${total.length} transformers processed.`);
 const writtenFiles = total.flat().filter((s) => s?.length > 0);

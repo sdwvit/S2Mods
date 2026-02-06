@@ -6,6 +6,7 @@ import {
   EItemGenerationCategory,
   ERank,
   GeneralNPCObjPrototype,
+  GetStructType,
   GrenadePrototype,
   Internal,
   NPCWeaponSettingsPrototype,
@@ -209,6 +210,8 @@ export const allDefaultDroppableArmorsByFaction: Record<Exclude<CoreFaction, "Mu
 };
 allDefaultDroppableArmorsByFaction.FreeStalkers = allDefaultDroppableArmorsByFaction.Neutrals;
 allDefaultDroppableArmorsByFaction.Noon = allDefaultDroppableArmorsByFaction.Monolith;
+
+export const allDefaultDroppableAttachments = new Set(allDefaultAttachPrototypes.filter((a) => a.Icon && a.Cost).map((a) => a.SID));
 
 export const RSQLessThan3QuestNodesSIDs = new Set([
   "RSQ01_If_LessThen3Tasks",
@@ -672,12 +675,49 @@ const itemGeneratorFactionMapFallback: Record<string, CoreFaction> = {
   ZombieLevsa_ItemGenerator: "Bandits",
   ZombiePetkaBelak_ItemGenerator: "Bandits",
   ZombieZombirovannyj_1_ItemGenerator: "Neutrals",
-  AllHeadsGenerator: 'Neutrals',
-   _ItemGenerator: "Neutrals",
+  AllHeadsGenerator: "Neutrals",
+  _ItemGenerator: "Neutrals",
   elma_0_ItemGenerator: "Neutrals",
   upack_guide_vozatyj_0_ItemGenerator: "Mercenaries",
   upack_trader_selma_0_ItemGenerator: "Neutrals",
 };
+
+export const UniqueWeaponGeneralSetupPrototypesSIDs = new Set([
+  "GunG37V2_ST",
+  "GunGonta_SP_GS",
+  "GunGauss_Scar_SP",
+  "GunNightStalker_HG",
+  "GunUDP_Deadeye_HG",
+  "Gun_Krivenko_HG_GS",
+  "Gun_S15_AR",
+  "Gun_Sharpshooter_AR_GS",
+  "Gun_Cavalier_SR_GS",
+  "Gun_Unknown_AR_GS",
+  "Gun_GStreet_HG_GS",
+  "Gun_Encourage_HG_GS",
+  "Gun_Star_HG_GS",
+  "Gun_Shakh_SMG_GS",
+  "Gun_RatKiller_SMG_GS",
+  "Gun_Silence_SMG_GS",
+  "Gun_Spitter_SMG_GS",
+  "Gun_Spitfire_SMG_GS",
+  "Gun_Lynx_SR_GS",
+  "Gun_Whip_SR_GS",
+  "Gun_Partner_SR_GS",
+  "Gun_SOFMOD_AR_GS",
+  "Gun_Predator_SG_GS",
+  "Gun_Sledgehammer_SG_GS",
+  "Gun_Texas_SG_GS",
+  "Gun_Combatant_AR_GS",
+  "Gun_Drowned_AR_GS",
+  "Gun_Lummox_AR_GS",
+  "Gun_Merc_AR_GS",
+  "Gun_Tank_MG_GS",
+  "Gun_Sotnyk_AR_GS",
+  "Gun_Trophy_AR_GS",
+  "Gun_Decider_AR_GS",
+  "Gun_Kaimanov_HG_GS",
+]);
 
 function guessArmor(SID: string | number, refkey?: string | number) {
   if (allDefaultArmorPrototypesRecord[SID]) {
@@ -694,8 +734,20 @@ function guessNVG(SID: string | number, refkey?: string | number) {
   return allDefaultNightVisionGogglesPrototypesRecord[refkey];
 }
 
-export function getCorePrototype(descriptor: { SID: string | number; __internal__: { refkey?: string | number } }) {
+export function getArmorNVGCorePrototype(descriptor: { SID: string | number; __internal__: { refkey?: string | number } }) {
   const SID = descriptor.SID;
   const refkey = descriptor.__internal__.refkey;
   return guessArmor(SID, refkey) || guessNVG(SID, refkey);
+}
+
+export function getCorePrototype<T extends Struct>(itemSID: string | number, collection: Record<string, T>, stopSignal: (t: T) => any) {
+  let ref: string | number = itemSID;
+  while (collection[ref] && !stopSignal(collection[ref])) {
+    ref = collection[ref].__internal__.refkey;
+  }
+  return stopSignal(collection[ref]);
+}
+
+export function guessAttachmentSlot(itemSID: string) {
+  return getCorePrototype(itemSID, allDefaultAttachPrototypesRecord, (item) => item.Slot);
 }

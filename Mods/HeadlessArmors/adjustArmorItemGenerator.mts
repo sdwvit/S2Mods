@@ -8,7 +8,7 @@ import {
   ArmorDescriptor,
   CoreFaction,
   Factions,
-  getCorePrototype,
+  getArmorNVGCorePrototype,
   getFactionFromItemGeneratorSID,
 } from "../../src/consts.mts";
 
@@ -123,7 +123,7 @@ export const adjustArmorItemGenerator = (fork: ItemGeneratorPrototype, structSID
         return Number.isInteger(lowestItemRank) && Number.isInteger(lowestIGRank) ? lowestIGRank >= lowestItemRank : true;
       })
       .forEach((descriptor) => {
-        const originalSID = (getCorePrototype(descriptor) || newArmors[descriptor.__internal__.refkey])?.SID;
+        const originalSID = (getArmorNVGCorePrototype(descriptor) || newArmors[descriptor.__internal__.refkey])?.SID;
         if (!originalSID) {
           logger.warn(`Can't find original SID: '${descriptor.SID}', '${descriptor.__internal__.refkey}'`);
           return;

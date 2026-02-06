@@ -1,4 +1,10 @@
-import { QuestNodePrototype, QuestNodePrototypeActivateRestrictor, Struct } from "s2cfgtojson";
+import {
+  EConditionComparance,
+  QuestNodePrototype,
+  QuestNodePrototypeActivateRestrictor,
+  QuestNodePrototypeConditionsItemItem,
+  Struct,
+} from "s2cfgtojson";
 import { EVENTS, EVENTS_INTERESTING_PROPS, EVENTS_INTERESTING_SIDS } from "./constants.mts";
 import { QuestIr, QuestIrNode } from "./ir.mts";
 
@@ -19,20 +25,19 @@ export function buildQuestScriptParts(ir: QuestIr) {
   };
 }
 
-function getConditionComparance(ConditionComparance: string) {
-  const subType = ConditionComparance.split("::").pop();
-  switch (subType) {
-    case "Equal":
+function getConditionComparance(ConditionComparance: EConditionComparance) {
+  switch (ConditionComparance) {
+    case "EConditionComparance::Equal":
       return "===";
-    case "Greater":
+    case "EConditionComparance::Greater":
       return ">";
-    case "GreaterOrEqual":
+    case "EConditionComparance::GreaterOrEqual":
       return ">=";
-    case "Less":
+    case "EConditionComparance::Less":
       return "<";
-    case "LessOrEqual":
+    case "EConditionComparance::LessOrEqual":
       return "<=";
-    case "NotEqual":
+    case "EConditionComparance::NotEqual":
       return "!==";
   }
 }
@@ -54,143 +59,107 @@ function questNodeToJavascript(
   const subType = struct.NodeType.split("::").pop();
 
   // noinspection FallThroughInSwitchStatementJS
-  switch (subType) {
-    case "ActivateRestrictor":
+  switch (struct.NodeType) {
+    case "EQuestNodeType::ActivateRestrictor":
       globalFunctions.set("activateRestrictor", "");
-      return `activateRestrictor('${(struct as QuestNodePrototypeActivateRestrictor).VolumeGuid}');`;
-
-    case "ChangeRelationships":
+      return `activateRestrictor('${struct.VolumeGuid}');`;
+    case "EQuestNodeType::ChangeRelationships":
       globalFunctions.set("setFactionRelationship", "");
       globalFunctions.set("addFactionRelationship", "");
 
       questActors.add(struct.FirstTargetSID);
       return `${struct.UseDeltaValue ? "add" : "set"}FactionRelationship(questActors['${struct.FirstTargetSID}'], questActors['${struct.SecondTargetSID}'],  ${struct.RelationshipValue});`;
-
-    case "If":
-    case "Condition":
+    case "EQuestNodeType::If":
+    case "EQuestNodeType::Condition":
       return processConditionNode(struct, globalVars, globalFunctions, questActors, getNodeSid);
-
-    case "Despawn":
+    case "EQuestNodeType::Despawn":
       questActors.add(struct.TargetQuestGuid);
       globalFunctions.set("despawn", "(actor) => { delete spawnedActors[actor]; console.log(`despawn(${actor})`); }; ");
       return `despawn(questActors['${struct.TargetQuestGuid}']);`;
-    case "End":
+    case "EQuestNodeType::End":
       return "";
-    case "OnAbilityEndedEvent":
-    case "OnAbilityUsedEvent":
-    case "OnDialogStartEvent":
-    case "OnEmissionFinishEvent":
-    case "OnEmissionStageActivated":
-    case "OnEmissionStageFinished":
-    case "OnEmissionStartEvent":
-    case "OnFactionBecomeEnemyEvent":
-    case "OnFactionBecomeFriendEvent":
-    case "OnGetCompatibleAttachEvent":
-    case "OnHitEvent":
-    case "OnInfotopicFinishEvent":
-    case "OnInteractEvent":
-    case "OnJournalQuestEvent":
-    case "OnKillerCheckEvent":
-    case "OnMoneyAmountReachedEvent":
-    case "OnNPCDeathEvent":
-    case "OnNPCBecomeEnemyEvent":
-    case "OnNPCBecomeFriendEvent":
-    case "OnNPCCreateEvent":
-    case "OnNPCDefeatEvent":
-    case "OnPlayerGetItemEvent":
-    case "OnPlayerLostItemEvent":
-    case "OnPlayerNoticedEvent":
-    case "OnPlayerRankReachedEvent":
-    case "OnUpgradeInstallEvent":
-    case "OnSignalReceived":
+    case "EQuestNodeType::OnAbilityEndedEvent":
       globalFunctions.set(subType, "");
       return "";
-
-    case "ItemAdd":
-    case "ConsoleCommand":
-    case "LookAt":
-    case "ALifeDirectorZoneSwitch":
-    case "AchievementUnlock":
-    case "ActivateAnomaly":
-    case "ActivateInteractableObject":
-    case "ActivateDataLayerCombination":
-    case "AddNote":
-    case "AddOrRemoveFromSquad":
-    case "AddTechnicianSkillOrUpgrade":
-    case "AddTutorialToPDA":
-    case "BridgeCleanUp":
-    case "BridgeEvent":
-    case "CancelAllSideQuests":
-    case "ChangeFaction":
-    case "DeactivateZone":
-    case "PlayEffect":
-    case "PlayPostProcess":
-    case "PlaySound":
-    case "PlayVideo":
-    case "ProtectLairNPCSquadItem":
-    case "ReputationLocker":
-    case "ResetAI":
-    case "RestrictSave":
-    case "RestrictionArea":
-    case "SaveGame":
-    case "ScheduledContainer":
-    case "SearchPoint":
-    case "SendSignal":
-    case "SequenceStart":
-    case "SetCharacterEffect":
-    case "SetCharacterParam":
-    case "SetDurabilityParam":
-    case "SetFactionRestriction":
-    case "SetHubOwner":
-    case "SetLocationName":
-    case "SetMeshGenerator":
-    case "SetNPCSequentialAbility":
-    case "SetName":
-    case "SetPersonalRestriction":
-    case "SetQuestGiver":
-    case "SetSpaceRestrictor":
-    case "SetTime":
-    case "SetTimer":
-    case "SetWeather":
-    case "SetWounded":
-    case "ShowFadeScreen":
-    case "ShowLoadingScreen":
-    case "ShowMarker":
-    case "ShowTutorialWidget":
-    case "TeleportCharacter":
-    case "TimeLock":
-    case "ToggleLairActivity":
-    case "ToggleNPCHidden":
-    case "TrackJournal":
-    case "TrackShelter":
-    case "Trigger":
-    case "DisableNPCBark":
-    case "DisableNPCInteraction":
-    case "EmissionScheduleControl":
-    case "EmissionStart":
-    case "EnableDataLayer":
-    case "EquipItemInHands":
-    case "FlashlightOnOff":
-    case "ForceInteract":
-    case "GiveCache":
-    case "HideLoadingScreen":
-    case "HideTutorial":
-    case "ItemRemove":
-    case "LoadAsset":
-    case "MoveInventory":
-    case "NPCBark":
-    case "SwitchQuestItemState":
-    case "SpawnAnomaly":
-    case "SpawnAnomalySpawner":
-    case "SpawnArtifactSpawner":
-    case "SpawnDeadBody":
-    case "SpawnItemContainer":
-    case "SpawnLair":
-    case "SpawnSafeZone":
-    case "SpawnSingleObj":
-    case "SpawnSquad":
-    case "SpawnTrigger":
-    case "StartBenchmark":
+    case "EQuestNodeType::OnAbilityUsedEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnDialogStartEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnEmissionFinishEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnEmissionStageActivated":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnEmissionStageFinished":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnEmissionStartEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnFactionBecomeEnemyEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnFactionBecomeFriendEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnGetCompatibleAttachEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnHitEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnInfotopicFinishEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnInteractEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnJournalQuestEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnKillerCheckEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnMoneyAmountReachedEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnNPCDeathEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnNPCBecomeEnemyEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnNPCBecomeFriendEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnNPCCreateEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnNPCDefeatEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnPlayerGetItemEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnPlayerLostItemEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnPlayerNoticedEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnPlayerRankReachedEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnUpgradeInstallEvent":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::OnSignalReceived":
+      globalFunctions.set(subType, "");
+      return "";
+    case "EQuestNodeType::ItemAdd":
       globalFunctions.set(subType, "");
       return `${subType}(${struct
         .entries()
@@ -207,10 +176,9 @@ function questNodeToJavascript(
           return "";
         })
         .filter((k) => k)});`;
-
-    case "Container":
+    case "EQuestNodeType::ConsoleCommand":
       globalFunctions.set(subType, "");
-      return `result = ${subType}(${struct
+      return `${subType}(${struct
         .entries()
         .map(([k]) => {
           if (EVENTS_INTERESTING_SIDS.has(k)) {
@@ -225,72 +193,1145 @@ function questNodeToJavascript(
           return "";
         })
         .filter((k) => k)});`;
-    case "OnTickEvent":
-      globalFunctions.set(
-        "OnTickEvent",
-        "(fn, target) => { console.log(`OnTickEvent('${target ?? ''}', () => ${fn.name}())`); intervals.push(setInterval(() => fn(OnTickEvent), 200)) };",
-      );
-      return "";
+    case "EQuestNodeType::LookAt":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
 
-    case "Random":
-      return `result = (() => { 
-      const rand = Math.random();
-      console.log('Math.random() called with ${struct.PinWeights.entries().length} vars');
-      ${struct.PinWeights.entries()
-        .map(([_k, weight], i) => `if (rand >= ${weight}) return '${struct.OutputPinNames?.[i] ?? "impossible"}'`)
-        .join("\nelse ")}
-        })();`;
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
 
-    case "SetAIBehavior":
-      globalFunctions.set("setAIBehavior", "");
-      return `result = setAIBehavior('${struct.TargetQuestGuid}', '${struct.BehaviorType.split("::").pop()}');`;
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ALifeDirectorZoneSwitch":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
 
-    case "SetDialog":
-      globalFunctions.set("setDialog", "");
-      globalVars.add(struct.DialogChainPrototypeSID);
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
 
-      return `result = setDialog(${struct.DialogChainPrototypeSID}, [ ${struct.LastPhrases.entries().map(([_k, lp]) => {
-        globalVars.add(lp.LastPhraseSID);
-        globalVars.add("finish");
-        globalVars.add(lp.NextLaunchedPhraseSID);
-        return `${lp.LastPhraseSID} ${lp.NextLaunchedPhraseSID ? ", " + lp.NextLaunchedPhraseSID : ""} ${lp.FinishNode ? ", finish" : ""}`;
-      })}]);`;
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::AchievementUnlock":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
 
-    case "SetGlobalVariable":
-      globalVars.add(struct.GlobalVariablePrototypeSID);
-      let op = "=";
-      if (struct.ChangeValueMode === "EChangeValueMode::Add") {
-        op = "+=";
-      } else if (struct.ChangeValueMode === "EChangeValueMode::Subtract") {
-        op = "-=";
-      } else if (struct.ChangeValueMode === "EChangeValueMode::Set") {
-        op = "=";
-      }
-      op = `${struct.GlobalVariablePrototypeSID} ${op} ${struct.VariableValue};`;
-      return `console.log('${op}');\n${op}`.trim();
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
 
-    case "SetItemGenerator":
-      globalFunctions.set("setItemGenerator", "");
-      questActors.add(struct.TargetQuestGuid);
-      return `setItemGenerator(questActors['${struct.TargetQuestGuid}'], ${JSON.stringify(struct.ItemGeneratorSID)});`;
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ActivateAnomaly":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
 
-    case "SetJournal":
-      globalFunctions.set("setJournal", "");
-      globalVars.add(struct.JournalQuestSID);
-      const setJrn = `setJournal(${struct.JournalQuestSID}, '${struct.JournalAction.split("::").pop()}'`;
-      switch (struct.JournalEntity) {
-        case "EJournalEntity::Quest":
-          return `${setJrn});`;
-        case "EJournalEntity::QuestStage":
-          return `${setJrn}${struct.StageID ? ", " + struct.StageID : ""} );`;
-      }
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
 
-    case "Spawn":
-      globalFunctions.set("spawn", "(actor) => { spawnedActors[actor] = true; console.log(`spawn(${questActors[actor]});`); return actor; }; //");
-      questActors.add(struct.TargetQuestGuid);
-      return `spawn(questActors['${struct.TargetQuestGuid}'], { ignoreDamageType: '${struct.IgnoreDamageType}', spawnHidden: ${struct.SpawnHidden}, spawnNodeExcludeType: '${struct.SpawnNodeExcludeType}' });`;
-    case "Technical":
-      return "";
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ActivateInteractableObject":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ActivateDataLayerCombination":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::AddNote":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::AddOrRemoveFromSquad":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::AddTechnicianSkillOrUpgrade":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::AddTutorialToPDA":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::BridgeCleanUp":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::BridgeEvent":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::CancelAllSideQuests":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ChangeFaction":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::DeactivateZone":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::PlayEffect":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::PlayPostProcess":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::PlaySound":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::PlayVideo":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ProtectLairNPCSquadItem":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ReputationLocker":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ResetAI":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::RestrictSave":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::RestrictionArea":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SaveGame":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ScheduledContainer":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SearchPoint":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SendSignal":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SequenceStart":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetCharacterEffect":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetCharacterParam":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetDurabilityParam":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetFactionRestriction":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetHubOwner":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetLocationName":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetMeshGenerator":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetNPCSequentialAbility":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetName":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetPersonalRestriction":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetQuestGiver":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetSpaceRestrictor":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetTime":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetTimer":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetWeather":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::SetWounded":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ShowFadeScreen":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ShowLoadingScreen":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ShowMarker":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ShowTutorialWidget":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::TeleportCharacter":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::TimeLock":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ToggleLairActivity":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ToggleNPCHidden":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::TrackJournal":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::TrackShelter":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::Trigger":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::DisableNPCBark":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::DisableNPCInteraction":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::EmissionScheduleControl":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::EmissionStart":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::EnableDataLayer":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::EquipItemInHands":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::FlashlightOnOff":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::ForceInteract":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::GiveCache":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    case "EQuestNodeType::HideLoadingScreen":
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
+    default:
+      globalFunctions.set(subType, "");
+      return `${subType}(${struct
+        .entries()
+        .map(([k]) => {
+          if (EVENTS_INTERESTING_SIDS.has(k)) {
+            questActors.add(String(struct[k]));
+            return `questActors['${struct[k]}']`;
+          }
+
+          if (EVENTS_INTERESTING_PROPS.has(k)) {
+            return struct[k];
+          }
+
+          return "";
+        })
+        .filter((k) => k)});`;
   }
   return "";
 }
@@ -304,7 +1345,7 @@ function processConditionNode(
 ) {
   const struct = structT as QuestNodePrototype;
   const andOr = struct.Conditions.ConditionCheckType === "EConditionCheckType::Or" ? " || " : " && ";
-  const subType = struct.NodeType.split("::").pop();
+  const conditionSubType = struct.NodeType.split("::").pop();
   return `result = ${struct.Conditions.entries()
     .filter(([k]) => k !== "ConditionCheckType")
     .map(([_k, cond]) => {
@@ -318,23 +1359,23 @@ function processConditionNode(
             return;
           }
           const c = cR as QuestNodePrototypeConditionsItemItem;
-          const subType = c.ConditionType.split("::").pop();
-          switch (subType) {
-            case "Weather": {
+          const questConditionSubType = c.ConditionType.split("::").pop();
+          switch (c.ConditionType) {
+            case "EQuestConditionType::Weather": {
               const f = "getWeather";
               const weather = c.Weather?.split("::").pop() || "";
               const comp = getConditionComparance(c.ConditionComparance);
               globalFunctions.set(f, "() => 'Unknown';");
               return `${f}() ${comp} '${weather}'`;
             }
-            case "Random": {
+            case "EQuestConditionType::Random": {
               const f = "getRandomValue";
               const comp = getConditionComparance(c.ConditionComparance);
               const val = typeof c.NumericValue === "number" ? c.NumericValue : 0;
               globalFunctions.set(f, "() => Math.random();");
               return `${f}() ${comp} ${val}`;
             }
-            case "Trigger": {
+            case "EQuestConditionType::Trigger": {
               const f = `wasTriggered`;
               const param1 = c.ReactType.split("::").pop();
               const param2 = c.RequiredSquadMembers.split("::").pop();
@@ -346,7 +1387,7 @@ function processConditionNode(
               questActors.add(trigger);
               return `${f}(questActors['${trigger}'], questActors['${target}'], '${param1}', '${param2}') ${comp} true`;
             }
-            case "Emission": {
+            case "EQuestConditionType::Emission": {
               const f = `isEmissionHappening`;
               const target = c.EmissionPrototypeSID;
               const comp = getConditionComparance(c.ConditionComparance);
@@ -356,7 +1397,7 @@ function processConditionNode(
               }
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} true`;
             }
-            case "Money": {
+            case "EQuestConditionType::Money": {
               const f = "getMoney";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -367,7 +1408,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
             }
-            case "Rank": {
+            case "EQuestConditionType::Rank": {
               const f = "getRank";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -378,8 +1419,8 @@ function processConditionNode(
               globalFunctions.set(f, "() => 'Novice';");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} '${rank}'`;
             }
-            case "JournalState": {
-              const f = `get${subType}`;
+            case "EQuestConditionType::JournalState": {
+              const f = `get${questConditionSubType}`;
               const st = c.JournalState.split("::").pop();
               const sid = c.JournalQuestSID;
               const comp = getConditionComparance(c.ConditionComparance);
@@ -388,8 +1429,8 @@ function processConditionNode(
               globalVars.add(sid);
               return `${f}(${sid}) ${comp} '${st}'`;
             }
-            case "NodeState": {
-              const f = `get${subType}`;
+            case "EQuestConditionType::NodeState": {
+              const f = `get${questConditionSubType}`;
               const st = c.NodeState.split("::").pop();
               const sid = getNodeSid(c.TargetNode);
               const comp = getConditionComparance(c.ConditionComparance);
@@ -397,7 +1438,7 @@ function processConditionNode(
               globalFunctions.set(f, "(s) => true");
               return `${f}(${sid}) ${comp} '${st}'`;
             }
-            case "Bleeding": {
+            case "EQuestConditionType::Bleeding": {
               const f = "getBleeding";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -408,7 +1449,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
             }
-            case "HP": {
+            case "EQuestConditionType::HP": {
               const f = "getHP";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -419,7 +1460,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
             }
-            case "HPPercent": {
+            case "EQuestConditionType::HPPercent": {
               const f = "getHPPercent";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -430,7 +1471,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
             }
-            case "HungerPoints": {
+            case "EQuestConditionType::HungerPoints": {
               const f = "getHungerPoints";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -441,7 +1482,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
             }
-            case "InventoryWeight": {
+            case "EQuestConditionType::InventoryWeight": {
               const f = "getInventoryWeight";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -452,7 +1493,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
             }
-            case "Radiation": {
+            case "EQuestConditionType::Radiation": {
               const f = "getRadiation";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -463,7 +1504,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
             }
-            case "AITarget": {
+            case "EQuestConditionType::AITarget": {
               const f = "getAITarget";
               const comp = getConditionComparance(c.ConditionComparance);
               const targetNpc = c.TargetNPC;
@@ -477,7 +1518,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 'None';");
               return `${f}(${targetNpc ? `questActors['${targetNpc}']` : ""}) ${comp} ${target ? `questActors['${target}']` : "None"}`;
             }
-            case "ArmorState": {
+            case "EQuestConditionType::ArmorState": {
               const f = "getArmorState";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -488,7 +1529,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${target ? `questActors['${target}']` : ""}, ${!!c.WithHeadArmor}, ${!!c.WithBodyArmor}) ${comp} ${val}`;
             }
-            case "Awareness": {
+            case "EQuestConditionType::Awareness": {
               const f = "getAwareness";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -499,14 +1540,14 @@ function processConditionNode(
               globalFunctions.set(f, "() => 'Idle';");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} '${level}'`;
             }
-            case "Bridge": {
+            case "EQuestConditionType::Bridge": {
               const linkedNodeSid = getNodeSid(c.LinkedNodePrototypeSID);
               const completedPins = c.CompletedNodeLauncherNames.entries()
                 .map(([_k, v]) => JSON.stringify(v))
                 .join(", ");
               return `hasQuestNodeExecuted(${linkedNodeSid}, [${completedPins}]) ${getConditionComparance(c.ConditionComparance)} true`;
             }
-            case "ContextualAction": {
+            case "EQuestConditionType::ContextualAction": {
               const f = "hasContextualAction";
               const comp = getConditionComparance(c.ConditionComparance);
               const targetNpc = c.TargetNPC;
@@ -520,7 +1561,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => true;");
               return `${f}(${targetNpc ? `questActors['${targetNpc}']` : ""}${placeholder ? `, questActors['${placeholder}']` : ""}) ${comp} true`;
             }
-            case "CorpseCarry": {
+            case "EQuestConditionType::CorpseCarry": {
               const f = "isCarryingCorpse";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -535,8 +1576,8 @@ function processConditionNode(
               globalFunctions.set(f, "() => false;");
               return `${f}(${target ? `questActors['${target}']` : ""}${corpse ? `, questActors['${corpse}']` : ""}, ${anyBody}) ${comp} true`;
             }
-            case "DistanceToNPC": {
-              const f = `get${subType}`;
+            case "EQuestConditionType::DistanceToNPC": {
+              const f = `get${questConditionSubType}`;
               const val = c.NumericValue;
               const sid1 = c.TargetCharacter;
               const sid2 = c.TargetNPC;
@@ -546,8 +1587,8 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(questActors['${sid1}'], questActors['${sid2}']) ${comp} '${val}'`;
             }
-            case "DistanceToPoint": {
-              const f = `get${subType}`;
+            case "EQuestConditionType::DistanceToPoint": {
+              const f = `get${questConditionSubType}`;
               const st = c.NumericValue;
               const point = getConditionPoint(c);
               const sid = point ? getCoordsStr(point.X, point.Y, point.Z) : "";
@@ -556,7 +1597,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}('${sid}') ${comp} ${st}`;
             }
-            case "Effect": {
+            case "EQuestConditionType::Effect": {
               const f = "hasEffect";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -567,7 +1608,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => false;");
               return `${f}(${target ? `questActors['${target}']` : ""}, ${JSON.stringify(effect)}) ${comp} true`;
             }
-            case "EquipmentInHands": {
+            case "EQuestConditionType::EquipmentInHands": {
               const f = "hasEquipmentInHands";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -582,7 +1623,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => false;");
               return `${f}(${target ? `questActors['${target}']` : ""}, ${itemSid ? itemSid : "null"}, ${JSON.stringify(equipment)}) ${comp} true`;
             }
-            case "FactionRelationship": {
+            case "EQuestConditionType::FactionRelationship": {
               const f = "getFactionRelationship";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -594,10 +1635,10 @@ function processConditionNode(
               globalFunctions.set(f, "() => 'Neutral';");
               return `${f}(${target ? `questActors['${target}']` : ""}, ${JSON.stringify(faction)}) ${comp} '${relation}'`;
             }
-            case "GlobalVariable":
+            case "EQuestConditionType::GlobalVariable":
               globalVars.add(c.GlobalVariablePrototypeSID);
               return `${c.GlobalVariablePrototypeSID} ${getConditionComparance(c.ConditionComparance)} ${c.VariableValue}`;
-            case "HasItemInQuickSlot": {
+            case "EQuestConditionType::HasItemInQuickSlot": {
               const f = "hasItemInQuickSlot";
               const comp = getConditionComparance(c.ConditionComparance);
               const index = c.QuickSlotIndex ?? -1;
@@ -606,7 +1647,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => false;");
               return `${f}(${index}, ${JSON.stringify(itemSid)}, ${JSON.stringify(consumable)}) ${comp} true`;
             }
-            case "IsAlive":
+            case "EQuestConditionType::IsAlive":
               globalFunctions.set(
                 "IsAlive",
                 "(actor) => { const isAlive = !!spawnedActors[actor]; console.log(`IsAlive(${actor}) === ${isAlive}`); return isAlive; };",
@@ -614,7 +1655,7 @@ function processConditionNode(
               questActors.add(c.TargetCharacter);
               return `${getConditionComparance(c.ConditionComparance) === "===" ? "" : "!"}IsAlive(questActors['${c.TargetCharacter}'])`;
 
-            case "IsCreated":
+            case "EQuestConditionType::IsCreated":
               globalFunctions.set(
                 "IsCreated",
                 "(actor) => { const created = !!spawnedActors[actor]; console.log(`IsCreated(${actor}) === ${created}`); return created; };",
@@ -622,14 +1663,14 @@ function processConditionNode(
               questActors.add(c.TargetPlaceholder);
               return `${getConditionComparance(c.ConditionComparance) === "===" ? "" : "!"}IsCreated(questActors['${c.TargetPlaceholder}'])`;
 
-            case "IsEnoughAmmo": {
+            case "EQuestConditionType::IsEnoughAmmo": {
               const f = "isEnoughAmmo";
               const comp = getConditionComparance(c.ConditionComparance);
               const required = c.AmmoRequired ?? 0;
               globalFunctions.set(f, "() => true;");
               return `${f}(${required}) ${comp} true`;
             }
-            case "IsOnline": {
+            case "EQuestConditionType::IsOnline": {
               const f = "isOnline";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -639,13 +1680,13 @@ function processConditionNode(
               globalFunctions.set(f, "() => true;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} true`;
             }
-            case "IsWeaponJammed": {
+            case "EQuestConditionType::IsWeaponJammed": {
               const f = "isWeaponJammed";
               const comp = getConditionComparance(c.ConditionComparance);
               globalFunctions.set(f, "() => false;");
               return `${f}() ${comp} true`;
             }
-            case "IsWounded": {
+            case "EQuestConditionType::IsWounded": {
               const f = "isWounded";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -655,8 +1696,8 @@ function processConditionNode(
               globalFunctions.set(f, "() => false;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} true`;
             }
-            case "ItemInContainer": {
-              const f = `is${subType}`;
+            case "EQuestConditionType::ItemInContainer": {
+              const f = `is${questConditionSubType}`;
               const TargetItemContainer = c.TargetItemContainer;
               const ItemPrototypeSID = c.ItemPrototypeSID?.VariableValue ?? c.VariableValue;
               const ItemsCount = c.ItemsCount?.VariableValue ?? c.NumericValue ?? 0;
@@ -668,8 +1709,8 @@ function processConditionNode(
 
               return `${f}(questActors['${TargetItemContainer}'], ${ItemPrototypeSID}, ${ItemsCount}) ${comp} true`;
             }
-            case "ItemInInventory": {
-              const f = `is${subType}`;
+            case "EQuestConditionType::ItemInInventory": {
+              const f = `is${questConditionSubType}`;
               const ItemPrototypeSID = c.ItemPrototypeSID?.VariableValue ?? c.VariableValue;
               const ItemsCount = c.ItemsCount?.VariableValue ?? c.NumericValue ?? 0;
               const comp = getConditionComparance(c.ConditionComparance);
@@ -679,7 +1720,7 @@ function processConditionNode(
 
               return `${f}(${ItemPrototypeSID}, ${ItemsCount}) ${comp} true`;
             }
-            case "LookAtAngle": {
+            case "EQuestConditionType::LookAtAngle": {
               const f = "getLookAtAngle";
               const comp = getConditionComparance(c.ConditionComparance);
               const trigger = c.Trigger;
@@ -691,15 +1732,15 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${trigger ? `questActors['${trigger}']` : ""}, ${JSON.stringify(point ? getCoordsStr(point.X, point.Y, point.Z) : "")}, ${!!c.BoolValue}) ${comp} ${val}`;
             }
-            case "Note": {
+            case "EQuestConditionType::Note": {
               const f = "hasNote";
               const comp = getConditionComparance(c.ConditionComparance);
               const note = c.NotePrototypeSID || "";
               globalFunctions.set(f, "() => false;");
               return `${f}(${JSON.stringify(note)}) ${comp} true`;
             }
-            case "PersonalRelationship": {
-              const f = `is${subType}`;
+            case "EQuestConditionType::PersonalRelationship": {
+              const f = `is${questConditionSubType}`;
               const comp = getConditionComparance(c.ConditionComparance);
               const TargetCharacter = c.TargetCharacter;
               const Relationships = c.Relationships.split("::").pop();
@@ -709,7 +1750,7 @@ function processConditionNode(
 
               return `${f}(questActors['${TargetCharacter}']) ${comp} ${Relationships}`;
             }
-            case "PlayerOverload": {
+            case "EQuestConditionType::PlayerOverload": {
               const f = "isPlayerOverloaded";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -719,7 +1760,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => false;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} true`;
             }
-            case "Psy": {
+            case "EQuestConditionType::Psy": {
               const f = "getPsy";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -730,7 +1771,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => 0;");
               return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
             }
-            case "Stamina": {
+            case "EQuestConditionType::Stamina": {
               const f = "getStamina";
               const comp = getConditionComparance(c.ConditionComparance);
               const target = c.TargetCharacter;
@@ -745,7 +1786,7 @@ function processConditionNode(
         })
         .join(andOr);
     })
-    .join(andOr)} ${subType === "If" ? "" : "; \nif (!result) return"};`;
+    .join(andOr)} ${conditionSubType === "If" ? "" : "; \nif (!result) return"};`;
 }
 
 function getEventHandler(eventName: string) {

@@ -125,8 +125,7 @@ function getCoordsStr(x: number, y: number, z: number) {
 
 await Promise.all(
   `
-  EQ98_P.cfg
-  EQ98.cfg
+E03_MQ02.cfg
   `
     .trim()
     .split("\n")
@@ -146,7 +145,8 @@ await Promise.all(
 
       console.log(`\n\nProcessing quest node script for ${filePath}`);
       const r = await questNodesToJs(context);
-      writeFileSync(`${path.parse((await getCfgFiles(filePath))[0]).dir}/${filePath}.js`, r);
+      const fileName = `${path.parse((await getCfgFiles(filePath))[0]).dir}/${filePath}.js`;
+      writeFileSync(fileName, r);
       // console.log(`\n\nExecuting quest node script for ${filePath}`);
       // await eval(r);
     }),
