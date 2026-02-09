@@ -673,7 +673,7 @@ function processConditionNode(
                 globalVars.add(String(itemSid));
               }
               globalFunctions.set(f, "() => false;");
-              return `${f}(${target ? `questActors['${target}']` : ""}, ${itemSid ? itemSid : "null"}, ${JSON.stringify(equipment)}) ${comp} true`;
+              return `${f}(${target ? `questActors['${target}']` : "null"}, ${itemSid ? itemSid : "null"}, ${JSON.stringify(equipment)}) ${comp} true`;
             }
             case "EQuestConditionType::FactionRelationship": {
               const f = "getFactionRelationship";
