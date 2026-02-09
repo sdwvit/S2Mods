@@ -1,4 +1,5 @@
 import {
+  DialogPrototype,
   QuestNodePrototype,
   QuestNodePrototypeContainer,
   QuestNodePrototypeLaunchers,
@@ -65,6 +66,18 @@ function structTransformer(struct: QuestNodePrototype, context: MetaContext<Ques
       "E02_MQ03_C05_RestrictSave",
     ]);
   }
+
+  if (struct.SID === "E02_MQ03_Comment_Warlock_after_cutscene_Warlock_after_cutscene_begin_42872") {
+    const fork = struct.fork() as any as DialogPrototype;
+    fork.Unskippable = false;
+    return fork;
+  }
 }
 
-structTransformer.files = ["/QuestNodePrototypes/E01_MQ01.cfg", "/QuestNodePrototypes/E02_MQ01.cfg", "/QuestNodePrototypes/E02_MQ03.cfg"];
+structTransformer.files = [
+  "/QuestNodePrototypes/E01_MQ01.cfg",
+  "/QuestNodePrototypes/E02_MQ01.cfg",
+  "/QuestNodePrototypes/E02_MQ03.cfg",
+  '/QuestNodePrototypes/E02_MQ03_C05.cfg',
+  "/DialogPrototypes/E02_MQ03_Comment_Warlock_after_cutscene.cfg",
+];
