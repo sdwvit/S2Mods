@@ -1,12 +1,4 @@
-import {
-  DialogPrototype,
-  QuestNodePrototype,
-  QuestNodePrototypeContainer,
-  QuestNodePrototypeLaunchers,
-  QuestNodePrototypePlayVideo,
-  QuestNodePrototypeSetJournal,
-  Struct,
-} from "s2cfgtojson";
+import { DialogPrototype, QuestNodePrototype, QuestNodePrototypeContainer, Struct } from "s2cfgtojson";
 import { MetaContext, MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType = {
@@ -15,7 +7,7 @@ This mod skips / speeds up Intro / Scanner / Wake up with Richter / Zalissya bar
 [hr][/hr]
 Use this mod for frequent resets.[h1][/h1]
 `,
-  changenote: "Initial release",
+  changenote: "Fix save restrictors",
   structTransformers: [structTransformer],
 };
 
@@ -56,18 +48,14 @@ function structTransformer(struct: QuestNodePrototype, context: MetaContext<Ques
   }
 
   if (struct.SID === "E02_MQ03_Container_Cutscene") {
-    return reroute(struct, context, ["E02_MQ03_Technical_BarScene", "E02_MQ03_Technical_E02_MQ01_Bar_Flashback", "E02_MQ03_RestrictSave"]);
+    return reroute(struct, context, ["E02_MQ03_Technical_BarScene", "E02_MQ03_Technical_E02_MQ01_Bar_Flashback"]);
   }
 
   if (struct.SID === "E02_MQ03_C05_Container_PlayCutscene") {
-    return reroute(struct, context, [
-      "E02_MQ03_C05_Technical_PripyLive",
-      "E02_MQ03_C05_Technical_E02_MQ03_PripoyCutscene_Alive",
-      "E02_MQ03_C05_RestrictSave",
-    ]);
+    return reroute(struct, context, ["E02_MQ03_C05_Technical_PripyLive", "E02_MQ03_C05_Technical_E02_MQ03_PripoyCutscene_Alive"]);
   }
 
-  if (struct.SID === "E02_MQ03_Comment_Warlock_after_cutscene_Warlock_after_cutscene_begin_42872") {
+  if (context.filePath.endsWith('E02_MQ03_Dialog_Warlock_in_Bar_after_CS.cfg') && 'Unskippable' in struct) {
     const fork = struct.fork() as any as DialogPrototype;
     fork.Unskippable = false;
     return fork;
@@ -78,6 +66,6 @@ structTransformer.files = [
   "/QuestNodePrototypes/E01_MQ01.cfg",
   "/QuestNodePrototypes/E02_MQ01.cfg",
   "/QuestNodePrototypes/E02_MQ03.cfg",
-  '/QuestNodePrototypes/E02_MQ03_C05.cfg',
-  "/DialogPrototypes/E02_MQ03_Comment_Warlock_after_cutscene.cfg",
+  "/QuestNodePrototypes/E02_MQ03_C05.cfg",
+  "/DialogPrototypes/E02_MQ03_Dialog_Warlock_in_Bar_after_CS.cfg",
 ];
