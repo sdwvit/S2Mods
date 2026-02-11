@@ -1,4 +1,4 @@
-import { QuestItemPrototype, Struct } from "s2cfgtojson";
+import { EItemType, QuestItemPrototype, Struct } from "s2cfgtojson";
 import { Factions, getRecord } from "../../src/consts.mts";
 
 let addFactionPatchesOnce = false;
@@ -11,20 +11,21 @@ export const patchDefs: {
   Icon: string;
   cost?: number;
 }[] = [
-  { SID: `${FactionPatch}Scientists`, Icon: `${ICON_BASE}T_inv_ScientistPatch.T_inv_ScientistPatch'` },
-  { SID: `${FactionPatch}Spark`, Icon: `${ICON_BASE}T_inv_SparkPatch.T_inv_SparkPatch'` },
+  { SID: `${FactionPatch}Bandits`, Icon: `${ICON_BASE}T_inv_BanditsPatch.T_inv_BanditsPatch'` },
+  { SID: `${FactionPatch}Corpus`, Icon: `${ICON_BASE}T_inv_CorpusPatch.T_inv_CorpusPatch'` },
   { SID: `${FactionPatch}Duty`, Icon: `${ICON_BASE}T_inv_DutyPatch.T_inv_DutyPatch'` },
-  { SID: `${FactionPatch}Freedom`, Icon: `${ICON_BASE}T_inv_FreedomPatch.T_inv_FreedomPatch'` },
   { SID: `${FactionPatch}FreeStalkers`, Icon: `${ICON_BASE}T_inv_LonersPatch.T_inv_LonersPatch'`, cost: 50 },
-  { SID: `${FactionPatch}Neutrals`, Icon: `${ICON_BASE}T_inv_NeutralPatch.T_inv_NeutralPatch'`, cost: 50 },
+  { SID: `${FactionPatch}Freedom`, Icon: `${ICON_BASE}T_inv_FreedomPatch.T_inv_FreedomPatch'` },
   { SID: `${FactionPatch}Mercenaries`, Icon: `${ICON_BASE}T_inv_MercenariesPatch.T_inv_MercenariesPatch'` },
   { SID: `${FactionPatch}Militaries`, Icon: `${ICON_BASE}T_inv_ISPFPatch.T_inv_ISPFPatch'` },
   { SID: `${FactionPatch}Monolith`, Icon: `${ICON_BASE}T_inv_MonolithPatch.T_inv_MonolithPatch'` },
+  { SID: `${FactionPatch}Neutrals`, Icon: `${ICON_BASE}T_inv_NeutralPatch.T_inv_NeutralPatch'`, cost: 50 },
   { SID: `${FactionPatch}Noon`, Icon: `${ICON_BASE}T_inv_NoonPatch.T_inv_NoonPatch'` },
-  { SID: `${FactionPatch}Corpus`, Icon: `${ICON_BASE}T_inv_CorpusPatch.T_inv_CorpusPatch'` },
+  { SID: `${FactionPatch}Scientists`, Icon: `${ICON_BASE}T_inv_ScientistPatch.T_inv_ScientistPatch'` },
+  { SID: `${FactionPatch}Spark`, Icon: `${ICON_BASE}T_inv_SparkPatch.T_inv_SparkPatch'` },
   { SID: `${FactionPatch}Varta`, Icon: `${ICON_BASE}T_inv_VartaPatch.T_inv_VartaPatch'` },
-  { SID: `${FactionPatch}Bandits`, Icon: `${ICON_BASE}T_inv_BanditsPatch.T_inv_BanditsPatch'` },
 ];
+
 export const patchDefsRecord = getRecord(patchDefs);
 
 export function addFactionPatchItems() {
@@ -40,7 +41,7 @@ export function addFactionPatchItems() {
     MeshPrototypeSID: "Icon",
     Weight: 0.01,
     Cost: 100,
-    Type: "EItemType::Other",
+    Type: "EItemType::Other" as EItemType,
     MaxStackCount: 1000,
     IsQuestItem: false,
     ItemGridWidth: 1,
