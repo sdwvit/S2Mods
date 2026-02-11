@@ -1,31 +1,8 @@
 import { DialogPrototype, QuestNodePrototype, QuestNodePrototypeContainer, Struct } from "s2cfgtojson";
-import { MetaContext, MetaType } from "../../src/meta-type.mts";
+import { MetaContext, MetaType, StructTransformer } from "../../src/meta-type.mts";
+import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 
-export const meta: MetaType = {
-  description: `
-This mod skips / speeds up Intro / Scanner / Wake up with Richter / Zalissya bar / Sphere cutscenes.
-[hr][/hr]
-Use this mod for frequent resets.[h1][/h1]
-`,
-  changenote: "Fix save restrictors",
-  structTransformers: [structTransformer],
-};
-
-const reroute = (struct: QuestNodePrototype, context: MetaContext<QuestNodePrototype>, dependants: string[]) => {
-  const fork = struct.fork() as QuestNodePrototypeContainer;
-  const structs = [fork];
-  fork.Launchers = new Struct() as QuestNodePrototypeContainer["Launchers"];
-
-  dependants.forEach((sid) => {
-    const finishFork = context.structsById[sid].fork() as QuestNodePrototypeContainer;
-    finishFork.Launchers = (struct as QuestNodePrototypeContainer).Launchers;
-    structs.push(finishFork);
-  });
-
-  return structs;
-};
-
-function structTransformer(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototype>) {
+ function structTransformer(struct, context) {
   if (struct.SID === "E01_MQ01_PlayVideo") {
     return reroute(struct, context, [
       "E01_MQ01_ItemAdd_Scanner",
@@ -51,11 +28,17 @@ function structTransformer(struct: QuestNodePrototype, context: MetaContext<Ques
     return reroute(struct, context, ["E02_MQ03_Technical_BarScene", "E02_MQ03_Technical_E02_MQ01_Bar_Flashback"]);
   }
 
+  if (struct.NodeType === "EQuestNodeType::RestrictSave") {
+    const fork = struct.fork();
+    fork.Launchers = new Struct() as any;
+    return fork;
+  }
+
   if (struct.SID === "E02_MQ03_C05_Container_PlayCutscene") {
     return reroute(struct, context, ["E02_MQ03_C05_Technical_PripyLive", "E02_MQ03_C05_Technical_E02_MQ03_PripoyCutscene_Alive"]);
   }
 
-  if (context.filePath.endsWith('E02_MQ03_Dialog_Warlock_in_Bar_after_CS.cfg') && 'Unskippable' in struct) {
+  if (context.filePath.endsWith("E02_MQ03_Dialog_Warlock_in_Bar_after_CS.cfg") && "Unskippable" in struct) {
     const fork = struct.fork() as any as DialogPrototype;
     fork.Unskippable = false;
     return fork;
@@ -69,3 +52,37 @@ structTransformer.files = [
   "/QuestNodePrototypes/E02_MQ03_C05.cfg",
   "/DialogPrototypes/E02_MQ03_Dialog_Warlock_in_Bar_after_CS.cfg",
 ];
+
+export const meta: MetaType = {
+  description: `
+This mod skips / speeds up Intro / Scanner / Wake up with Richter / Zalissya bar / Sphere cutscenes.
+[hr][/hr]
+Use this mod for frequent resets.[h1][/h1]
+`,
+  changenote: "Fix save restrictors 2",
+  structTransformers: [structTransformer],
+};
+
+function reroute(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototype>, dependants: string[]) {
+  const fork = struct.fork() as QuestNodePrototypeContainer;
+  const structs = [fork];
+  fork.Launchers = new Struct() as QuestNodePrototypeContainer["Launchers"];
+
+  dependants.forEach((sid) => {
+    const target = context.structsById[sid] as QuestNodePrototypeContainer;
+    const finishFork = target.fork();
+    finishFork.Launchers = target.Launchers.fork(true).filter(
+      ([_, l]) =>
+        !!l.Connections.filter(([_2, c]) => {
+          return c.SID !== struct.SID; // remove currently removed node from connections
+        }).entries().length,
+    );
+    const currentKeys = new Set(finishFork.Launchers.entries().map(([k]) => k));
+    (struct as QuestNodePrototypeContainer).Launchers.forEach(([_, l]) => finishFork.Launchers.addNode(l));
+    finishFork.Launchers = finishFork.Launchers.filter(([k]) => !currentKeys.has(k));
+
+    structs.push(markAsForkRecursively(finishFork));
+  });
+
+  return structs;
+}
