@@ -2,7 +2,7 @@ import { DialogPrototype, QuestNodePrototype, QuestNodePrototypeContainer, Struc
 import { MetaContext, MetaType, StructTransformer } from "../../src/meta-type.mts";
 import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 
- function structTransformer(struct, context) {
+const structTransformer: StructTransformer<QuestNodePrototype> = (struct, context) => {
   if (struct.SID === "E01_MQ01_PlayVideo") {
     return reroute(struct, context, [
       "E01_MQ01_ItemAdd_Scanner",
@@ -43,7 +43,7 @@ import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
     fork.Unskippable = false;
     return fork;
   }
-}
+};
 
 structTransformer.files = [
   "/QuestNodePrototypes/E01_MQ01.cfg",
