@@ -2,13 +2,20 @@ import { EItemGenerationCategory, ItemGeneratorPrototype, Struct } from "s2cfgto
 import { StructTransformer } from "../../src/meta-type.mts";
 import { logger } from "../../src/logger.mts";
 import { FactionPatch, patchDefsRecord } from "./addFactionPatchItems.mts";
-import { getFactionFromItemGeneratorSID } from "../../src/consts.mts";
+import {
+  allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
+  allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID,
+  getFactionFromItemGeneratorSID,
+} from "../../src/consts.mts";
 
 /**
  * Add faction patches to drops
  */
 export const addFactionPatchesToItemGenerators: StructTransformer<ItemGeneratorPrototype> = (struct) => {
-  if (struct.SID.includes("Trade") || !struct.ItemGenerator) {
+  if (
+    !allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] &&
+    !allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID]
+  ) {
     return;
   }
 

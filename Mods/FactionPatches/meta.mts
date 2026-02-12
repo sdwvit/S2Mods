@@ -4,6 +4,6 @@ import { addFactionPatchItems } from "./addFactionPatchItems.mts";
 
 export const meta: MetaType = {
   description: `Adds Faction Patches as a simple item. Drops from dead bodies. `,
-  changenote: "Reduce price",
+  changenote: "Fix multiple patches spawn on single body",
   structTransformers: [addFactionPatchItems, addFactionPatchesToItemGenerators],
 };
