@@ -680,6 +680,26 @@ const itemGeneratorFactionMapFallback: Record<string, CoreFaction> = {
   elma_0_ItemGenerator: "Neutrals",
   upack_guide_vozatyj_0_ItemGenerator: "Mercenaries",
   upack_trader_selma_0_ItemGenerator: "Neutrals",
+
+
+  GeneralNPC_Neutral_WeaponPistol: "Neutrals",
+  GeneralNPC_Bandit_WeaponPistol: "Bandits",
+  GeneralNPC_Mercenaries_WeaponPistol: "Mercenaries",
+  GeneralNPC_Scientists_WeaponPistol: "Scientists",
+  GeneralNPC_Militaries_WeaponPistol: "Militaries",
+  GeneralNPC_Monolith_WeaponPistol: "Monolith",
+  GeneralNPC_Duty_WeaponPistol: "Duty",
+  GeneralNPC_Freedom_WeaponPistol: "Freedom",
+  GeneralNPC_Varta_WeaponPistol: "Varta",
+  GeneralNPC_Noon_WeaponPistol: "Noon",
+  GeneralNPC_Spark_WeaponPistol: "Spark",
+  GeneralNPC_Corpus_WeaponPistol: "Corpus",
+
+  GeneralZombie_Scientist_Recon_ItemGenerator: "Scientists",
+  GeneralNPC_Neutral_Recon_No_Armor_ItemGenerator: "Neutrals",
+  GeneralNPC_Neutral_Stormtrooper_No_Armor_ItemGenerator: "Neutrals",
+  GeneralNPC_Neutral_CloseCombat_No_Armor_ItemGenerator: "Neutrals",
+  YantarDeadBody_Spark_ItemGenerator: "Spark",
 };
 
 export const UniqueWeaponGeneralSetupPrototypesSIDs = new Set([
