@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root"
+
+if ! command -v node >/dev/null 2>&1; then
+  echo "[post-push] node is not available; skipping pull-git-branches." >&2
+  exit 0
+fi
+
+node ./src/pull-git-branches.mts
