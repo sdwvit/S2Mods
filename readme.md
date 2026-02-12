@@ -4,7 +4,7 @@
 
 ## Requirements:
 
-- Node.js [24 or later](https://nodejs.org/en/download/current) (with *.mts typescript loader support).
+- Node.js [24 or later](https://nodejs.org/en/download/current) (with *.mts TypeScript loader support).
 - The official [STALKER2ZoneKit](https://store.epicgames.com/en-US/p/stalker-2-zone-kit).
 - [Optional] https://github.com/trumank/repak if you want to quickly recompile pak files
 - [Optional] if you fork it and want to publish with own modifications https://developer.valvesoftware.com/wiki/SteamCMD
@@ -27,5 +27,5 @@ All mods use bPatch. For a list of modified files see corresponding mod readme.m
 
 ## License
 
-Free for non-commercial use. For commercial use, please contact GSC - authors of this game - for a license.
+Free for non-commercial use. For commercial use, please contact GSC - authors of this game - for a licence.
 Copying or modifying the code should keep the author mentioned in the comments (https://github.com/sdwvit).
