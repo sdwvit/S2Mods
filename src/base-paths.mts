@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs, { existsSync, writeFileSync } from "node:fs";
-import { projectRoot } from "./ensure-dot-env.mts";
-export { projectRoot } from "./ensure-dot-env.mts";
+import { projectRoot } from "./ensure-env.mts";
+export { projectRoot } from "./ensure-env.mts";
 import { execSync } from "node:child_process";
 import { MetaType } from "./meta-type.mts";
 import { mkdirSync } from "fs";

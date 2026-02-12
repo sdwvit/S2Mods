@@ -1,4 +1,4 @@
-import "./ensure-dot-env.mts";
+import "./ensure-env.mts";
 import { sdkStagedPakFolder } from "./base-paths.mjs";
 import { spawnSync } from "child_process";
 import { cookMod } from "./cook.mts";

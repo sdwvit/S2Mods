@@ -1,4 +1,4 @@
-import "./ensure-dot-env.mts";
+import "./ensure-env.mts";
 import { modFolderSteamStruct, modName } from "./base-paths.mjs";
 import { spawnSync } from "child_process";
 import { injectIntoGame } from "./inject-into-game.mts";
