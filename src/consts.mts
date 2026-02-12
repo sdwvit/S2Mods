@@ -108,13 +108,13 @@ export type ArmorDescriptor = {
   };
 } & DeeplyPartial<ArmorPrototype> & { SID: string };
 
-const getDescriptor = (
+function getDescriptor(
   isDroppable = true,
   Category: EItemGenerationCategory = "EItemGenerationCategory::BodyArmor",
   struct: ArmorPrototype,
   PlayerRank: ERank = VETERAN_MASTER_RANK,
   extras: ArmorDescriptor["__internal__"]["_extras"] = {},
-) => {
+) {
   if (!(struct instanceof Struct)) {
     struct = new Struct(struct) as ArmorPrototype;
   }
@@ -123,10 +123,10 @@ const getDescriptor = (
   clone.__internal__.rawName = struct.SID;
   return Object.assign(clone, {
     __internal__: Object.assign(clone.__internal__, { _extras: { isDroppable, ItemGenerator: { Category, PlayerRank }, ...extras } }),
-  });
-};
+  }) as ArmorDescriptor;
+}
 
-export type DescriptorFn = (s: ArmorPrototype | any, pr?: ERank, e?: ArmorDescriptor["__internal__"]["_extras"]) => ArmorPrototype;
+export type DescriptorFn = (s: ArmorPrototype | any, pr?: ERank, e?: ArmorDescriptor["__internal__"]["_extras"]) => ArmorDescriptor;
 
 export const getDroppableArmor: DescriptorFn = getDescriptor.bind(null, true, "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory);
 export const getNonDroppableArmor: DescriptorFn = getDescriptor.bind(null, false, "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory);
@@ -680,7 +680,6 @@ const itemGeneratorFactionMapFallback: Record<string, CoreFaction> = {
   elma_0_ItemGenerator: "Neutrals",
   upack_guide_vozatyj_0_ItemGenerator: "Mercenaries",
   upack_trader_selma_0_ItemGenerator: "Neutrals",
-
 
   GeneralNPC_Neutral_WeaponPistol: "Neutrals",
   GeneralNPC_Bandit_WeaponPistol: "Bandits",

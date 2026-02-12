@@ -94,7 +94,7 @@ export const adjustArmorItemGenerator = (fork: ItemGeneratorPrototype, structSID
 
   const faction = getFactionFromItemGeneratorSID(SID) || getFactionFromItemGeneratorSID(structSID);
   if (!faction) {
-    logger.warn(`${SID}${SID !== structSID ? `/${structSID}` : ''} has no proper faction: '${faction}'`);
+    logger.debug(`${SID}${SID !== structSID ? `/${structSID}` : ''} has no proper faction: '${faction}'`);
     return;
   }
 
