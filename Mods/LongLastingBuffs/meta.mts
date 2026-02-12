@@ -25,13 +25,12 @@ const interestingSIDs = new Set<string>([
 ]);
 
 function transformEffectPrototypes(struct: EffectPrototype) {
-  if (interestingSIDs.has(struct.SID)) {
-    const fork = struct.fork();
-    return Object.assign(fork, {
-      Duration: struct.Duration * 10,
-    });
+  if (!interestingSIDs.has(struct.SID)) {
+    return null;
   }
-  return null;
+  const fork = struct.fork();
+  fork.Duration = struct.Duration * 10 + 1;
+  return fork;
 }
 
 transformEffectPrototypes.files = ["/EffectPrototypes.cfg"];
@@ -62,5 +61,5 @@ export const meta: MetaType<EffectPrototype> = {
   [*] 🏋️ Hercules: Weight buff duration increased from 5 minutes to 50 minutes
   [/list]
   bPatches EffectPrototypes.cfg`,
-  changenote: "Compatible with 1.7.x",
+  changenote: "Compatible with 1.8.x",
 };
