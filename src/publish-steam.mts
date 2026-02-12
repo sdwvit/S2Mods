@@ -2,7 +2,7 @@ import path from "node:path";
 import childProcess from "node:child_process";
 import * as fs from "node:fs";
 import * as VDF from "@node-steam/vdf";
-import "./ensure-dot-env.mts";
+import "./ensure-env.mts";
 const STALKER_STEAM_ID = "1643320";
 import { spawnSync } from "child_process";
 import { modFolder, modFolderSteam, modMeta, modName } from "./base-paths.mjs";

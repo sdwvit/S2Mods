@@ -1,4 +1,4 @@
-import "./ensure-dot-env.mts";
+import "./ensure-env.mts";
 await import(process.env.NODE_TS_TRANSFORMER);
 import { parentPort, workerData } from "node:worker_threads";
 import { readFile, writeFile } from "node:fs/promises";
