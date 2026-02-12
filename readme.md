@@ -1,3 +1,5 @@
+<img src="./UNISG.webp" alt="Logo" width="300" />
+
 # Code generator for my Stalker 2 mod config files
 
 ## Requirements:
