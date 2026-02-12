@@ -29,14 +29,35 @@ function runGit(command: string) {
   });
 }
 
-function hasUncommittedChanges() {
-  const status = execSync("git status --porcelain", {
+function runGitAndRead(command: string) {
+  return execSync(command, {
     cwd: projectRoot,
     encoding: "utf8",
     shell: "/usr/bin/bash",
     env: process.env,
-  });
+  }).trim();
+}
+
+function hasUncommittedChanges() {
+  const status = runGitAndRead("git status --porcelain");
   return status.trim().length > 0;
+}
+
+function resolvePushCommand() {
+  const currentBranch = runGitAndRead("git rev-parse --abbrev-ref HEAD");
+  try {
+    const upstream = runGitAndRead("git rev-parse --abbrev-ref --symbolic-full-name @{u}");
+    const upstreamMatch = upstream.match(/^([^/]+)\/(.+)$/);
+    if (!upstreamMatch) {
+      return `git push origin HEAD`;
+    }
+    const [, remote, upstreamBranch] = upstreamMatch;
+    logger.log(`Pushing HEAD (${currentBranch}) to upstream ${upstream}.`);
+    return `git push ${remote} HEAD:${upstreamBranch}`;
+  } catch {
+    logger.log(`No upstream detected for ${currentBranch}; pushing to origin/${currentBranch}.`);
+    return "git push origin HEAD";
+  }
 }
 
 export function commitAndPushIfDirty(platform: PublishPlatform, publishedAt = new Date()) {
@@ -47,7 +68,7 @@ export function commitAndPushIfDirty(platform: PublishPlatform, publishedAt = ne
   const isoTimestamp = publishedAt.toISOString();
   runGit("git add -A");
   runGit(`git commit -m "publish: ${modName} ${platform} ${isoTimestamp}"`);
-  runGit("git push");
+  runGit(resolvePushCommand());
 }
 
 function createAndPushPublishTag(platform: PublishPlatform, publishedAt: Date) {
