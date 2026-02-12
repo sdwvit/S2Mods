@@ -8,7 +8,7 @@ export function backfillDef<T extends Partial<Struct>>(
   struct: T,
   referenceMap: Record<string, { __internal__: { refkey?: number | string } }> = allDefaultArmorPrototypesRecord,
   referenceStructSID = referenceMap[struct.__internal__.refkey] ? struct.__internal__.refkey : allDefaultArmorPrototypes[0].SID,
-): T {
+): Struct & T {
   const s = new Struct(struct);
 
   if (!referenceMap[referenceStructSID]) {
@@ -30,7 +30,7 @@ export function backfillDef<T extends Partial<Struct>>(
     set(s, path, get(a, path));
   });
 
-  return s as T;
+  return s as Struct & T;
 }
 
 export function getTemplate<T extends Partial<Struct & { SID: string }>>(struct: T, referenceMap: Record<string, T>): string {

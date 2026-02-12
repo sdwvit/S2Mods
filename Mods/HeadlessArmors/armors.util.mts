@@ -1,4 +1,4 @@
-import "../../src/ensure-dot-env.mts";
+import "../../src/ensure-env.mts";
 import { ArmorPrototype, ERank, Struct } from "s2cfgtojson";
 
 import {
@@ -6,7 +6,6 @@ import {
   allDefaultArmorPrototypesRecord,
   allDefaultDroppableArmorsByFaction,
   ArmorDescriptor,
-  CoreFaction,
   DescriptorFn,
   getDroppableArmor,
   getDroppableHelmet,
@@ -23,54 +22,7 @@ const getArmorIcon = (refkey: string) => `${ICON_ROOT}${refkey}_headless.T_IFI_$
 
 const getHelmetIcon = () => ``;
 
-const getArmorKeysForRemoval = (ref: ArmorPrototype) => ({
-  UpgradePrototypeSIDs: backfillDef(ref)
-    .UpgradePrototypeSIDs.entries()
-    .map(([_, k]) => k)
-    .filter((k) => !!k.toLowerCase().match(/psyresist|_ps[iy]_/g)),
-});
-const getArmorExtras = (ref: ArmorPrototype, overrides?: ArmorDescriptor["__internal__"]["_extras"]) => {
-  const keysForRemoval = getArmorKeysForRemoval(ref);
-  if (!keysForRemoval && !overrides) {
-    return undefined;
-  }
-  return { ...overrides, ...(keysForRemoval ? { keysForRemoval } : {}) };
-};
-
-const createItem = (
-  fn: DescriptorFn,
-  suffix: string,
-  iconFn: (r: string) => string,
-  costFactor: number,
-  weightFactorA: number,
-  weightAdditionC: number,
-  ref: ArmorPrototype,
-  s: any,
-  extras = getArmorExtras(ref),
-  rank: ERank = VETERAN_MASTER_RANK,
-): ArmorPrototype => {
-  if (!ref) {
-    logger.error(`Missing ref '${ref}'`);
-    return;
-  }
-  const { SID: refSID } = ref;
-  return fn(
-    {
-      LocalizationSID: refSID,
-      __internal__: { refkey: refSID },
-      Icon: iconFn(refSID),
-      SID: `${refSID}${suffix}`,
-      Protection: { PSY: 0 },
-      bBlockHead: false,
-      Cost: costFactor * ref.Cost,
-      Weight: weightFactorA * ref.Weight + weightAdditionC,
-      ...s,
-    },
-    rank,
-    extras,
-  );
-};
-type CreateFn = (ref: ArmorPrototype, s?: any, extras?: ArmorDescriptor["__internal__"]["_extras"], rank?: ERank) => ArmorPrototype;
+type CreateFn = (ref: ArmorPrototype, s?: any, extras?: ArmorDescriptor["__internal__"]["_extras"], rank?: ERank) => ArmorDescriptor;
 const createHeadlessArmor: CreateFn = createItem.bind(null, getDroppableArmor, "_MasterMod_headless", getArmorIcon, 0.8, 1, -5);
 const createHelmet: CreateFn = createItem.bind(null, getDroppableHelmet, "_Helmet_MasterMod", getHelmetIcon, 1.45, 1, 0);
 
@@ -107,6 +59,7 @@ export const newArmors = {
   Battle_Dolg_End_Armor_MasterMod_headless: createHeadlessArmor(allDefaultArmorPrototypesRecord.Battle_Dolg_End_Armor, {
     Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Armor/T_IFI_Battle_Dolg_End_Armor.T_IFI_Battle_Dolg_End_Armor'`,
     Cost: allDefaultArmorPrototypesRecord.Battle_Dolg_End_Armor.Cost,
+    Weight: allDefaultArmorPrototypesRecord.Battle_Dolg_End_Armor.Weight - 3,
   }),
 
   // helmets
@@ -446,3 +399,55 @@ export const allExtraArmors = [
 
     return 0;
   });
+
+function getArmorKeysForRemoval(ref: ArmorPrototype) {
+  return {
+    UpgradePrototypeSIDs: backfillDef(ref)
+      .UpgradePrototypeSIDs.entries()
+      .map(([_, k]) => k)
+      .filter((k) => !!k.toLowerCase().match(/psyresist|_ps[iy]_/g)),
+  };
+}
+
+function getArmorExtras(ref: ArmorPrototype, overrides?: ArmorDescriptor["__internal__"]["_extras"]) {
+  const keysForRemoval = getArmorKeysForRemoval(ref);
+  if (!keysForRemoval && !overrides) {
+    return undefined;
+  }
+  return { ...overrides, ...(keysForRemoval ? { keysForRemoval } : {}) };
+}
+
+function createItem(
+  fn: DescriptorFn,
+  suffix: string,
+  iconFn: (r: string) => string,
+  costFactor: number,
+  weightFactorA: number,
+  weightAdditionC: number,
+  ref: ArmorPrototype,
+  s: any,
+  extras = getArmorExtras(ref),
+  rank: ERank = VETERAN_MASTER_RANK,
+) {
+  if (!ref) {
+    logger.error(`Missing ref '${ref}'`);
+    return;
+  }
+  const { SID: refSID } = ref;
+  const Weight = weightFactorA * ref.Weight + weightAdditionC;
+  return fn(
+    {
+      LocalizationSID: refSID,
+      __internal__: { refkey: refSID },
+      Icon: iconFn(refSID),
+      SID: `${refSID}${suffix}`,
+      Protection: { PSY: 0 },
+      bBlockHead: false,
+      Cost: costFactor * ref.Cost,
+      Weight: Weight > 0 ? Weight : ref.Weight,
+      ...s,
+    },
+    rank,
+    extras,
+  );
+}

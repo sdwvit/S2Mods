@@ -16,4 +16,4 @@ await Promise.all(promises);
 if (initialBranch) {
   await cmd(["git", "checkout", initialBranch].join(" "));
 }
-spawnSync("paplay", ["./pop.wav"]);
+
