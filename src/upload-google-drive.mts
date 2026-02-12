@@ -4,10 +4,16 @@ import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 import { logger } from "./logger.mts";
 
-const DRIVE_UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink";
+const DRIVE_UPLOAD_FIELDS = "id,name,webViewLink";
+const DRIVE_UPLOAD_URL = `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=${DRIVE_UPLOAD_FIELDS}`;
 const OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const DRIVE_API_URL = "https://www.googleapis.com/drive/v3/files";
 const OAUTH_PLAYGROUND_URL = "https://developers.google.com/oauthplayground/#step1&scopes=https://www.googleapis.com/auth/drive.file";
+
+type DriveFile = { id: string; name?: string };
+type DriveListResponse = { files?: DriveFile[] };
+type DriveUploadResponse = { id?: string; name?: string; webViewLink?: string };
+type GoogleTokenResponse = { access_token?: string };
 
 function getDriveFolderId() {
   const folderId = process.env.GDRIVE_FOLDER_ID?.trim();
@@ -35,11 +41,8 @@ async function prompt(question: string) {
 }
 
 function tryOpenBrowser(url: string) {
-  const commands =
-    process.platform === "win32"
-      ? ["cmd", ["/c", "start", "", url]]
-      : process.platform === "darwin"
-        ? ["open", [url]] : ["xdg-open", [url]];
+  const commands: Array<[string, string[]]> =
+    process.platform === "win32" ? [["cmd", ["/c", "start", "", url]]] : process.platform === "darwin" ? [["open", [url]]] : [["xdg-open", [url]]];
 
   for (const [cmd, args] of commands) {
     const result = spawnSync(cmd, args, { stdio: "ignore" });
@@ -106,12 +109,26 @@ async function getAccessToken() {
     throw new Error(`Failed to obtain Google OAuth access token (${response.status} ${response.statusText})`);
   }
 
-  const json = (await response.json()) as { access_token?: string };
+  const json = (await response.json()) as GoogleTokenResponse;
   if (!json.access_token) {
     throw new Error("Google OAuth token response did not include access_token.");
   }
 
   return json.access_token;
+}
+
+function buildDriveSearchQuery(folderId: string, fileName: string) {
+  const escapedFileName = fileName.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  return `'${folderId}' in parents and name='${escapedFileName}' and trashed=false`;
+}
+
+function buildMultipartBody(boundary: string, metadata: string, fileBuffer: Buffer) {
+  const preamble = Buffer.from(
+    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n--${boundary}\r\nContent-Type: application/zip\r\n\r\n`,
+    "utf8",
+  );
+  const closing = Buffer.from(`\r\n--${boundary}--\r\n`, "utf8");
+  return Buffer.concat([preamble, fileBuffer, closing]);
 }
 
 export async function uploadFileToGoogleDrive(filePath: string) {
@@ -120,38 +137,30 @@ export async function uploadFileToGoogleDrive(filePath: string) {
   const fileName = path.basename(filePath);
   const fileBuffer = await fs.readFile(filePath);
   const boundary = `----S2ModsDriveBoundary${Date.now()}`;
-  const escapedFileName = fileName.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  const searchQuery = buildDriveSearchQuery(folderId, fileName);
 
-  const findExistingResponse = await fetch(
-    `${DRIVE_API_URL}?q=${encodeURIComponent(`'${folderId}' in parents and name='${escapedFileName}' and trashed=false`)}&fields=files(id,name)&orderBy=modifiedTime desc`,
-    {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    },
-  );
+  const findExistingUrl = `${DRIVE_API_URL}?q=${encodeURIComponent(searchQuery)}` + "&fields=files(id,name)&orderBy=modifiedTime desc";
+  const findExistingResponse = await fetch(findExistingUrl, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
   if (!findExistingResponse.ok) {
     const payload = await findExistingResponse.text();
     throw new Error(`Failed to query existing Google Drive files (${findExistingResponse.status} ${findExistingResponse.statusText}): ${payload}`);
   }
 
-  const existingFiles = ((await findExistingResponse.json()) as { files?: { id: string; name?: string }[] }).files || [];
+  const existingFiles = ((await findExistingResponse.json()) as DriveListResponse).files || [];
   const existingFileToOverwrite = existingFiles[0];
 
   const metadata = JSON.stringify({
     name: fileName,
     ...(existingFileToOverwrite ? {} : { parents: [folderId] }),
   });
-
-  const preamble = Buffer.from(
-    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${metadata}\r\n--${boundary}\r\nContent-Type: application/zip\r\n\r\n`,
-    "utf8",
-  );
-  const closing = Buffer.from(`\r\n--${boundary}--\r\n`, "utf8");
-  const body = Buffer.concat([preamble, fileBuffer, closing]);
+  const body = buildMultipartBody(boundary, metadata, fileBuffer);
 
   const uploadUrl = existingFileToOverwrite
-    ? `https://www.googleapis.com/upload/drive/v3/files/${existingFileToOverwrite.id}?uploadType=multipart&fields=id,name,webViewLink`
+    ? `https://www.googleapis.com/upload/drive/v3/files/${existingFileToOverwrite.id}?uploadType=multipart&fields=${DRIVE_UPLOAD_FIELDS}`
     : DRIVE_UPLOAD_URL;
   const uploadMethod = existingFileToOverwrite ? "PATCH" : "POST";
   logger.log(
@@ -173,7 +182,7 @@ export async function uploadFileToGoogleDrive(filePath: string) {
     throw new Error(`Google Drive upload failed (${response.status} ${response.statusText}): ${payload}`);
   }
 
-  const json = (await response.json()) as { id?: string; name?: string; webViewLink?: string };
+  const json = (await response.json()) as DriveUploadResponse;
   logger.log("Google Drive upload complete:", json.name || fileName, json.id || "(no id)");
   if (json.webViewLink) {
     logger.log("Google Drive link:", json.webViewLink);
