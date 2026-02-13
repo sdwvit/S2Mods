@@ -1,10 +1,10 @@
 import { ArmorPrototype, Struct } from "s2cfgtojson";
 import { MetaContext } from "../../src/meta-type.mts";
-import { allExtraArmors, newArmors } from "./armors.util.mts";
 import { allDefaultArmorPrototypesRecord, ArmorDescriptor } from "../../src/consts.mts";
-import { backfillDef, getDots } from "../../src/backfill-def.mts";
+import { backfillDef } from "../../src/backfill-def.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { logger } from "../../src/logger.mts";
+import { getGdocsArmorData, GdocsArmorData } from "./gdocs-armors.mts";
 
 let once = false;
 
@@ -45,26 +45,21 @@ export async function transformArmorPrototypes(struct: ArmorPrototype, context: 
 
   if (!once) {
     once = true;
-    allExtraArmors.forEach((descriptor) => {
+    const gdocsData = await getGdocsArmorData();
+    const referenceMap = buildReferenceMap(gdocsData);
+
+    gdocsData.descriptors.forEach((descriptor) => {
       const newSID = descriptor.SID;
 
-      const newArmor = createNewArmor(descriptor);
+      const newArmor = createNewArmor(descriptor, referenceMap);
       if (!newArmor) {
         logger.warn(`Couldn't create new armor due to no ref? ${new Struct(descriptor).toString()}`);
         return;
       }
-      const overrides = {
-        ...newArmors[newSID as keyof typeof newArmors],
-      };
-      if (overrides.__internal__?._extras && "keysForRemoval" in overrides.__internal__._extras) {
-        removeExtraKeys(overrides, newArmor);
-      }
-      deepMerge(newArmor, overrides);
+      deepMerge(newArmor, gdocsData.overrides[newSID] || {});
       fixUpgradePrototypeSIDs(newArmor);
       dedupeUpgradePrototypeSIDs(newArmor);
-      if (!(newArmors[newSID] && newArmors[newSID].__internal__._extras?.isDroppable)) {
-        newArmor.Invisible = true;
-      }
+
       const clone = newArmor.clone();
       clone.__internal__.isRoot = true;
       extraStructs.push(clone);
@@ -115,23 +110,10 @@ function dedupeUpgradePrototypeSIDs(armor: ArmorPrototype) {
   armor.UpgradePrototypeSIDs = upgrades;
 }
 
-function removeExtraKeys(overrides: ArmorDescriptor, newArmor: ArmorPrototype) {
-  Object.entries(overrides.__internal__._extras.keysForRemoval || {}).forEach(([p, v]) => {
-    const e = getDots(newArmor, p) || {};
-    if (!Array.isArray(v)) {
-      throw new Error("Expected array for keysForRemoval values");
-    }
-    const keysV = new Set(v.map((e: number | string) => e.toString()));
-    const keyToDelete = Object.keys(e).find((k) => keysV.has(e[k]));
-
-    delete e[keyToDelete];
-  });
-}
-
-function createNewArmor(descriptor: ArmorDescriptor) {
+function createNewArmor(descriptor: ArmorDescriptor, referenceMap: Record<string, ArmorPrototype>) {
   const refkey = descriptor.__internal__.refkey;
   const SID = descriptor.SID;
-  const referenceArmor = allDefaultArmorPrototypesRecord[refkey] || allDefaultArmorPrototypesRecord[newArmors[refkey].__internal__.refkey];
+  const referenceArmor = referenceMap[refkey];
   if (!referenceArmor) {
     return;
   }
@@ -140,5 +122,16 @@ function createNewArmor(descriptor: ArmorDescriptor) {
   }
   const s = new Struct(descriptor) as ArmorPrototype;
 
-  return backfillDef(s, allDefaultArmorPrototypesRecord, referenceArmor.SID).filter(([k]) => !!s[k]);
+  const backfilled = backfillDef(s, referenceMap, referenceArmor.SID).filter(([k]) => !!s[k]);
+  backfilled.__internal__.rawName = SID;
+  return backfilled;
+}
+
+function buildReferenceMap(data: GdocsArmorData): Record<string, ArmorPrototype> {
+  const map: Record<string, ArmorPrototype> = { ...allDefaultArmorPrototypesRecord };
+  for (const descriptor of data.descriptors) {
+    const sid = descriptor.SID;
+    map[sid] = new Struct({ SID: sid, __internal__: { refkey: descriptor.__internal__.refkey }, ...(data.overrides[sid] || {}) }) as ArmorPrototype;
+  }
+  return map;
 }

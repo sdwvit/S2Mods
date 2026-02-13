@@ -51,6 +51,6 @@ export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype> = {
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
     [/list] 
   `,
-  changenote: `Fix some helmets accidentally made invisible`,
+  changenote: `Migrate to sheet-driven armor pipeline, tighten generator gating, and fix parser/rawName edge cases`,
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };
