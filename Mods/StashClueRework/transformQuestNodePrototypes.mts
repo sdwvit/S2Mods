@@ -10,7 +10,6 @@ import { MalachiteMutantQuestPartsQuestsDoneDialogs, MalachiteMutantQuestPartsQu
 
 export const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];
 
-let oncePerTransformer = false;
 let oncePerBodyParts_Malahit = false;
 /**
  * Removes timeout for repeating quests.
@@ -23,8 +22,7 @@ export async function transformQuestNodePrototypes(struct: QuestNodePrototype, c
     promises.push(hookStashSpawners(struct as QuestNodePrototypeItemAdd, fork as QuestNodePrototypeConsoleCommand, finishedTransformers));
   }
 
-  if (!oncePerTransformer) {
-    oncePerTransformer = true;
+  if (context.filePath.endsWith("E01_MQ01.cfg")) {
     promises.push(injectMassiveRNGQuestNodes(finishedTransformers));
   }
 
