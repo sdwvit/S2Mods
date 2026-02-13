@@ -1,4 +1,4 @@
-import { ItemGeneratorPrototype } from "s2cfgtojson";
+import { ItemGeneratorPrototype, Struct } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
 import { adjustArmorItemGenerator } from "./adjustArmorItemGenerator.mts";
 import {
@@ -15,41 +15,38 @@ export const transformDynamicItemGenerator: StructTransformer<ItemGeneratorProto
     return;
   }
 
-  const canInjectNewItems =
-    !!allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] ||
-    !!allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
   const canResolveFaction = !!getFactionFromItemGeneratorSID(struct.SID);
   const fork = struct.fork();
   let shouldReturn = false;
+  const canInjectNewItems =
+    !!allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] ||
+    !!allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
   /**
-   * Iterate over existing head/body armor and mark entries as removenode. This way it won't conflict with other mods.
+   * Iterate over existing head/body armor and remove entries by overriding with Struct.
    */
   struct.ItemGenerator.forEach(([k, itemGenerator]) => {
     fork.ItemGenerator ||= struct.ItemGenerator.fork();
     fork.ItemGenerator.__internal__.useAsterisk = false;
+
     const categoryMatch =
       itemGenerator.Category === "EItemGenerationCategory::BodyArmor" || itemGenerator.Category === "EItemGenerationCategory::Head";
-    const nonAsteriskKey = `${struct.ItemGenerator[k].__internal__.rawName}_dupe_${k}` as typeof k; // todo secret name sauce, add it to the lib as a util method
-    if (categoryMatch || struct.ItemGenerator[k].__internal__.rawName === "[*]") {
-      fork.ItemGenerator[nonAsteriskKey] ||= struct.ItemGenerator[k].fork();
+    const nonAsteriskKey = `${itemGenerator.__internal__.rawName}_dupe_${k}` as typeof k; // todo secret name sauce, add it to the lib as a util method
+    if (categoryMatch || itemGenerator.__internal__.rawName === "[*]") {
+      fork.ItemGenerator[nonAsteriskKey] ||= itemGenerator.fork();
     }
 
     if (categoryMatch) {
       const target = fork.ItemGenerator[nonAsteriskKey];
 
       itemGenerator.PossibleItems?.forEach?.(([possibleItemKey]) => {
-        const possibleItem = struct.ItemGenerator[k].PossibleItems[possibleItemKey];
+        const possibleItem = itemGenerator.PossibleItems[possibleItemKey];
         const hasNonZeroChance = typeof possibleItem?.Chance === "number" && possibleItem.Chance !== 0;
         const shouldRemoveArmor = canInjectNewItems || hasNonZeroChance;
         if (!shouldRemoveArmor) {
           return;
         }
 
-        target.Category = struct.ItemGenerator[k].Category;
-        target.PlayerRank = struct.ItemGenerator[k].PlayerRank || "ERank::Newbie, ERank::Experienced, ERank::Veteran, ERank::Master";
-        target.PossibleItems ||= struct.ItemGenerator[k].PossibleItems.fork();
-        target.PossibleItems[possibleItemKey] = possibleItem.fork();
-        target.PossibleItems.removeNode(possibleItemKey);
+        target.PossibleItems = new Struct() as any;
 
         shouldReturn = true;
       });
