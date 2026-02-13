@@ -677,9 +677,9 @@ const itemGeneratorFactionMapFallback: Record<string, CoreFaction> = {
   ZombieZombirovannyj_1_ItemGenerator: "Neutrals",
   AllHeadsGenerator: "Neutrals",
   _ItemGenerator: "Neutrals",
-  elma_0_ItemGenerator: "Neutrals",
-  upack_guide_vozatyj_0_ItemGenerator: "Mercenaries",
-  upack_trader_selma_0_ItemGenerator: "Neutrals",
+  selma_0_ItemGenerator: "Neutrals",
+  supack_guide_vozatyj_0_ItemGenerator: "Mercenaries",
+  supack_trader_selma_0_ItemGenerator: "Neutrals",
 
   GeneralNPC_Neutral_WeaponPistol: "Neutrals",
   GeneralNPC_Bandit_WeaponPistol: "Bandits",
