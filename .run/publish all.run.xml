@@ -3,9 +3,6 @@
     <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
       <browser name="35837b5c-3dc9-4c9f-8f33-503d7e702d71" with-js-debugger="true" />
     </EXTENSION>
-    <EXTENSION ID="com.jetbrains.nodejs.run.NodeJSProfilingRunConfigurationExtension">
-      <profiling do-profile="true" />
-    </EXTENSION>
     <method v="2" />
   </configuration>
 </component>
