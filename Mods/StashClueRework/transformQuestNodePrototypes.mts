@@ -11,6 +11,7 @@ import { MalachiteMutantQuestPartsQuestsDoneDialogs, MalachiteMutantQuestPartsQu
 export const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];
 
 let oncePerBodyParts_Malahit = false;
+
 /**
  * Removes timeout for repeating quests.
  */
@@ -20,10 +21,6 @@ export async function transformQuestNodePrototypes(struct: QuestNodePrototype, c
   // applies to all quest nodes that add items (i.e., stash clues)
   if (struct.NodeType === "EQuestNodeType::ItemAdd") {
     promises.push(hookStashSpawners(struct as QuestNodePrototypeItemAdd, fork as QuestNodePrototypeConsoleCommand, finishedTransformers));
-  }
-
-  if (context.filePath.endsWith("E01_MQ01.cfg")) {
-    promises.push(injectMassiveRNGQuestNodes(finishedTransformers));
   }
 
   // applies only to recurring quests
@@ -37,6 +34,7 @@ export async function transformQuestNodePrototypes(struct: QuestNodePrototype, c
 
   if (!oncePerBodyParts_Malahit && context.filePath.endsWith("/BodyParts_Malahit.cfg")) {
     oncePerBodyParts_Malahit = true;
+    promises.push(injectMassiveRNGQuestNodes(finishedTransformers));
 
     promises.push(
       Promise.resolve(
