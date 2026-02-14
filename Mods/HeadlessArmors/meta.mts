@@ -51,6 +51,6 @@ export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype> = {
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
     [/list] 
   `,
-  changenote: `Override existing spawning armors.`,
+  changenote: `Fixes quest characters dropping full repaired armors.`,
   structTransformers: [transformArmorPrototypes, transformDynamicItemGenerator],
 };
