@@ -19,7 +19,7 @@ Once you finish any recurring quest from base vendors, apart from monetary rewar
 [hr][/hr]
 bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 `,
-  changenote: "Fix npcs giving clues, fix quest nodes not activating",
+  changenote: "Fix duplicate quest nodes",
   structTransformers: [transformSpawnActorPrototypes, transformCluePrototypes, transformQuestNodePrototypes, transformObjPrototypes],
   onTransformerFinish(transformer: StructTransformer<Struct>) {
     finishedTransformers.add(transformer.name);

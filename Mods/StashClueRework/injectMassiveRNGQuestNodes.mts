@@ -11,7 +11,7 @@ export const getStashSpawnerSID = (stashKey: string) => `${RandomStashQuestNodeP
 
 export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<string>) {
   await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
-  const extraStructs: QuestNodePrototype[] = [];
+  const extraStructs: Record<string, QuestNodePrototype> = {};
   const stashes = Object.keys(allStashes);
   const randomNode = new Struct(`
     ${RandomStashQuestNodePrefix}_Random : struct.begin
@@ -19,7 +19,7 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
         QuestSID = ${RandomStashQuestName}
         NodeType = EQuestNodeType::Random
     struct.end`) as QuestNodePrototypeRandom;
-  extraStructs.push(randomNode);
+  extraStructs[randomNode.SID] = randomNode;
   stashes.forEach((key, i) => {
     randomNode.OutputPinNames ||= new Struct() as any;
     randomNode.OutputPinNames.addNode(i);
@@ -41,7 +41,7 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
     const launcherConfig = [{ SID: `${RandomStashQuestNodePrefix}_Random`, Name: String(i) }];
     spawner.Launchers = getLaunchers(launcherConfig);
 
-    extraStructs.push(spawner);
+    extraStructs[spawner.SID] = spawner;
     const cacheNotif = new Struct(`
         ${RandomStashQuestNodePrefix}_Random_${i} : struct.begin
            SID = ${RandomStashQuestNodePrefix}_Random_${i}
@@ -50,9 +50,9 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
            TargetQuestGuid = ${key}
         struct.end
       `) as QuestNodePrototypeGiveCache;
-    cacheNotif.Launchers = getLaunchers([{ SID: `${RandomStashQuestNodePrefix}_Random`, Name: String(i) }]);
+    cacheNotif.Launchers = getLaunchers([{ SID: spawner.SID, Name: '' }]);
 
-    extraStructs.push(cacheNotif);
+    extraStructs[cacheNotif.SID] = cacheNotif;
   });
-  return extraStructs;
+  return Object.values(extraStructs);
 }
