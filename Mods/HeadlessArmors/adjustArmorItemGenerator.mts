@@ -243,13 +243,13 @@ export const adjustArmorItemGenerator = async (fork: ItemGeneratorPrototype, str
   ensureMissingArmorCategoriesWithCandidates(forkIG, allFactionDescriptors);
 
   forkIG.forEach(([_, itemGen], i) => {
-    itemGen.bAllowSameCategoryGeneration = true;
-    if (!itemGen.Category) {
+    if (!itemGen.Category || !(itemGen.PossibleItems instanceof Struct)) {
       return;
     }
     if (isFullRankPlayerRank(itemGen.PlayerRank)) {
       return;
     }
+    itemGen.bAllowSameCategoryGeneration = true;
 
     const weights: Record<string, number> = {};
     const droppableArmors: GetStructType<PossibleItem>[] = [];

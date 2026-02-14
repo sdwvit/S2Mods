@@ -38,18 +38,21 @@ export const transformDynamicItemGenerator: StructTransformer<ItemGeneratorProto
     if (categoryMatch) {
       const target = fork.ItemGenerator[nonAsteriskKey];
 
-      itemGenerator.PossibleItems?.forEach?.(([possibleItemKey]) => {
-        const possibleItem = itemGenerator.PossibleItems[possibleItemKey];
+      itemGenerator.PossibleItems?.forEach?.(([_, possibleItem]) => {
         const hasNonZeroChance = typeof possibleItem?.Chance === "number" && possibleItem.Chance !== 0;
         const shouldRemoveArmor = canInjectNewItems || hasNonZeroChance;
         if (!shouldRemoveArmor) {
           return;
         }
 
-        target.PossibleItems = new Struct() as any;
-
         shouldReturn = true;
       });
+      if (shouldReturn) {
+        target.Category = itemGenerator.Category;
+        target.PlayerRank = itemGenerator.PlayerRank;
+        target.PossibleItems = new Struct() as any;
+        target.removeNode("PossibleItems");
+      }
     }
   });
 
