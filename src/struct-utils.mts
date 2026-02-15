@@ -21,8 +21,8 @@ export const getLaunchers = (
 
   sids_names.map((questNodePrototypeConnectionsItemOrItems) => {
     const connections = new Struct() as QuestNodePrototypeLaunchersItem;
-    connections.Connections = new Struct() as QuestNodePrototypeConnections;
     connections.Excluding = false;
+    connections.Connections = new Struct() as QuestNodePrototypeConnections;
     if (Array.isArray(questNodePrototypeConnectionsItemOrItems)) {
       questNodePrototypeConnectionsItemOrItems.forEach((item) => {
         connections.Connections.addNode(new Struct(item) as QuestNodePrototypeConnectionsItem);
