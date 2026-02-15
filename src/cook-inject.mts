@@ -10,3 +10,4 @@ await cookMod();
 injectIntoGame(path.join(await sdkStagedPakFolder, "*"));
 
 spawnSync("paplay", ["./pop.wav"]);
+spawnSync("echo", [new Date().toISOString()]);

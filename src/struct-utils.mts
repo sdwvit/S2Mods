@@ -1,20 +1,12 @@
-import { Condition, GetStructType, QuestNodePrototype, Struct } from "s2cfgtojson";
+import { QuestNodePrototypeConditions, QuestNodePrototypeConditionsItem, QuestNodePrototypeLaunchers, Struct } from "s2cfgtojson";
 
-export const getLaunchers = (sids_names: { SID: string; Name: string }[]) => {
+export const getLaunchers = (sids_names: { SID: string; Name: string | number }[]) => {
   return new Struct(
-    Object.fromEntries(
-      sids_names.map(({ SID, Name }) => [
-        `${SID}${Name}_Launcher`,
-        {
-          Excluding: false,
-          Connections: { 0: { SID, Name } },
-        },
-      ]),
-    ),
-  ) as QuestNodePrototype["Launchers"];
+    Object.fromEntries(sids_names.map(({ SID, Name }, i) => [i, { Excluding: false, Connections: { 0: { SID, Name } } }])),
+  ) as QuestNodePrototypeLaunchers;
 };
 
-export const getConditions = (conditions: Partial<Condition>[]) =>
+export const getConditions = (conditions: Partial<QuestNodePrototypeConditionsItem>[]) =>
   Object.assign(
     new Struct(
       Object.fromEntries(
@@ -22,6 +14,6 @@ export const getConditions = (conditions: Partial<Condition>[]) =>
           return [i, new Struct({ 0: new Struct(condition) })];
         }),
       ),
-    ) as GetStructType<QuestNodePrototype["Conditions"]>,
+    ) as QuestNodePrototypeConditions,
     { ConditionCheckType: "EConditionCheckType::And" },
   ).fork(true);
