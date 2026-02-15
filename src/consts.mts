@@ -74,8 +74,8 @@ export let allDefaultQuestObjPrototypes: QuestObjPrototype[];
 
 // Records:
 export const getRecord = <T extends { SID: string }>(arr: T[]) => Object.fromEntries(arr.map((e) => [e.SID, e]));
-export const getRecordByKey = <const K extends string, T extends Record<K, string>>(arr: T[], key: K) =>
-  Object.fromEntries(arr.map((e) => [e[key], e]));
+export const getRecordByKey = <T extends GetStructType<{}>, K extends keyof T>(arr: T[], key: K) => Object.fromEntries(arr.map((e) => [e[key], e]));
+
 export const allDefaultArmorPrototypesRecord = getRecord(allDefaultArmorPrototypes);
 export const allDefaultArtifactPrototypesRecord = getRecord(allDefaultArtifactPrototypes);
 export const allDefaultNightVisionGogglesPrototypesRecord = getRecord(allDefaultNightVisionGogglesPrototypes);
