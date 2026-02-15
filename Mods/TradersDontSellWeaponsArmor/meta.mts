@@ -41,6 +41,7 @@ const transformTrade = (struct: ItemGeneratorPrototype) => {
       }
     }
   });
+  ItemGenerator.__internal__.useAsterisk = false;
   if (!ItemGenerator.entries().length) {
     return;
   }
