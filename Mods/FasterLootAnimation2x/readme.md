@@ -2,7 +2,5 @@
 
 Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines):
 
-`DialogPrototypes`:
- - `EQ197_QD_Orders`
-
-`QuestNodePrototypes`
+`Modified or added assets`:
+ - `MG_fp_bh_creaturestash_looting_common`

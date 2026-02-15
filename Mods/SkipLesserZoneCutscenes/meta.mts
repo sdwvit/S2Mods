@@ -1,6 +1,5 @@
 import { DialogPrototype, QuestNodePrototype, QuestNodePrototypeContainer, Struct } from "s2cfgtojson";
 import { MetaContext, MetaType, StructTransformer } from "../../src/meta-type.mts";
-import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 
 const structTransformer: StructTransformer<QuestNodePrototype> = (struct, context) => {
   if (struct.SID === "E01_MQ01_PlayVideo") {
@@ -81,7 +80,7 @@ function reroute(struct: QuestNodePrototype, context: MetaContext<QuestNodeProto
     (struct as QuestNodePrototypeContainer).Launchers.forEach(([_, l]) => finishFork.Launchers.addNode(l));
     finishFork.Launchers = finishFork.Launchers.filter(([k]) => !currentKeys.has(k));
 
-    structs.push(markAsForkRecursively(finishFork));
+    structs.push(finishFork.fork(true));
   });
 
   return structs;
