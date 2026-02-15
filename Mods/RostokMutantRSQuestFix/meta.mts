@@ -1,5 +1,6 @@
 import { MetaType } from "../../src/meta-type.mts";
-import { GetStructType, QuestNodePrototype, Struct, Condition } from "s2cfgtojson";
+import { QuestNodePrototype, QuestNodePrototypeRandom } from "s2cfgtojson";
+import { getConditions } from "../../src/struct-utils.mts";
 
 export const meta: MetaType<QuestNodePrototype> = {
   description: `
@@ -13,7 +14,7 @@ export const meta: MetaType<QuestNodePrototype> = {
   structTransformers: [structTransformer],
 };
 
-function structTransformer(struct: QuestNodePrototype) {
+function structTransformer(struct: QuestNodePrototypeRandom) {
   if (struct.SID === "RSQ08_C01_K_M_Random_3") {
     return Object.assign(struct.fork(), { PinWeights: Object.assign(struct.PinWeights.fork(), { 0: 0.5 }) });
   }
@@ -36,15 +37,3 @@ function structTransformer(struct: QuestNodePrototype) {
 }
 
 structTransformer.files = ["/RSQ08_C01_K_M.cfg"];
-
-export const getConditions = (conditions: Partial<Condition>[]) =>
-  Object.assign(
-    new Struct(
-      Object.fromEntries(
-        conditions.map((condition, i) => {
-          return [i, new Struct({ 0: new Struct(condition) })];
-        }),
-      ),
-    ) as GetStructType<QuestNodePrototype["Conditions"]>,
-    { ConditionCheckType: "EConditionCheckType::And" },
-  ).fork(true);

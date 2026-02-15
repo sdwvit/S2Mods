@@ -2,7 +2,6 @@ import {
   DialogPrototypeConditions,
   DialogPrototypeConditionsItem,
   DialogPrototypeConditionsItemItem,
-  EConditionCheckType,
   QuestNodePrototypeConditions,
   QuestNodePrototypeConditionsItem,
   QuestNodePrototypeConditionsItemItem,
@@ -62,5 +61,6 @@ export function getConditions(
   } else {
     questNodePrototypeConditionsItem.addNode(new Struct(conditions));
   }
+  questNodePrototypeConditions.addNode(questNodePrototypeConditionsItem);
   return questNodePrototypeConditions;
 }
