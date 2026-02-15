@@ -2,8 +2,6 @@ import { ALifeDirectorScenarioPrototype, Struct } from "s2cfgtojson";
 
 import { SPAWN_BUBBLE_FACTOR } from "./transformAIGlobals.mts";
 import { StructTransformer } from "../../src/meta-type.mts";
-import { modName } from "../../src/base-paths.mts";
-import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 
 const FACTOR = SPAWN_BUBBLE_FACTOR ** 2;
 /**
@@ -56,7 +54,7 @@ export const transformALifeDirectorScenarioPrototypes: StructTransformer<ALifeDi
     DefaultSpawnDelayMax: Math.ceil(struct.DefaultSpawnDelayMax / FACTOR),
     DefaultSpawnDelayMin: Math.ceil(struct.DefaultSpawnDelayMin / FACTOR),
   });
-  return markAsForkRecursively(newStruct);
+  return newStruct.fork(true);
 };
 
 transformALifeDirectorScenarioPrototypes.files = ["/ALifeDirectorScenarioPrototypes.cfg"];

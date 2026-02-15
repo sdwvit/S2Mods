@@ -1,6 +1,5 @@
 import { MetaType } from "../../src/meta-type.mts";
 import { Struct, TradePrototype } from "s2cfgtojson";
-import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 
 export const meta: MetaType<TradePrototype> = {
   description: `
@@ -24,7 +23,7 @@ function entriesTransformer(struct: TradePrototype) {
     return fork;
   });
 
-  return markAsForkRecursively(fork);
+  return fork.fork(true);
 }
 
 entriesTransformer.files = ["/TradePrototypes.cfg"];

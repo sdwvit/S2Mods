@@ -1,7 +1,8 @@
 import { Struct, TradePrototype } from "s2cfgtojson";
 import { MetaType } from "../../src/meta-type.mts";
-import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
+
 type TG = TradePrototype["TradeGenerators"]["0"];
+
 function entriesTransformer(struct: TradePrototype) {
   if (!struct.TradeGenerators) {
     return null;
@@ -15,7 +16,7 @@ function entriesTransformer(struct: TradePrototype) {
     return tg;
   });
   fork.TradeGenerators.__internal__.bpatch = true;
-  return markAsForkRecursively(fork);
+  return fork.fork(true);
 }
 
 entriesTransformer.files = ["/TradePrototypes.cfg"];
