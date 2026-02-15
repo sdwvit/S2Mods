@@ -15,7 +15,7 @@ import {
   getCorePrototype,
   getRecordByKey,
   guessAttachmentSlot,
-  UniqueWeaponGeneralSetupPrototypesSIDs,
+  allUniqueWeaponGeneralSetupPrototypesSIDs,
 } from "../../src/consts.mts";
 import { precision } from "../../src/precision.mts";
 
@@ -87,7 +87,7 @@ const newWeaponSetupCost: Record<string, number> = {};
  * 1
  */
 function createWeaponParamsWithPreinstalledAttachments(struct: WeaponGeneralSetupPrototype) {
-  if (!struct.CompatibleAttachments || UniqueWeaponGeneralSetupPrototypesSIDs.has(struct.SID)) {
+  if (!struct.CompatibleAttachments || allUniqueWeaponGeneralSetupPrototypesSIDs.has(struct.SID)) {
     return;
   }
 
@@ -201,7 +201,7 @@ async function addNewWeaponsToDynamicItemGenerators(struct: ItemGeneratorPrototy
         return;
       }
       fork.ItemGenerator ||= struct.ItemGenerator.fork();
-      fork.ItemGenerator[k1] ||= struct.ItemGenerator[k1].fork();
+      fork.ItemGenerator[k1] ||= struct.ItemGenerator[k1].fork() as any;
       fork.ItemGenerator[k1].PossibleItems ||= struct.ItemGenerator[k1].PossibleItems.fork();
       fork.ItemGenerator[k1].PossibleItems[k2] ||= struct.ItemGenerator[k1].PossibleItems[k2].fork();
       const baseChance = struct.ItemGenerator[k1].PossibleItems[k2].Chance;
