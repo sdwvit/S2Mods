@@ -9,7 +9,7 @@ function rememberAndEmptyStash(struct: SpawnActorPrototype, context: MetaContext
     return;
   }
   const fork = struct.fork();
-  allStashes[struct.SID] = struct;
+  allStashes[struct.SID] = Object.keys(allStashes).length;
 
   fork.ClueVariablePrototypeSID = getGeneratedStashSID((context.fileIndex % 100) + 1);
   fork.SpawnOnStart = false;

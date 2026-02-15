@@ -1,12 +1,13 @@
 import { QuestNodePrototype, QuestNodePrototypeConsoleCommand, QuestNodePrototypeItemAdd, Struct } from "s2cfgtojson";
 import { MetaContext } from "../../src/meta-type.mts";
 import { finishedTransformers } from "./meta.mts";
-import { getStashSpawnerSID, injectMassiveRNGQuestNodes, RandomStashQuestNodePrefix } from "./injectMassiveRNGQuestNodes.mts";
+import injectMassiveRNGQuestNodes, { getStashSpawnerSID } from "./injectMassiveRNGQuestNodes.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
 import { transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
 import { waitFor } from "../../src/wait-for.mts";
 import { allStashes } from "./stashes.mts";
 import { MalachiteMutantQuestPartsQuestsDoneDialogs, MalachiteMutantQuestPartsQuestsDoneNode } from "../../src/consts.mts";
+import { modName } from "../../src/base-paths.mts";
 
 export const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", "RSQ05", "RSQ06", "RSQ07", "RSQ08", "RSQ09", "RSQ10"];
 
@@ -67,7 +68,7 @@ export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, N
          SID = ${sid}
          QuestSID = ${struct.QuestSID}
          NodeType = EQuestNodeType::ConsoleCommand
-         ConsoleCommand = XStartQuestNodeBySID ${RandomStashQuestNodePrefix}_Random
+         ConsoleCommand = XStartQuestNodeBySID ${modName}_Random
       struct.end
     `) as QuestNodePrototypeConsoleCommand;
 
@@ -83,15 +84,15 @@ export async function hookStashSpawners(
   await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
 
   // only quest stashes that are hidden by this mod are interesting here
-  if (!allStashes[struct.TargetQuestGuid]) {
+  if (!(struct.TargetQuestGuid in allStashes)) {
     return;
   }
-
+  const pin = allStashes[struct.TargetQuestGuid];
   const spawnStash = struct.fork() as QuestNodePrototype as QuestNodePrototypeConsoleCommand;
-  spawnStash.SID = `${struct.QuestSID}_Spawn_${struct.TargetQuestGuid}`;
+  spawnStash.SID = `${struct.QuestSID}_Spawn_${pin}`;
   spawnStash.NodeType = "EQuestNodeType::ConsoleCommand";
   spawnStash.QuestSID = struct.QuestSID;
-  spawnStash.ConsoleCommand = `XStartQuestNodeBySID ${getStashSpawnerSID(struct.TargetQuestGuid)}`;
+  spawnStash.ConsoleCommand = `XStartQuestNodeBySID ${getStashSpawnerSID(pin)}`;
   spawnStash.Launchers = struct.Launchers;
   fork.Launchers ||= getLaunchers([{ SID: spawnStash.SID, Name: "" }]);
   spawnStash.__internal__.rawName = spawnStash.SID;
