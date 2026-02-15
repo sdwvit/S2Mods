@@ -3,6 +3,7 @@ import { MetaType, StructTransformer } from "../../src/meta-type.mts";
 import { transformObjPrototypes } from "./transformObjPrototypes.mts";
 import { transformCluePrototypes } from "./transformCluePrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
+import { transformQuestPrototypes } from "./transformQuestPrototypes.mts";
 import { transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
 import { Struct } from "s2cfgtojson";
 
@@ -20,7 +21,13 @@ Once you finish any recurring quest from base vendors, apart from monetary rewar
 bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 `,
   changenote: "Fix duplicate quest nodes",
-  structTransformers: [transformSpawnActorPrototypes, transformCluePrototypes, transformQuestNodePrototypes, transformObjPrototypes],
+  structTransformers: [
+    transformSpawnActorPrototypes,
+    transformCluePrototypes,
+    transformQuestPrototypes,
+    transformQuestNodePrototypes,
+    transformObjPrototypes,
+  ],
   onTransformerFinish(transformer: StructTransformer<Struct>) {
     finishedTransformers.add(transformer.name);
   },
