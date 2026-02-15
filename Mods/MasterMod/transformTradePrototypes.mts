@@ -6,64 +6,16 @@ import { semiRandom } from "../../src/semi-random.mts";
 import { bartendersTradePrototypes, generalTradersTradePrototypes, medicsTradePrototypes, technicianTradePrototypes } from "../../src/consts.mts";
 import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 const GAMMA_FACTOR = DIFFICULTY_FACTOR / 1.6;
-const oncePerFile = new Set<string>();
+let oncePerFile = false;
 /**
  * Don't allow traders to buy weapons and armor.
  */
 export const transformTradePrototypes: StructTransformer<TradePrototype> = async (struct, context) => {
   const extraStructs: TradePrototype[] = [];
-  if (!oncePerFile.has(context.filePath)) {
-    oncePerFile.add(context.filePath);
-    extraStructs.push(
-      new Struct({
-        __internal__: {
-          rawName: "Guide_TradePrototype",
-          refkey: "[0]",
-          isRoot: true,
-        },
-        SID: "Guide_TradePrototype",
-        TradeTimeLength: 24,
-        TradeGenerators: {
-          __internal__: { isArray: true },
-          0: {
-            ConditionSID: "ConstTrue",
-            ItemGeneratorPrototypeSID: "empty",
-            BuyModifier: 10,
-            SellModifier: 10 * 2.5,
-            BuyLimitations: {
-              __internal__: { isArray: true },
-              0: "EItemType::Weapon",
-              1: "EItemType::Armor",
-              2: "EItemType::Artifact",
-              3: "EItemType::Attach",
-              4: "EItemType::Consumable",
-              5: "EItemType::Detector",
-              6: "EItemType::Grenade",
-              7: "EItemType::MutantLoot",
-              8: "EItemType::Ammo",
-              9: "EItemType::NightVisionGoggles",
-            },
-          },
-        },
-        BuyDiscounts: {
-          __internal__: { isArray: true },
-          0: {
-            ConditionSID: "PlayerRankExperienced",
-            Modifier: 1.15,
-          },
-          1: {
-            ConditionSID: "PlayerRankVeteran",
-            Modifier: 1.2,
-          },
-          2: {
-            ConditionSID: "PlayerRankMaster",
-            Modifier: 1.25,
-          },
-        },
-        bInfiniteMoney: true,
-        RefreshConditionSID: "TradeRegenHoursPassed8",
-      }) as TradePrototype,
-    );
+  if (!oncePerFile) {
+    oncePerFile = true;
+    const guideTP = getGuideTp();
+    extraStructs.push(guideTP);
   }
 
   if (!struct.TradeGenerators || ignoreSIDs.has(struct.SID)) {
@@ -169,3 +121,54 @@ export const GeneralNPCTradePrototypesMoneyMult = new Map([
 ]);
 
 const ignoreSIDs = new Set(["BaseTraderNPC_Template", "BasicTrader", "TraderNPC", "AllTraderNPC", "RC_TraderNPC", "TradeTest"]);
+
+function getGuideTp() {
+  return new Struct({
+    __internal__: {
+      rawName: "Guide_TradePrototype",
+      refkey: "[0]",
+      isRoot: true,
+    },
+    SID: "Guide_TradePrototype",
+    TradeTimeLength: 24,
+    TradeGenerators: {
+      __internal__: { isArray: true },
+      0: {
+        ConditionSID: "ConstTrue",
+        ItemGeneratorPrototypeSID: "empty",
+        BuyModifier: 10,
+        SellModifier: 10 * 2.5,
+        BuyLimitations: {
+          __internal__: { isArray: true },
+          0: "EItemType::Weapon",
+          1: "EItemType::Armor",
+          2: "EItemType::Artifact",
+          3: "EItemType::Attach",
+          4: "EItemType::Consumable",
+          5: "EItemType::Detector",
+          6: "EItemType::Grenade",
+          7: "EItemType::MutantLoot",
+          8: "EItemType::Ammo",
+          9: "EItemType::NightVisionGoggles",
+        },
+      },
+    },
+    BuyDiscounts: {
+      __internal__: { isArray: true },
+      0: {
+        ConditionSID: "PlayerRankExperienced",
+        Modifier: 1.15,
+      },
+      1: {
+        ConditionSID: "PlayerRankVeteran",
+        Modifier: 1.2,
+      },
+      2: {
+        ConditionSID: "PlayerRankMaster",
+        Modifier: 1.25,
+      },
+    },
+    bInfiniteMoney: true,
+    RefreshConditionSID: "TradeRegenHoursPassed8",
+  }) as TradePrototype;
+}

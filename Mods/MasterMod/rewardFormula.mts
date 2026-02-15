@@ -18,8 +18,7 @@ function parseCsv<T>(csv: string): T[] {
   }
   return result;
 }
-
-export const QuestDataTable = parseCsv<{
+export type QuestDataTableEntry = {
   "#": string;
   Vendor: string;
   "Quest idea": string;
@@ -62,7 +61,8 @@ export const QuestDataTable = parseCsv<{
   Stalker: string;
   Tushkan: string;
   Zombie: string;
-}>(readFileSync(path.join(import.meta.dirname, "./QuestDataTable.tsv"), "utf-8"));
+};
+export const QuestDataTable = parseCsv<QuestDataTableEntry>(readFileSync(path.join(import.meta.dirname, "./QuestDataTable.tsv"), "utf-8"));
 export const QuestDataTableByQuestSID = QuestDataTable.reduce(
   (acc, curr) => {
     acc[curr["Containered Quest SID"]] ||= [];

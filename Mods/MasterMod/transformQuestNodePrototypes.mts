@@ -1,7 +1,13 @@
-import { QuestNodePrototype, QuestNodePrototypeCondition, QuestNodePrototypeSetItemGenerator, Struct } from "s2cfgtojson";
+import {
+  QuestNodePrototype,
+  QuestNodePrototypeCondition,
+  QuestNodePrototypeSetGlobalVariable,
+  QuestNodePrototypeSetItemGenerator,
+  Struct,
+} from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
-import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
+import { QuestDataTableByQuestSID, QuestDataTableEntry } from "./rewardFormula.mts";
 import { logger } from "../../src/logger.mts";
 import { recurringQuestsFilenames } from "../StashClueRework/transformQuestNodePrototypes.mts";
 
@@ -43,53 +49,77 @@ function replaceRewards(struct: QuestNodePrototypeSetItemGenerator, fork: QuestN
     logger.info(`Replacing rewards for quest SID: ${struct.QuestSID}`);
     const questVariants = QuestDataTableByQuestSID[struct.QuestSID];
     questVariants.forEach((qv) => {
-      const newRewardNode = struct.fork(true);
-      delete newRewardNode.__internal__.bpatch;
-      delete newRewardNode.__internal__.refurl;
-      newRewardNode.SID = `${qv["Reward Gen SID"]}_SetItemGenerator`;
-      newRewardNode.__internal__.rawName = newRewardNode.SID;
-      newRewardNode.ItemGeneratorSID = qv["Reward Gen SID"];
-      newRewardNode.QuestSID = struct.QuestSID;
-      newRewardNode.Launchers = getLaunchers([{ SID: struct.SID, Name: "" }]);
+      const newRewardNode = getNewRewardNode(qv, struct);
       extraStructs.push(newRewardNode);
 
       if (!qv["Variant Quest Node SID"].trim()) {
         logger.warn(`Missing "Variant Quest Node SID" for qv #${qv["#"]}`);
         return;
       }
+
+      newRewardNode.Launchers = getLaunchers([{ SID: getConditionNodeSID(qv), Name: "" }]);
       const varName = `${qv.Vendor.replace(/\W/g, "")}_latest_quest_variant`;
-      const setLatestQuestVarNode = new Struct({
-        SID: `Set_${varName}_${qv["#"]}`,
-        QuestSID: struct.QuestSID,
-        NodeType: "EQuestNodeType::SetGlobalVariable",
-        GlobalVariablePrototypeSID: varName,
-        ChangeValueMode: "EChangeValueMode::Set",
-        VariableValue: qv["#"],
-        Launchers: getLaunchers([{ SID: qv["Variant Quest Node SID"].trim(), Name: "" }]),
-      }) as QuestNodePrototype;
-      setLatestQuestVarNode.__internal__.rawName = setLatestQuestVarNode.SID;
-      setLatestQuestVarNode.__internal__.isRoot = true;
+      const setLatestQuestVarNode = getLatestQuestVarNodeSetter(varName, qv, struct.QuestSID);
+      const conditionNode = getConditionNode(varName, qv, struct);
+
       extraStructs.push(setLatestQuestVarNode);
-      const conditionNode = new Struct() as QuestNodePrototypeCondition;
-      conditionNode.SID = `${qv["Reward Gen SID"]}_Condition`;
-      conditionNode.__internal__.rawName = conditionNode.SID;
-      conditionNode.__internal__.isRoot = true;
-      conditionNode.NodeType = "EQuestNodeType::Condition";
-      conditionNode.QuestSID = struct.QuestSID;
-      conditionNode.Conditions = getConditions([
-        {
-          ConditionType: "EQuestConditionType::GlobalVariable",
-          ConditionComparance: "EConditionComparance::Equal",
-          GlobalVariablePrototypeSID: varName,
-          ChangeValueMode: "EChangeValueMode::Set",
-          VariableValue: qv["#"],
-        },
-      ]);
-      conditionNode.Launchers = getLaunchers([{ SID: struct.SID, Name: "" }]);
-      newRewardNode.Launchers = getLaunchers([{ SID: conditionNode.SID, Name: "" }]);
       extraStructs.push(conditionNode);
     });
   }
   fork.ItemGeneratorSID = "empty";
   return extraStructs;
+}
+
+function getLatestQuestVarNodeSetter(varName: string, qv: QuestDataTableEntry, questSID: string) {
+  const s = new Struct({}) as QuestNodePrototypeSetGlobalVariable;
+  s.SID = `Set_${varName}_${qv["#"]}`;
+  s.QuestSID = questSID;
+  s.NodeType = "EQuestNodeType::SetGlobalVariable";
+  s.GlobalVariablePrototypeSID = varName;
+  s.ChangeValueMode = "EChangeValueMode::Set";
+  s.VariableValue = qv["#"];
+  s.Launchers = getLaunchers([{ SID: qv["Variant Quest Node SID"].trim(), Name: "" }]);
+
+  s.__internal__.isRoot = true;
+  s.__internal__.rawName = s.SID;
+  return s;
+}
+
+function getNewRewardNode(qv: QuestDataTableEntry, struct: QuestNodePrototype) {
+  const s = new Struct() as QuestNodePrototypeSetItemGenerator;
+  s.SID = `${qv["Reward Gen SID"]}_SetItemGenerator`;
+  s.QuestSID = struct.QuestSID;
+  s.NodeType = "EQuestNodeType::SetItemGenerator";
+  s.Launchers = getLaunchers([{ SID: struct.SID, Name: "" }]);
+  s.TargetQuestGuid = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+  s.ReplaceInventory = false;
+  s.EquipItems = false;
+  s.ItemGeneratorSID = qv["Reward Gen SID"];
+  s.__internal__.isRoot = true;
+  s.__internal__.rawName = s.SID;
+  return s;
+}
+
+function getConditionNodeSID(qv: QuestDataTableEntry) {
+  return `${qv["Reward Gen SID"]}_Condition`;
+}
+
+function getConditionNode(varName: string, qv: QuestDataTableEntry, struct: QuestNodePrototype) {
+  const s = new Struct() as QuestNodePrototypeCondition;
+  s.SID = getConditionNodeSID(qv);
+  s.__internal__.rawName = s.SID;
+  s.__internal__.isRoot = true;
+  s.NodeType = "EQuestNodeType::Condition";
+  s.QuestSID = struct.QuestSID;
+  s.Conditions = getConditions([
+    {
+      ConditionType: "EQuestConditionType::GlobalVariable",
+      ConditionComparance: "EConditionComparance::Equal",
+      GlobalVariablePrototypeSID: varName,
+      ChangeValueMode: "EChangeValueMode::Set",
+      VariableValue: qv["#"],
+    },
+  ]);
+  s.Launchers = getLaunchers([{ SID: struct.SID, Name: "" }]);
+  return s;
 }
