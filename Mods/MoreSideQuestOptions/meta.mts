@@ -1,9 +1,9 @@
-import { MetaType } from "../../src/meta-type.mts";
-import { Condition, DialogPrototype, QuestNodePrototype, Struct } from "s2cfgtojson";
+import { MetaContext, MetaType } from "../../src/meta-type.mts";
+import { DialogPrototype, DialogPrototypeNextDialogOptionsItem, QuestNodePrototypeIf, QuestNodePrototypeRandom, Struct } from "s2cfgtojson";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDs, RSQSetDialogQuestNodesSIDs } from "../../src/consts.mjs";
-import { markAsForkRecursively } from "../../src/mark-as-fork-recursively.mts";
 import { logger } from "../../src/logger.mts";
+import { getDialogPrototypeConditions } from "../../src/struct-utils.mts";
 
 export const meta: MetaType = {
   description: `
@@ -39,61 +39,54 @@ export function alwaysShowAllMutantQuestPartsDialog(struct: DialogPrototype) {
   if (struct.SID === "EQ197_QD_Orders_WaitForReply") {
     const fork = struct.fork();
     fork.NextDialogOptions = new Struct() as any;
-    struct.NextDialogOptions.forEach(([k, option]) => {
+    struct.NextDialogOptions.forEach(([k, option]: [string, DialogPrototypeNextDialogOptionsItem]) => {
       const optionFork = option.fork();
       if (!DialogOptionToMutantPartsMap[option.NextDialogSID]) {
         logger.error("Unknown dialog option", option.NextDialogSID);
         return;
       }
-      optionFork.Conditions = new Struct({
-        "0": new Struct({
-          "0": new Struct({
-            ConditionType: "EQuestConditionType::ItemInInventory",
-            ConditionComparance: "EConditionComparance::GreaterOrEqual",
-            TargetCharacter: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-            ItemPrototypeSID: new Struct({
-              VariableType: "EGlobalVariableType::String",
-              VariableValue: DialogOptionToMutantPartsMap[option.NextDialogSID].name,
-            }),
-            ItemsCount: new Struct({
-              VariableType: "EGlobalVariableType::Int",
-              VariableValue: DialogOptionToMutantPartsMap[option.NextDialogSID].count,
-            }),
-            WithEquipped: true,
-            WithInventory: true,
-          } as Partial<Condition>),
-        }),
-      }) as any;
+
+      optionFork.Conditions = getDialogPrototypeConditions({
+        ConditionType: "EQuestConditionType::ItemInInventory",
+        ConditionComparance: "EConditionComparance::GreaterOrEqual",
+        TargetCharacter: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        ItemPrototypeSID: {
+          VariableType: "EGlobalVariableType::String",
+          VariableValue: DialogOptionToMutantPartsMap[option.NextDialogSID].name,
+        },
+        ItemsCount: {
+          VariableType: "EGlobalVariableType::Int",
+          VariableValue: DialogOptionToMutantPartsMap[option.NextDialogSID].count,
+        },
+        WithEquipped: true,
+        WithInventory: true,
+      });
 
       fork.NextDialogOptions.addNode(optionFork, k);
     });
-    return markAsForkRecursively(fork);
+    return fork.fork(true);
   }
 
   if (mutantPartsVarSet.has(struct.Conditions?.["0"]["0"].GlobalVariablePrototypeSID)) {
     const fork = struct.fork();
-    deepMerge(fork, { Conditions: new Struct({ "0": new Struct({ "0": new Struct({}) }) }) });
-    fork.Conditions["0"]["0"].ConditionComparance = "EConditionComparance::NotEqual";
-    fork.Conditions["0"]["0"].VariableValue = -1;
-    return markAsForkRecursively(fork);
+    fork.Conditions = getDialogPrototypeConditions({ ConditionComparance: "EConditionComparance::NotEqual", VariableValue: -1 });
+    return fork.fork(true);
   }
 }
 
 alwaysShowAllMutantQuestPartsDialog.files = ["/DialogPrototypes/EQ197_QD_Orders.cfg"];
 
-export function transformQuestNodePrototypes(struct: QuestNodePrototype, context) {
+export function transformQuestNodePrototypes(struct: QuestNodePrototypeIf, context: MetaContext<QuestNodePrototypeRandom>) {
   if (RSQLessThan3QuestNodesSIDs.has(struct.SID)) {
     const total = context.structsById[RSQRandomizerQuestNodesSIDs.find((key) => !!context.structsById[key])].OutputPinNames.entries().length;
-    return markAsForkRecursively(
-      deepMerge(struct.fork(), {
-        Conditions: new Struct({
-          // as of 1.7 all of them are [0][0]
-          0: new Struct({
-            0: new Struct({ VariableValue: total }),
-          }),
+    return deepMerge(struct.fork(), {
+      Conditions: new Struct({
+        // as of 1.7 all of them are [0][0]
+        0: new Struct({
+          0: new Struct({ VariableValue: total }),
         }),
       }),
-    );
+    }).fork(true);
   }
   if (RSQSetDialogQuestNodesSIDs.has(struct.SID)) {
     let connectionIndex: string;
@@ -103,19 +96,17 @@ export function transformQuestNodePrototypes(struct: QuestNodePrototype, context
         return RSQLessThan3QuestNodesSIDs.has(e1[1].SID);
       });
     });
-    return markAsForkRecursively(
-      deepMerge(struct.fork(), {
-        Launchers: new Struct({
-          [launcherIndex]: new Struct({
-            Connections: new Struct({
-              [connectionIndex]: new Struct({
-                Name: "True",
-              }),
+    return deepMerge(struct.fork(), {
+      Launchers: new Struct({
+        [launcherIndex]: new Struct({
+          Connections: new Struct({
+            [connectionIndex]: new Struct({
+              Name: "True",
             }),
           }),
         }),
       }),
-    );
+    }).fork(true);
   }
 }
 
