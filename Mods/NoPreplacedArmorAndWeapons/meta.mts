@@ -1,7 +1,6 @@
-import { SpawnActorPrototype, WeaponPrototype } from "s2cfgtojson";
+import { SpawnActorPrototype } from "s2cfgtojson";
 import { MetaContext, MetaType } from "../../src/meta-type.mts";
-import { allDefaultAttachPrototypes } from "../../src/consts.mjs";
-import { readFileAndGetStructs } from "../../src/read-file-and-get-structs.mjs";
+import { allDefaultAttachPrototypesRecord, allUniqueWeaponPrototypeSIDs } from "../../src/consts.mjs";
 import { logger } from "../../src/logger.mjs";
 
 export const meta: MetaType<SpawnActorPrototype> = {
@@ -35,15 +34,6 @@ export function transformSpawnActorPrototypes(struct: SpawnActorPrototype, conte
   return null;
 }
 
-const attachmentsOrQuestItems = new Set([
-  ...allDefaultAttachPrototypes.map((e) => e?.SID),
-  ...(
-    await readFileAndGetStructs<WeaponPrototype>("ItemPrototypes/WeaponPrototypes.cfg", (s) =>
-      s.split("//--------------UNIQUE-WEAPONS--------------").pop(),
-    )
-  ).map((e) => e?.SID),
-]);
-
 export const totals = {
   DestructibleObject: 0,
   Gear: 0,
@@ -57,7 +47,10 @@ transformSpawnActorPrototypes.contains = true;
 transformSpawnActorPrototypes.contents = [...preplacedGear];
 
 function transformItems(struct: SpawnActorPrototype, fork: SpawnActorPrototype) {
-  const isGearReplacement = preplacedGear.some((i) => struct.ItemSID?.includes(i)) && !attachmentsOrQuestItems.has(struct.ItemSID);
+  const isGearReplacement =
+    preplacedGear.some((i) => struct.ItemSID?.includes(i)) &&
+    !allUniqueWeaponPrototypeSIDs.has(struct.ItemSID) &&
+    !allDefaultAttachPrototypesRecord[struct.ItemSID];
   if (!isGearReplacement) {
     return;
   }
@@ -67,5 +60,5 @@ function transformItems(struct: SpawnActorPrototype, fork: SpawnActorPrototype) 
       logger.info(`Found ${totals.Gear} preplaced ${struct.ItemSID || struct.PackOfItemsPrototypeSID}. Hiding it.`);
     }
   }
-  return Object.assign(fork, { SpawnOnStart: false }) as SpawnActorPrototype;
+  return Object.assign(fork, { SpawnOnStart: false, ItemSID: struct.ItemSID }) as SpawnActorPrototype;
 }

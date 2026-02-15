@@ -1,8 +1,6 @@
-import { SpawnActorPrototype, WeaponPrototype } from "s2cfgtojson";
-import { MetaContext, MetaType } from "../../src/meta-type.mts";
-import { allDefaultArmorPrototypesRecord, allDefaultAttachPrototypes } from "../../src/consts.mjs";
-import { readFileAndGetStructs } from "../../src/read-file-and-get-structs.mjs";
-import { logger } from "../../src/logger.mjs";
+import { SpawnActorPrototype } from "s2cfgtojson";
+import { MetaType } from "../../src/meta-type.mts";
+import { allDefaultArmorPrototypesRecord } from "../../src/consts.mjs";
 
 export const meta: MetaType<SpawnActorPrototype> = {
   description: `
