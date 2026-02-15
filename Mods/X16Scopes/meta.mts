@@ -1,5 +1,5 @@
 import { MetaType } from "../../src/meta-type.mts";
-import { AttachPrototype, DynamicItemGenerator, EffectPrototype, MeshPrototype, Struct, WeaponGeneralSetupPrototype } from "s2cfgtojson";
+import { AttachPrototype, EffectPrototype, ItemGeneratorPrototype, MeshPrototype, Struct, WeaponGeneralSetupPrototype } from "s2cfgtojson";
 import { allCompatibleAttachmentDefs } from "../MasterMod/basicAttachments.mts";
 
 export const meta: MetaType = {
@@ -102,7 +102,7 @@ function transformMeshPrototypes() {
 
 transformMeshPrototypes.files = ["/MeshPrototypes.cfg"];
 
-function transformTrade(struct: DynamicItemGenerator) {
+function transformTrade(struct: ItemGeneratorPrototype) {
   if (!struct.SID.includes("Trade")) {
     return;
   }
@@ -130,8 +130,28 @@ function transformTrade(struct: DynamicItemGenerator) {
 }
 transformTrade.files = ["/DynamicItemGenerator.cfg", "/QuestItemGeneratorPrototypes.cfg"];
 
+export const x16CompatibleAttachmentDefs: Record<string, Struct> = {
+  UA_X16Scope_1: new Struct({
+    AttachPrototypeSID: "UA_X16Scope_1",
+    Socket: "X16ScopeSocket",
+    IconPosX: 60,
+    IconPosY: 0,
+    AimMuzzleVFXSocket: "X4ScopeMuzzle",
+    AimShellShutterVFXSocket: "X4ScopeShells",
+  }),
+
+  EN_X16Scope_1: new Struct({
+    AttachPrototypeSID: "EN_X16Scope_1",
+    Socket: "X16ScopeSocket",
+    IconPosX: 60,
+    IconPosY: 0,
+    AimMuzzleVFXSocket: "X4ScopeMuzzle",
+    AimShellShutterVFXSocket: "X4ScopeShells",
+  }),
+};
+
 const getCompatibleAttachmentDefinition = (sid: string) =>
-  new Struct(allCompatibleAttachmentDefs[sid]) as WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"];
+  new Struct(allCompatibleAttachmentDefs[sid] || x16CompatibleAttachmentDefs[sid]) as WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"];
 
 const kharodDniproSharedAddMeshes = new Struct({
   __internal__: {
