@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="publish all" type="NodeJSConfigurationType" path-to-js-file="publish-all.mts" typescript-loader="bundled" working-dir="$PROJECT_DIR$/src">
+  <configuration default="false" name="publish all" type="NodeJSConfigurationType" path-to-js-file="$PROJECT_DIR$/src/publish-platforms.mts" typescript-loader="bundled" working-dir="$PROJECT_DIR$/src">
     <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
       <browser name="35837b5c-3dc9-4c9f-8f33-503d7e702d71" with-js-debugger="true" />
     </EXTENSION>
