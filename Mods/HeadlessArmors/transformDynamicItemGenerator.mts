@@ -1,4 +1,4 @@
-import { ItemGeneratorPrototype, Struct } from "s2cfgtojson";
+import { ItemGeneratorPrototype, ItemGeneratorPrototypeItemGeneratorItem, Struct } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
 import { adjustArmorItemGenerator } from "./adjustArmorItemGenerator.mts";
 import {
@@ -32,7 +32,7 @@ export const transformDynamicItemGenerator: StructTransformer<ItemGeneratorProto
       itemGenerator.Category === "EItemGenerationCategory::BodyArmor" || itemGenerator.Category === "EItemGenerationCategory::Head";
     const nonAsteriskKey = `${itemGenerator.__internal__.rawName}_dupe_${k}` as typeof k; // todo secret name sauce, add it to the lib as a util method
     if (categoryMatch || itemGenerator.__internal__.rawName === "[*]") {
-      fork.ItemGenerator[nonAsteriskKey] ||= itemGenerator.fork();
+      fork.ItemGenerator[nonAsteriskKey] ||= itemGenerator.fork() as ItemGeneratorPrototypeItemGeneratorItem;
     }
 
     if (categoryMatch) {
