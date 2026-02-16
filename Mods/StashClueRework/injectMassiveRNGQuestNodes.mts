@@ -1,137 +1,112 @@
+import { modName } from "../../src/base-paths.mts";
 import { waitFor } from "../../src/wait-for.mts";
+import { transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
 import {
   QuestNodePrototype,
+  QuestNodePrototypeConsoleCommand,
   QuestNodePrototypeGiveCache,
-  QuestNodePrototypeLaunchers,
+  QuestNodePrototypeItemAdd,
   QuestNodePrototypeRandom,
   QuestNodePrototypeSpawn,
-  QuestNodePrototypeTechnical,
   Struct,
 } from "s2cfgtojson";
 import { allStashes } from "./stashes.mts";
 import { precision } from "../../src/precision.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
-import { transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
 
-export const QuestSID = "StashClueRework"; // if you edit this, also edit bp in sdk editor
-export const RNGGenSID = `${QuestSID}_Random`;
-const MaxPinsPerRandomNode = 12;
-export const getStashSpawnerSID = (pin: number) => `${RNGGenSID}_${pin}_Spawn`;
-export const getStashDelaySID = (pin: number) => `${RNGGenSID}_${pin}_Delay`;
-export const getCacheNotificationSID = (pin: number) => `${RNGGenSID}_${pin}_Clue`;
-const getBucketSID = (layer: number, bucketIndex: number) => `${RNGGenSID}_Bucket_${layer}_${bucketIndex}`;
+const RandomStashQuestName = `RandomStashQuest`; // if you change this, also change Blueprint in SDK
+const RandomStashQuestNodePrefix = `${modName}_RandomStashQuest`;
 
-async function injectMassiveRNGQuestNodes(finishedTransformers: Set<string>) {
+const getStashSpawnerSID = (stashKey: string) => `${RandomStashQuestNodePrefix}_Random_${stashKey}_Spawn`;
+
+export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<string>) {
   await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
-  const extraStructs: Record<string, QuestNodePrototype> = {};
+  const extraStructs: QuestNodePrototype[] = [];
   const stashes = Object.keys(allStashes);
+  const randomNode = new Struct(`
+    ${RandomStashQuestNodePrefix}_Random : struct.begin
+        SID = ${RandomStashQuestNodePrefix}_Random
+        QuestSID = ${RandomStashQuestName}
+        NodeType = EQuestNodeType::Random
+    struct.end`) as QuestNodePrototypeRandom;
+  extraStructs.push(randomNode);
+  stashes.forEach((key, i) => {
+    randomNode.OutputPinNames ||= new Struct() as any;
+    randomNode.OutputPinNames.addNode(i);
+    randomNode.PinWeights ||= new Struct() as any;
+    randomNode.PinWeights.addNode(precision(1 - (i + 1) / stashes.length, 1e6));
 
-  extraStructs[RNGGenSID] = getRNGNode(RNGGenSID);
-  const leafSpawnerSIDs: string[] = [];
+    const spawnerSID = getStashSpawnerSID(key);
+    const spawner = new Struct(`
+      ${spawnerSID} : struct.begin
+         SID = ${spawnerSID}
+         QuestSID = ${RandomStashQuestName}
+         NodeType = EQuestNodeType::Spawn
+         TargetQuestGuid = ${key}
+         IgnoreDamageType = EIgnoreDamageType::None
+         SpawnHidden = false
+         SpawnNodeExcludeType = ESpawnNodeExcludeType::SeamlessDespawn
+      struct.end
+    `) as QuestNodePrototypeSpawn;
+    const launcherConfig = [{ SID: `${RandomStashQuestNodePrefix}_Random`, Name: String(i) }];
+    spawner.Launchers = getLaunchers(launcherConfig);
 
-  stashes.forEach((key, pin) => {
-    const spawnerSID = getStashSpawnerSID(pin);
-    extraStructs[spawnerSID] = getSpawnerNode(key, pin);
-    extraStructs[getCacheNotificationSID(pin)] = getCacheNotificationNode(key, pin);
-    leafSpawnerSIDs.push(spawnerSID);
+    extraStructs.push(spawner);
+    const cacheNotif = new Struct(`
+        ${RandomStashQuestNodePrefix}_Random_${i} : struct.begin
+           SID = ${RandomStashQuestNodePrefix}_Random_${i}
+           QuestSID = ${RandomStashQuestName}
+           NodeType = EQuestNodeType::GiveCache
+           TargetQuestGuid = ${key}
+        struct.end
+      `) as QuestNodePrototypeGiveCache;
+    cacheNotif.Launchers = getLaunchers([{ SID: `${RandomStashQuestNodePrefix}_Random`, Name: String(i) }]);
+
+    extraStructs.push(cacheNotif);
   });
-
-  buildRandomTree(extraStructs, leafSpawnerSIDs);
-  return Object.values(extraStructs);
+  return extraStructs;
 }
 
-export default injectMassiveRNGQuestNodes;
+/**
+ * ConsoleCommand start a quest node for giving a clue.
+ */
+export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, Name = "") {
+  const sid = `${struct.SID}_${Name ? Name + "_" : ""}Give_Cache`;
+  const stashClueReward = new Struct(`
+      ${sid} : struct.begin
+         SID = ${sid}
+         QuestSID = ${struct.QuestSID}
+         NodeType = EQuestNodeType::ConsoleCommand
+         ConsoleCommand = XStartQuestNodeBySID ${RandomStashQuestNodePrefix}_Random
+      struct.end
+    `) as QuestNodePrototypeConsoleCommand;
 
-function getRNGNode(sid: string) {
-  const randomNode = new Struct() as QuestNodePrototypeRandom;
-  randomNode.SID = sid;
-  randomNode.QuestSID = QuestSID;
-  randomNode.NodeType = "EQuestNodeType::Random";
-  randomNode.__internal__.isRoot = true;
-  randomNode.__internal__.rawName = randomNode.SID;
-  // randomNode.Repeatable = true;
-  randomNode.OutputPinNames ||= new Struct() as any;
-  randomNode.PinWeights ||= new Struct() as any;
-
-  return randomNode;
+  stashClueReward.Launchers = getLaunchers([{ SID: struct.SID, Name }]);
+  return stashClueReward;
 }
 
-function setRandomPins(randomNode: QuestNodePrototypeRandom, count: number) {
-  for (let pin = 0; pin < count; pin++) {
-    randomNode.OutputPinNames.addNode(pin);
-    randomNode.PinWeights.addNode(precision(1 - (pin + 1) / count, 1e6));
-  }
-}
+export async function hookStashSpawners(struct: QuestNodePrototypeItemAdd, finishedTransformers: Set<string>) {
+  await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
 
-function buildRandomTree(extraStructs: Record<string, QuestNodePrototype>, leafSpawnerSIDs: string[]) {
-  let layer = leafSpawnerSIDs;
-  let layerIndex = 0;
-
-  while (layer.length > MaxPinsPerRandomNode) {
-    const nextLayer: string[] = [];
-    for (let i = 0; i < layer.length; i += MaxPinsPerRandomNode) {
-      const chunk = layer.slice(i, i + MaxPinsPerRandomNode);
-      const bucketIndex = Math.floor(i / MaxPinsPerRandomNode);
-      const bucketSID = getBucketSID(layerIndex, bucketIndex);
-      const bucketNode = getRNGNode(bucketSID);
-      setRandomPins(bucketNode, chunk.length);
-      extraStructs[bucketSID] = bucketNode;
-      nextLayer.push(bucketSID);
-
-      chunk.forEach((childSID, pin) => {
-        setLauncher(extraStructs[childSID] as QuestNodePrototypeRandom, bucketSID, pin);
-      });
-    }
-    layer = nextLayer;
-    layerIndex++;
+  // only quest stashes that are hidden by this mod are interesting here
+  if (!allStashes[struct.TargetQuestGuid]) {
+    return;
   }
 
-  const root = extraStructs[RNGGenSID] as QuestNodePrototypeRandom;
-  setRandomPins(root, layer.length);
-  layer.forEach((childSID, pin) => {
-    setLauncher(extraStructs[childSID] as QuestNodePrototypeRandom, RNGGenSID, pin);
-  });
-}
+  const spawnStash = new Struct() as QuestNodePrototypeConsoleCommand;
+  spawnStash.SID = `${struct.QuestSID}_Spawn_${struct.TargetQuestGuid}`;
+  spawnStash.__internal__.isRoot = true;
+  spawnStash.__internal__.rawName = spawnStash.SID;
 
-function setLauncher(node: { Launchers: QuestNodePrototypeLaunchers }, launcherSID: string, launcherPin: number) {
-  node.Launchers = getLaunchers([{ SID: launcherSID, Name: String(launcherPin) }]);
-}
+  spawnStash.NodeType = "EQuestNodeType::ConsoleCommand";
+  spawnStash.QuestSID = struct.QuestSID;
+  spawnStash.ConsoleCommand = `XStartQuestNodeBySID ${getStashSpawnerSID(struct.TargetQuestGuid)}`;
+  spawnStash.Launchers = struct.Launchers;
 
-function getSpawnerNode(stashKey: string, pin: number) {
-  const spawner = new Struct() as QuestNodePrototypeSpawn;
-  spawner.SID = getStashSpawnerSID(pin);
-  spawner.__internal__.rawName = spawner.SID;
-  spawner.__internal__.isRoot = true;
-  spawner.QuestSID = QuestSID;
-  spawner.NodeType = `EQuestNodeType::Spawn`;
-  spawner.TargetQuestGuid = stashKey;
-  spawner.IgnoreDamageType = `EIgnoreDamageType::None`;
-  spawner.SpawnHidden = false;
-  spawner.SpawnNodeExcludeType = `ESpawnNodeExcludeType::SeamlessDespawn`;
-
-  return spawner;
-}
-
-function getDelayNode(pin: number) {
-  const delayNode = new Struct() as QuestNodePrototypeTechnical;
-  delayNode.SID = getStashDelaySID(pin);
-  delayNode.__internal__.rawName = delayNode.SID;
-  delayNode.__internal__.isRoot = true;
-  delayNode.QuestSID = QuestSID;
-  delayNode.NodeType = "EQuestNodeType::Technical";
-  delayNode.StartDelay = 1.0;
-  (delayNode as any).Launchers = getLaunchers([{ SID: getStashSpawnerSID(pin), Name: "" }]);
-  return delayNode;
-}
-
-function getCacheNotificationNode(stashKey: string, pin: number) {
-  const cacheNotif = new Struct() as QuestNodePrototypeGiveCache;
-  cacheNotif.SID = getCacheNotificationSID(pin);
-  cacheNotif.__internal__.rawName = cacheNotif.SID;
-  cacheNotif.__internal__.isRoot = true;
-  cacheNotif.QuestSID = QuestSID;
-  cacheNotif.NodeType = `EQuestNodeType::GiveCache`;
-  cacheNotif.TargetQuestGuid = stashKey;
-  cacheNotif.Launchers = getLaunchers([{ SID: getStashSpawnerSID(pin), Name: "" }]);
-  return cacheNotif;
+  const fork = struct.fork();
+  fork.Launchers = getLaunchers([{ SID: spawnStash.SID, Name: "" }]);
+  delete spawnStash.__internal__.bpatch;
+  delete spawnStash.__internal__.refurl;
+  delete spawnStash.__internal__.refkey;
+  return [spawnStash, fork];
 }
