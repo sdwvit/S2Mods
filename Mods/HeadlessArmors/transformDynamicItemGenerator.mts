@@ -49,7 +49,9 @@ export const transformDynamicItemGenerator: StructTransformer<ItemGeneratorProto
       });
       if (shouldReturn) {
         target.Category = itemGenerator.Category;
-        target.PlayerRank = itemGenerator.PlayerRank;
+        if (itemGenerator.PlayerRank) {
+          target.PlayerRank = itemGenerator.PlayerRank;
+        }
         target.PossibleItems = new Struct() as any;
         target.removeNode("PossibleItems");
       }
