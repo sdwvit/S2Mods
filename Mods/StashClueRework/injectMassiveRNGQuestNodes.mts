@@ -19,45 +19,62 @@ const RandomStashQuestNodePrefix = `${modName}_RandomStashQuest`;
 
 const getStashSpawnerSID = (stashKey: string) => `${RandomStashQuestNodePrefix}_Random_${stashKey}_Spawn`;
 
-export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<string>) {
-  await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
-  const extraStructs: QuestNodePrototype[] = [];
-  const stashes = Object.keys(allStashes);
+function getCacheNotif(key: string, i: number) {
+  const cacheNotifSID = `${RandomStashQuestNodePrefix}_Random_${i}`;
+  const cacheNotif = new Struct({
+    __internal__: { rawName: cacheNotifSID, isRoot: true },
+  }) as QuestNodePrototypeGiveCache;
 
-  const randomNodeSID = `${RandomStashQuestNodePrefix}_Random`;
-  const randomNode = new Struct({ __internal__: { rawName: randomNodeSID, isRoot: true } }) as QuestNodePrototypeRandom;
-  randomNode.SID = randomNodeSID;
+  cacheNotif.SID = cacheNotifSID;
+  cacheNotif.QuestSID = `${RandomStashQuestName}`;
+  cacheNotif.NodeType = `EQuestNodeType::GiveCache`;
+  cacheNotif.TargetQuestGuid = `${key}`;
+  cacheNotif.Launchers = getLaunchers([{ SID: getRandomNodeSID(), Name: String(i) }]);
+  return cacheNotif;
+}
+
+function getSpawner(key: string, i: number) {
+  const spawnerSID = getStashSpawnerSID(key);
+  const spawner = new Struct({ __internal__: { rawName: spawnerSID, isRoot: true } }) as QuestNodePrototypeSpawn;
+  spawner.SID = spawnerSID;
+  spawner.QuestSID = RandomStashQuestName;
+  spawner.NodeType = `EQuestNodeType::Spawn`;
+  spawner.TargetQuestGuid = key;
+  spawner.IgnoreDamageType = `EIgnoreDamageType::None`;
+  spawner.SpawnHidden = false;
+  spawner.SpawnNodeExcludeType = `ESpawnNodeExcludeType::SeamlessDespawn`;
+  spawner.Launchers = getLaunchers([{ SID: getRandomNodeSID(), Name: String(i) }]);
+  return spawner;
+}
+
+function getRandomNode() {
+  const randomNode = new Struct({ __internal__: { rawName: getRandomNodeSID(), isRoot: true } }) as QuestNodePrototypeRandom;
+  randomNode.SID = getRandomNodeSID();
   randomNode.QuestSID = `${RandomStashQuestName}`;
   randomNode.NodeType = `EQuestNodeType::Random`;
-  extraStructs.push(randomNode);
-  stashes.forEach((key, i) => {
+  const stashes = Object.keys(allStashes);
+
+  stashes.forEach((_, i) => {
     randomNode.OutputPinNames ||= new Struct() as any;
     randomNode.OutputPinNames.addNode(i);
     randomNode.PinWeights ||= new Struct() as any;
     randomNode.PinWeights.addNode(precision(1 - (i + 1) / stashes.length, 1e6));
+  });
+  return randomNode;
+}
 
-    const spawnerSID = getStashSpawnerSID(key);
-    const spawner = new Struct({ __internal__: { rawName: spawnerSID, isRoot: true } }) as QuestNodePrototypeSpawn;
-    spawner.SID = spawnerSID;
-    spawner.QuestSID = RandomStashQuestName;
-    spawner.NodeType = `EQuestNodeType::Spawn`;
-    spawner.TargetQuestGuid = key;
-    spawner.IgnoreDamageType = `EIgnoreDamageType::None`;
-    spawner.SpawnHidden = false;
-    spawner.SpawnNodeExcludeType = `ESpawnNodeExcludeType::SeamlessDespawn`;
-    spawner.Launchers = getLaunchers([{ SID: randomNode.SID, Name: String(i) }]);
+function getRandomNodeSID() {
+  return `${RandomStashQuestNodePrefix}_Random`;
+}
 
-    extraStructs.push(spawner);
-    const cacheNotifSID = `${RandomStashQuestNodePrefix}_Random_${i}`;
-    const cacheNotif = new Struct({ __internal__: { rawName: cacheNotifSID, isRoot: true } }) as QuestNodePrototypeGiveCache;
+export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<string>) {
+  await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
+  const extraStructs: QuestNodePrototype[] = [];
 
-    cacheNotif.SID = cacheNotifSID;
-    cacheNotif.QuestSID = `${RandomStashQuestName}`;
-    cacheNotif.NodeType = `EQuestNodeType::GiveCache`;
-    cacheNotif.TargetQuestGuid = `${key}`;
-    cacheNotif.Launchers = getLaunchers([{ SID: randomNodeSID, Name: String(i) }]);
-
-    extraStructs.push(cacheNotif);
+  extraStructs.push(getRandomNode());
+  Object.keys(allStashes).forEach((key, i) => {
+    extraStructs.push(getSpawner(key, i));
+    extraStructs.push(getCacheNotif(key, i));
   });
   return extraStructs;
 }
