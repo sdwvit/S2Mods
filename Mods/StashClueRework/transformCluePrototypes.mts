@@ -18,17 +18,7 @@ export function transformCluePrototypes() {
 
   transformCluePrototypesOncePerFile = true;
   const extraStructs: CluePrototype[] = [];
-  [...new Set(QuestDataTable.map((q) => `${q.Vendor.replace(/\W/g, "")}_latest_quest_variant`))].forEach((SID) => {
-    extraStructs.push(
-      new Struct(`
-          ${SID} : struct.begin {refkey=[0]}
-             SID = ${SID}
-             Type = EGlobalVariableType::Int
-             DefaultValue = 0
-          struct.end
-      `) as CluePrototype,
-    );
-  });
+
   for (let i = 1; i <= 100; i++) {
     extraStructs.push(
       new Struct({
