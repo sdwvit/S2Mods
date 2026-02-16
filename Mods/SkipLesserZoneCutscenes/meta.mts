@@ -6,8 +6,18 @@ const structTransformer: StructTransformer<QuestNodePrototype> = (struct, contex
     return reroute(struct, context, [
       "E01_MQ01_ItemAdd_Scanner",
       "E01_MQ01_Technical_TestWithoutTeleportTransition",
-      "E01_MQ01_ShowMarker_sid_locations_loc_01_scientists_bunker_name_Discovered",
+      "E01_MQ01_Start_Point3",
+      "E01_MQ01_SendSignal_ThirdPoint_On",
+      "E01_MQ01_Technical_3",
+      "E01_MQ01_SpawnObjectNPCMonster_BP_NPC_TEST_Zombie1",
+      "E01_MQ01_Technical_ZombieAttackOnPlayer",
     ]);
+  }
+
+  if (struct.SID === "E01_MQ01_Bunker_Start" || struct.SID === "E01_MQ01_Start_PlaceScanner" || struct.SID === "E01_MQ01_Start_PlaceScanner_1") {
+    const fork = struct.fork() as QuestNodePrototypeContainer;
+    fork.Launchers = new Struct() as QuestNodePrototypeContainer["Launchers"];
+    return fork;
   }
 
   if (struct.SID === "E01_MQ01_Cutscene_Napadenie") {
@@ -58,7 +68,7 @@ This mod skips / speeds up Intro / Scanner / Wake up with Richter / Zalissya bar
 [hr][/hr]
 Use this mod for frequent resets.[h1][/h1]
 `,
-  changenote: "Fix save restrictors 2",
+  changenote: "Skip bunker/artifact/point1; point3 + wall-destroy + bandit fight available from start",
   structTransformers: [structTransformer],
 };
 
@@ -66,18 +76,27 @@ function reroute(struct: QuestNodePrototype, context: MetaContext<QuestNodeProto
   const fork = struct.fork() as QuestNodePrototypeContainer;
   const structs = [fork];
   fork.Launchers = new Struct() as QuestNodePrototypeContainer["Launchers"];
+  const sourceLaunchers = (struct as QuestNodePrototypeContainer).Launchers;
 
   dependants.forEach((sid) => {
-    const target = context.structsById[sid] as QuestNodePrototypeContainer;
+    const target = context.structsById[sid] as QuestNodePrototypeContainer | undefined;
+    if (!target) return;
+
     const finishFork = target.fork();
-    finishFork.Launchers = target.Launchers.fork(true).filter(
+    const targetLaunchers = target.Launchers;
+    if (!targetLaunchers || !sourceLaunchers) {
+      structs.push(finishFork.fork(true));
+      return;
+    }
+
+    finishFork.Launchers = targetLaunchers.fork(true).filter(
       ([_, l]) =>
         !!l.Connections.filter(([_2, c]) => {
           return c.SID !== struct.SID; // remove currently removed node from connections
         }).entries().length,
     );
     const currentKeys = new Set(finishFork.Launchers.entries().map(([k]) => k));
-    (struct as QuestNodePrototypeContainer).Launchers.forEach(([_, l]) => finishFork.Launchers.addNode(l));
+    sourceLaunchers.forEach(([_, l]) => finishFork.Launchers.addNode(l));
     finishFork.Launchers = finishFork.Launchers.filter(([k]) => !currentKeys.has(k));
 
     structs.push(finishFork.fork(true));
