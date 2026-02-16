@@ -13,10 +13,4 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 
 `QuestNodePrototypes`
 
-`QuestPrototypes`:
- - `BodyParts_Malahit`
-
 `SpawnActorPrototypes`
-
-`Modified or added assets`:
- - `ongamestart`

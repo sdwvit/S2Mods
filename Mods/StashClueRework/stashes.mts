@@ -1,1 +1,3 @@
-export const allStashes: Record<string, number> = {};
+import { SpawnActorPrototype } from "s2cfgtojson";
+
+export const allStashes: Record<string, SpawnActorPrototype> = {};
