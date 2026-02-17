@@ -41,18 +41,15 @@ export const transformDynamicItemGenerator: StructTransformer<ItemGeneratorProto
       itemGenerator.PossibleItems?.forEach?.(([_, possibleItem]) => {
         const hasNonZeroChance = typeof possibleItem?.Chance === "number" && possibleItem.Chance !== 0;
         const shouldRemoveArmor = canInjectNewItems || hasNonZeroChance;
-        if (!shouldRemoveArmor) {
-          return;
+        if (shouldRemoveArmor) {
+          shouldReturn = true;
         }
-
-        shouldReturn = true;
       });
       if (shouldReturn) {
-        target.Category = itemGenerator.Category;
-        if (itemGenerator.PlayerRank) {
-          target.PlayerRank = itemGenerator.PlayerRank;
-        }
         target.PossibleItems = new Struct() as any;
+        if (itemGenerator.PlayerRank) target.PlayerRank = itemGenerator.PlayerRank; // I think these are mandatory
+        if (itemGenerator.Category) target.Category = itemGenerator.Category; // I think these are mandatory
+        target.bAllowSameCategoryGeneration = true;
         target.removeNode("PossibleItems");
       }
     }
