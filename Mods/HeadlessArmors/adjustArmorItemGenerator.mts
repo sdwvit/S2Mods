@@ -378,7 +378,7 @@ async function buildSheetArmorsByFaction(): Promise<Record<CoreFaction, ArmorDes
     }
     const rank =
       sidToRank[rootRef] || sidToRank[descriptor.__internal__.refkey] || "ERank::Newbie, ERank::Experienced, ERank::Veteran, ERank::Master";
-    const isDroppable = !descriptor.SID.includes("_NPC");
+    const isDroppable = !descriptor.SID.startsWith("NPC_");
 
     const item = {
       SID: descriptor.SID,
