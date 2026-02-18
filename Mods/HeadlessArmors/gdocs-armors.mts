@@ -1,6 +1,6 @@
 import "../../src/ensure-env.mts";
-import { ArmorPrototype, Struct } from "s2cfgtojson";
-import { ArmorDescriptor } from "../../src/consts.mts";
+import { ArmorPrototype, ArmorPrototypeProtection, ERank, Struct } from "s2cfgtojson";
+import { CoreFaction } from "../../src/consts.mts";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { logger } from "../../src/logger.mts";
 
@@ -10,8 +10,8 @@ const GDOCS_CACHE_PATH = new URL("./.gdocs.armors.cache.json", import.meta.url);
 let gdocsDataPromise: Promise<GdocsArmorData> | null = null;
 
 export type GdocsArmorData = {
-  overrides: Record<string, Partial<ArmorPrototype>>;
-  descriptors: ArmorDescriptor[];
+  overrides: Record<string, ArmorPrototype>;
+  descriptors: { Faction: CoreFaction; Rank: ERank; SID: string }[];
 };
 
 type GdocsArmorCache = {
@@ -78,6 +78,27 @@ async function fetchGdocsData(): Promise<GdocsArmorData> {
   logger.log(`Loaded ${Object.keys(data.overrides).length} armor overrides from gdocs`);
   return data;
 }
+const PROTECTION_KEYS = ["PSY", "Burn", "Shock", "ChemicalBurn", "Radiation", "Strike", "Fall"];
+const EXPECTED_HEADER = new Set([
+  "SID",
+  "Sort priority",
+  "refkey",
+  "Invisible",
+  "Protection.PSY",
+  "Protection.Burn",
+  "Protection.Shock",
+  "Protection.ChemicalBurn",
+  "Protection.Radiation",
+  "Protection.Strike",
+  "Protection.Fall",
+  "Weight",
+  "Cost",
+  "bBlockHead",
+  "Icon",
+  "LocalizationSID",
+  "Faction",
+  "Rank",
+]);
 
 function parseDataFromCsv(csv: string): GdocsArmorData {
   const rows = parseCsv(csv);
@@ -86,6 +107,13 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
   }
 
   const header = rows[0].map((h) => h.trim());
+
+  if (EXPECTED_HEADER.difference(new Set(header)).size) {
+    throw new Error(
+      `Header doesn't match the schema: missing '${[...EXPECTED_HEADER.difference(new Set(header))]}', extra fields ${[...new Set(header).difference(EXPECTED_HEADER)]}`,
+    );
+  }
+
   const byHeader = Object.fromEntries(header.map((h, i) => [h, i]));
   const sidIndex = byHeader.SID;
   if (sidIndex === undefined) {
@@ -95,14 +123,17 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
   if (refkeyIndex === undefined) {
     throw new Error("Gdocs armor CSV has no refkey column");
   }
+  const factionIndex = byHeader.Faction;
+  const ranksIndex = byHeader.Ranks ?? byHeader.PlayerRank;
 
-  const overrides: Record<string, Partial<ArmorPrototype>> = {};
-  const descriptorsBySid: Record<string, ArmorDescriptor> = {};
+  const extrasBySID: Record<string, GdocsArmorData["descriptors"][number]> = {};
+  const overrides: Record<string, GdocsArmorData["overrides"][string]> = {};
   const duplicateSIDs = new Set<string>();
+
   for (const rawRow of rows.slice(1)) {
     const row = rawRow.map((v) => v.trim());
-    const sid = row[sidIndex];
-    if (!sid) {
+    const SID = row[sidIndex];
+    if (!SID) {
       continue;
     }
     const refkey = row[refkeyIndex];
@@ -110,45 +141,40 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
       continue;
     }
 
-    if (descriptorsBySid[sid]) {
-      duplicateSIDs.add(sid);
+    if (extrasBySID[SID]) {
+      duplicateSIDs.add(SID);
     }
-    descriptorsBySid[sid] = { SID: sid, __internal__: { refkey } } as ArmorDescriptor;
+    extrasBySID[SID] = { SID } as any;
+    extrasBySID[SID].Faction = row[factionIndex] as CoreFaction;
+    extrasBySID[SID].Rank = row[ranksIndex] as ERank;
 
-    const override: Partial<ArmorPrototype> & { Protection?: Partial<ArmorPrototype["Protection"]> } = {};
-    assignIfDefined(override, "LocalizationSID", parseScalar(row[byHeader.LocalizationSID]));
-    assignIfDefined(override, "Icon", parseScalar(row[byHeader.Icon]));
+    const armorDef: ArmorPrototype = new Struct() as ArmorPrototype;
 
-    const protectionKeys: Array<keyof NonNullable<ArmorPrototype["Protection"]>> = [
-      "PSY",
-      "Burn",
-      "Shock",
-      "ChemicalBurn",
-      "Radiation",
-      "Strike",
-      "Fall",
-    ];
-    for (const key of protectionKeys) {
+    armorDef.Protection ||= new Struct() as ArmorPrototypeProtection;
+    for (const key of PROTECTION_KEYS) {
       const value = parseScalar(row[byHeader[`Protection.${key}`]]);
       if (value !== undefined) {
-        override.Protection ||= new Struct() as ArmorPrototype["Protection"];
-        (override.Protection as any)[key] = value;
+        armorDef.Protection[key] = Number(value);
       }
     }
-    assignIfDefined(override, "Cost", parseScalar(row[byHeader.Cost]));
-    assignIfDefined(override, "Weight", parseScalar(row[byHeader.Weight]));
-    assignIfDefined(override, "bBlockHead", parseScalar(row[byHeader.bBlockHead]));
-    const invisibleValue = parseScalar(row[byHeader.Invisible]);
-    assignIfDefined(override, "Invisible", invisibleValue);
+    armorDef.SID = SID;
+    armorDef.__internal__.refkey = refkey;
+    armorDef.__internal__.rawName = SID;
+    assignIfDefined(armorDef, "LocalizationSID", parseScalar(row[byHeader.LocalizationSID]));
+    assignIfDefined(armorDef, "Icon", parseScalar(row[byHeader.Icon]));
+    assignIfDefined(armorDef, "Cost", parseScalar(row[byHeader.Cost]));
+    assignIfDefined(armorDef, "Weight", parseScalar(row[byHeader.Weight]));
+    assignIfDefined(armorDef, "bBlockHead", parseScalar(row[byHeader.bBlockHead]));
+    assignIfDefined(armorDef, "Invisible", parseScalar(row[byHeader.Invisible]));
 
-    if (Object.keys(override).length) {
-      overrides[sid] = override;
+    if (Object.keys(armorDef).length) {
+      overrides[SID] = armorDef;
     }
   }
   if (duplicateSIDs.size) {
     logger.warn(`Duplicate SIDs found in gdocs armor table (${[...duplicateSIDs]}). Using last occurrence per SID.`);
   }
-  const descriptors = Object.values(descriptorsBySid);
+  const descriptors = Object.values(extrasBySID);
   return { overrides, descriptors };
 }
 

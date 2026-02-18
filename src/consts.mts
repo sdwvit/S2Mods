@@ -9,6 +9,7 @@ import {
   GetStructType,
   GrenadePrototype,
   Internal,
+  ItemGeneratorPrototype,
   NPCWeaponSettingsPrototype,
   QuestObjPrototype,
   SpawnActorPrototype,
@@ -42,6 +43,10 @@ export let allDefaultWeaponPrototypes: WeaponPrototype[];
 export let allDefaultAttachPrototypes: AttachPrototype[];
 export let allDefaultGeneralNPCObjPrototypes: GeneralNPCObjPrototype[];
 export let allDefaultQuestObjPrototypes: QuestObjPrototype[];
+export let allDefaultItemGeneratorPrototypes: ItemGeneratorPrototype[];
+export let allDefaultDynamicItemGeneratorPrototypes: ItemGeneratorPrototype[];
+export let allDefaultQuestItemGeneratorPrototypes: ItemGeneratorPrototype[];
+
 [
   allDefaultWeaponGeneralSetupPrototypes,
   allDefaultPlayerWeaponSettingsPrototypes,
@@ -56,6 +61,9 @@ export let allDefaultQuestObjPrototypes: QuestObjPrototype[];
   allDefaultAttachPrototypes,
   allDefaultGeneralNPCObjPrototypes,
   allDefaultQuestObjPrototypes,
+  allDefaultItemGeneratorPrototypes,
+  allDefaultDynamicItemGeneratorPrototypes,
+  allDefaultQuestItemGeneratorPrototypes,
 ] = await Promise.all([
   readFileAndGetStructs<WeaponGeneralSetupPrototype>("WeaponData/WeaponGeneralSetupPrototypes.cfg"),
   readFileAndGetStructs<NPCWeaponSettingsPrototype>("WeaponData/CharacterWeaponSettingsPrototypes/PlayerWeaponSettingsPrototypes.cfg"),
@@ -70,6 +78,9 @@ export let allDefaultQuestObjPrototypes: QuestObjPrototype[];
   readFileAndGetStructs<AttachPrototype>("ItemPrototypes/AttachPrototypes.cfg"),
   readFileAndGetStructs<GeneralNPCObjPrototype>("ObjPrototypes/GeneralNPCObjPrototypes.cfg"),
   readFileAndGetStructs<QuestObjPrototype>("ObjPrototypes/QuestObjPrototypes.cfg"),
+  readFileAndGetStructs<ItemGeneratorPrototype>("ItemGeneratorPrototypes.cfg"),
+  readFileAndGetStructs<ItemGeneratorPrototype>("ItemGeneratorPrototypes/DynamicItemGenerator.cfg"),
+  readFileAndGetStructs<ItemGeneratorPrototype>("ItemGeneratorPrototypes/QuestItemGeneratorPrototypes.cfg"),
 ]);
 
 // Records:
@@ -96,120 +107,85 @@ export const allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID = get
   allDefaultQuestObjPrototypes,
   "ItemGeneratorPrototypeSID",
 );
+export const allDefaultItemGeneratorsRecord = getRecord([
+  ...allDefaultItemGeneratorPrototypes,
+  ...allDefaultDynamicItemGeneratorPrototypes,
+  ...allDefaultQuestItemGeneratorPrototypes,
+]);
 
-export type ArmorDescriptor = {
-  __internal__: {
-    refkey?: string | number;
-    _extras?: {
-      keysForRemoval?: Record<string, string | number | string[] | number[]>;
-      ItemGenerator?: { Category: `${EItemGenerationCategory}`; PlayerRank: `${ERank}` };
-      isDroppable?: boolean;
-    };
-  };
-} & DeeplyPartial<ArmorPrototype> & { SID: string };
+export const helmetRanksBySID: Record<string, ERank> = {
+  Light_Bandit_Helmet: ALL_RANK,
+  Light_Duty_Helmet: ALL_RANK,
+  Light_Mercenaries_Helmet: ALL_RANK,
+  Light_Military_Helmet: ALL_RANK,
+  Light_Neutral_Helmet: ALL_RANK,
 
-function getDescriptor(
-  isDroppable = true,
-  Category: EItemGenerationCategory = "EItemGenerationCategory::BodyArmor",
-  struct: ArmorPrototype,
-  PlayerRank: ERank = VETERAN_MASTER_RANK,
-  extras: ArmorDescriptor["__internal__"]["_extras"] = {},
-) {
-  if (!(struct instanceof Struct)) {
-    struct = new Struct(struct) as ArmorPrototype;
-  }
-  const clone = struct.clone();
-  clone.__internal__.isRoot = true;
-  clone.__internal__.rawName = struct.SID;
-  return Object.assign(clone, {
-    __internal__: Object.assign(clone.__internal__, { _extras: { isDroppable, ItemGenerator: { Category, PlayerRank }, ...extras } }),
-  }) as ArmorDescriptor;
-}
+  Heavy_Duty_Helmet: EXPERIENCED_MASTER_RANK,
+  Heavy_Military_Helmet: EXPERIENCED_MASTER_RANK,
+  Heavy_Varta_Helmet: EXPERIENCED_MASTER_RANK,
 
-export type DescriptorFn = (s: ArmorPrototype | any, pr?: ERank, e?: ArmorDescriptor["__internal__"]["_extras"]) => ArmorDescriptor;
-
-export const getDroppableArmor: DescriptorFn = getDescriptor.bind(null, true, "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory);
-export const getNonDroppableArmor: DescriptorFn = getDescriptor.bind(null, false, "EItemGenerationCategory::BodyArmor" as EItemGenerationCategory);
-export const getDroppableHelmet: DescriptorFn = getDescriptor.bind(null, true, "EItemGenerationCategory::Head" as EItemGenerationCategory);
-
-export const allDefaultDroppableArmorsByFaction: Record<Exclude<CoreFaction, "Mutant">, ArmorDescriptor[]> = {
-  Bandits: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Bandit_Helmet, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.SkinJacket_Bandit_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Jacket_Bandit_Armor, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Middle_Bandit_Armor, EXPERIENCED_MASTER_RANK),
-  ],
-  Corpus: [],
-  Duty: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Duty_Helmet, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Duty_Helmet, EXPERIENCED_MASTER_RANK),
-
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Rook_Dolg_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Dolg_Armor, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Dolg_Armor, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Dolg_Armor, VETERAN_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Dolg_Armor, MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Dolg_Armor, MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Dolg_End_Armor, MASTER_RANK),
-  ],
-  FreeStalkers: [],
-  Freedom: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Svoboda_Helmet, VETERAN_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Rook_Svoboda_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Svoboda_Armor, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Svoboda_Armor, VETERAN_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Svoboda_Armor, VETERAN_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Svoboda_Armor, MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Svoboda_Armor, MASTER_RANK),
-  ],
-  Mercenaries: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Mercenaries_Helmet, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Mercenaries_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Mercenaries_Armor, VETERAN_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Mercenaries_Armor, MASTER_RANK),
-  ],
-  Militaries: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Military_Helmet, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Military_Helmet, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Military_Helmet, VETERAN_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Default_Military_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy2_Military_Armor, VETERAN_MASTER_RANK),
-  ],
-  Monolith: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Monolith_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Monolith_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyExoskeleton_Monolith_Armor, VETERAN_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Monolith_Armor, ALL_RANK),
-  ],
-  Neutrals: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Light_Neutral_Helmet, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Jemmy_Neutral_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Newbee_Neutral_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Nasos_Neutral_Armor, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Zorya_Neutral_Armor, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Neutral_Armor, VETERAN_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Exoskeleton_Neutral_Armor, MASTER_RANK),
-  ],
-  Noon: [],
-  Scientists: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Anomaly_Scientific_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Scientific_Armor, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.SciSEVA_Scientific_Armor, VETERAN_MASTER_RANK),
-  ],
-  Spark: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Spark_Armor, VETERAN_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.SEVA_Spark_Armor, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyAnomaly_Spark_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.HeavyBattle_Spark_Armor, VETERAN_MASTER_RANK),
-  ],
-  Varta: [
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Heavy_Varta_Helmet, EXPERIENCED_MASTER_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.Battle_Varta_Armor, ALL_RANK),
-    getDroppableArmor(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor, VETERAN_MASTER_RANK),
-  ],
+  Heavy_Svoboda_Helmet: VETERAN_MASTER_RANK,
+  Battle_Military_Helmet: VETERAN_MASTER_RANK,
+  Exoskeleton_Neutral_Helmet: VETERAN_MASTER_RANK,
+  Exoskeleton_Mercenaries_Helmet: VETERAN_MASTER_RANK,
+  Exoskeleton_Monolith_Helmet: VETERAN_MASTER_RANK,
+  Exoskeleton_Svoboda_Helmet: VETERAN_MASTER_RANK,
+  Exoskeleton_Duty_Helmet: VETERAN_MASTER_RANK,
+  Exoskeleton_Spark_Helmet: VETERAN_MASTER_RANK,
+  HeavyBattle_Merc_Helmet: VETERAN_MASTER_RANK,
+  HeavyBattle_Dolg_Helmet: VETERAN_MASTER_RANK,
+  HeavyBattle_Spark_Helmet: VETERAN_MASTER_RANK,
 };
-allDefaultDroppableArmorsByFaction.FreeStalkers = allDefaultDroppableArmorsByFaction.Neutrals;
-allDefaultDroppableArmorsByFaction.Noon = allDefaultDroppableArmorsByFaction.Monolith;
+
+export const armorRanksBySID: Record<string, ERank> = {
+  // ALL_RANK
+  SkinJacket_Bandit_Armor: ALL_RANK,
+  Battle_Monolith_Armor: ALL_RANK,
+  Battle_Varta_Armor: ALL_RANK,
+  Default_Military_Armor: ALL_RANK,
+  Exoskeleton_Monolith_Armor: ALL_RANK,
+  Anomaly_Scientific_Armor: ALL_RANK,
+  HeavyAnomaly_Monolith_Armor: ALL_RANK,
+  HeavyAnomaly_Spark_Armor: ALL_RANK,
+  Jemmy_Neutral_Armor: ALL_RANK,
+  Newbee_Neutral_Armor: ALL_RANK,
+  Light_Mercenaries_Armor: ALL_RANK,
+  Rook_Dolg_Armor: ALL_RANK,
+  Rook_Svoboda_Armor: ALL_RANK,
+
+  // EXPERIENCED_MASTER_RANK
+  Jacket_Bandit_Armor: EXPERIENCED_MASTER_RANK,
+  Middle_Bandit_Armor: EXPERIENCED_MASTER_RANK,
+  Battle_Dolg_Armor: EXPERIENCED_MASTER_RANK,
+  SEVA_Dolg_Armor: EXPERIENCED_MASTER_RANK,
+  Battle_Svoboda_Armor: EXPERIENCED_MASTER_RANK,
+  Nasos_Neutral_Armor: EXPERIENCED_MASTER_RANK,
+  Zorya_Neutral_Armor: EXPERIENCED_MASTER_RANK,
+  HeavyAnomaly_Scientific_Armor: EXPERIENCED_MASTER_RANK,
+  SEVA_Spark_Armor: EXPERIENCED_MASTER_RANK,
+
+  // VETERAN_MASTER_RANK
+  Heavy_Dolg_Armor: VETERAN_MASTER_RANK,
+  SEVA_Svoboda_Armor: VETERAN_MASTER_RANK,
+  Heavy_Svoboda_Armor: VETERAN_MASTER_RANK,
+  Heavy_Mercenaries_Armor: VETERAN_MASTER_RANK,
+  Heavy2_Military_Armor: VETERAN_MASTER_RANK,
+  HeavyExoskeleton_Monolith_Armor: VETERAN_MASTER_RANK,
+  SEVA_Neutral_Armor: VETERAN_MASTER_RANK,
+  SciSEVA_Scientific_Armor: VETERAN_MASTER_RANK,
+  Battle_Spark_Armor: VETERAN_MASTER_RANK,
+  HeavyBattle_Spark_Armor: VETERAN_MASTER_RANK,
+  BattleExoskeleton_Varta_Armor: VETERAN_MASTER_RANK,
+
+  // MASTER_RANK
+  HeavyExoskeleton_Dolg_Armor: MASTER_RANK,
+  Exoskeleton_Dolg_Armor: MASTER_RANK,
+  Battle_Dolg_End_Armor: MASTER_RANK,
+  HeavyExoskeleton_Svoboda_Armor: MASTER_RANK,
+  Exoskeleton_Svoboda_Armor: MASTER_RANK,
+  Exoskeleton_Mercenaries_Armor: MASTER_RANK,
+  Exoskeleton_Neutral_Armor: MASTER_RANK,
+};
 
 export const allDefaultDroppableAttachments = new Set(allDefaultAttachPrototypes.filter((a) => a.Icon && a.Cost).map((a) => a.SID));
 
