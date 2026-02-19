@@ -11,7 +11,7 @@ let gdocsDataPromise: Promise<GdocsArmorData> | null = null;
 
 export type GdocsArmorData = {
   overrides: Record<string, ArmorPrototype>;
-  descriptors: { Faction: CoreFaction; Rank: ERank; SID: string }[];
+  descriptors: Record<string, { Faction: CoreFaction; Rank: ERank; SID: string }>;
 };
 
 type GdocsArmorCache = {
@@ -124,9 +124,9 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
     throw new Error("Gdocs armor CSV has no refkey column");
   }
   const factionIndex = byHeader.Faction;
-  const ranksIndex = byHeader.Ranks ?? byHeader.PlayerRank;
+  const ranksIndex = byHeader.Rank;
 
-  const extrasBySID: Record<string, GdocsArmorData["descriptors"][number]> = {};
+  const descriptors: Record<string, GdocsArmorData["descriptors"][number]> = {};
   const overrides: Record<string, GdocsArmorData["overrides"][string]> = {};
   const duplicateSIDs = new Set<string>();
 
@@ -141,12 +141,12 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
       continue;
     }
 
-    if (extrasBySID[SID]) {
+    if (descriptors[SID]) {
       duplicateSIDs.add(SID);
     }
-    extrasBySID[SID] = { SID } as any;
-    extrasBySID[SID].Faction = row[factionIndex] as CoreFaction;
-    extrasBySID[SID].Rank = row[ranksIndex] as ERank;
+    descriptors[SID] = { SID } as any;
+    descriptors[SID].Faction = row[factionIndex] as CoreFaction;
+    descriptors[SID].Rank = row[ranksIndex] as ERank;
 
     const armorDef: ArmorPrototype = new Struct() as ArmorPrototype;
 
@@ -174,7 +174,7 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
   if (duplicateSIDs.size) {
     logger.warn(`Duplicate SIDs found in gdocs armor table (${[...duplicateSIDs]}). Using last occurrence per SID.`);
   }
-  const descriptors = Object.values(extrasBySID);
+
   return { overrides, descriptors };
 }
 

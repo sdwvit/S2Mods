@@ -1,8 +1,6 @@
-import { allDefaultArmorPrototypesRecord, allDefaultNightVisionGogglesPrototypesRecord } from "../../src/consts.mts";
-import { ArmorPrototype, Struct } from "s2cfgtojson";
-import { backfillDef } from "../../src/backfill-def.mts";
-import { logger } from "../../src/logger.mts";
-import { getGdocsArmorData } from "./gdocs-armors.mts";
+import { allDefaultArmorPrototypesRecord } from "../../src/consts.mts";
+import { ArmorPrototype } from "s2cfgtojson";
+import { precision } from "../../src/precision.mts";
 
 const maxDurability = Math.max(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 0));
 const minDurability = Math.min(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 10000));
@@ -67,48 +65,30 @@ function calculateArmorScore(armor: ArmorPrototype): number {
   return score / 100;
 }
 
-let allItemRankPromise: Promise<Record<string, number>> | null = null;
+const maxDropDurability = 0.5; // 50%
+// 0.1% to 5%
+const minDropChance = 0.001;
+const maxDropChance = 0.05;
+const lowestPossibleScore = calculateArmorScore(allDefaultArmorPrototypesRecord.SkinJacket_Bandit_Armor);
+const highestPossibleScore = calculateArmorScore(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor);
 
-export async function getAllItemRank(): Promise<Record<string, number>> {
-  if (!allItemRankPromise) {
-    allItemRankPromise = buildAllItemRank();
-  }
-  return allItemRankPromise;
+export function getDropChance(prototype: ArmorPrototype, minChance = minDropChance, maxChance = maxDropChance) {
+  const score = (calculateArmorScore(prototype) - lowestPossibleScore) / (highestPossibleScore - lowestPossibleScore); // 1 means good, 0 means bad armor
+  const normalScore = getNormalDistribution(score);
+  const normalScaled = (normalScore - getNormalDistribution(1)) / (getNormalDistribution(0) - getNormalDistribution(1));
+  return Math.max(minChance, precision(maxChance * normalScaled, 1e4));
 }
 
-async function buildAllItemRank(): Promise<Record<string, number>> {
-  const gdocs = await getGdocsArmorData();
+export function getMaxDurability(prototype: ArmorPrototype) {
+  return getDropChance(prototype, 0, maxDropDurability);
+}
 
-  const sheetArmorPrototypes: Record<string, ArmorPrototype> = {};
-  for (const descriptor of gdocs.descriptors) {
-    const sid = descriptor.SID;
-    sheetArmorPrototypes[sid] = new Struct({ SID: sid, __internal__: { refkey: descriptor.__internal__.refkey }, ...(gdocs.overrides[sid] || {}) }) as ArmorPrototype;
-  }
+function getNormalDistribution(score: number, omegaSq = 0.5) {
+  const pi = Math.PI;
+  const mu = 0;
 
-  const backfillCache: Record<string, ArmorPrototype> = {};
-  const allItems = Object.values({
-    ...allDefaultNightVisionGogglesPrototypesRecord,
-    ...allDefaultArmorPrototypesRecord,
-    ...sheetArmorPrototypes,
-  }).filter((armor) => !armor.SID.includes("Template"));
+  const a = 1 / Math.sqrt(2 * pi * omegaSq);
+  const b = Math.exp(-((score - mu) ** 2) / (2 * omegaSq));
 
-  return Object.fromEntries(
-    allItems
-      .map((armor) => {
-        const backfilled = backfillDef(
-          armor as any,
-          { ...allDefaultArmorPrototypesRecord, ...sheetArmorPrototypes, ...backfillCache },
-          armor.SID.toLowerCase().includes("helmet") ? "Heavy_Svoboda_Helmet" : undefined,
-        );
-        backfillCache[armor.SID] = backfilled;
-        return [armor.SID, calculateArmorScore(backfilled)] as [string, number];
-      })
-      .filter((a) => {
-        if (!a[1]) {
-          logger.warn(`${a[0]} doesn't have a valid set of properties or was not backfilled. Score = '${a[1]}'`);
-        }
-        return !!a[1];
-      })
-      .sort((a, b) => a[0].localeCompare(b[0])),
-  );
+  return a * b;
 }
