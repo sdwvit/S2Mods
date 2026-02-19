@@ -31,10 +31,10 @@ export async function transformArmorPrototypes() {
   const seenSIDs = new Set<string>();
   const gdocsData = await getGdocsArmorData();
   const referenceMap = { ...allDefaultArmorPrototypesRecord, ...gdocsData.overrides };
-  gdocsData.descriptors.forEach((d) => seenSIDs.add(d.SID));
+  seenSIDs.union(new Set(Object.keys(gdocsData.descriptors)));
 
-  gdocsData.descriptors.forEach(({ SID }) => {
-    const newArmor = createNewArmor(SID, referenceMap);
+  Object.keys(gdocsData.descriptors).forEach((SID) => {
+    const newArmor = createArmorPrototype(SID, referenceMap)?.filter(([_, v]) => !!v);
     if (!newArmor) {
       logger.warn(`Couldn't create new armor due to no ref? ${SID}`);
       return;
@@ -46,20 +46,6 @@ export async function transformArmorPrototypes() {
     const clone = newArmor.clone();
     clone.__internal__.isRoot = true;
     extraStructs.push(clone);
-
-    // Generate dedicated equip-only variant so equipped item SID differs from droppable SID.
-    if (!SID.startsWith("NPC_")) {
-      const npcSID = `NPC_${SID}`;
-      if (!seenSIDs.has(npcSID)) {
-        seenSIDs.add(npcSID);
-        const npcClone = newArmor.clone();
-        npcClone.SID = npcSID;
-        npcClone.Invisible = true;
-        npcClone.__internal__.isRoot = true;
-        npcClone.__internal__.rawName = npcSID;
-        extraStructs.push(npcClone);
-      }
-    }
   });
   return extraStructs;
 }
@@ -93,7 +79,7 @@ function dedupeUpgradePrototypeSIDs(armor: ArmorPrototype) {
       continue;
     }
     if (seen.has(value)) {
-      if (typeof upgrades.removeNode === "function") {
+      if (upgrades[key] instanceof Struct) {
         upgrades.removeNode(key);
       } else {
         delete upgrades[key];
@@ -105,7 +91,7 @@ function dedupeUpgradePrototypeSIDs(armor: ArmorPrototype) {
   armor.UpgradePrototypeSIDs = upgrades;
 }
 
-function createNewArmor(SID: string, referenceMap: Record<string, ArmorPrototype>) {
+export function createArmorPrototype(SID: string, referenceMap: Record<string, ArmorPrototype>) {
   const override = referenceMap[SID];
   const refkey = override.__internal__.refkey;
   const referenceArmor = referenceMap[refkey];
@@ -115,9 +101,9 @@ function createNewArmor(SID: string, referenceMap: Record<string, ArmorPrototype
   if (!referenceArmor.SID.toLowerCase().includes("helmet") && SID.toLowerCase().includes("helmet")) {
     logger.warn(`referenceArmor.SID '${referenceArmor.SID}' is not a helmet, even though SID '${SID}' points to a helmet`);
   }
-  const s = new Struct() as ArmorPrototype;
+  const s = new Struct(override) as ArmorPrototype;
 
-  const backfilled = backfillDef(s, referenceMap, referenceArmor.SID).filter(([k]) => !!s[k]);
+  const backfilled = backfillDef(s, referenceMap, referenceArmor.SID);
 
   deepMerge(backfilled, override);
   backfilled.__internal__.rawName = SID;

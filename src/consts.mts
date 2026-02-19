@@ -126,15 +126,6 @@ export const helmetRanksBySID: Record<string, ERank> = {
 
   Heavy_Svoboda_Helmet: VETERAN_MASTER_RANK,
   Battle_Military_Helmet: VETERAN_MASTER_RANK,
-  Exoskeleton_Neutral_Helmet: VETERAN_MASTER_RANK,
-  Exoskeleton_Mercenaries_Helmet: VETERAN_MASTER_RANK,
-  Exoskeleton_Monolith_Helmet: VETERAN_MASTER_RANK,
-  Exoskeleton_Svoboda_Helmet: VETERAN_MASTER_RANK,
-  Exoskeleton_Duty_Helmet: VETERAN_MASTER_RANK,
-  Exoskeleton_Spark_Helmet: VETERAN_MASTER_RANK,
-  HeavyBattle_Merc_Helmet: VETERAN_MASTER_RANK,
-  HeavyBattle_Dolg_Helmet: VETERAN_MASTER_RANK,
-  HeavyBattle_Spark_Helmet: VETERAN_MASTER_RANK,
 };
 
 export const armorRanksBySID: Record<string, ERank> = {
@@ -185,6 +176,62 @@ export const armorRanksBySID: Record<string, ERank> = {
   Exoskeleton_Svoboda_Armor: MASTER_RANK,
   Exoskeleton_Mercenaries_Armor: MASTER_RANK,
   Exoskeleton_Neutral_Armor: MASTER_RANK,
+};
+
+export const helmetFactionsBySID: Record<string, CoreFaction> = {
+  Light_Bandit_Helmet: "Bandits",
+  Light_Duty_Helmet: "Duty",
+  Light_Mercenaries_Helmet: "Mercenaries",
+  Light_Military_Helmet: "Militaries",
+  Light_Neutral_Helmet: "Neutrals",
+  Heavy_Duty_Helmet: "Duty",
+  Heavy_Military_Helmet: "Militaries",
+  Heavy_Varta_Helmet: "Varta",
+  Heavy_Svoboda_Helmet: "Freedom",
+  Battle_Military_Helmet: "Militaries",
+};
+
+export const armorFactionsBySID: Record<string, CoreFaction> = {
+  SkinJacket_Bandit_Armor: "Bandits",
+  Battle_Monolith_Armor: "Monolith",
+  Battle_Varta_Armor: "Varta",
+  Default_Military_Armor: "Militaries",
+  Exoskeleton_Monolith_Armor: "Monolith",
+  Anomaly_Scientific_Armor: "Scientists",
+  HeavyAnomaly_Monolith_Armor: "Monolith",
+  HeavyAnomaly_Spark_Armor: "Spark",
+  Jemmy_Neutral_Armor: "Neutrals",
+  Newbee_Neutral_Armor: "Neutrals",
+  Light_Mercenaries_Armor: "Mercenaries",
+  Rook_Dolg_Armor: "Duty",
+  Rook_Svoboda_Armor: "Freedom",
+  Jacket_Bandit_Armor: "Bandits",
+  Middle_Bandit_Armor: "Bandits",
+  Battle_Dolg_Armor: "Duty",
+  SEVA_Dolg_Armor: "Duty",
+  Battle_Svoboda_Armor: "Freedom",
+  Nasos_Neutral_Armor: "Neutrals",
+  Zorya_Neutral_Armor: "Neutrals",
+  HeavyAnomaly_Scientific_Armor: "Scientists",
+  SEVA_Spark_Armor: "Spark",
+  Heavy_Dolg_Armor: "Duty",
+  SEVA_Svoboda_Armor: "Freedom",
+  Heavy_Svoboda_Armor: "Freedom",
+  Heavy_Mercenaries_Armor: "Mercenaries",
+  Heavy2_Military_Armor: "Militaries",
+  HeavyExoskeleton_Monolith_Armor: "Monolith",
+  SEVA_Neutral_Armor: "Neutrals",
+  SciSEVA_Scientific_Armor: "Scientists",
+  Battle_Spark_Armor: "Spark",
+  HeavyBattle_Spark_Armor: "Spark",
+  BattleExoskeleton_Varta_Armor: "Varta",
+  HeavyExoskeleton_Dolg_Armor: "Duty",
+  Exoskeleton_Dolg_Armor: "Duty",
+  Battle_Dolg_End_Armor: "Duty",
+  HeavyExoskeleton_Svoboda_Armor: "Freedom",
+  Exoskeleton_Svoboda_Armor: "Freedom",
+  Exoskeleton_Mercenaries_Armor: "Mercenaries",
+  Exoskeleton_Neutral_Armor: "Neutrals",
 };
 
 export const allDefaultDroppableAttachments = new Set(allDefaultAttachPrototypes.filter((a) => a.Icon && a.Cost).map((a) => a.SID));
