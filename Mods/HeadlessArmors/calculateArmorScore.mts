@@ -68,7 +68,7 @@ function calculateArmorScore(armor: ArmorPrototype): number {
 const maxDropDurability = 0.5; // 50%
 // 0.1% to 5%
 const minDropChance = 0.001;
-const maxDropChance = 0.05;
+export const maxDropChance = 0.05;
 const lowestPossibleScore = calculateArmorScore(allDefaultArmorPrototypesRecord.SkinJacket_Bandit_Armor);
 const highestPossibleScore = calculateArmorScore(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor);
 
