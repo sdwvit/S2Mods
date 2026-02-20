@@ -7,7 +7,7 @@ export const deepMerge = <T, S>(target: T, source: S, preferLeft = true): T & S 
       target[key] = deepMerge(target[key], source[key]);
     } else {
       if (preferLeft) {
-        target[key] ||= source[key];
+        target[key] ??= source[key];
       } else {
         target[key] = source[key];
       }
