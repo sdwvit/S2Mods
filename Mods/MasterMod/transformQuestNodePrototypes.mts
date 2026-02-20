@@ -43,11 +43,18 @@ const oncePerQuestSID = new Set<string>();
 
 function replaceRewards(struct: QuestNodePrototypeSetItemGenerator, fork: QuestNodePrototypeSetItemGenerator) {
   const extraStructs: QuestNodePrototype[] = [];
+  const questVariants = QuestDataTableByQuestSID[struct.QuestSID] || [];
+
+  // For quests with exactly one reward variant, avoid redirecting through a
+  // condition chain and patch the original reward node directly.
+  if (questVariants.length === 1) {
+    fork.ItemGeneratorSID = questVariants[0]["Reward Gen SID"];
+    return extraStructs;
+  }
 
   if (!oncePerQuestSID.has(struct.QuestSID)) {
     oncePerQuestSID.add(struct.QuestSID);
     logger.info(`Replacing rewards for quest SID: ${struct.QuestSID}`);
-    const questVariants = QuestDataTableByQuestSID[struct.QuestSID];
     questVariants.forEach((qv) => {
       const newRewardNode = getNewRewardNode(qv, struct);
       extraStructs.push(newRewardNode);
