@@ -7,6 +7,7 @@ import {
   QuestNodePrototypeGiveCache,
   QuestNodePrototypeItemAdd,
   QuestNodePrototypeRandom,
+  QuestNodePrototypeSetItemGenerator,
   QuestNodePrototypeSpawn,
   Struct,
 } from "s2cfgtojson";
@@ -82,7 +83,7 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
 /**
  * ConsoleCommand start a quest node for giving a clue.
  */
-export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, Name = "") {
+export function hookRewardStashClue(struct: QuestNodePrototypeSetItemGenerator, Name = "") {
   const sid = `${struct.SID}_${Name ? Name + "_" : ""}Give_Cache`;
   const stashClueReward = new Struct({ __internal__: { rawName: sid, isRoot: true } }) as QuestNodePrototypeConsoleCommand;
 
@@ -90,7 +91,7 @@ export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, N
   stashClueReward.QuestSID = struct.QuestSID;
   stashClueReward.NodeType = `EQuestNodeType::ConsoleCommand`;
   stashClueReward.ConsoleCommand = `XStartQuestNodeBySID ${RandomStashQuestNodePrefix}_Random`;
-  stashClueReward.Launchers = getLaunchers([{ SID: struct.SID, Name }]);
+  stashClueReward.Launchers = struct.Launchers;
   return stashClueReward;
 }
 

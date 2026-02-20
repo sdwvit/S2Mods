@@ -56,7 +56,7 @@ export async function transformQuestNodePrototypes(
     promises.push(
       Promise.resolve(
         MalachiteMutantQuestPartsQuestsDoneDialogs.map((dialog) =>
-          hookRewardStashClue({ SID: MalachiteMutantQuestPartsQuestsDoneNode, QuestSID: struct.QuestSID }, dialog),
+          hookRewardStashClue(context.structsById[MalachiteMutantQuestPartsQuestsDoneNode] as QuestNodePrototypeSetItemGenerator, dialog),
         ),
       ),
     );
