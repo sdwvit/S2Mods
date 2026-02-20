@@ -29,6 +29,8 @@ import { logger } from "../../src/logger.mts";
 import { precision } from "../../src/precision.mts";
 import { waitFor } from "../../src/wait-for.mts";
 
+export const NPC_AVG_DURABILITY = 0.25;
+
 function shouldProcessStruct(struct: ItemGeneratorPrototype) {
   if (!struct?.ItemGenerator) {
     return false;
@@ -162,6 +164,8 @@ function doOnce(extraStructs: any[]) {
       item.ItemPrototypeSID = SID;
       if (i === 0) {
         item.Chance = 1; // equipped
+        item.MinDurability = 0;
+        item.MaxDurability = getMaxDurability(armor); // NPCs can pick a second spawned armor instead of this one (i suspect it is 50% chance), and drop this one instead. Adjust the dura so it's not OP.
       } else {
         item.Chance = getDropChance(armor);
         item.MinDurability = 0;

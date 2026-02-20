@@ -4,6 +4,9 @@ import { backfillDef } from "../../src/backfill-def.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { logger } from "../../src/logger.mts";
 import { getGdocsArmorData } from "./gdocs-armors.mts";
+import { NPC_AVG_DURABILITY } from "./transformItemGenerators.mts";
+import { MetaContext } from "../../src/meta-type.mts";
+import { waitFor } from "../../src/wait-for.mts";
 
 let once = false;
 
@@ -20,33 +23,40 @@ const UPGRADE_SID_FIXUPS: Record<string, string> = {
 /**
  * Adds armor that doesn't block head, but also removes any psy protection. Allows player to use helmets.
  */
-export async function transformArmorPrototypes() {
-  if (once) {
-    return;
+export async function transformArmorPrototypes(struct: ArmorPrototype, context: MetaContext<ArmorPrototype>) {
+  const extraStructs: ArmorPrototype[] = [];
+
+  if (struct.Protection && struct.SID !== "TemplateArmor") {
+    const fork = struct.fork();
+    fork.Protection = struct.Protection.fork(true);
+    overrideProtectionNPCWithProtection(fork);
+    fork.ProtectionNPC.__internal__.bpatch = true;
+    delete fork.Protection;
+    // extraStructs.push(fork);
   }
 
-  once = true;
+  if (!once && context.array.length - 1 === context.index) {
+    once = true;
+    const seenSIDs = new Set<string>();
+    const gdocsData = await getGdocsArmorData();
+    const referenceMap = { ...allDefaultArmorPrototypesRecord, ...gdocsData.overrides };
+    seenSIDs.union(new Set(Object.keys(gdocsData.descriptors)));
+    Object.keys(gdocsData.descriptors).forEach((SID) => {
+      const newArmor = createArmorPrototype(SID, referenceMap);
+      if (!newArmor) {
+        logger.warn(`Couldn't create new armor due to no ref? ${SID}`);
+        return;
+      }
 
-  const extraStructs: ArmorPrototype[] = [];
-  const seenSIDs = new Set<string>();
-  const gdocsData = await getGdocsArmorData();
-  const referenceMap = { ...allDefaultArmorPrototypesRecord, ...gdocsData.overrides };
-  seenSIDs.union(new Set(Object.keys(gdocsData.descriptors)));
+      fixUpgradePrototypeSIDs(newArmor);
+      dedupeUpgradePrototypeSIDs(newArmor);
 
-  Object.keys(gdocsData.descriptors).forEach((SID) => {
-    const newArmor = createArmorPrototype(SID, referenceMap)?.filter(([_, v]) => !!v);
-    if (!newArmor) {
-      logger.warn(`Couldn't create new armor due to no ref? ${SID}`);
-      return;
-    }
+      const clone = newArmor.clone();
+      clone.__internal__.isRoot = true;
+      extraStructs.push(clone);
+    });
+  }
 
-    fixUpgradePrototypeSIDs(newArmor);
-    dedupeUpgradePrototypeSIDs(newArmor);
-
-    const clone = newArmor.clone();
-    clone.__internal__.isRoot = true;
-    extraStructs.push(clone);
-  });
   return extraStructs;
 }
 
@@ -91,6 +101,22 @@ function dedupeUpgradePrototypeSIDs(armor: ArmorPrototype) {
   armor.UpgradePrototypeSIDs = upgrades;
 }
 
+/**
+ * Because NPCs sometimes can equip wrong armor, and drop whats intended for equipment, we need to adjust durability in both cases.
+ * With dura loss comes protection loss, so adjust protection for npcs upfront to compensate.
+ */
+export function overrideProtectionNPCWithProtection(armor: ArmorPrototype): void {
+  if (!armor?.Protection) {
+    return;
+  }
+  armor.ProtectionNPC = armor.Protection.clone().map(([k, e]) => {
+    if (k === "Strike") {
+      return Math.min(5, e / NPC_AVG_DURABILITY);
+    }
+    return Math.min(80, e / NPC_AVG_DURABILITY);
+  });
+}
+
 export function createArmorPrototype(SID: string, referenceMap: Record<string, ArmorPrototype>) {
   const override = referenceMap[SID];
   const refkey = override.__internal__.refkey;
@@ -105,7 +131,8 @@ export function createArmorPrototype(SID: string, referenceMap: Record<string, A
 
   const backfilled = backfillDef(s, referenceMap, referenceArmor.SID);
 
-  deepMerge(backfilled, override);
+  deepMerge(backfilled, override, false);
+  overrideProtectionNPCWithProtection(backfilled);
   backfilled.__internal__.rawName = SID;
   return backfilled;
 }
