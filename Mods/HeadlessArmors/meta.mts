@@ -21,38 +21,37 @@ export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype | QuestNodeP
     [h1][/h1]
     Armors:
     [list]
-    [*] XSpawnItemNearPlayerBySID BattleExoskeleton_Varta_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Heavy_Dolg_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Heavy2_Military_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Monolith_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Dolg_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Heavy_Svoboda_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Heavy_Mercenaries_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Dolg_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Monolith_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Svoboda_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Varta_Armor_HeadlessArmors_headless
-    [*] XSpawnItemNearPlayerBySID Battle_Dolg_End_Armor_HeadlessArmors_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Dolg_Armor_headless
+    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Dolg_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Heavy_Dolg_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Battle_Dolg_End_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Armor_headless
+    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Svoboda_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Heavy_Svoboda_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Heavy_Mercenaries_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Heavy2_Military_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Armor_headless
+    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Monolith_Armor_headless
+    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Monolith_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Armor_headless
+    [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Armor_headless
+    [*] XSpawnItemNearPlayerBySID BattleExoskeleton_Varta_Armor_headless
     [/list]    [h1][/h1]
     Helmets: 
     [list]
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Helmet_HeadlessArmors
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Helmet_HeadlessArmors
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Helmet_HeadlessArmors
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Spark_Helmet_HeadlessArmors
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Duty_Helmet_HeadlessArmors
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Helmet_HeadlessArmors
-    [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet_HeadlessArmors
-    [*] XSpawnItemNearPlayerBySID HeavyBattle_Merc_Helmet_HeadlessArmors
-    [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet_HeadlessArmors
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Duty_Helmet
+    [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Helmet
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Helmet
+    [*] XSpawnItemNearPlayerBySID HeavyBattle_Merc_Helmet
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Helmet
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Helmet
+    [*] XSpawnItemNearPlayerBySID Exoskeleton_Spark_Helmet
+    [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet
     [/list] 
   `,
-  changenote: `Fix bug where quest characters could drop fully repaired armor #2.`,
+  changenote: `Rewrite the system completely. Consolidated SIDs. New game required (or save without old armors).`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,
