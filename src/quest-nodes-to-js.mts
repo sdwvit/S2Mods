@@ -125,8 +125,13 @@ function getCoordsStr(x: number, y: number, z: number) {
 
 await Promise.all(
   `
-EQ11.cfg
-  `
+RSQ01.cfg
+RSQ01_C01.cfg
+RSQ01_C02.cfg
+RSQ01_C03.cfg
+RSQ01_C04.cfg
+RSQ01_C05.cfg
+RSQ01_C06.cfg  `
     .trim()
     .split("\n")
     .map((f) => f.trim())
