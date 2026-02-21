@@ -9,11 +9,17 @@ const DRIVE_UPLOAD_URL = `https://www.googleapis.com/upload/drive/v3/files?uploa
 const OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const DRIVE_API_URL = "https://www.googleapis.com/drive/v3/files";
 const OAUTH_PLAYGROUND_URL = "https://developers.google.com/oauthplayground/#step1&scopes=https://www.googleapis.com/auth/drive.file";
+const TOKEN_CACHE_PATH = path.resolve(process.cwd(), ".gdrive.access-token.cache.json");
+const TOKEN_CACHE_TTL_MS = 60 * 60 * 1000;
 
 type DriveFile = { id: string; name?: string };
 type DriveListResponse = { files?: DriveFile[] };
 type DriveUploadResponse = { id?: string; name?: string; webViewLink?: string };
-type GoogleTokenResponse = { access_token?: string };
+type GoogleTokenResponse = { access_token?: string; expires_in?: number };
+type GoogleTokenCache = {
+  accessToken: string;
+  expiresAt: number;
+};
 
 function getDriveFolderId() {
   const folderId = process.env.GDRIVE_FOLDER_ID?.trim();
@@ -71,13 +77,57 @@ async function configureGoogleDriveAuthInteractively() {
   const token = await prompt("Paste GDRIVE_ACCESS_TOKEN to continue this run (or press Enter to cancel): ");
   if (token) {
     process.env.GDRIVE_ACCESS_TOKEN = token;
+    await writeTokenCache(token, TOKEN_CACHE_TTL_MS);
     logger.log("Using provided GDRIVE_ACCESS_TOKEN for current run.");
   }
 }
 
-async function getAccessToken() {
+async function readTokenCache() {
+  try {
+    const raw = await fs.readFile(TOKEN_CACHE_PATH, "utf8");
+    const json = JSON.parse(raw) as GoogleTokenCache;
+    if (!json?.accessToken || !json?.expiresAt) {
+      return null;
+    }
+    if (Date.now() >= json.expiresAt) {
+      return null;
+    }
+    return json.accessToken;
+  } catch {
+    return null;
+  }
+}
+
+async function writeTokenCache(accessToken: string, ttlMs: number) {
+  const cache: GoogleTokenCache = {
+    accessToken,
+    expiresAt: Date.now() + ttlMs,
+  };
+  await fs.writeFile(TOKEN_CACHE_PATH, JSON.stringify(cache, null, 2), "utf8");
+}
+
+async function clearTokenCache() {
+  try {
+    await fs.unlink(TOKEN_CACHE_PATH);
+  } catch {
+    // ignore missing cache
+  }
+}
+
+function hasRefreshCredentials() {
+  return Boolean(process.env.GDRIVE_CLIENT_ID && process.env.GDRIVE_CLIENT_SECRET && process.env.GDRIVE_REFRESH_TOKEN);
+}
+
+async function getAccessToken(forceRefresh = false) {
   if (process.env.GDRIVE_ACCESS_TOKEN) {
     return process.env.GDRIVE_ACCESS_TOKEN;
+  }
+
+  if (!forceRefresh) {
+    const cachedToken = await readTokenCache();
+    if (cachedToken) {
+      return cachedToken;
+    }
   }
 
   const clientId = process.env.GDRIVE_CLIENT_ID;
@@ -114,6 +164,8 @@ async function getAccessToken() {
     throw new Error("Google OAuth token response did not include access_token.");
   }
 
+  const ttlMs = Math.min(TOKEN_CACHE_TTL_MS, (json.expires_in || 3600) * 1000);
+  await writeTokenCache(json.access_token, ttlMs);
   return json.access_token;
 }
 
@@ -132,18 +184,32 @@ function buildMultipartBody(boundary: string, metadata: string, fileBuffer: Buff
 }
 
 export async function uploadFileToGoogleDrive(filePath: string) {
-  const token = await getAccessToken();
+  let token = await getAccessToken();
   const folderId = getDriveFolderId();
   const fileName = path.basename(filePath);
   const fileBuffer = await fs.readFile(filePath);
   const boundary = `----S2ModsDriveBoundary${Date.now()}`;
   const searchQuery = buildDriveSearchQuery(folderId, fileName);
 
+  async function authorizedFetch(url: string, init: RequestInit = {}, retry = true) {
+    const headers = new Headers(init.headers || {});
+    headers.set("Authorization", `Bearer ${token}`);
+    const response = await fetch(url, { ...init, headers });
+
+    if (response.status === 401 && retry) {
+      await clearTokenCache();
+      if (!hasRefreshCredentials()) {
+        throw new Error("Google Drive token expired and refresh credentials are missing. Configure GDRIVE_CLIENT_ID/SECRET/REFRESH_TOKEN.");
+      }
+      token = await getAccessToken(true);
+      return authorizedFetch(url, init, false);
+    }
+
+    return response;
+  }
+
   const findExistingUrl = `${DRIVE_API_URL}?q=${encodeURIComponent(searchQuery)}` + "&fields=files(id,name)&orderBy=modifiedTime desc";
-  const findExistingResponse = await fetch(findExistingUrl, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const findExistingResponse = await authorizedFetch(findExistingUrl, { method: "GET" });
 
   if (!findExistingResponse.ok) {
     const payload = await findExistingResponse.text();
@@ -168,10 +234,9 @@ export async function uploadFileToGoogleDrive(filePath: string) {
       ? `Overwriting ${fileName} in Google Drive folder ${folderId} (fileId=${existingFileToOverwrite.id})...`
       : `Uploading ${fileName} to Google Drive folder ${folderId}...`,
   );
-  const response = await fetch(uploadUrl, {
+  const response = await authorizedFetch(uploadUrl, {
     method: uploadMethod,
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": `multipart/related; boundary=${boundary}`,
     },
     body,
@@ -189,10 +254,7 @@ export async function uploadFileToGoogleDrive(filePath: string) {
   }
 
   for (const duplicate of existingFiles.slice(1)) {
-    const deleteResponse = await fetch(`${DRIVE_API_URL}/${duplicate.id}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const deleteResponse = await authorizedFetch(`${DRIVE_API_URL}/${duplicate.id}`, { method: "DELETE" });
     if (!deleteResponse.ok) {
       logger.warn(`Failed to remove duplicate Google Drive file ${duplicate.id} (${duplicate.name || "unknown"}).`);
     }
