@@ -58,6 +58,7 @@ The following are git-ignored and should not be committed unless explicitly requ
 - When touching scripts that integrate external tools (SDK, SteamCMD, repak), keep path/credential handling intact.
 - Many scripts read from environment variables; do not hardcode local paths.
 - `SDK_PATH` is expected to point at the STALKER2ZoneKit root; cfg source data is under `Stalker2/Content/GameLite` (see `src/base-paths.mts`).
+- For opening files in IntelliJ at a specific line, use: `"$IDEA_PATH" --line <line> <path-to-file>` (set `IDEA_PATH` in `.env`).
 
 ## How to analyze `.cfg` files
 - Source of truth is the SDK GameLite tree at `SDK_PATH/Stalker2/Content/GameLite` (this is what `src/base-paths.mts` calls `baseCfgDir`).
