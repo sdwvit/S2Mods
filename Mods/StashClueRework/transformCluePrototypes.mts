@@ -23,11 +23,13 @@ export function transformCluePrototypes() {
     extraStructs.push(
       new Struct({
         __internal__: {
-          refkey: "[0]",
           rawName: getGeneratedStashSID(i),
           isRoot: true,
         },
         SID: getGeneratedStashSID(i),
+        Type: "EGlobalVariableType::Bool",
+        DefaultValue: false,
+        ID: i,
       }) as CluePrototype,
     );
   }
