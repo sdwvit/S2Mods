@@ -1,7 +1,7 @@
 import { SpawnActorPrototype } from "s2cfgtojson";
 import { MetaContext } from "../../src/meta-type.mts";
-import { allStashes } from "./stashes.mts";
 
+export const allStashes: Map<string, number> = new Map();
 export function transformSpawnActorPrototypes(struct: SpawnActorPrototype, context: MetaContext<SpawnActorPrototype>) {
   if (struct.SpawnType === "ESpawnType::ItemContainer") {
     return rememberAndEmptyStash(struct, context);
@@ -17,7 +17,7 @@ export function rememberAndEmptyStash(struct: SpawnActorPrototype, context: Meta
     return;
   }
   const fork = struct.fork();
-  allStashes[struct.SID] = struct;
+  allStashes.set(struct.SID, allStashes.size);
 
   fork.ClueVariablePrototypeSID = getGeneratedStashSID((context.fileIndex % 100) + 1);
   fork.SpawnOnStart = false;

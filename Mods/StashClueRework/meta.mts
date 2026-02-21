@@ -4,6 +4,7 @@ import { transformObjPrototypes } from "./transformObjPrototypes.mts";
 import { transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
 import { transformCluePrototypes } from "./transformCluePrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
+import { transformQuestPrototypes } from "./transformQuestPrototypes.mts";
 export const finishedTransformers = new Set<string>();
 
 export const meta: MetaType = {
@@ -18,7 +19,13 @@ Once you finish any recurring quest from base vendors, apart from monetary rewar
 bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 `,
   changenote: "Rollback to a stable version",
-  structTransformers: [transformObjPrototypes, transformSpawnActorPrototypes, transformCluePrototypes, transformQuestNodePrototypes],
+  structTransformers: [
+    transformObjPrototypes,
+    transformSpawnActorPrototypes,
+    transformQuestPrototypes,
+    transformCluePrototypes,
+    transformQuestNodePrototypes,
+  ],
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
   },
