@@ -4,7 +4,7 @@ import { CoreFaction } from "../../src/consts.mts";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { logger } from "../../src/logger.mts";
 
-const GDOCS_ARMORS_CSV_URL = process.env.GDOCS_ARMORS_CSV_URL;
+const HEADLESS_ARMORS_DATA_TABLE_URL = process.env.HEADLESS_ARMORS_DATA_TABLE_URL;
 const GDOCS_CACHE_PATH = new URL("./.gdocs.armors.cache.json", import.meta.url);
 
 let gdocsDataPromise: Promise<GdocsArmorData> | null = null;
@@ -29,8 +29,8 @@ export async function getGdocsArmorData(): Promise<GdocsArmorData> {
 }
 
 async function fetchGdocsData(): Promise<GdocsArmorData> {
-  if (!GDOCS_ARMORS_CSV_URL) {
-    throw new Error("Missing GDOCS_ARMORS_CSV_URL in .env");
+  if (!HEADLESS_ARMORS_DATA_TABLE_URL) {
+    throw new Error("Missing HEADLESS_ARMORS_DATA_TABLE_URL in .env");
   }
 
   const cache = readGdocsCache();
@@ -44,7 +44,7 @@ async function fetchGdocsData(): Promise<GdocsArmorData> {
 
   let response: Response;
   try {
-    response = await fetch(GDOCS_ARMORS_CSV_URL, { headers });
+    response = await fetch(HEADLESS_ARMORS_DATA_TABLE_URL, { headers });
   } catch (error) {
     if (cache?.data) {
       logger.warn(`Failed to fetch gdocs armor table, using cached data: ${(error as Error).message}`);
