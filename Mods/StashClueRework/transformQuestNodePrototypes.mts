@@ -145,8 +145,12 @@ export async function hookStashSpawners(struct: QuestNodePrototypeItemAdd, finis
   spawnStash.Launchers = struct.Launchers.clone();
   extraStructs.push(spawnStash);
 
+  const itemDelay = getItemAddDelayNode(struct);
+  itemDelay.Launchers = struct.Launchers.clone();
+  extraStructs.push(itemDelay);
+
   const fork = struct.fork();
-  fork.Launchers = getLaunchers([{ SID: spawnStash.SID }]);
+  fork.Launchers = getLaunchers([{ SID: itemDelay.SID }]);
   extraStructs.push(fork);
 
   return extraStructs;
@@ -182,6 +186,19 @@ function getGiveCacheDelay(i: number, QuestSID = RandomStashQuestName) {
       struct.end
     `) as QuestNodePrototypeTechnical;
   delay.Launchers = getLaunchers([{ SID: randomNodeSID, Name: String(i) }]);
+  return delay;
+}
+
+function getItemAddDelayNode(struct: QuestNodePrototypeItemAdd) {
+  const SID = `${struct.SID}_SpawnDelay`;
+  const delay = new Struct(`
+      ${SID} : struct.begin
+         SID = ${SID}
+         QuestSID = ${struct.QuestSID}
+         NodeType = EQuestNodeType::Technical
+         StartDelay = 1.0
+      struct.end
+    `) as QuestNodePrototypeTechnical;
   return delay;
 }
 
