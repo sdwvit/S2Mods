@@ -19,6 +19,7 @@ import { transformUpgradePrototypes } from "./transformUpgradePrototypes.mts";
 import { transformWeaponGeneralSetupPrototypes } from "./transformWeaponGeneralSetupPrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 import { transformWeaponPrototypes } from "./transformWeaponPrototypes.mts";
+import { transformGlobalVariablePrototypes } from "./transformGlobalVariablePrototypes.mts";
 import { MetaType } from "../../src/meta-type.mts";
 import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
 import { logger } from "../../src/logger.mts";
@@ -35,6 +36,7 @@ const structTransformers = [
   transformDifficultyPrototypes,
   transformDynamicItemGenerator,
   transformEffectPrototypes,
+  transformGlobalVariablePrototypes,
   transformItemGeneratorPrototypes,
   transformLairPrototypes,
   transformMeshGeneratorPrototypes,
