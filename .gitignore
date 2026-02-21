@@ -18,3 +18,4 @@ Mods/MasterMod/.gdocs.quest-data-table.cache.json
 *.zip
 nodejs/
 /types.mts
+.gdrive.access-token.cache.json
