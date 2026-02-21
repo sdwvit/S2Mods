@@ -72,7 +72,8 @@ export function commitAndPushIfDirty(platform: PublishPlatform, publishedAt = ne
 }
 
 function createAndPushPublishTag(platform: PublishPlatform, publishedAt: Date) {
-  const tagName = `publish-${formatTagTimestamp(publishedAt)}`;
+  const safeModName = modName.replace(/[^A-Za-z0-9._-]/g, "-");
+  const tagName = `publish-${safeModName}-${platform}-${formatTagTimestamp(publishedAt)}`;
   runGit(`git tag -a "${tagName}" -m "publish ${platform} ${publishedAt.toISOString()}"`);
   runGit(`git push origin "${tagName}"`);
   return tagName;
