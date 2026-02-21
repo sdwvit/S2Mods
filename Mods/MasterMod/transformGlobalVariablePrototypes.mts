@@ -1,4 +1,4 @@
-import { Struct } from "s2cfgtojson";
+import { CluePrototype, EGlobalVariableType, Struct } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
 import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 
@@ -21,9 +21,7 @@ function getMissingVariantTrackingVariables(context: Parameters<StructTransforme
     requiredSIDs.add(getLatestQuestVariantVariableSID(variants[0].Vendor));
   }
 
-  return [...requiredSIDs]
-    .filter((sid) => !existingSIDs.has(sid))
-    .sort();
+  return [...requiredSIDs].filter((sid) => !existingSIDs.has(sid)).sort();
 }
 
 export const transformGlobalVariablePrototypes: StructTransformer<Struct> = async (struct, context) => {
@@ -38,11 +36,11 @@ export const transformGlobalVariablePrototypes: StructTransformer<Struct> = asyn
   }
 
   return missingSIDs.map((sid) => {
-    const variable = struct.fork(true) as any;
+    const variable = new Struct() as CluePrototype;
     variable.SID = sid;
-    variable.Type = "EGlobalVariableType::Int";
-    variable.DefaultValue = 0;
     variable.Description = "MasterMod: latest recurring quest variant";
+    variable.Type = "EGlobalVariableType::Int" as EGlobalVariableType;
+    variable.DefaultValue = 0 as any;
     variable.__internal__.rawName = sid;
     variable.__internal__.isRoot = true;
     return variable;

@@ -73,7 +73,7 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [QoL] Allows buying/selling/dropping quest items.
  [*] [Balance] Unique and fair rewards for each possible variant of repeating quests.
 [/list]`,
-  changenote: `Fix rewards for quests that don't have variation`,
+  changenote: `Fix not issuing monetary reward`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
