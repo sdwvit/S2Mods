@@ -1,5 +1,5 @@
 import { MetaType } from "../../src/meta-type.mts";
-import { addXpGlobalVariable } from "./addXpGlobalVariable.mts";
+import { addXpCounterItem } from "./addXpCounterItem.mts";
 import { disableQuestRankSetters } from "./disableQuestRankSetters.mts";
 
 export const meta: MetaType = {
@@ -16,5 +16,5 @@ Current implementation target:[h1][/h1]
 - Apply rank updates through centralized progression logic.[h1][/h1]
 `,
   changenote: "Initial release",
-  structTransformers: [disableQuestRankSetters, addXpGlobalVariable],
+  structTransformers: [disableQuestRankSetters, addXpCounterItem],
 };

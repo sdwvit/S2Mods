@@ -1,18 +1,19 @@
 import {
   QuestNodePrototype,
+  QuestNodePrototypeItemAdd,
+  QuestNodePrototypeItemRemove,
   QuestNodePrototypeOnPlayerGetItemEvent,
   QuestNodePrototypeSetCharacterParam,
-  QuestNodePrototypeSetGlobalVariable,
   QuestNodePrototypeShowFadeScreen,
   QuestNodePrototypeTechnical,
   Struct,
 } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
 import { modName } from "../../src/base-paths.mts";
-import { patchDefs } from "../FactionPatches/addFactionPatchItems.mts";
-import { XP_GLOBAL_VARIABLE_SID } from "./addXpGlobalVariable.mts";
+import { FactionPatchDefinitions } from "../FactionPatches/addFactionPatchItems.mts";
+import { XP_COUNTER_ITEM_SID } from "./addXpCounterItem.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
-import { allDefaultArtifactPrototypesRecord, ArtifactRankMap, DefaultArtifact, NPCRank } from "../../src/consts.mts";
+import { NPCRank } from "../../src/consts.mts";
 
 const SKIF_GUID = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -42,27 +43,15 @@ export const disableQuestRankSetters: StructTransformer<QuestNodePrototype> = (s
 };
 
 function createOnPlayerGetFactionPatchEventListeners(extraStructs: Struct[]) {
-  patchDefs.forEach((patchDef) => {
-    const onPatchReceivedNode = getOnPatchReceivedNode(patchDef.SID);
+  FactionPatchDefinitions.forEach((patchDef) => {
+    const onPatchReceivedNode = getOnItemReceivedNode(patchDef.SID);
     extraStructs.push(onPatchReceivedNode);
 
     const gotXPNode = getGotXPNode(onPatchReceivedNode, NPCRank[patchDef.Faction]);
     extraStructs.push(gotXPNode);
 
-    const bumpXp = getBumpXPVariableNode(onPatchReceivedNode, NPCRank[patchDef.Faction]);
-    extraStructs.push(bumpXp);
-  });
-
-  Object.keys(ArtifactRankMap).forEach((artifact: DefaultArtifact) => {
-    const SID = allDefaultArtifactPrototypesRecord[artifact].SID;
-    const onPatchReceivedNode = getOnPatchReceivedNode(SID);
-    extraStructs.push(onPatchReceivedNode);
-
-    const gotXPNode = getGotXPNode(onPatchReceivedNode, ArtifactRankMap[SID]);
-    extraStructs.push(gotXPNode);
-
-    const bumpXp = getBumpXPVariableNode(onPatchReceivedNode, ArtifactRankMap[SID]);
-    extraStructs.push(bumpXp);
+    const adjustXpItem = getAdjustXPItemNode(onPatchReceivedNode, NPCRank[patchDef.Faction]);
+    extraStructs.push(adjustXpItem);
   });
 }
 
@@ -144,7 +133,7 @@ function collectRelevantKeys(struct: QuestNodePrototypeSetCharacterParam): {
   return { rankParamKeys, hasNonRank };
 }
 
-function getOnPatchReceivedNode(SID: string) {
+function getOnItemReceivedNode(SID: string) {
   const node = new Struct() as QuestNodePrototypeOnPlayerGetItemEvent;
   node.SID = `${modName}_OnPlayerGetItemEvent_${SID}`;
   node.QuestSID = modName;
@@ -178,17 +167,27 @@ function getGotXPNode(onPatchReceivedNode: QuestNodePrototypeOnPlayerGetItemEven
   return printXpVarNode;
 }
 
-function getBumpXPVariableNode(onPatchReceivedNode: QuestNodePrototypeOnPlayerGetItemEvent, xp: number) {
-  const bumpXp = new Struct() as QuestNodePrototypeSetGlobalVariable;
-  bumpXp.ChangeValueMode = "EChangeValueMode::Add";
-  bumpXp.GlobalVariablePrototypeSID = XP_GLOBAL_VARIABLE_SID;
-  bumpXp.Launchers = getLaunchers([onPatchReceivedNode]);
-  bumpXp.NodeType = "EQuestNodeType::SetGlobalVariable";
-  bumpXp.QuestSID = onPatchReceivedNode.QuestSID;
-  bumpXp.Repeatable = true;
-  bumpXp.SID = `${modName}_bumpXpBy_${xp}`;
-  bumpXp.VariableValue = xp;
-  bumpXp.__internal__.isRoot = true;
-  bumpXp.__internal__.rawName = bumpXp.SID;
-  return bumpXp;
+function getAdjustXPItemNode(onPatchReceivedNode: QuestNodePrototypeOnPlayerGetItemEvent, xp: number) {
+  const amount = Math.abs(xp);
+  const isAdd = xp > 0;
+
+  const node = new Struct() as QuestNodePrototypeItemAdd | QuestNodePrototypeItemRemove;
+  node.ItemSID = XP_COUNTER_ITEM_SID;
+  node.ItemsCount = amount;
+  node.Launchers = getLaunchers([onPatchReceivedNode]);
+  node.QuestSID = onPatchReceivedNode.QuestSID;
+  node.Repeatable = true;
+  node.SID = `${modName}_${isAdd ? "add" : "remove"}XpItem_${onPatchReceivedNode.ItemPrototypeSID}`;
+  node.TargetQuestGuid = SKIF_GUID;
+
+  if (isAdd) {
+    (node as QuestNodePrototypeItemAdd).NodeType = "EQuestNodeType::ItemAdd";
+    (node as QuestNodePrototypeItemAdd).AddToPlayerStash = false;
+  } else {
+    (node as QuestNodePrototypeItemRemove).NodeType = "EQuestNodeType::ItemRemove";
+  }
+
+  node.__internal__.isRoot = true;
+  node.__internal__.rawName = node.SID;
+  return node;
 }
