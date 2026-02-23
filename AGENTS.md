@@ -75,10 +75,12 @@ The following are git-ignored and should not be committed unless explicitly requ
 - Create a new folder under `Mods/<ModName>/` and run command `npm run create-git-branches`, you can use `NODE_PATH` and `NODE_TS_TRANSFORMER` from `.env` file if node refuses to launch. 
 - Switch to a newly added git branch called same `<ModName>` from previous step, and run `npm run prepare-configs` once. This command should create `meta.mts` for you.
 - Define one or more struct transformers; follow the pattern in `Mods/NoFallDamage/meta.mts` and `Mods/NoQuestCooldown/meta.mts`.
+- Try to name struct transformers as `transform%File%Prototypes` (for example, `transformWeaponGeneralSetupPrototypes`) so file intent is obvious from the function name.
 - Always set `transformer.files` to the exact cfg paths you intend to patch (paths are relative to `GameData/` and usually start with `/`). You can also use substring pattern, similar to `Mods/MasterMod/transformQuestNodePrototypes.mts`.
 - Do not use multiple transformers to modify the same target cfg file. If one cfg needs several behaviors (edits + injected structs, etc.), combine them inside a single transformer and split the implementation into helper functions/methods.
 - Use `struct.fork()` to create a patched bare minimum copy. Use `struct.fork(true)` to create a deep copy. When changing nested structs, set `__internal__.bpatch = true` on the nested struct.
 - For adding new structs, clone/backfill, set `__internal__.isRoot = true`, and return them from the transformer (see `Mods/HeadlessArmors/meta.mts`).
+- If a mod must patch prototypes introduced by another mod and those raw/generated structs are not available during `npm run prepare-configs`, assume the target SIDs exist and inject one-shot patch structs with a `let once = false` guard. It is OK to depend on TypeScript source objects/constants (for example SID definition arrays), but not on the other mod's generated/raw structs.
 - Keep edits in transformers and regenerate `raw/` via `npm run prepare-configs`; do not hand-edit `raw/` unless explicitly asked.
 - `ShowFadeScreen` quest nodes can be used as a lightweight in-game debug message display during quest logic prototyping.
 - Validate references against GameLite: `ItemPrototypeSID`, `UpgradePrototypeSIDs`, `EffectPrototypeSIDs`, `MeshGeneratorPrototypeSID`. Avoid duplicate UpgradePrototypeSIDs.
