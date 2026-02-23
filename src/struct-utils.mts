@@ -27,7 +27,12 @@ export const getLaunchers = (
         connections.Connections.addNode(new Struct(item) as QuestNodePrototypeConnectionsItem);
       });
     } else {
-      connections.Connections.addNode(new Struct(questNodePrototypeConnectionsItemOrItems) as QuestNodePrototypeConnectionsItem);
+      const connection = new Struct({
+        SID: questNodePrototypeConnectionsItemOrItems.SID,
+        Name: questNodePrototypeConnectionsItemOrItems.Name ?? "",
+      }) as QuestNodePrototypeConnectionsItem;
+
+      connections.Connections.addNode(connection);
     }
 
     Launchers.addNode(connections);
