@@ -1,7 +1,7 @@
 import { EItemGenerationCategory, ItemGeneratorPrototype, Struct } from "s2cfgtojson";
 import { StructTransformer } from "../../src/meta-type.mts";
 import { logger } from "../../src/logger.mts";
-import { FactionPatch, patchDefsRecord } from "./addFactionPatchItems.mts";
+import { FactionPatchSID, patchDefsRecord } from "./addFactionPatchItems.mts";
 import {
   allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
   allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID,
@@ -28,7 +28,7 @@ export const addFactionPatchesToItemGenerators: StructTransformer<ItemGeneratorP
     return;
   }
 
-  const patch = patchDefsRecord[`${FactionPatch}${coreFaction}`];
+  const patch = patchDefsRecord[`${FactionPatchSID}${coreFaction}`];
 
   if (!patch) {
     logger.warn(`Unknown coreFaction '${coreFaction}'`);
