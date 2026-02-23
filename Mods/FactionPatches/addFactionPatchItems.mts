@@ -1,5 +1,5 @@
 import { EItemType, QuestItemPrototype, Struct } from "s2cfgtojson";
-import { Factions, getRecord } from "../../src/consts.mts";
+import { CoreFaction, Factions, getRecord } from "../../src/consts.mts";
 
 let addFactionPatchesOnce = false;
 
@@ -7,23 +7,24 @@ const ICON_BASE = "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/PDA/F
 export const FactionPatch = "FactionPatch";
 
 export const patchDefs: {
-  SID: `FactionPatch${(typeof Factions)[keyof typeof Factions]}`;
+  SID: `FactionPatch${CoreFaction}`;
   Icon: string;
   cost?: number;
+  Faction: CoreFaction;
 }[] = [
-  { SID: `${FactionPatch}Bandits`, Icon: `${ICON_BASE}T_inv_BanditsPatch.T_inv_BanditsPatch'` },
-  { SID: `${FactionPatch}Corpus`, Icon: `${ICON_BASE}T_inv_CorpusPatch.T_inv_CorpusPatch'` },
-  { SID: `${FactionPatch}Duty`, Icon: `${ICON_BASE}T_inv_DutyPatch.T_inv_DutyPatch'` },
-  { SID: `${FactionPatch}FreeStalkers`, Icon: `${ICON_BASE}T_inv_LonersPatch.T_inv_LonersPatch'` },
-  { SID: `${FactionPatch}Freedom`, Icon: `${ICON_BASE}T_inv_FreedomPatch.T_inv_FreedomPatch'` },
-  { SID: `${FactionPatch}Mercenaries`, Icon: `${ICON_BASE}T_inv_MercenariesPatch.T_inv_MercenariesPatch'` },
-  { SID: `${FactionPatch}Militaries`, Icon: `${ICON_BASE}T_inv_ISPFPatch.T_inv_ISPFPatch'` },
-  { SID: `${FactionPatch}Monolith`, Icon: `${ICON_BASE}T_inv_MonolithPatch.T_inv_MonolithPatch'` },
-  { SID: `${FactionPatch}Neutrals`, Icon: `${ICON_BASE}T_inv_NeutralPatch.T_inv_NeutralPatch'` },
-  { SID: `${FactionPatch}Noon`, Icon: `${ICON_BASE}T_inv_NoonPatch.T_inv_NoonPatch'` },
-  { SID: `${FactionPatch}Scientists`, Icon: `${ICON_BASE}T_inv_ScientistPatch.T_inv_ScientistPatch'` },
-  { SID: `${FactionPatch}Spark`, Icon: `${ICON_BASE}T_inv_SparkPatch.T_inv_SparkPatch'` },
-  { SID: `${FactionPatch}Varta`, Icon: `${ICON_BASE}T_inv_VartaPatch.T_inv_VartaPatch'` },
+  { Faction: "Bandits", SID: `${FactionPatch}Bandits`, Icon: `${ICON_BASE}T_inv_BanditsPatch.T_inv_BanditsPatch'` },
+  { Faction: "Corpus", SID: `${FactionPatch}Corpus`, Icon: `${ICON_BASE}T_inv_CorpusPatch.T_inv_CorpusPatch'` },
+  { Faction: "Duty", SID: `${FactionPatch}Duty`, Icon: `${ICON_BASE}T_inv_DutyPatch.T_inv_DutyPatch'` },
+  { Faction: "FreeStalkers", SID: `${FactionPatch}FreeStalkers`, Icon: `${ICON_BASE}T_inv_LonersPatch.T_inv_LonersPatch'` },
+  { Faction: "Freedom", SID: `${FactionPatch}Freedom`, Icon: `${ICON_BASE}T_inv_FreedomPatch.T_inv_FreedomPatch'` },
+  { Faction: "Mercenaries", SID: `${FactionPatch}Mercenaries`, Icon: `${ICON_BASE}T_inv_MercenariesPatch.T_inv_MercenariesPatch'` },
+  { Faction: "Militaries", SID: `${FactionPatch}Militaries`, Icon: `${ICON_BASE}T_inv_ISPFPatch.T_inv_ISPFPatch'` },
+  { Faction: "Monolith", SID: `${FactionPatch}Monolith`, Icon: `${ICON_BASE}T_inv_MonolithPatch.T_inv_MonolithPatch'` },
+  { Faction: "Neutrals", SID: `${FactionPatch}Neutrals`, Icon: `${ICON_BASE}T_inv_NeutralPatch.T_inv_NeutralPatch'` },
+  { Faction: "Noon", SID: `${FactionPatch}Noon`, Icon: `${ICON_BASE}T_inv_NoonPatch.T_inv_NoonPatch'` },
+  { Faction: "Scientists", SID: `${FactionPatch}Scientists`, Icon: `${ICON_BASE}T_inv_ScientistPatch.T_inv_ScientistPatch'` },
+  { Faction: "Spark", SID: `${FactionPatch}Spark`, Icon: `${ICON_BASE}T_inv_SparkPatch.T_inv_SparkPatch'` },
+  { Faction: "Varta", SID: `${FactionPatch}Varta`, Icon: `${ICON_BASE}T_inv_VartaPatch.T_inv_VartaPatch'` },
 ];
 
 export const patchDefsRecord = getRecord(patchDefs);
