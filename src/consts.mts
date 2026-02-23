@@ -837,3 +837,167 @@ export function getCorePrototype<T extends Struct>(itemSID: string | number, col
 export function guessAttachmentSlot(itemSID: string) {
   return getCorePrototype(itemSID, allDefaultAttachPrototypesRecord, (item) => item.Slot);
 }
+
+export const NPCRank: Record<Exclude<CoreFaction, "Mutant">, number> = {
+  Bandits: 10, // fallback (no clean armor-rarity aggregate extracted yet)
+  Scientists: 10, // data-informed
+  FreeStalkers: 10, // fallback (between Neutrals and Duty/Freedom)
+  Neutrals: 10,
+
+  Duty: 20, // data-informed
+  Militaries: 20, // data-informed
+  Freedom: 20, // data-informed
+  Mercenaries: 20, // data-informed
+  Noon: 20, // fallback
+
+  Corpus: 25, // fallback (assumed high-tier)
+  Spark: 25, // data-informed
+  Varta: 25, // data-informed outlier (armor rarity proxy was extremely high-end)
+
+  Monolith: 30, // data-informed
+};
+
+export type DefaultArtifact =
+  | "CArtifactBouncyBall"
+  | "CArtifactBubble"
+  | "CArtifactBun"
+  | "CArtifactBung"
+  | "CArtifactChunkMeat"
+  | "CArtifactCottonWool"
+  | "CArtifactCrystalThorn"
+  | "CArtifactDevilsMushroom"
+  | "CArtifactEchinus"
+  | "CArtifactKryptonite"
+  | "CArtifactLiquidStone"
+  | "CArtifactMica"
+  | "CArtifactPellicle"
+  | "CArtifactPlasticine"
+  | "CArtifactRosin"
+  | "CArtifactSlime"
+  | "CArtifactSlug"
+  | "CArtifactThorn"
+  | "EArtifactAtom"
+  | "EArtifactBattery"
+  | "EArtifactChocolate"
+  | "EArtifactCloud"
+  | "EArtifactCrystalGlass"
+  | "EArtifactDope"
+  | "EArtifactDummy"
+  | "EArtifactFlash"
+  | "EArtifactJellyFish"
+  | "EArtifactMoonlight"
+  | "EArtifactRazor"
+  | "EArtifactSnowflake"
+  | "EArtifactSoul"
+  | "EArtifactSparkler"
+  | "EArtifactThunderHedgehog"
+  | "EArtifactTow"
+  | "EArtifactWorm"
+  | "FArtifactBakedBolts"
+  | "FArtifactBurntHunk"
+  | "FArtifactCandle"
+  | "FArtifactCore"
+  | "FArtifactCrystal"
+  | "FArtifactDeadSponge"
+  | "FArtifactDrops"
+  | "FArtifactEye"
+  | "FArtifactFireBall"
+  | "FArtifactFireworks"
+  | "FArtifactGlass"
+  | "FArtifactHellishHedgehog"
+  | "FArtifactMomsBeads"
+  | "FArtifactPlasma"
+  | "FArtifactResin"
+  | "FArtifactRingOmnipotence"
+  | "FArtifactSteak"
+  | "GArtifactBloodStone"
+  | "GArtifactBud"
+  | "GArtifactCompass"
+  | "GArtifactGoldFish"
+  | "GArtifactGraphiteBlock"
+  | "GArtifactGravy"
+  | "GArtifactHedgehog"
+  | "GArtifactLandSlug"
+  | "GArtifactNightStar"
+  | "GArtifactPlane"
+  | "GArtifactRubiksCube"
+  | "GArtifactSplitStone"
+  | "GArtifactSponge"
+  | "GArtifactSpring"
+  | "GArtifactStoneDrop"
+  | "GArtifactTrunk"
+  | "GArtifactWrenched"
+  | "PArtifactBrain";
+
+export const ArtifactRankMap: Record<DefaultArtifact, number> = {
+  CArtifactBouncyBall: 15,
+  CArtifactBubble: 10,
+  CArtifactBun: 10,
+  CArtifactBung: 10,
+  CArtifactChunkMeat: 5,
+  CArtifactCottonWool: 10,
+  CArtifactCrystalThorn: 5,
+  CArtifactDevilsMushroom: 30,
+  CArtifactEchinus: 10,
+  CArtifactKryptonite: 5,
+  CArtifactLiquidStone: 60,
+  CArtifactMica: 5,
+  CArtifactPellicle: 30,
+  CArtifactPlasticine: 20,
+  CArtifactRosin: 20,
+  CArtifactSlime: 10,
+  CArtifactSlug: 5,
+  CArtifactThorn: 5,
+  EArtifactAtom: 15,
+  EArtifactBattery: 5,
+  EArtifactChocolate: 5,
+  EArtifactCloud: 10,
+  EArtifactCrystalGlass: 15,
+  EArtifactDope: 20,
+  EArtifactDummy: 5,
+  EArtifactFlash: 5,
+  EArtifactJellyFish: 5,
+  EArtifactMoonlight: 10,
+  EArtifactRazor: 20,
+  EArtifactSnowflake: 5,
+  EArtifactSoul: 10,
+  EArtifactSparkler: 10,
+  EArtifactThunderHedgehog: 20,
+  EArtifactTow: 10,
+  EArtifactWorm: 10,
+  FArtifactBakedBolts: 15,
+  FArtifactBurntHunk: 10,
+  FArtifactCandle: 15,
+  FArtifactCore: 30,
+  FArtifactCrystal: 5,
+  FArtifactDeadSponge: 10,
+  FArtifactDrops: 5,
+  FArtifactEye: 5,
+  FArtifactFireBall: 10,
+  FArtifactFireworks: 15,
+  FArtifactGlass: 10,
+  FArtifactHellishHedgehog: 15,
+  FArtifactMomsBeads: 10,
+  FArtifactPlasma: 20,
+  FArtifactResin: 5,
+  FArtifactRingOmnipotence: 40,
+  FArtifactSteak: 5,
+  GArtifactBloodStone: 10,
+  GArtifactBud: 20,
+  GArtifactCompass: 20,
+  GArtifactGoldFish: 10,
+  GArtifactGraphiteBlock: 10,
+  GArtifactGravy: 10,
+  GArtifactHedgehog: 30,
+  GArtifactLandSlug: 5,
+  GArtifactNightStar: 30,
+  GArtifactPlane: 5,
+  GArtifactRubiksCube: 15,
+  GArtifactSplitStone: 10,
+  GArtifactSponge: 15,
+  GArtifactSpring: 20,
+  GArtifactStoneDrop: 10,
+  GArtifactTrunk: 5,
+  GArtifactWrenched: 5,
+  PArtifactBrain: 5,
+};
