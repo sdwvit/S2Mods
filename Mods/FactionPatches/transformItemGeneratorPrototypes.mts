@@ -11,7 +11,7 @@ import {
 /**
  * Add faction patches to drops
  */
-export const addFactionPatchesToItemGenerators: StructTransformer<ItemGeneratorPrototype> = (struct) => {
+export const transformItemGeneratorPrototypes: StructTransformer<ItemGeneratorPrototype> = (struct) => {
   if (
     !allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] &&
     !allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID]
@@ -57,4 +57,4 @@ export const addFactionPatchesToItemGenerators: StructTransformer<ItemGeneratorP
 
   return fork;
 };
-addFactionPatchesToItemGenerators.files = ["/DynamicItemGenerator.cfg", "QuestItemGeneratorPrototypes.cfg"];
+transformItemGeneratorPrototypes.files = ["/DynamicItemGenerator.cfg", "QuestItemGeneratorPrototypes.cfg"];

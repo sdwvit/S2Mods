@@ -1,5 +1,5 @@
 import { EItemType, QuestItemPrototype, Struct } from "s2cfgtojson";
-import { CoreFaction, Factions, getRecord } from "../../src/consts.mts";
+import { CoreFaction, getRecord } from "../../src/consts.mts";
 
 let addFactionPatchesOnce = false;
 
@@ -59,7 +59,7 @@ export function addFactionPatchItems() {
       }),
   );
 
-  return [template, ...patches];
+  return [template, ...patches] as QuestItemPrototype[];
 }
 
 addFactionPatchItems.files = ["/KeyItemPrototypes.cfg"];
