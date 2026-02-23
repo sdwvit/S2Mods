@@ -11,6 +11,7 @@
     "publish-modio": "node ./src/publish-modio.mts",
     "zip-for-xbox": "node ./src/zip-for-xbox.mts",
     "publish-platforms": "node ./src/publish-platforms.mts",
+    "check-unpublished": "node ./src/check-unpublished-mods.mts",
     "update-readme": "node ./src/update-readme.mts",
     "prepare-all": "node src/prepare-all.ts",
     "push-to-sdk": "node ./src/push-to-sdk.mts",
