@@ -1,7 +1,7 @@
 import { MetaType } from "../../src/meta-type.mts";
-import { addXpCounterItem } from "./addXpCounterItem.mts";
-import { disableQuestRankSetters } from "./disableQuestRankSetters.mts";
-
+import { transformKeyItemPrototypes } from "./transformKeyItemPrototypes.mts";
+import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
+import { transformItemGeneratorPrototypes } from "../FactionPatches/transformItemGeneratorPrototypes.mts";
 export const meta: MetaType = {
   description: `
 Decoupled Ranks separates player rank progression from story quest milestones.[h1][/h1]
@@ -16,5 +16,5 @@ Current implementation target:[h1][/h1]
 - Apply rank updates through centralized progression logic.[h1][/h1]
 `,
   changenote: "Initial release",
-  structTransformers: [disableQuestRankSetters, addXpCounterItem],
+  structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformItemGeneratorPrototypes],
 };
