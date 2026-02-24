@@ -7,30 +7,29 @@ import { writeFileSync } from "node:fs";
 const readmePath = path.join(modFolder, "readme.md");
 const maxRenderedFiles = 10;
 
-function truncateModifiedFilesMarkdown(markdown: string, maxFiles: number) {
+function truncateModifiedFilesMarkdown(markdown: string, maxFilesPerCategory: number) {
   const lines = markdown.split("\n");
   const truncatedLines: string[] = [];
-  let renderedFiles = 0;
-  let didTruncate = false;
+  let renderedFilesInCategory = 0;
+  let didTruncateCategory = false;
 
   for (const line of lines) {
     if (line.startsWith(" - ")) {
-      if (renderedFiles < maxFiles) {
+      if (renderedFilesInCategory < maxFilesPerCategory) {
         truncatedLines.push(line);
-        renderedFiles++;
+        renderedFilesInCategory++;
         continue;
       }
-      if (!didTruncate) {
+      if (!didTruncateCategory) {
         truncatedLines.push(" - ...");
-        didTruncate = true;
+        didTruncateCategory = true;
       }
       continue;
     }
 
-    if (didTruncate) {
-      continue;
-    }
-
+    // Non-list line means a new category header (or a separator/blank line).
+    renderedFilesInCategory = 0;
+    didTruncateCategory = false;
     truncatedLines.push(line);
   }
 
