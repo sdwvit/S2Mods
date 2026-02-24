@@ -1,8 +1,6 @@
 import {
   EConditionComparance,
-  GetStructType,
   QuestNodePrototype,
-  QuestNodePrototypeActivateRestrictor,
   QuestNodePrototypeCondition,
   QuestNodePrototypeConditionsItemItem,
   Struct,
@@ -44,6 +42,29 @@ function getConditionComparance(ConditionComparance: EConditionComparance) {
   }
 }
 
+export function renderBooleanComparison(expr: string, comp: string) {
+  switch (comp) {
+    case "===":
+    case ">=":
+    case ">":
+      return expr;
+    case "!==":
+    case "<":
+    case "<=":
+      return `!(${expr})`;
+    default:
+      return `${expr} ${comp} true`;
+  }
+}
+
+export function renderConditionResultBlock(conditionExpr: string, isIfNode: boolean) {
+  const expr = conditionExpr.trim();
+  if (isIfNode) {
+    return `result = ${expr};`;
+  }
+  return `result = ${expr};\nif (!result) return;`;
+}
+
 type QuestFunction = {
   (caller: QuestFunction, pinName: string): void;
   State: Record<QuestFunction["name"], { SID: string; Name: string }[]>;
@@ -77,6 +98,22 @@ function questNodeToJavascript(
       })
       .filter((k) => k)});`;
 
+  const renderSubTypeWithProps = <T extends QuestNodePrototype>(subType: string, propKeys: (keyof T & string)[]) => {
+    const pairs = propKeys
+      .filter((k) => Object.hasOwn(struct, k))
+      .map((k) => {
+        const value = (struct as T as any)[k];
+        const renderedValue = value === undefined ? "undefined" : JSON.stringify(value);
+        return `${k}: ${renderedValue}`;
+      });
+
+    if (!pairs.length) {
+      return renderSubType<T>(subType);
+    }
+
+    return `${subType}({ ${pairs.join(", ")} });`;
+  };
+
   // noinspection FallThroughInSwitchStatementJS
   switch (struct.NodeType) {
     case "EQuestNodeType::ActivateRestrictor":
@@ -93,7 +130,7 @@ function questNodeToJavascript(
       return processConditionNode(struct, globalVars, globalFunctions, questActors, getNodeSid);
     case "EQuestNodeType::Despawn":
       questActors.add(struct.TargetQuestGuid);
-      globalFunctions.set("despawn", "(actor) => { delete spawnedActors[actor]; console.log(`despawn(${actor})`); }; ");
+      globalFunctions.set("despawn", "(actor) => { delete spawnedActors[actor]; __questLog(`despawn(${actor})`); }; ");
       return `despawn(questActors['${struct.TargetQuestGuid}']);`;
     case "EQuestNodeType::End":
       return "";
@@ -321,7 +358,7 @@ function questNodeToJavascript(
       return renderSubType(subType);
     case "EQuestNodeType::ShowFadeScreen":
       globalFunctions.set(subType, "");
-      return renderSubType(subType);
+      return renderSubTypeWithProps(subType, ["FadeTime", "ScreenText", "ImagePath"]);
     case "EQuestNodeType::ShowLoadingScreen":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
@@ -334,6 +371,9 @@ function questNodeToJavascript(
     case "EQuestNodeType::TeleportCharacter":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
+    case "EQuestNodeType::Technical":
+      globalFunctions.set(subType, "");
+      return renderSubTypeWithProps(subType, ["StartDelay", "LaunchOnQuestStart"]);
     case "EQuestNodeType::TimeLock":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
@@ -398,7 +438,7 @@ function processConditionNode(
   const struct = structT as QuestNodePrototypeCondition;
   const andOr = struct.Conditions.ConditionCheckType === "EConditionCheckType::Or" ? " || " : " && ";
   const conditionSubType = struct.NodeType.split("::").pop();
-  return `result = ${struct.Conditions.entries()
+  const conditionExpr = `${struct.Conditions.entries()
     .filter(([k]) => k !== "ConditionCheckType")
     .map(([_k, cond]) => {
       if (typeof cond === "string") {
@@ -437,7 +477,7 @@ function processConditionNode(
               globalFunctions.set(f, "(s) => true");
               questActors.add(target);
               questActors.add(trigger);
-              return `${f}(questActors['${trigger}'], questActors['${target}'], '${param1}', '${param2}') ${comp} true`;
+              return renderBooleanComparison(`${f}(questActors['${trigger}'], questActors['${target}'], '${param1}', '${param2}')`, comp);
             }
             case "EQuestConditionType::Emission": {
               const f = `isEmissionHappening`;
@@ -447,7 +487,7 @@ function processConditionNode(
               if (target) {
                 questActors.add(target);
               }
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} true`;
+              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""})`, comp);
             }
             case "EQuestConditionType::Money": {
               const f = "getMoney";
@@ -597,7 +637,10 @@ function processConditionNode(
               const completedPins = c.CompletedNodeLauncherNames.entries()
                 .map(([_k, v]) => JSON.stringify(v))
                 .join(", ");
-              return `hasQuestNodeExecuted(${linkedNodeSid}, [${completedPins}]) ${getConditionComparance(c.ConditionComparance)} true`;
+              return renderBooleanComparison(
+                `hasQuestNodeExecuted(${linkedNodeSid}, [${completedPins}])`,
+                getConditionComparance(c.ConditionComparance),
+              );
             }
             case "EQuestConditionType::ContextualAction": {
               const f = "hasContextualAction";
@@ -611,7 +654,10 @@ function processConditionNode(
                 questActors.add(placeholder);
               }
               globalFunctions.set(f, "() => true;");
-              return `${f}(${targetNpc ? `questActors['${targetNpc}']` : ""}${placeholder ? `, questActors['${placeholder}']` : ""}) ${comp} true`;
+              return renderBooleanComparison(
+                `${f}(${targetNpc ? `questActors['${targetNpc}']` : ""}${placeholder ? `, questActors['${placeholder}']` : ""})`,
+                comp,
+              );
             }
             case "EQuestConditionType::CorpseCarry": {
               const f = "isCarryingCorpse";
@@ -626,7 +672,10 @@ function processConditionNode(
                 questActors.add(corpse);
               }
               globalFunctions.set(f, "() => false;");
-              return `${f}(${target ? `questActors['${target}']` : ""}${corpse ? `, questActors['${corpse}']` : ""}, ${anyBody}) ${comp} true`;
+              return renderBooleanComparison(
+                `${f}(${target ? `questActors['${target}']` : ""}${corpse ? `, questActors['${corpse}']` : ""}, ${anyBody})`,
+                comp,
+              );
             }
             case "EQuestConditionType::DistanceToNPC": {
               const f = `get${questConditionSubType}`;
@@ -658,7 +707,7 @@ function processConditionNode(
                 questActors.add(target);
               }
               globalFunctions.set(f, "() => false;");
-              return `${f}(${target ? `questActors['${target}']` : ""}, ${JSON.stringify(effect)}) ${comp} true`;
+              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""}, ${JSON.stringify(effect)})`, comp);
             }
             case "EQuestConditionType::EquipmentInHands": {
               const f = "hasEquipmentInHands";
@@ -673,7 +722,10 @@ function processConditionNode(
                 globalVars.add(String(itemSid));
               }
               globalFunctions.set(f, "() => false;");
-              return `${f}(${target ? `questActors['${target}']` : "null"}, ${itemSid ? itemSid : "null"}, ${JSON.stringify(equipment)}) ${comp} true`;
+              return renderBooleanComparison(
+                `${f}(${target ? `questActors['${target}']` : "null"}, ${itemSid ? itemSid : "null"}, ${JSON.stringify(equipment)})`,
+                comp,
+              );
             }
             case "EQuestConditionType::FactionRelationship": {
               const f = "getFactionRelationship";
@@ -697,12 +749,12 @@ function processConditionNode(
               const itemSid = c.QuickSlotItemSID || "";
               const consumable = c.QuickSlotConsumableType?.split("::").pop() || "";
               globalFunctions.set(f, "() => false;");
-              return `${f}(${index}, ${JSON.stringify(itemSid)}, ${JSON.stringify(consumable)}) ${comp} true`;
+              return renderBooleanComparison(`${f}(${index}, ${JSON.stringify(itemSid)}, ${JSON.stringify(consumable)})`, comp);
             }
             case "EQuestConditionType::IsAlive":
               globalFunctions.set(
                 "IsAlive",
-                "(actor) => { const isAlive = !!spawnedActors[actor]; console.log(`IsAlive(${actor}) === ${isAlive}`); return isAlive; };",
+                "(actor) => { const isAlive = !!spawnedActors[actor]; __questLog(`IsAlive(${actor}) === ${isAlive}`); return isAlive; };",
               );
               questActors.add(c.TargetCharacter);
               return `${getConditionComparance(c.ConditionComparance) === "===" ? "" : "!"}IsAlive(questActors['${c.TargetCharacter}'])`;
@@ -710,7 +762,7 @@ function processConditionNode(
             case "EQuestConditionType::IsCreated":
               globalFunctions.set(
                 "IsCreated",
-                "(actor) => { const created = !!spawnedActors[actor]; console.log(`IsCreated(${actor}) === ${created}`); return created; };",
+                "(actor) => { const created = !!spawnedActors[actor]; __questLog(`IsCreated(${actor}) === ${created}`); return created; };",
               );
               questActors.add(c.TargetPlaceholder);
               return `${getConditionComparance(c.ConditionComparance) === "===" ? "" : "!"}IsCreated(questActors['${c.TargetPlaceholder}'])`;
@@ -720,7 +772,7 @@ function processConditionNode(
               const comp = getConditionComparance(c.ConditionComparance);
               const required = c.AmmoRequired ?? 0;
               globalFunctions.set(f, "() => true;");
-              return `${f}(${required}) ${comp} true`;
+              return renderBooleanComparison(`${f}(${required})`, comp);
             }
             case "EQuestConditionType::IsOnline": {
               const f = "isOnline";
@@ -730,13 +782,13 @@ function processConditionNode(
                 questActors.add(target);
               }
               globalFunctions.set(f, "() => true;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} true`;
+              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""})`, comp);
             }
             case "EQuestConditionType::IsWeaponJammed": {
               const f = "isWeaponJammed";
               const comp = getConditionComparance(c.ConditionComparance);
               globalFunctions.set(f, "() => false;");
-              return `${f}() ${comp} true`;
+              return renderBooleanComparison(`${f}()`, comp);
             }
             case "EQuestConditionType::IsWounded": {
               const f = "isWounded";
@@ -746,7 +798,7 @@ function processConditionNode(
                 questActors.add(target);
               }
               globalFunctions.set(f, "() => false;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} true`;
+              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""})`, comp);
             }
             case "EQuestConditionType::ItemInContainer": {
               const f = `is${questConditionSubType}`;
@@ -759,7 +811,7 @@ function processConditionNode(
               globalVars.add(String(ItemPrototypeSID));
               questActors.add(TargetItemContainer);
 
-              return `${f}(questActors['${TargetItemContainer}'], ${ItemPrototypeSID}, ${ItemsCount}) ${comp} true`;
+              return renderBooleanComparison(`${f}(questActors['${TargetItemContainer}'], ${ItemPrototypeSID}, ${ItemsCount})`, comp);
             }
             case "EQuestConditionType::ItemInInventory": {
               const f = `is${questConditionSubType}`;
@@ -770,7 +822,7 @@ function processConditionNode(
               globalFunctions.set(f, "() => true;");
               globalVars.add(String(ItemPrototypeSID));
 
-              return `${f}(${ItemPrototypeSID}, ${ItemsCount}) ${comp} true`;
+              return renderBooleanComparison(`${f}(${ItemPrototypeSID}, ${ItemsCount})`, comp);
             }
             case "EQuestConditionType::LookAtAngle": {
               const f = "getLookAtAngle";
@@ -789,7 +841,7 @@ function processConditionNode(
               const comp = getConditionComparance(c.ConditionComparance);
               const note = c.NotePrototypeSID || "";
               globalFunctions.set(f, "() => false;");
-              return `${f}(${JSON.stringify(note)}) ${comp} true`;
+              return renderBooleanComparison(`${f}(${JSON.stringify(note)})`, comp);
             }
             case "EQuestConditionType::PersonalRelationship": {
               const f = `is${questConditionSubType}`;
@@ -810,7 +862,7 @@ function processConditionNode(
                 questActors.add(target);
               }
               globalFunctions.set(f, "() => false;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} true`;
+              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""})`, comp);
             }
             case "EQuestConditionType::Psy": {
               const f = "getPsy";
@@ -838,11 +890,23 @@ function processConditionNode(
         })
         .join(andOr);
     })
-    .join(andOr)} ${conditionSubType === "If" ? "" : "; \nif (!result) return"};`;
+    .join(andOr)}`;
+  return renderConditionResultBlock(conditionExpr, conditionSubType === "If");
 }
 
 function getEventHandler(eventName: string) {
   return (target: string, content?: string) => `${eventName}(${target}${content ? `, ${content}` : ""});`;
+}
+
+function indentBlock(content: string, indent = "  ") {
+  return content
+    .split("\n")
+    .map((line) => (line ? `${indent}${line}` : line))
+    .join("\n");
+}
+
+export function shouldDeclareResultVar(nodeBody: string, usesResultBasedLaunches: boolean) {
+  return usesResultBasedLaunches || /\bresult\b/.test(nodeBody);
 }
 
 function getStructBody(
@@ -853,8 +917,10 @@ function getStructBody(
   getNodeSid: (sid: string) => string,
 ) {
   let launches = "";
+  let usesResultBasedLaunches = false;
   if (node.launches.length) {
     const useSwitch = node.launches.some(({ Name }) => Name);
+    usesResultBasedLaunches = useSwitch;
     if (useSwitch) {
       launches = node.launches
         .map(({ Name, SID }) => {
@@ -868,26 +934,40 @@ function getStructBody(
   }
   const isCoDep =
     node.launchersByJsSid && Object.entries(node.launchersByJsSid).length && Object.entries(node.launchersByJsSid).some(([_k, v]) => v.length > 1);
-  const consoleLog = `console.log('// ' + f.name + '(${isCoDep ? "', callerName, ',', name, '" : ""});');`;
-  return `
-     function ${node.jsSid}(caller, name) {         
-         const f = ${node.jsSid};
-         const callerName = caller?.name ?? String(caller ?? "Unknown");
-         ${isCoDep ? `f.Conditions ??= ${JSON.stringify(node.launchersByJsSid || {})}` : ""}
-         let result = None;
-         f.State ??= {}; 
-         f.State[callerName] ||= [];
-         f.State[callerName].push({ SID: callerName, Name: name || true });
-         ${isCoDep ? "" : consoleLog}
-         ${isCoDep ? `waitForCallers(1000, f, caller).then(() => {` : ""}
-           ${questNodeToJavascript(node.raw, globalVars, globalFunctions, questActors, getNodeSid)}
-           ${launches}
-           ${isCoDep ? consoleLog : ""}
-           f.State[f.name] ||= [];
-           f.State[f.name].push({ SID: f.name, Name: result });
-         ${isCoDep ? "}).catch(e => console.log(e))" : ""} 
-     }
-    `.trim();
+  const consoleLog = isCoDep
+    ? `__questLog('// ${node.jsSid}(', callerName, ',', name, ');');`
+    : `__questLog('// ${node.jsSid}();');`;
+  const nodeBody = questNodeToJavascript(node.raw, globalVars, globalFunctions, questActors, getNodeSid);
+  const needsResultVar = shouldDeclareResultVar(nodeBody, usesResultBasedLaunches);
+  const bodyLines = [
+    nodeBody,
+    launches,
+    isCoDep ? consoleLog : "",
+    `__questNodeComplete(f, ${needsResultVar ? "result" : "None"});`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const lines = [
+    `function ${node.jsSid}(caller, name) {`,
+    `  const f = ${node.jsSid};`,
+    ...(isCoDep
+      ? ["  const callerName = __questNodeInit(f, caller, name);"]
+      : ["  __questNodeInit(f, caller, name);"]),
+    ...(isCoDep ? [`  f.Conditions ??= ${JSON.stringify(node.launchersByJsSid || {})};`] : []),
+    ...(needsResultVar ? ["  let result = None;"] : []),
+    ...(isCoDep
+      ? [
+          "  waitForCallers(1000, f, caller)",
+          "    .then(() => {",
+          indentBlock(bodyLines, "      "),
+          "    })",
+          "    .catch((e) => __questLog(e));",
+        ]
+      : [indentBlock(bodyLines, "  ")]),
+    "}",
+  ];
+  return lines.join("\n");
 }
 
 function getContent(

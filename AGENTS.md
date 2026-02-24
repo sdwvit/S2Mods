@@ -59,6 +59,9 @@ The following are git-ignored and should not be committed unless explicitly requ
 - Many scripts read from environment variables; do not hardcode local paths.
 - `SDK_PATH` is expected to point at the STALKER2ZoneKit root; cfg source data is under `Stalker2/Content/GameLite` (see `src/base-paths.mts`).
 - For opening files in IntelliJ at a specific line, use: `"$IDEA_PATH" --line <line> <path-to-file>` (set `IDEA_PATH` in `.env`).
+- To run `.mts` scripts manually with the `.env` loader paths (for example `src/quest-nodes-to-js.mts`), use:
+  - `PATH="$(dirname "$NODE_PATH"):$PATH" "$NODE_PATH" --import "file:$NODE_TS_TRANSFORMER" ./src/quest-nodes-to-js.mts`
+  - Use `--import` (not `--loader`) with modern Node (v20.6+ / v22+), because `tsx` loader rejects `--loader`.
 
 ## How to analyze `.cfg` files
 - Source of truth is the SDK GameLite tree at `SDK_PATH/Stalker2/Content/GameLite` (this is what `src/base-paths.mts` calls `baseCfgDir`).
