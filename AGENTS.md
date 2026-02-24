@@ -83,6 +83,7 @@ The following are git-ignored and should not be committed unless explicitly requ
 - If a mod must patch prototypes introduced by another mod and those raw/generated structs are not available during `npm run prepare-configs`, assume the target SIDs exist and inject one-shot patch structs with a `let once = false` guard. It is OK to depend on TypeScript source objects/constants (for example SID definition arrays), but not on the other mod's generated/raw structs.
 - Keep edits in transformers and regenerate `raw/` via `npm run prepare-configs`; do not hand-edit `raw/` unless explicitly asked.
 - `ShowFadeScreen` quest nodes can be used as a lightweight in-game debug message display during quest logic prototyping.
+- In quest-node chains, `ItemRemove` on an absent inventory item appears to attempt removal without failing the chain (verified in DecoupledRanks work); do not assume it hard-fails unless observed otherwise for a specific node type/case.
 - Validate references against GameLite: `ItemPrototypeSID`, `UpgradePrototypeSIDs`, `EffectPrototypeSIDs`, `MeshGeneratorPrototypeSID`. Avoid duplicate UpgradePrototypeSIDs.
 - In special cases when mod requires SDK involvement and doesn't modify cfgs, `structTransformers` can be empty (see `Mods/NoEnemyMarkers`).
 
