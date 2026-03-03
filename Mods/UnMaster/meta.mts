@@ -10,7 +10,7 @@ Rest of Master specific things are left intact.[h1][/h1]
 [hr][/hr]
 bpatches DifficultyPrototypes
 `,
-  changenote: "Fix save limits",
+  changenote: "Show body markers",
   structTransformers: [structTransformer],
 };
 
@@ -23,6 +23,7 @@ function structTransformer(struct: DifficultyPrototype, context: MetaContext<Dif
   fork.TotalSaveLimits = new Struct() as any;
   fork.bShouldDisableCompass = false;
   fork.BlockSettings = false;
+  fork.bShouldDisableDeadBodyMarkers = false;
   return fork;
 }
 
