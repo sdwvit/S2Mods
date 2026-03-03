@@ -12,9 +12,15 @@ function truncateModifiedFilesMarkdown(markdown: string, maxFilesPerCategory: nu
   const truncatedLines: string[] = [];
   let renderedFilesInCategory = 0;
   let didTruncateCategory = false;
+  let currentCategory = "";
 
   for (const line of lines) {
     if (line.startsWith(" - ")) {
+      if (currentCategory === "GameData") {
+        truncatedLines.push(line);
+        continue;
+      }
+
       if (renderedFilesInCategory < maxFilesPerCategory) {
         truncatedLines.push(line);
         renderedFilesInCategory++;
@@ -30,6 +36,7 @@ function truncateModifiedFilesMarkdown(markdown: string, maxFilesPerCategory: nu
     // Non-list line means a new category header (or a separator/blank line).
     renderedFilesInCategory = 0;
     didTruncateCategory = false;
+    currentCategory = line.match(/^`([^`]+)`:?$/)?.[1] ?? "";
     truncatedLines.push(line);
   }
 

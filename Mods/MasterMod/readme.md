@@ -63,17 +63,7 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `GenericLairPrototypes`
 
 `ObjPrototypes`:
- - `Bloodsucker`
- - `Boar`
- - `Burer`
- - `Chimera`
- - `Controller`
- - `Deer`
- - `Flesh`
- - `PseudoDog`
- - `Pseudogiant`
  - `QuestObjPrototypes`
- - `Snork`
 
 `QuestNodePrototypes`
 
