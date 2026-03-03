@@ -24,7 +24,6 @@ import { MetaType } from "../../src/meta-type.mts";
 import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
 import { logger } from "../../src/logger.mts";
 import { MergedStructs } from "../../src/merged-structs.mts";
-import { transformMobs } from "./transformMobs.mts";
 import { transformDynamicItemGenerator } from "./transformItemGenerator.mts";
 
 const structTransformers = [
@@ -40,7 +39,6 @@ const structTransformers = [
   transformItemGeneratorPrototypes,
   transformLairPrototypes,
   transformMeshGeneratorPrototypes,
-  transformMobs,
   transformNPCWeaponSettingsPrototypes,
   transformQuestArtifactPrototypes,
   transformQuestItemPrototypes,
@@ -73,7 +71,7 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [QoL] Allows buying/selling/dropping quest items.
  [*] [Balance] Unique and fair rewards for each possible variant of repeating quests.
 [/list]`,
-  changenote: `Fix not issuing monetary reward`,
+  changenote: `Extracted mutant related changes into a separate mod.`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
