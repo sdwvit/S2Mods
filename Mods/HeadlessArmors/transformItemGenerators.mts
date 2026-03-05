@@ -59,24 +59,29 @@ function shouldProcessStruct(struct: ItemGeneratorPrototype) {
   );
 }
 
-function* getCoreItemGeneratorPrototypeForEdit(
-  struct: ItemGeneratorPrototype,
-  papaIndex?: string | number,
-): Generator<[string, ItemGeneratorPrototypeItemGeneratorItem], void, unknown> {
+function* getCoreItemGeneratorPrototypeForEdit<T extends ItemGeneratorPrototype>(
+  struct: T,
+  path: string[] = [],
+): Generator<`${number}`[], void, unknown> {
   for (const [_, ig] of struct.ItemGenerator.entries()) {
     switch (ig.Category) {
+      case "EItemGenerationCategory::BodyArmor":
+      case "EItemGenerationCategory::Head":
       case "EItemGenerationCategory::SubItemGenerator": {
+        if (!ig.PossibleItems) {
+          break;
+        }
         for (const [_2, pi] of ig.PossibleItems.entries()) {
-          if (allDefaultItemGeneratorsRecord[pi.ItemGeneratorPrototypeSID]) {
-            yield* getCoreItemGeneratorPrototypeForEdit(allDefaultItemGeneratorsRecord[pi.ItemGeneratorPrototypeSID], papaIndex ?? _);
+          if (pi.ItemGeneratorPrototypeSID) {
+            if (allDefaultItemGeneratorsRecord[pi.ItemGeneratorPrototypeSID]) {
+              yield* getCoreItemGeneratorPrototypeForEdit(allDefaultItemGeneratorsRecord[pi.ItemGeneratorPrototypeSID], [...path, _, _2]);
+            }
+          } else {
+            yield [...path, _, _2] as `${number}`[];
           }
         }
         break;
       }
-      case "EItemGenerationCategory::BodyArmor":
-      case "EItemGenerationCategory::Head":
-        yield [papaIndex ?? _, ig] as [string, ItemGeneratorPrototypeItemGeneratorItem];
-        break;
     }
   }
 }
@@ -352,12 +357,21 @@ export const transformItemGenerators: StructTransformer<ItemGeneratorPrototype> 
  * Removes any existing item generators
  */
 function resetCss(struct: ItemGeneratorPrototype, fork: ItemGeneratorPrototype) {
-  getCoreItemGeneratorPrototypeForEdit(struct).forEach(([key, ig]) => {
-    const igFork = ig.fork();
+  getCoreItemGeneratorPrototypeForEdit(struct).forEach((path) => {
+    const [igIndex, piIndex, ...rest] = path;
+    const ig = struct.ItemGenerator[igIndex];
+    const igFork = struct.ItemGenerator[igIndex].fork();
+    const isSubItemGen = !!rest.length;
     igFork.bAllowSameCategoryGeneration = true;
-    igFork.PossibleItems = new Struct() as any;
-    igFork.removeNode("PossibleItems");
-    fork.ItemGenerator.addNode(igFork, key);
+    igFork.PossibleItems = ig.PossibleItems.fork();
+    struct;
+    igFork.PossibleItems[piIndex] = ig.PossibleItems[piIndex].fork();
+    if (isSubItemGen) {
+      igFork.PossibleItems[piIndex].removeNode("ItemGeneratorPrototypeSID");
+    } else {
+      igFork.PossibleItems[piIndex].removeNode("ItemPrototypeSID");
+    }
+    fork.ItemGenerator.addNode(igFork, igIndex);
   });
 }
 
