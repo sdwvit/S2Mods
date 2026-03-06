@@ -139,14 +139,7 @@ export function resolveQuestNodesToJsInputPath(inputPath: string, cfgRoot = base
 
 export async function runQuestNodesToJsDebug(
   input = `
-
-RSQ01.cfg
-RSQ01_C01.cfg
-RSQ01_C02.cfg
-RSQ01_C03.cfg
-RSQ01_C04.cfg
-RSQ01_C05.cfg
-RSQ01_C06.cfg 
+/home/sdwvit/IdeaProjects/S2Mods/Mods/DecoupledRanks/raw/Stalker2/Content/GameLite/GameData/QuestNodePrototypes/rootgraph/rootgraph_patch_DecoupledRanks.cfg
  `,
 ) {
   await Promise.all(

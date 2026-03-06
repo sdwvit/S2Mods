@@ -59,10 +59,12 @@ export function renderBooleanComparison(expr: string, comp: string) {
 
 export function renderConditionResultBlock(conditionExpr: string, isIfNode: boolean) {
   const expr = conditionExpr.trim();
+  // Never early-return from condition-like nodes: __questNodeComplete must run
+  // to keep __questDepth balanced.
   if (isIfNode) {
     return `result = ${expr};`;
   }
-  return `result = ${expr};\nif (!result) return;`;
+  return `result = ${expr};`;
 }
 
 type QuestFunction = {
@@ -442,13 +444,13 @@ function processConditionNode(
     .filter(([k]) => k !== "ConditionCheckType")
     .map(([_k, cond]) => {
       if (typeof cond === "string") {
-        return;
+        return "";
       }
-      return cond
+      const groupExpr = cond
         .entries()
         .map(([_k, cR]) => {
           if (typeof cR !== "object") {
-            return;
+            return "";
           }
           const c = cR as QuestNodePrototypeConditionsItemItem;
           const questConditionSubType = c.ConditionType.split("::").pop();
@@ -888,8 +890,12 @@ function processConditionNode(
             }
           }
         })
-        .join(andOr);
+        .filter(Boolean)
+        // Conditions inside one group are evaluated conjunctively.
+        .join(" && ");
+      return groupExpr ? `(${groupExpr})` : "";
     })
+    .filter(Boolean)
     .join(andOr)}`;
   return renderConditionResultBlock(conditionExpr, conditionSubType === "If");
 }
@@ -919,11 +925,18 @@ function getStructBody(
   let launches = "";
   let usesResultBasedLaunches = false;
   if (node.launches.length) {
-    const useSwitch = node.launches.some(({ Name }) => Name);
+    const isConditionLike = node.raw.NodeType === "EQuestNodeType::Condition" || node.raw.NodeType === "EQuestNodeType::If";
+    // Condition/If outputs are always result-dependent, even when Name is empty.
+    // Other nodes should still use result-dependent dispatch when they expose named outputs.
+    const useSwitch = isConditionLike || node.launches.some(({ Name }) => Boolean(Name));
     usesResultBasedLaunches = useSwitch;
     if (useSwitch) {
       launches = node.launches
         .map(({ Name, SID }) => {
+          if (!Name) {
+            // For Condition/If nodes, empty pin names represent the successful branch.
+            return `if (result) ${getNodeSid(SID)}(f, '');`;
+          }
           const isBool = Name === "True" || Name === "False";
           return `if (${isBool ? (Name === "True" ? "result" : "!result") : `result === \"${Name}\"`}) ${getNodeSid(SID)}(f, '${Name || ""}');`;
         })
