@@ -7,6 +7,7 @@ const RUNTIME_BASE_SOURCE = `
 const DEBUG_QUEST_JS = globalThis.DEBUG_QUEST_JS ?? true;
 const DEBUG_QUEST_JS_LEVEL = globalThis.DEBUG_QUEST_JS_LEVEL ?? "full";
 const DEBUG_QUEST_JS_NODE_LOGS = globalThis.DEBUG_QUEST_JS_NODE_LOGS ?? false;
+const DEBUG_QUEST_JS_MAX_INDENT = Number(globalThis.DEBUG_QUEST_JS_MAX_INDENT ?? 24);
 let __questDepth = 0;
 const __questLog = (...args) => {
   if (DEBUG_QUEST_JS) console.log(...args);
@@ -14,7 +15,7 @@ const __questLog = (...args) => {
 const __questLogFull = (...args) => {
   if (DEBUG_QUEST_JS && DEBUG_QUEST_JS_LEVEL === "full") console.log(...args);
 };
-const __questIndent = (extra = 0) => "  ".repeat(Math.max(0, __questDepth + extra));
+const __questIndent = (extra = 0) => " ".repeat(Math.min(DEBUG_QUEST_JS_MAX_INDENT, Math.max(0, __questDepth + extra)));
 const __questLogIndented = (message, extra = 0) => {
   __questLog(__questIndent(extra) + message);
 };
@@ -53,7 +54,11 @@ function __questAddItem(itemSid, count = 1, actor = "Skif") {
 function __questRemoveItem(itemSid, count = 1, actor = "Skif") {
   const inventory = getActorInventory(actor);
   const next = Math.max(0, (inventory[itemSid] || 0) - Number(count || 0));
-  inventory[itemSid] = next;
+  if (next) {
+    inventory[itemSid] = next;
+  } else {
+    delete inventory[itemSid];
+  }
   __questLogIndented(\`inventory remove \${itemSid} x\${count} -> \${actor} now has \${next}\`, 1);
   return next;
 }
