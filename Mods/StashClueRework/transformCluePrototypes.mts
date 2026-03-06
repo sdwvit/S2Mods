@@ -1,5 +1,4 @@
 import { CluePrototype, Struct } from "s2cfgtojson";
-import { QuestDataTable } from "../MasterMod/rewardFormula.mts";
 import { getGeneratedStashSID } from "./transformSpawnActorPrototypes.mts";
 
 let transformCluePrototypesOncePerFile = false;
