@@ -10,10 +10,11 @@ Design goals:[h1][/h1]
 - Keep rank progression consistent across different story paths.[h1][/h1]
 - Make rank feel earned through play activity, not only mission scripting.[h1][/h1]
 - Preserve existing rank-based systems (loot, trade, spawn scaling, dialogs) while changing only how rank is awarded.[h1][/h1]
-Current implementation target:[h1][/h1]
-- Remove or neutralize quest-driven rank setters.[h1][/h1]
-- Introduce score thresholds that map to rank tiers.[h1][/h1]
-- Apply rank updates through centralized progression logic.[h1][/h1]
+Current implementation:[h1][/h1]
+- Removes quest-driven rank setters.[h1][/h1]
+- Introduces score thresholds that map to rank tiers.[h1][/h1]
+- Apply rank updates through collecting XP.[h1][/h1]
+- Get XP by picking up faction patches from dead bodies.[h1][/h1]
 `,
   changenote: "Initial release",
   structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformItemGeneratorPrototypes],
