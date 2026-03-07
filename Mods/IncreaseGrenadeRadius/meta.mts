@@ -10,7 +10,7 @@ Changes RGD5, F1, VOG-25, and M203 explosion radius to 12, 20, 10, and 10 meters
 [hr][/hr]
 This aligns better with IRL danger/injury radii.
 `,
-  changenote: "Update grenade/vog/m203 radii.",
+  changenote: "Improved compatibility with recent game updates.",
   structTransformers: [structTransformer],
   onFinish(): void | Promise<void> {
     logger.log(Object.keys(MergedStructs).length);

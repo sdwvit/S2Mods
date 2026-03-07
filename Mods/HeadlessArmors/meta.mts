@@ -51,7 +51,7 @@ export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype | QuestNodeP
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet
     [/list] 
   `,
-  changenote: `Rewrite the system completely. Consolidated SIDs. New game required (or save without old armors).`,
+  changenote: `Major update to the headless armor system. A new game is recommended.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,

@@ -15,6 +15,6 @@ Current implementation target:[h1][/h1]
 - Introduce score thresholds that map to rank tiers.[h1][/h1]
 - Apply rank updates through centralized progression logic.[h1][/h1]
 `,
-  changenote: "Initial release",
+  changenote: "Rank progression was reworked to behave more consistently across quests.",
   structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformItemGeneratorPrototypes],
 };

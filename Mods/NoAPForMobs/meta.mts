@@ -9,7 +9,7 @@ Meant to be used in other collections of mods.[h1][/h1]
 [h1][/h1]
 Compatibility: this mods does not modify any existing .cfg files, only extends mutant's object prototypes via new files.
  `,
-  changenote: "Deduplicate code",
+  changenote: "Improved compatibility with recent game updates.",
   structTransformers: [transformMobs],
 };
 
