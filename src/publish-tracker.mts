@@ -38,8 +38,16 @@ function runGitAndRead(command: string) {
   }).trim();
 }
 
-function hasUncommittedChanges() {
-  const status = runGitAndRead("git status --porcelain");
+function quoteForBash(value: string) {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+function getModFolderPath() {
+  return `Mods/${modName}`;
+}
+
+function hasUncommittedChangesInModFolder() {
+  const status = runGitAndRead(`git status --porcelain -- ${quoteForBash(getModFolderPath())}`);
   return status.trim().length > 0;
 }
 
@@ -61,12 +69,13 @@ function resolvePushCommand() {
 }
 
 export function commitAndPushIfDirty(platform: PublishPlatform, publishedAt = new Date()) {
-  if (!hasUncommittedChanges()) {
-    logger.log("No local changes to commit before publish.");
+  const modFolderPath = getModFolderPath();
+  if (!hasUncommittedChangesInModFolder()) {
+    logger.log(`No local changes to commit in ${modFolderPath} before publish.`);
     return;
   }
   const isoTimestamp = publishedAt.toISOString();
-  runGit("git add -A");
+  runGit(`git add -A -- ${quoteForBash(modFolderPath)}`);
   runGit(`git commit -m "publish: ${modName} ${platform} ${isoTimestamp}"`);
   runGit(resolvePushCommand());
 }
