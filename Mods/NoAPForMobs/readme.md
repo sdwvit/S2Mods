@@ -13,8 +13,4 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `Deer`
  - `Flesh`
  - `MutantBase`
- - `Poltergeist`
- - `PseudoDog`
- - `Pseudogiant`
- - `Snork`
- - `Tushkan`
+ - ...
