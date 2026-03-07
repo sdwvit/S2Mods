@@ -6,8 +6,8 @@ import { modFolderRaw, sdkModFolder } from "./base-paths.mjs";
 import { cpSync } from "node:fs";
 
 async function pullAssets() {
-  const sourcePath = path.join(await sdkModFolder, "Content");
-  const destinationPath = path.join(modFolderRaw, "Stalker2", "Content");
+  const sourcePath = path.join(await sdkModFolder);
+  const destinationPath = path.join(modFolderRaw, "Stalker2");
   logger.log(`Pulling mod assets from ${sourcePath}...`);
   if (fs.readdirSync(sourcePath).length === 0) {
     console.error(`No files found in source path: ${sourcePath}`);
