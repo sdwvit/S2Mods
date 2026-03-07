@@ -81,6 +81,8 @@ function getCombinations(items: string[]) {
 
 const newlyCreatedWeaponParamsWithPreinstalledAttachments: Record<string, WeaponGeneralSetupPrototype[]> = {};
 const requiredUpgradesRecord: Record<string, string[]> = {};
+const inheritedPreinstalledAttachmentUpgradesRecord: Record<string, Set<string>> = {};
+const inheritedPreinstalledAttachmentBlockedUpgradesRecord: Record<string, Set<string>> = {};
 
 const newWeaponSetupCost: Record<string, number> = {};
 /**
@@ -96,6 +98,10 @@ function createWeaponParamsWithPreinstalledAttachments(struct: WeaponGeneralSetu
     return;
   }
   const extraStructs = [];
+  const compatibleAttachmentsRecord = getRecordByKey(
+    struct.CompatibleAttachments.entries().map((e) => e[1]),
+    "AttachPrototypeSID",
+  );
   const compatibleDroppableAttachmentsRecord = getRecordByKey(
     compatibleDroppableAttachments.entries().map((e) => e[1]),
     "AttachPrototypeSID",
@@ -131,6 +137,22 @@ function createWeaponParamsWithPreinstalledAttachments(struct: WeaponGeneralSetu
     newlyCreatedWeaponParamsWithPreinstalledAttachments[struct.SID] ||= [];
     newlyCreatedWeaponParamsWithPreinstalledAttachments[struct.SID].push(newWeaponSetup);
     requiredUpgradesRecord[newWeaponSetup.SID] = requiredUpgrades;
+    const inheritedPreinstalledAttachments = struct.PreinstalledAttachmentsItemPrototypeSIDs?.entries().map((e) => e[1].AttachSID) || [];
+    inheritedPreinstalledAttachmentUpgradesRecord[newWeaponSetup.SID] = new Set(
+      inheritedPreinstalledAttachments
+        .flatMap((attachSID) => compatibleAttachmentsRecord[attachSID]?.RequiredUpgradeIDs?.entries().map((e) => e[1]) || [])
+        .filter((e) => !!e),
+    );
+    inheritedPreinstalledAttachmentBlockedUpgradesRecord[newWeaponSetup.SID] = new Set(
+      inheritedPreinstalledAttachments
+        .flatMap((attachSID) => {
+          const blockingUpgradeIDs =
+            (compatibleAttachmentsRecord[attachSID] as any)?.BlockingUpgradeIDs ||
+            (compatibleAttachmentsRecord[attachSID] as any)?.BlockingUpgradeIds;
+          return blockingUpgradeIDs?.entries().map((e) => e[1]) || [];
+        })
+        .filter((e) => !!e),
+    );
     if (!requiredUpgrades.length) {
       delete newWeaponSetup.UpgradePrototypeSIDs;
     }
@@ -155,6 +177,17 @@ async function createWeapons(struct: WeaponPrototype) {
   }
   const extraStructs = [];
   newlyCreatedWeaponParamsWithPreinstalledAttachments[struct.GeneralWeaponSetup].forEach((newlyCreatedWeaponParamsWithPreinstalledAttachment) => {
+    let preinstalledUpgrades = [...(requiredUpgradesRecord[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID] || [])];
+    const inheritedPreinstalledAttachmentUpgrades = inheritedPreinstalledAttachmentUpgradesRecord[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID];
+    if (inheritedPreinstalledAttachmentUpgrades?.size) {
+      preinstalledUpgrades = preinstalledUpgrades.filter((upgrade) => !inheritedPreinstalledAttachmentUpgrades.has(upgrade));
+    }
+    const inheritedPreinstalledAttachmentBlockedUpgrades =
+      inheritedPreinstalledAttachmentBlockedUpgradesRecord[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID];
+    if (inheritedPreinstalledAttachmentBlockedUpgrades?.size) {
+      preinstalledUpgrades = preinstalledUpgrades.filter((upgrade) => !inheritedPreinstalledAttachmentBlockedUpgrades.has(upgrade));
+    }
+
     const newSID = `${struct.SID}_withGWS_${newlyCreatedWeaponParamsWithPreinstalledAttachment.SID}`;
     const newWeapon = new Struct({
       __internal__: {
@@ -164,10 +197,10 @@ async function createWeapons(struct: WeaponPrototype) {
       },
       LocalizationSID: struct.LocalizationSID || struct.SID,
       GeneralWeaponSetup: newlyCreatedWeaponParamsWithPreinstalledAttachment.SID,
-      PreinstalledUpgrades: requiredUpgradesRecord[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID],
+      PreinstalledUpgrades: preinstalledUpgrades,
       SID: newSID,
     } as DeeplyPartial<WeaponPrototype>) as WeaponPrototype;
-    if (!requiredUpgradesRecord[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID].length) {
+    if (!preinstalledUpgrades.length) {
       delete newWeapon.PreinstalledUpgrades;
     }
     newlyCreatedWeaponsWithPreinstalledAttachments[struct.SID] ||= [];
