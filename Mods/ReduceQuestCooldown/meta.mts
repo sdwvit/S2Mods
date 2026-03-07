@@ -9,8 +9,9 @@ export const meta: MetaType<QuestNodePrototype> = {
 };
 
 function reduceQuestCooldownTransformer(struct: QuestNodePrototype) {
-  if (struct.InGameHours) {
-    return Object.assign(struct.fork(), { InGameHours: Math.min(struct.InGameHours, 3) });
+  const inGameHours = (struct as any).InGameHours;
+  if (typeof inGameHours === "number" && inGameHours > 0) {
+    return Object.assign(struct.fork(), { InGameHours: Math.min(inGameHours, 3) });
   }
   return null;
 }
