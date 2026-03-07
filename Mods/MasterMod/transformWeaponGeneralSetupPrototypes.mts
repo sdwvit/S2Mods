@@ -44,9 +44,6 @@ function mapUniqueAttachmentsToGeneric(
       fork.CompatibleAttachments.addNode(Object.assign(e.clone(), { AttachPrototypeSID: newKey }), newKey);
     });
 
-    if (struct.SID === "Gun_Krivenko_HG_GS") {
-      struct.__internal__.refkey = "GunUDP_HG";
-    }
     let parent = context.structsById[struct.__internal__.refkey];
 
     while (parent && parent.CompatibleAttachments) {
@@ -97,23 +94,6 @@ export const transformWeaponGeneralSetupPrototypes: StructTransformer<WeaponGene
     case "GunDnipro_ST": {
       fork.UpgradePrototypeSIDs ||= struct.UpgradePrototypeSIDs.fork();
       fork.UpgradePrototypeSIDs.addNode(GunDnipro_Upgrade_HoldBreathPos75Effect, GunDnipro_Upgrade_HoldBreathPos75Effect);
-      return fork;
-    }
-    case "GunUDP_Deadeye_HG":
-    case "GunUDP_HG":
-    case "Gun_Krivenko_HG_GS": {
-      if (struct.SID === "GunUDP_Deadeye_HG") {
-        fork.UpgradePrototypeSIDs ||= struct.UpgradePrototypeSIDs.fork();
-        fork.UpgradePrototypeSIDs.addNode("GunUDP_Upgrade_Attachment_Laser", "GunUDP_Upgrade_Attachment_Laser");
-      }
-
-      fork.CompatibleAttachments.addNode(
-        Object.assign(getCompatibleAttachmentDefinition("EN_ColimScope_1"), {
-          Socket: "ColimScopeSocket_corrected",
-          WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/UDP/T_inv_w_en_colim_scope.T_inv_w_en_colim_scope'`,
-        }),
-        "EN_ColimScope_1",
-      );
       return fork;
     }
     case "Gun_Sharpshooter_AR_GS": {

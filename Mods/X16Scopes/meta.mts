@@ -9,10 +9,11 @@ Adds 2 new X16 Scopes for Gvyntar / Lavina / Merc / Trophy / SVDM / Lynx / SVU3 
 [hr][/hr]
 You can buy these new scopes from T4 attachment traders like the one on Yaniv.
 [hr][/hr]
-Unfortunately, I don't know how to do animations. You have to attach the scopes in your inventory while NOT holding a hand.[h2][/h2]
+Now with attach animations. Please be aware that animations are WIP and some are placeholders. 
 bPatches AttachPrototypes, MeshPrototypes, DynamicItemGenerator, QuestItemGeneratorPrototypes, and WeaponGeneralSetupPrototypes.
 `,
-  changenote: "Fix G37V2 rail requirements, fix skeleton mesh for Dnipro / Lavina",
+  changenote: `Added detachable 8x/16x scope support and matching icons/animations across many weapons, fixed
+  special cases (including GP37v2, UDP, Dnipro/Sotnyk, Gvintar/Lavina/Lynx/Whip/SVU/SVDM)`,
   structTransformers: [
     addX16ScopesToWeaponGeneralSetupPrototypes,
     getX16AttachPrototypes,
@@ -183,35 +184,27 @@ export function addX16ScopesToWeaponGeneralSetupPrototypes(struct: WeaponGeneral
   }
 
   const fork = struct.fork();
-  const compX8 = getXnCompatibleScope(struct, 8);
-  const compX16 = getXnCompatibleScope(struct, 16);
+  let hasChanges = false;
 
-  if (compX8 || compX16) {
-    fork.CompatibleAttachments = struct.CompatibleAttachments.fork();
-    if (compX8) {
-      fork.CompatibleAttachments.addNode(compX8, "X8");
-    }
-    if (compX16) {
-      fork.CompatibleAttachments.addNode(compX16, "X16");
-    }
+  const compX8 = getXnCompatibleScope(struct, 8);
+  if (compX8) {
+    fork.CompatibleAttachments ||= struct.CompatibleAttachments.fork();
+    fork.CompatibleAttachments.addNode(compX8, "X8");
+    hasChanges = true;
   }
 
-  if (struct.SID === "GunUDP_HG" || struct.SID === "GunUDP_Deadeye_HG" || struct.SID === "Gun_Krivenko_HG_GS") {
+  const compX16 = getXnCompatibleScope(struct, 16);
+  if (compX16) {
     fork.CompatibleAttachments ||= struct.CompatibleAttachments.fork();
-    fork.CompatibleAttachments.addNode(
-      Object.assign(getCompatibleAttachmentDefinition("EN_ColimScope_1"), {
-        Socket: "ColimScopeSocket_corrected",
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/UDP/T_inv_w_en_colim_scope.T_inv_w_en_colim_scope'`,
-      }),
-      "EN_ColimScope_1",
-    );
+    fork.CompatibleAttachments.addNode(compX16, "X16");
+    hasChanges = true;
   }
 
   if (fork.CompatibleAttachments && !fork.CompatibleAttachments.entries().length) {
     delete fork.CompatibleAttachments;
   }
 
-  if (fork.CompatibleAttachments) {
+  if (hasChanges) {
     return fork;
   }
 }

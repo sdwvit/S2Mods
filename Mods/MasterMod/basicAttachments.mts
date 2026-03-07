@@ -16,6 +16,7 @@ export const uniqueAttachmentsToAlternatives: Record<string, string> = {
 
   M701_Scope: "EN_X8Scope_1",
   M701_Colim_Scope: "EN_ColimScope_1",
+  GunG37V2_Scope: "EN_X2Scope_1",
   SVDM_Scope: "RU_X4Scope_1",
   Gvintar_Scope: "RU_X4Scope_1",
   SVU_Scope: "RU_X8Scope_1",

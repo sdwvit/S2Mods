@@ -22,7 +22,7 @@ type ScopeCompatibilityDef = {
 
 const g37RailRequiredUpgradeIDs = new Struct({ 0: "GunG37_Upgrade_Attachment_Rail" });
 
-export const xNCompatibleScopeByWeapon: Record<string, Record<ScopeLevel, ScopeCompatibilityDef>> = {
+export const xNCompatibleScopeByWeapon: Record<string, Partial<Record<ScopeLevel, ScopeCompatibilityDef>>> = {
   GunG37V2_ST: {
     8: {
       family: "EN",
@@ -95,7 +95,7 @@ export const xNCompatibleScopeByWeapon: Record<string, Record<ScopeLevel, ScopeC
     8: {
       family: "UA",
       WeaponSpecificIcon:
-        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ua_x8scope_1.T_inv_w_gvintar_ua_x8scope_1'",
+        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'",
     },
     16: {
       family: "UA",
@@ -107,7 +107,7 @@ export const xNCompatibleScopeByWeapon: Record<string, Record<ScopeLevel, ScopeC
     8: {
       family: "UA",
       WeaponSpecificIcon:
-        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ua_x8scope_1.T_inv_w_gvintar_ua_x8scope_1'",
+        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'",
     },
     16: {
       family: "UA",
@@ -119,7 +119,7 @@ export const xNCompatibleScopeByWeapon: Record<string, Record<ScopeLevel, ScopeC
     8: {
       family: "UA",
       WeaponSpecificIcon:
-        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ua_x8scope_1.T_inv_w_gvintar_ua_x8scope_1'",
+        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'",
     },
     16: {
       family: "UA",
@@ -131,7 +131,7 @@ export const xNCompatibleScopeByWeapon: Record<string, Record<ScopeLevel, ScopeC
     8: {
       family: "UA",
       WeaponSpecificIcon:
-        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ua_x8scope_1.T_inv_w_gvintar_ua_x8scope_1'",
+        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'",
     },
     16: {
       family: "UA",
@@ -148,15 +148,10 @@ export const xNCompatibleScopeByWeapon: Record<string, Record<ScopeLevel, ScopeC
     16: {
       family: "UA",
       WeaponSpecificIcon:
-        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_whip_ua_x16scope_1.T_inv_w_whip_ua_x16scope_1'",
+        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_svu_ua_x16scope_1.T_inv_w_svu_ua_x16scope_1'",
     },
   },
   GunSVU_SP: {
-    8: {
-      family: "UA",
-      WeaponSpecificIcon:
-        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_svu_ru_x8scope_1.T_inv_w_svu_ru_x8scope_1'",
-    },
     16: {
       family: "UA",
       WeaponSpecificIcon:
@@ -167,7 +162,7 @@ export const xNCompatibleScopeByWeapon: Record<string, Record<ScopeLevel, ScopeC
     8: {
       family: "UA",
       WeaponSpecificIcon:
-        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVDM/T_inv_w_lynx_ua_x8scope_1.T_inv_w_lynx_ua_x8scope_1'",
+        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVDM/T_inv_w_svdm_ua_x8scope_1.T_inv_w_svdm_ua_x8scope_1'",
     },
     16: {
       family: "UA",
@@ -236,3 +231,23 @@ export const xNCompatibleScopeByWeapon: Record<string, Record<ScopeLevel, ScopeC
     },
   },
 };
+
+/**
+ XCreateItemInInventoryByID GunG37V2_ST 0 1 1
+ XCreateItemInInventoryByID GunG37_ST 0 1 1
+ XCreateItemInInventoryByID GunKharod_ST 0 1 1
+ XCreateItemInInventoryByID GunDnipro_ST 0 1 1
+ XCreateItemInInventoryByID Gun_Sotnyk_AR_GS 0 1 1
+ XCreateItemInInventoryByID GunGvintar_ST 0 1 1
+ XCreateItemInInventoryByID Gun_Merc_AR_GS 0 1 1
+ XCreateItemInInventoryByID GunLavina_ST 0 1 1
+ XCreateItemInInventoryByID Gun_Trophy_AR_GS 0 1 1
+ XCreateItemInInventoryByID Gun_Whip_SR_GS 0 1 1
+ XCreateItemInInventoryByID GunSVU_SP 0 1 1
+ XCreateItemInInventoryByID Gun_Lynx_SR_GS 0 1 1
+ XCreateItemInInventoryByID GunSVDM_SP 0 1 1
+ XCreateItemInInventoryByID Gun_Sharpshooter_AR_GS 0 1 1
+ XCreateItemInInventoryByID Gun_Unknown_AR_GS 0 1 1
+ XCreateItemInInventoryByID GunM16_ST 0 1 1
+ XCreateItemInInventoryByID Gun_SOFMOD_AR_GS 0 1 1
+ */
