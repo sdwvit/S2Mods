@@ -17,18 +17,22 @@ Just start a new game, hit escape, then back to fix the sound and you're good to
 
 function structTransformer(struct: QuestNodePrototype) {
   if (struct.SID === "E01_MQ01_Technical_NoIntro" || struct.SID === "E01_MQ01_PlayVideo") {
+    const launchers = (struct as any).Launchers;
+    if (typeof launchers === "string") {
+      return null;
+    }
     const fork = struct.fork();
 
-    fork.Launchers = new Struct().fork() as any;
-    fork.Launchers[0] = new Struct().fork();
-    fork.Launchers[0].Connections = new Struct().fork();
-    fork.Launchers[0].Connections[0] = new Struct().fork();
+    (fork as any).Launchers = new Struct().fork();
+    (fork as any).Launchers[0] = new Struct().fork();
+    (fork as any).Launchers[0].Connections = new Struct().fork();
+    (fork as any).Launchers[0].Connections[0] = new Struct().fork();
     if (struct.SID === "E01_MQ01_Technical_NoIntro") {
-      fork.Launchers[0].Connections[0].SID = "E01_MQ01_Start";
+      (fork as any).Launchers[0].Connections[0].SID = "E01_MQ01_Start";
       return fork;
     }
     if (struct.SID === "E01_MQ01_PlayVideo") {
-      fork.Launchers[0].Connections[0].SID = "empty";
+      (fork as any).Launchers[0].Connections[0].SID = "empty";
       return fork;
     }
     return null;

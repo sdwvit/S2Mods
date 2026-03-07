@@ -26,8 +26,14 @@ export const preplacedDestructibleItems = [
 
 export function transformSpawnActorPrototypes(struct: SpawnActorPrototype) {
   const fork = struct.fork();
+  const itemGeneratorSettings = (struct as any).ItemGeneratorSettings;
 
-  if (!struct.ItemGeneratorSettings?.entries?.().length) {
+  if (
+    !itemGeneratorSettings ||
+    typeof itemGeneratorSettings === "string" ||
+    typeof itemGeneratorSettings.entries !== "function" ||
+    !itemGeneratorSettings.entries().length
+  ) {
     return;
   }
 
