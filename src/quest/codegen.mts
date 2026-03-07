@@ -3,6 +3,8 @@ import {
   QuestNodePrototype,
   QuestNodePrototypeCondition,
   QuestNodePrototypeConditionsItemItem,
+  QuestNodePrototypeShowFadeScreen,
+  QuestNodePrototypeTechnical,
   Struct,
 } from "s2cfgtojson";
 import { EVENTS, EVENTS_INTERESTING_PROPS, EVENTS_INTERESTING_SIDS } from "./constants.mts";
@@ -81,7 +83,7 @@ function questNodeToJavascript(
   getNodeSid: (sid: string) => string,
 ): string {
   const struct = structr as QuestNodePrototype;
-  const subType = struct.NodeType.split("::").pop();
+  const subType = String(struct.NodeType).split("::").pop();
 
   const renderSubType = <T extends QuestNodePrototype>(subType: string) =>
     `${subType}(${(struct as T as any)
@@ -360,7 +362,7 @@ function questNodeToJavascript(
       return renderSubType(subType);
     case "EQuestNodeType::ShowFadeScreen":
       globalFunctions.set(subType, "");
-      return renderSubTypeWithProps(subType, ["FadeTime", "ScreenText", "ImagePath"]);
+      return renderSubTypeWithProps<QuestNodePrototypeShowFadeScreen>(subType, ["FadeTime", "ScreenText", "ImagePath"]);
     case "EQuestNodeType::ShowLoadingScreen":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
@@ -375,7 +377,7 @@ function questNodeToJavascript(
       return renderSubType(subType);
     case "EQuestNodeType::Technical":
       globalFunctions.set(subType, "");
-      return renderSubTypeWithProps(subType, ["StartDelay", "LaunchOnQuestStart"]);
+      return renderSubTypeWithProps<QuestNodePrototypeTechnical>(subType, ["StartDelay", "LaunchOnQuestStart"]);
     case "EQuestNodeType::TimeLock":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
@@ -947,36 +949,21 @@ function getStructBody(
   }
   const isCoDep =
     node.launchersByJsSid && Object.entries(node.launchersByJsSid).length && Object.entries(node.launchersByJsSid).some(([_k, v]) => v.length > 1);
-  const consoleLog = isCoDep
-    ? `__questLog('// ${node.jsSid}(', callerName, ',', name, ');');`
-    : `__questLog('// ${node.jsSid}();');`;
+  const consoleLog = isCoDep ? `__questLog('// ${node.jsSid}(', callerName, ',', name, ');');` : `__questLog('// ${node.jsSid}();');`;
   const nodeBody = questNodeToJavascript(node.raw, globalVars, globalFunctions, questActors, getNodeSid);
   const needsResultVar = shouldDeclareResultVar(nodeBody, usesResultBasedLaunches);
-  const bodyLines = [
-    nodeBody,
-    launches,
-    isCoDep ? consoleLog : "",
-    `__questNodeComplete(f, ${needsResultVar ? "result" : "None"});`,
-  ]
+  const bodyLines = [nodeBody, launches, isCoDep ? consoleLog : "", `__questNodeComplete(f, ${needsResultVar ? "result" : "None"});`]
     .filter(Boolean)
     .join("\n");
 
   const lines = [
     `function ${node.jsSid}(caller, name) {`,
     `  const f = ${node.jsSid};`,
-    ...(isCoDep
-      ? ["  const callerName = __questNodeInit(f, caller, name);"]
-      : ["  __questNodeInit(f, caller, name);"]),
+    ...(isCoDep ? ["  const callerName = __questNodeInit(f, caller, name);"] : ["  __questNodeInit(f, caller, name);"]),
     ...(isCoDep ? [`  f.Conditions ??= ${JSON.stringify(node.launchersByJsSid || {})};`] : []),
     ...(needsResultVar ? ["  let result = None;"] : []),
     ...(isCoDep
-      ? [
-          "  waitForCallers(1000, f, caller)",
-          "    .then(() => {",
-          indentBlock(bodyLines, "      "),
-          "    })",
-          "    .catch((e) => __questLog(e));",
-        ]
+      ? ["  waitForCallers(1000, f, caller)", "    .then(() => {", indentBlock(bodyLines, "      "), "    })", "    .catch((e) => __questLog(e));"]
       : [indentBlock(bodyLines, "  ")]),
     "}",
   ];
@@ -996,7 +983,7 @@ function getContent(
     .map((node) => {
       const struct = node.raw;
       const subscription = subscriptions[struct.NodeType.split("::").pop()];
-      if (struct.LaunchOnQuestStart && !subscription) {
+      if ((struct as QuestNodePrototypeTechnical).LaunchOnQuestStart && !subscription) {
         launchOnQuestStart.push(node.jsSid);
       }
 
@@ -1009,7 +996,7 @@ function getContent(
         return structBody;
       }
       const args = new Set(
-        struct
+        (struct as QuestNodePrototypeTechnical)
           .entries()
           .filter(([k]) => EVENTS_INTERESTING_PROPS.has(k) || EVENTS_INTERESTING_SIDS.has(k))
           .map(([_k, v]) => {
