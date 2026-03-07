@@ -1,6 +1,7 @@
 import { MetaType } from "../../src/meta-type.mts";
 import { AttachPrototype, EffectPrototype, ItemGeneratorPrototype, MeshPrototype, Struct, WeaponGeneralSetupPrototype } from "s2cfgtojson";
 import { allCompatibleAttachmentDefs } from "../MasterMod/basicAttachments.mts";
+import { xNCompatibleScopeByWeapon } from "./xNCompatibleScopeByWeapon.mts";
 
 export const meta: MetaType = {
   description: `
@@ -153,87 +154,64 @@ export const x16CompatibleAttachmentDefs: Record<string, Struct> = {
 const getCompatibleAttachmentDefinition = (sid: string) =>
   new Struct(allCompatibleAttachmentDefs[sid] || x16CompatibleAttachmentDefs[sid]) as WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"];
 
-const kharodDniproSharedAddMeshes = new Struct({
-  __internal__: {
-    isArray: true,
-    useAsterisk: true,
-  },
-  0: new Struct({
-    MeshPrototypeSID: "Ironsights_02_Front_Close",
-    Socket: "IronSightFront",
-  }),
-});
-
 export const getXnCompatibleScope = (struct: WeaponGeneralSetupPrototype, X: number) => {
-  const enCompatibleAttachment = getCompatibleAttachmentDefinition(`EN_X${X}Scope_1`);
-  const uaCompatibleAttachment = getCompatibleAttachmentDefinition(`${X === 8 ? "RU" : "UA"}_X${X}Scope_1`);
-
-  switch (struct.SID) {
-    case "GunG37V2_ST":
-      return Object.assign(enCompatibleAttachment, {
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/GP37/T_inv_w_gp37_en_x${X}scope_1.T_inv_w_gp37_en_x${X}scope_1'`,
-      });
-    case "GunG37_ST":
-      return Object.assign(enCompatibleAttachment, {
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/GP37/T_inv_w_gp37_en_x${X}scope_1.T_inv_w_gp37_en_x${X}scope_1'`,
-        RequiredUpgradeIDs: new Struct({ 0: "GunG37_Upgrade_Attachment_Rail" }),
-      });
-    case "GunKharod_ST":
-      return Object.assign(enCompatibleAttachment, {
-        AdditionalMeshes: kharodDniproSharedAddMeshes,
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Kharod/T_inv_w_kharod_en_x${X}scope_1.T_inv_w_kharod_en_x${X}scope_1'`,
-      });
-    case "GunDnipro_ST":
-      return Object.assign(enCompatibleAttachment, {
-        AdditionalMeshes: kharodDniproSharedAddMeshes,
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Dnipro/T_inv_w_dnipro_en_x${X}scope_1.T_inv_w_dnipro_en_x${X}scope_1'`,
-      });
-    case "Gun_Sotnyk_AR_GS":
-      return Object.assign(enCompatibleAttachment, {
-        AdditionalMeshes: kharodDniproSharedAddMeshes,
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Dnipro/T_inv_w_sotnyk_en_x${X}scope_1.T_inv_w_sotnyk_en_x${X}scope_1'`,
-      });
-    case "GunGvintar_ST":
-    case "Gun_Merc_AR_GS":
-    case "GunLavina_ST":
-    case "Gun_Trophy_AR_GS":
-      return Object.assign(uaCompatibleAttachment, {
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ua_x${X}scope_1.T_inv_w_gvintar_ua_x${X}scope_1'`,
-      });
-    case "Gun_Whip_SR_GS":
-      return Object.assign(uaCompatibleAttachment, {
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_whip_ua_x${X}scope_1.T_inv_w_whip_ua_x${X}scope_1'`,
-      });
-    case "GunSVU_SP":
-      return Object.assign(uaCompatibleAttachment, {
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_svu_ua_x${X}scope_1.T_inv_w_svu_ua_x${X}scope_1'`,
-      });
-    case "Gun_Lynx_SR_GS":
-      return Object.assign(uaCompatibleAttachment, {
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVDM/T_inv_w_lynx_ua_x${X}scope_1.T_inv_w_lynx_ua_x${X}scope_1'`,
-      });
-    case "GunSVDM_SP":
-      return Object.assign(uaCompatibleAttachment, {
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVDM/T_inv_w_svdm_ua_x${X}scope_1.T_inv_w_svdm_ua_x${X}scope_1'`,
-      });
-    case "Gun_Sharpshooter_AR_GS":
-    case "Gun_Unknown_AR_GS":
-    case "GunM16_ST":
-    case "Gun_SOFMOD_AR_GS":
-      return Object.assign(enCompatibleAttachment, {
-        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/M16/T_inv_w_sharpshooter_en_x${X}scope_1.T_inv_w_sharpshooter_en_x${X}scope_1'`,
-      });
+  if (X !== 8 && X !== 16) {
+    return;
   }
+
+  const scope = xNCompatibleScopeByWeapon[struct.SID]?.[X];
+  if (!scope) {
+    return;
+  }
+
+  const attachmentSid = scope.family === "EN" ? `EN_X${X}Scope_1` : `${X === 8 ? "RU" : "UA"}_X${X}Scope_1`;
+  const compatibleAttachment = getCompatibleAttachmentDefinition(attachmentSid);
+
+  return Object.assign(compatibleAttachment, {
+    ...(scope.AdditionalMeshes ? { AdditionalMeshes: scope.AdditionalMeshes } : {}),
+    ...(scope.RequiredUpgradeIDs ? { RequiredUpgradeIDs: scope.RequiredUpgradeIDs } : {}),
+    WeaponSpecificIcon: scope.WeaponSpecificIcon,
+  });
 };
+
 /**
  * Adds X16 scopes compatibility to certain guns
  */
 export function addX16ScopesToWeaponGeneralSetupPrototypes(struct: WeaponGeneralSetupPrototype) {
+  if (!struct.CompatibleAttachments) {
+    return;
+  }
+
   const fork = struct.fork();
-  const comp = getXnCompatibleScope(struct, 16);
-  if (comp) {
+  const compX8 = getXnCompatibleScope(struct, 8);
+  const compX16 = getXnCompatibleScope(struct, 16);
+
+  if (compX8 || compX16) {
     fork.CompatibleAttachments = struct.CompatibleAttachments.fork();
-    fork.CompatibleAttachments.addNode(comp, "X16");
+    if (compX8) {
+      fork.CompatibleAttachments.addNode(compX8, "X8");
+    }
+    if (compX16) {
+      fork.CompatibleAttachments.addNode(compX16, "X16");
+    }
+  }
+
+  if (struct.SID === "GunUDP_HG" || struct.SID === "GunUDP_Deadeye_HG" || struct.SID === "Gun_Krivenko_HG_GS") {
+    fork.CompatibleAttachments ||= struct.CompatibleAttachments.fork();
+    fork.CompatibleAttachments.addNode(
+      Object.assign(getCompatibleAttachmentDefinition("EN_ColimScope_1"), {
+        Socket: "ColimScopeSocket_corrected",
+        WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/UDP/T_inv_w_en_colim_scope.T_inv_w_en_colim_scope'`,
+      }),
+      "EN_ColimScope_1",
+    );
+  }
+
+  if (fork.CompatibleAttachments && !fork.CompatibleAttachments.entries().length) {
+    delete fork.CompatibleAttachments;
+  }
+
+  if (fork.CompatibleAttachments) {
     return fork;
   }
 }
