@@ -23,8 +23,8 @@ export function normalizeQuestNodes(context: MetaContext<QuestNodePrototype>): Q
   const missingLauncherTargets = new Set<string>();
 
   nodes.forEach((node) => {
-    const launchers = node.raw.Launchers;
-    if (!launchers) {
+    const launchers = (node.raw as any).Launchers;
+    if (!launchers || typeof launchers === "string") {
       return;
     }
     launchers.forEach(([_k, launcher]) => {
