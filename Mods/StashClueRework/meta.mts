@@ -18,7 +18,7 @@ Once you finish any recurring quest from base vendors, apart from monetary rewar
 [hr][/hr]
 bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 `,
-  changenote: "Massive rewrite of the system. Fix all outstanding issues.",
+  changenote: "Minor cleanup and stability improvements.",
   structTransformers: [
     transformObjPrototypes,
     transformSpawnActorPrototypes,

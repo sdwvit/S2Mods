@@ -9,7 +9,7 @@ Removes drops from destructible crates: 🍔 Wooden Boxes, 🍔 Plywood Crates, 
 [hr][/hr]
 bPatches SpawnActorPrototypes/WorldMap_WP/*.cfg
 `,
-  changenote: "Initial release",
+  changenote: "Improved compatibility with recent game updates.",
   structTransformers: [transformSpawnActorPrototypes],
 };
 export const preplacedDestructibleItems = [

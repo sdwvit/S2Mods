@@ -11,7 +11,7 @@ Say no more![h1][/h1]
 Skips intro cutscene in E01_MQ01 by redirecting the quest flow in QuestNodePrototypes.[h1][/h1]
 Just start a new game, hit escape, then back to fix the sound and you're good to go[h1][/h1]
 `,
-  changenote: "Update to 1.7.x",
+  changenote: "Improved compatibility with recent game updates.",
   structTransformers: [structTransformer],
 };
 
