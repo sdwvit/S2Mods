@@ -22,7 +22,4 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `toz_top_rail_upgrade`
  - `toz_top_rail_upgrade_icon`
  - `toz_x2_scope`
- - `toz_x2_scope_upgrade`
- - `SM_Toz`
- - `MI_Threeline_scope_glass`
- - `SM_sr_threeline_scope`
+ - ...
