@@ -15,6 +15,8 @@ Current implementation:[h1][/h1]
 - Introduces score thresholds that map to rank tiers.[h1][/h1]
 - Apply rank updates through collecting XP.[h1][/h1]
 - Get XP by picking up faction patches from dead bodies.[h1][/h1]
+[hr][/hr]
+With 2500 xp you advance from newbie to experienced, and that happens around Slug Heap. [h1][/h1]
 `,
   changenote: "Initial release",
   structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformItemGeneratorPrototypes],
