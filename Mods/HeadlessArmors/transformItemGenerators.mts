@@ -14,7 +14,6 @@ import {
   allDefaultArmorPrototypesRecord,
   allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
   allDefaultItemGeneratorsRecord,
-  allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID,
   armorFactionsBySID,
   armorRanksBySID,
   CoreFaction,
@@ -53,10 +52,7 @@ function shouldProcessStruct(struct: ItemGeneratorPrototype) {
     return false;
   }
 
-  return (
-    allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] ||
-    allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID]
-  );
+  return !!allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
 }
 
 function* getCoreItemGeneratorPrototypeForEdit<T extends ItemGeneratorPrototype>(
