@@ -1,8 +1,8 @@
-import { allValidMods } from "./base-paths.mts";
-import { cmdSync, nodeSync } from "./cmd.mts";
+import { allValidMods } from "./mod-context.mts";
+import { nodeSync } from "./cmd.mts";
+
+nodeSync("./pull-git-branches.mts");
 
 allValidMods.forEach((mod) => {
-  cmdSync(["git", "checkout", mod].join(" "));
-  cmdSync(["git", "pull"].join(" "));
-  nodeSync("./prepare-configs.mts");
+  nodeSync("./prepare-configs.mts", { S2_MOD: mod });
 });

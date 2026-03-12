@@ -1,5 +1,7 @@
 import "./ensure-env.mts";
-await import(process.env.NODE_TS_TRANSFORMER);
+if (process.env.NODE_TS_TRANSFORMER) {
+  await import(process.env.NODE_TS_TRANSFORMER);
+}
 import { parentPort, workerData } from "node:worker_threads";
 import { readFile, writeFile } from "node:fs/promises";
 import { Struct } from "s2cfgtojson";

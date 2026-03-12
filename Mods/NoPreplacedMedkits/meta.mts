@@ -1,6 +1,6 @@
 import { SpawnActorPrototype } from "s2cfgtojson";
 import { MetaType } from "../../src/meta-type.mts";
-import { logger } from "../../src/logger.mjs";
+import { logger } from "../../src/logger.mts";
 
 export const meta: MetaType<SpawnActorPrototype> = {
   description: `This mode does only one thing: removes all 650+ medkits placed around the map for more challenging gameplay.[h1][/h1]

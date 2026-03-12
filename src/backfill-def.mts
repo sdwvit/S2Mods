@@ -1,5 +1,5 @@
 import { Struct } from "s2cfgtojson";
-import { allDefaultArmorPrototypesRecord, allDefaultArmorPrototypes } from "./consts.mjs";
+import { allDefaultArmorPrototypesRecord, allDefaultArmorPrototypes } from "./consts.mts";
 import { logger } from "./logger.mts";
 
 const defaultKeys = new Set(["__internal__"]);

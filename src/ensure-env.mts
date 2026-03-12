@@ -15,14 +15,12 @@ function runPullGitBranchesInBackground() {
     return;
   }
 
-  const transformerPath = process.env.NODE_TS_TRANSFORMER;
-  if (!transformerPath) {
-    return;
-  }
-
   const child = spawn(
     process.execPath,
-    ["--import", `file:${transformerPath}`, path.join(import.meta.dirname, "pull-git-branches.mts")],
+    [
+      ...(process.env.NODE_TS_TRANSFORMER ? ["--import", `file:${process.env.NODE_TS_TRANSFORMER}`] : []),
+      path.join(import.meta.dirname, "pull-git-branches.mts"),
+    ],
     {
       cwd: import.meta.dirname,
       stdio: "ignore",

@@ -1,7 +1,7 @@
 import { StructTransformer } from "./meta-type.mts";
-import { logger } from "./logger.mjs";
-import { getCfgFiles } from "./get-cfg-files.mjs";
-import { getL2CacheKey, L2Cache, L2CacheState } from "./l2-cache.mjs";
+import { logger } from "./logger.mts";
+import { getCfgFiles } from "./get-cfg-files.mts";
+import { getL2CacheKey, L2Cache, L2CacheState } from "./l2-cache.mts";
 
 export async function getFilesForTransformer<T>(transformer: StructTransformer<T>): Promise<string[]> {
   if (!transformer?.files?.length) {
