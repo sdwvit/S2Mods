@@ -1,7 +1,7 @@
 import path from "node:path";
-import { baseCfgDir } from "./base-paths.mjs";
+import { baseCfgDir } from "./base-paths.mts";
 import { existsSync } from "node:fs";
-import { getCfgFiles } from "./get-cfg-files.mjs";
+import { getCfgFiles } from "./get-cfg-files.mts";
 import { Struct } from "s2cfgtojson";
 import { getOrUpdateFromL1GlobalCache } from "./l1global-cache.mts";
 import { logger } from "./logger.mts";

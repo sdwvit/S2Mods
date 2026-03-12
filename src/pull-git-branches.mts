@@ -1,4 +1,4 @@
-import { allValidMods } from "./base-paths.mts";
+import { allValidMods } from "./mod-context.mts";
 import { spawnSync } from "child_process";
 import { cmd } from "./cmd.mts";
 
@@ -16,4 +16,3 @@ await Promise.all(promises);
 if (initialBranch) {
   await cmd(["git", "checkout", initialBranch].join(" "));
 }
-

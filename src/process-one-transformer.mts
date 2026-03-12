@@ -1,5 +1,5 @@
-import { getFilesForTransformer } from "./create-cfg-file-selector-for-transformer.mjs";
-import { getCfgFileProcessor } from "./get-cfg-file-processor.mjs";
+import { getFilesForTransformer } from "./create-cfg-file-selector-for-transformer.mts";
+import { getCfgFileProcessor } from "./get-cfg-file-processor.mts";
 import { StructTransformer } from "./meta-type.mts";
 import { Struct } from "s2cfgtojson";
 

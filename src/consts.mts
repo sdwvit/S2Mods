@@ -17,7 +17,7 @@ import {
   WeaponGeneralSetupPrototype,
   WeaponPrototype,
 } from "s2cfgtojson";
-import { readFileAndGetStructs } from "./read-file-and-get-structs.mjs";
+import { readFileAndGetStructs } from "./read-file-and-get-structs.mts";
 
 export type DeeplyPartial<T> = {
   [P in Exclude<keyof T, Internal | "toString">]?: T[P] extends object ? DeeplyPartial<T[P]> : T[P];

@@ -2,8 +2,8 @@ import path from "node:path";
 import childProcess from "node:child_process";
 
 import * as fs from "node:fs";
-import { logger } from "./logger.mjs";
-import { modFolder, sdkStagedPakFolder, stagedFolderStruct } from "./base-paths.mjs";
+import { logger } from "./logger.mts";
+import { modFolder, sdkStagedPakFolder, stagedFolderStruct } from "./base-paths.mts";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
 
 const copyPaks = async () => {

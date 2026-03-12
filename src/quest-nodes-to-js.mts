@@ -1,9 +1,9 @@
 import { MetaContext } from "./meta-type.mts";
 import { ArtifactPrototype, QuestItemPrototype, QuestNodePrototype, SpawnActorPrototype, Struct } from "s2cfgtojson";
-import { readFileAndGetStructs } from "./read-file-and-get-structs.mjs";
+import { readFileAndGetStructs } from "./read-file-and-get-structs.mts";
 import { writeFileSync } from "node:fs";
-import { onL1Finish } from "./l1-cache.mjs";
-import { allDefaultArtifactPrototypes, allDefaultQuestItemPrototypes } from "./consts.mjs";
+import { onL1Finish } from "./l1-cache.mts";
+import { allDefaultArtifactPrototypes, allDefaultQuestItemPrototypes } from "./consts.mts";
 import { logger } from "./logger.mts";
 import { normalizeQuestNodes } from "./quest/normalize.mts";
 import { buildQuestScriptParts } from "./quest/codegen.mts";
@@ -11,7 +11,7 @@ import { getRuntimeSource } from "./quest/runtime.mts";
 import path from "node:path";
 import { getCfgFiles } from "./get-cfg-files.mts";
 import { readFile } from "node:fs/promises";
-import { baseCfgDir } from "./base-paths.mjs";
+import { baseCfgDir } from "./base-paths.mts";
 import { pathToFileURL } from "node:url";
 import { renderQuestJsGlobalFunctionStub, resolveQuestNodesToJsInputPath as resolveQuestNodesToJsInputPathRaw } from "./quest/js-gen-utils.mts";
 

@@ -1,16 +1,15 @@
 import { modName } from "./base-paths.mts";
 import { logger } from "./logger.mts";
-import { nodeSync } from "./cmd.mts";
 
 logger.log(`Publishing mod: ${modName}`);
 
 logger.log("Step 1/3: publish-modio");
-nodeSync("./publish-modio.mts");
+await import(new URL("./publish-modio.mts", import.meta.url).href);
 
 logger.log("Step 2/3: publish-steam");
-nodeSync("./publish-steam.mts");
+await import(new URL("./publish-steam.mts", import.meta.url).href);
 
 logger.log("Step 3/3: zip-for-xbox");
-nodeSync("./zip-for-xbox.mts");
+await import(new URL("./zip-for-xbox.mts", import.meta.url).href);
 
 logger.log(`Publish flow complete for mod: ${modName}`);
