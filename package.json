@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "Get Stalker 2 game data from ObjPrototypes",
   "type": "module",
+  "packageManager": "pnpm@10.17.0",
   "scripts": {
     "prepare-configs": "node ./src/prepare-configs.mts",
+    "prepare-configs:mods": "pnpm -r --parallel --if-present run prepare-configs",
     "pack-inject": "node ./src/pack-inject.mts",
     "cook-inject": "node ./src/cook-inject.mts",
     "publish-steam": "node ./src/publish-steam.mts",
@@ -13,6 +15,7 @@
     "publish-platforms": "node ./src/publish-platforms.mts",
     "check-unpublished": "node ./src/check-unpublished-mods.mts",
     "update-readme": "node ./src/update-readme.mts",
+    "update-readme:mods": "pnpm -r --parallel --if-present run update-readme",
     "prepare-all": "node src/prepare-all.ts",
     "push-to-sdk": "node ./src/push-to-sdk.mts",
     "pull-staged": "node ./src/pull-staged.mts",

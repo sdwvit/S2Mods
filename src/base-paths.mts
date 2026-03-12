@@ -2,18 +2,14 @@ import path from "node:path";
 import fs, { existsSync, writeFileSync } from "node:fs";
 import { projectRoot } from "./ensure-env.mts";
 export { projectRoot } from "./ensure-env.mts";
-import { execSync } from "node:child_process";
 import { MetaType } from "./meta-type.mts";
 import { mkdirSync } from "fs";
+import { allValidMods, modsFolder, resolveModName } from "./mod-context.mts";
 
 export const rawCfgEnclosingFolder = path.join("Stalker2", "Content", "GameLite");
 export const baseCfgDir = path.join(process.env.SDK_PATH, rawCfgEnclosingFolder);
 
-const branchName = execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf8" }).trim();
-
-export const modName = branchName === "master" ? "MasterMod" : branchName;
-
-export const modsFolder = path.join(projectRoot, "Mods");
+export const modName = resolveModName();
 export const modFolder = path.join(modsFolder, modName);
 
 export const modFolderSteam = path.join(modFolder, "steamworkshop");
@@ -22,7 +18,6 @@ export const modFolderSdkLink = path.join(modFolder, "sdk");
 
 export const sdkStagedFolder = path.join(process.env.SDK_PATH, "Stalker2", "SavedMods", "Staged");
 export const sdkModsFolder = path.join(process.env.SDK_PATH, "Stalker2", "Mods");
-export const allValidMods = fs.readdirSync(modsFolder).filter((file) => fs.statSync(path.join(modsFolder, file)).isDirectory());
 
 export const gameRootFolder = process.env.STALKER2_FOLDER;
 export const gameModsFolder = path.join(gameRootFolder, "Stalker2", "Content", "Paks", "~mods");
