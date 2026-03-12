@@ -67,6 +67,29 @@ function mapUniqueAttachmentsToGeneric(
   }
 }
 
+function addUdpScopeCompatibility(fork: WeaponGeneralSetupPrototype, struct: WeaponGeneralSetupPrototype) {
+  if (struct.SID !== "GunUDP_HG" && struct.SID !== "GunUDP_Deadeye_HG" && struct.SID !== "Gun_Krivenko_HG_GS") {
+    return false;
+  }
+
+  fork.CompatibleAttachments ||= struct.CompatibleAttachments?.fork() || new Struct({});
+  fork.CompatibleAttachments.addNode(
+    Object.assign(getCompatibleAttachmentDefinition("EN_ColimScope_1"), {
+      Socket: "ColimScopeSocket_corrected",
+      WeaponSpecificIcon:
+        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/UDP/T_inv_w_en_colim_scope.T_inv_w_en_colim_scope'",
+    }),
+    "EN_ColimScope_1",
+  );
+
+  if (struct.SID === "GunUDP_Deadeye_HG") {
+    fork.UpgradePrototypeSIDs ||= struct.UpgradePrototypeSIDs.fork();
+    fork.UpgradePrototypeSIDs.addNode("GunUDP_Upgrade_Attachment_Laser", "GunUDP_Upgrade_Attachment_Laser");
+  }
+
+  return true;
+}
+
 const getCompatibleAttachmentDefinition = (sid: string) =>
   new Struct(allCompatibleAttachmentDefs[sid]) as WeaponGeneralSetupPrototype["CompatibleAttachments"]["0"];
 const getCompatibleAttachmentDefinitionByWeaponSetupSID = (weaponSid: string, sid: string) =>
@@ -78,14 +101,18 @@ const getCompatibleAttachmentDefinitionByWeaponSetupSID = (weaponSid: string, si
  */
 export const transformWeaponGeneralSetupPrototypes: StructTransformer<WeaponGeneralSetupPrototype> = async (struct, context) => {
   const fork = struct.fork();
-  if (!struct.CompatibleAttachments) {
+  const hasUdpCompatibility = addUdpScopeCompatibility(fork, struct);
+  if (!struct.CompatibleAttachments && !hasUdpCompatibility) {
     return;
   }
-  mapUniqueAttachmentsToGeneric(fork, struct, context);
-  fork.CompatibleAttachments ||= struct.CompatibleAttachments.fork();
+  if (struct.CompatibleAttachments) {
+    mapUniqueAttachmentsToGeneric(fork, struct, context);
+    fork.CompatibleAttachments ||= struct.CompatibleAttachments.fork();
+  }
 
   const compX8 = getXnCompatibleScope(struct, 8);
   if (compX8) {
+    fork.CompatibleAttachments ||= struct.CompatibleAttachments?.fork() || new Struct({});
     fork.CompatibleAttachments.addNode(compX8, "X8");
   }
 

@@ -2,10 +2,10 @@ import { Struct } from "s2cfgtojson";
 import { StructTransformer } from "./meta-type.mts";
 import path from "node:path";
 import fs from "node:fs";
-import { baseCfgDir, modFolderRaw, modName, rawCfgEnclosingFolder } from "./base-paths.mjs";
+import { baseCfgDir, modFolderRaw, modName, rawCfgEnclosingFolder } from "./base-paths.mts";
 import { promisify } from "node:util";
-import { logger } from "./logger.mjs";
-import { getOrUpdateFromL1Cache } from "./l1-cache.mjs";
+import { logger } from "./logger.mts";
+import { getOrUpdateFromL1Cache } from "./l1-cache.mts";
 import { deepMerge } from "./deep-merge.mts";
 import { MergedStructs } from "./merged-structs.mts";
 

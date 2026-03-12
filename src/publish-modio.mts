@@ -166,7 +166,7 @@ async function publishToModIO() {
   }
   const publishedAt = new Date();
   const publishNote = process.env.CHANGENOTE || meta.changenote || "Update";
-  await Promise.allSettled([import("./pull-assets.mjs"), import("./pull-staged.mjs")]);
+  await Promise.allSettled([import("./pull-assets.mts"), import("./pull-staged.mts")]);
   const [outputZip, modId] = await Promise.all([createModZip(await modFolderSteamStruct), Promise.resolve(getStoredModId() || createMod())]);
   await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
   rmSync(outputZip);
