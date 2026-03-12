@@ -14,7 +14,6 @@ import {
   allDefaultArmorPrototypesRecord,
   allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
   allDefaultItemGeneratorsRecord,
-  allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID,
   armorFactionsBySID,
   armorRanksBySID,
   CoreFaction,
@@ -53,10 +52,7 @@ function shouldProcessStruct(struct: ItemGeneratorPrototype) {
     return false;
   }
 
-  return (
-    allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] ||
-    allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID]
-  );
+  return allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
 }
 
 function* getCoreItemGeneratorPrototypeForEdit<T extends ItemGeneratorPrototype>(
@@ -364,7 +360,6 @@ function resetCss(struct: ItemGeneratorPrototype, fork: ItemGeneratorPrototype) 
     const isSubItemGen = !!rest.length;
     igFork.bAllowSameCategoryGeneration = true;
     igFork.PossibleItems = ig.PossibleItems.fork();
-    struct;
     igFork.PossibleItems[piIndex] = ig.PossibleItems[piIndex].fork();
     if (isSubItemGen) {
       igFork.PossibleItems[piIndex].removeNode("ItemGeneratorPrototypeSID");
@@ -375,4 +370,4 @@ function resetCss(struct: ItemGeneratorPrototype, fork: ItemGeneratorPrototype) 
   });
 }
 
-transformItemGenerators.files = ["/DynamicItemGenerator.cfg", "/QuestItemGeneratorPrototypes.cfg", "/ItemGeneratorPrototypes.cfg"];
+transformItemGenerators.files = ["/DynamicItemGenerator.cfg", "/ItemGeneratorPrototypes.cfg"];
