@@ -7,6 +7,6 @@ import path from "path";
 
 await pack();
 
-injectIntoGame(path.join(await modFolderSteamStruct, await getPackFileName()));
+await injectIntoGame(path.join(await modFolderSteamStruct, await getPackFileName()));
 
 spawnSync("paplay", ["./pop.wav"]);

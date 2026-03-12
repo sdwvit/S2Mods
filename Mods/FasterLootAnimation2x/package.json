@@ -1,0 +1,12 @@
+{
+  "name": "@s2mods/fasterlootanimation2x",
+  "private": true,
+  "scripts": {
+    "prepare-configs": "S2_MOD=FasterLootAnimation2x node ../../src/prepare-configs.mts",
+    "update-readme": "S2_MOD=FasterLootAnimation2x node ../../src/update-readme.mts",
+    "pack-inject": "S2_MOD=FasterLootAnimation2x node ../../src/pack-inject.mts",
+    "cook-inject": "S2_MOD=FasterLootAnimation2x node ../../src/cook-inject.mts",
+    "publish-steam": "S2_MOD=FasterLootAnimation2x node ../../src/publish-steam.mts",
+    "publish-modio": "S2_MOD=FasterLootAnimation2x node ../../src/publish-modio.mts"
+  }
+}
