@@ -1,4 +1,4 @@
-import { allValidMods } from "./base-paths.mts";
+import { allValidMods } from "./mod-context.mts";
 import { cmdSync, nodeSync } from "./cmd.mts";
 
 nodeSync("./pull-git-branches.mts");

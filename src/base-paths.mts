@@ -4,7 +4,7 @@ import { projectRoot } from "./ensure-env.mts";
 export { projectRoot } from "./ensure-env.mts";
 import { MetaType } from "./meta-type.mts";
 import { mkdirSync } from "fs";
-import { allValidMods, modsFolder, resolveModName } from "./mod-context.mts";
+import { modsFolder, resolveModName } from "./mod-context.mts";
 
 export const rawCfgEnclosingFolder = path.join("Stalker2", "Content", "GameLite");
 export const baseCfgDir = path.join(process.env.SDK_PATH, rawCfgEnclosingFolder);

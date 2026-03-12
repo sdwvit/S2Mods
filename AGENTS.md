@@ -54,6 +54,7 @@ The following are git-ignored and should not be committed unless explicitly requ
 
 ## Development notes
 - Scripts are ESM and `.mts`; follow the existing import style and path conventions.
+- Even on Node 22.18+ native `.mts` execution is not sufficient for this repo today, because `s2cfgtojson` currently ships `.mts` sources from `node_modules/` and Node refuses type-stripping there. Keep using `NODE_TS_TRANSFORMER` until that dependency ships JS or is vendored locally.
 - Prefer `rg` for searching and avoid wide refactors unless asked.
 - When touching scripts that integrate external tools (SDK, SteamCMD, repak), keep path/credential handling intact.
 - Many scripts read from environment variables; do not hardcode local paths.

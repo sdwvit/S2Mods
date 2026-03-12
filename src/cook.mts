@@ -1,7 +1,7 @@
 import path from "node:path";
 import childProcess from "node:child_process";
 import dotEnv from "dotenv";
-import { logger } from "./logger.mjs";
+import { logger } from "./logger.mts";
 import { spawnSync } from "child_process";
 import { existsSync } from "node:fs";
 import { projectRoot, sdkModFolder, sdkModName } from "./base-paths.mts";
