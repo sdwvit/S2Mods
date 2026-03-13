@@ -1,21 +1,53 @@
 import type { ERank } from "s2cfgtojson";
 import type { DialogPrototypeItemPrototypeSID, DialogPrototypeMoney, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeParams } from "s2cfgtojson";
 import { Struct } from "s2cfgtojson";
-import type { QuestNodePrototype, QuestNodePrototypeIf, QuestNodePrototypeConsoleCommand, QuestNodePrototypeItemAdd, QuestNodePrototypeItemRemove, QuestNodePrototypeOnPlayerGetItemEvent, QuestNodePrototypeSetCharacterParam, QuestNodePrototypeShowFadeScreen, QuestNodePrototypeTechnical } from "s2cfgtojson";
+import type { QuestNodePrototype, QuestNodePrototypeIf, QuestNodePrototypeConsoleCommand, QuestNodePrototypeItemAdd, QuestNodePrototypeItemRemove, QuestNodePrototypeOnPlayerGetItemEvent, QuestNodePrototypeSetCharacterParam, QuestNodePrototypeTechnical } from "s2cfgtojson";
 import type { StructTransformer } from "../../src/meta-type.mts";
 import { modName } from "../../src/base-paths.mts";
 import { FactionPatchDefinitions } from "../FactionPatches/addFactionPatchItems.mts";
-import { getNonQuestFactionPatchSID, RANK_INDICATOR_ITEM_SIDS, XP_COUNTER_ITEM_SID } from "./transformKeyItemPrototypes.mts";
+import { getNonQuestFactionPatchSID, LEVEL_COUNTER_ITEM_SID, RANK_INDICATOR_ITEM_SIDS, XP_COUNTER_ITEM_SID } from "./transformKeyItemPrototypes.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
 import { NPCRank } from "../../src/consts.mts";
 
-// XP thresholds for player rank progression in ascending order.
-export const rankThresholdsByXp: Record<number, ERank> = {
-  0: "ERank::Newbie",
-  2500: "ERank::Experienced",
-  10000: "ERank::Veteran",
-  20000: "ERank::Master",
-} as const satisfies Record<number, ERank>;
+export const levelThresholds = [
+  { level: 1, xp: 0 },
+  { level: 2, xp: 350 },
+  { level: 3, xp: 900 },
+  { level: 4, xp: 1600 },
+  { level: 5, xp: 2450 },
+  { level: 6, xp: 3350 },
+  { level: 7, xp: 3950 },
+  { level: 8, xp: 4400 },
+  { level: 9, xp: 4750 },
+  { level: 10, xp: 5000 },
+  { level: 11, xp: 5900 },
+  { level: 12, xp: 7000 },
+  { level: 13, xp: 8300 },
+  { level: 14, xp: 9800 },
+  { level: 15, xp: 11500 },
+  { level: 16, xp: 13300 },
+  { level: 17, xp: 15000 },
+  { level: 18, xp: 16300 },
+  { level: 19, xp: 17200 },
+  { level: 20, xp: 18000 },
+  { level: 21, xp: 19600 },
+  { level: 22, xp: 21400 },
+  { level: 23, xp: 23400 },
+  { level: 24, xp: 25600 },
+  { level: 25, xp: 28000 },
+  { level: 26, xp: 30300 },
+  { level: 27, xp: 32300 },
+  { level: 28, xp: 33900 },
+  { level: 29, xp: 35100 },
+  { level: 30, xp: 36000 },
+] as const;
+
+export const rankThresholdsByLevel: Array<{ lowLevel: number; highLevel?: number; rank: ERank }> = [
+  { lowLevel: 1, highLevel: 10, rank: "ERank::Newbie" },
+  { lowLevel: 10, highLevel: 20, rank: "ERank::Experienced" },
+  { lowLevel: 20, highLevel: 30, rank: "ERank::Veteran" },
+  { lowLevel: 30, rank: "ERank::Master" },
+];
 
 const SKIF_GUID = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
@@ -87,40 +119,45 @@ function createOnPlayerGetFactionPatchEventListeners() {
     hasQuestPatchNode.Launchers = getLaunchers([onPatchReceivedNode, removeQuestPatchNode]);
 
     const adjustXpItem = getAdjustXPItemNode(hasQuestPatchNode, NPCRank[patchDef.Faction]);                                         // Add/remove XP counter item for this patch reward.
-    const gotXPNode = getFadeScreenNode(hasQuestPatchNode, NPCRank[patchDef.Faction]);                                             // Show "+XP" feedback text.
     const addNonQuestPatchNode = getAddNonQuestPatchNode(hasQuestPatchNode);                                                            // Grant normalized non-quest patch item.
 
     extraStructs.push(onPatchReceivedNode);
     extraStructs.push(hasQuestPatchNode);
-    extraStructs.push(gotXPNode);
     extraStructs.push(adjustXpItem);
     xpAdjustNodes.push(adjustXpItem);
     extraStructs.push(removeQuestPatchNode);
     extraStructs.push(addNonQuestPatchNode);
   });
 
-  const technical = getDelay(xpAdjustNodes, `${modName}_SharedRankThresholdNode`);
-  extraStructs.push(technical);
+  const levelThresholdNode = getDelay(xpAdjustNodes, `${modName}_SharedLevelThresholdNode`);
+  extraStructs.push(levelThresholdNode);
+  const levelSyncNodes = levelThresholds.flatMap((entry, i, arr) => {
+    const highXp = arr[i + 1]?.xp ?? Infinity;
+    return getLevelSyncNodes(levelThresholdNode, entry.level, entry.xp, highXp);
+  });
+  extraStructs.push(...levelSyncNodes);
+
+  const rankThresholdNode = getDelay(
+    levelSyncNodes.filter((node): node is QuestNodePrototypeItemAdd => node.NodeType === "EQuestNodeType::ItemAdd"),
+    `${modName}_SharedRankThresholdNode`,
+  );
+  extraStructs.push(rankThresholdNode);
   const missingRankIndicators = [];
 
-  Object.entries(rankThresholdsByXp).forEach(([lowXpStr, rank], i, arr) => {
-    const lowXp = Number(lowXpStr);
-    const highXp = Number((arr[i + 1] ?? [Infinity])[0]);
-    const { finalNode: conditionNode, nodes: thresholdNodes } = getRankThresholdConditionChain(technical, rank, lowXp, highXp); // Match current XP against this rank bracket.
+  rankThresholdsByLevel.forEach(({ lowLevel, highLevel, rank }) => {
+    const { finalNode: conditionNode, nodes: thresholdNodes } = getRankThresholdConditionChain(rankThresholdNode, rank, lowLevel, highLevel ?? Infinity); // Match current level against this rank bracket.
 
     const missingRankIndicator = getMissingRankIndicator(conditionNode, rank);                                                       // Continue only if this rank indicator is currently missing.
     missingRankIndicators.push(missingRankIndicator);
     const delay = getDelay([missingRankIndicator], `${modName}_${rank.split("::").pop()}_delay`, 1);                   // Small sequencing delay before rank apply.
     delay.Launchers = getLaunchers([asTrueConnection(missingRankIndicator)]);
     const setRankNode = getSetRankNode(delay, rank);                                                                                   // Write resolved player rank param.
-    const rankShowFadeScreenNode = getRankShowFadeScreenNode(delay, rank);                                                             // Show rank change feedback text.
     const addCurrentRankIndicatorNode = getAddCurrentRankIndicatorNode(delay, rank);                                                    // Add indicator item for active rank.
 
     extraStructs.push(...thresholdNodes);
     extraStructs.push(missingRankIndicator);
     extraStructs.push(delay);
     extraStructs.push(setRankNode);
-    extraStructs.push(rankShowFadeScreenNode);
     extraStructs.push(addCurrentRankIndicatorNode);
   });
   const removeAllRankIndicatorNodes = getRemoveAllRankIndicatorNodes(missingRankIndicators);                                                  // Remove all rank indicators before adding current one.
@@ -198,23 +235,6 @@ function getOnItemReceivedNode(SID: string): QuestNodePrototypeOnPlayerGetItemEv
   return node;
 }
 
-function getFadeScreenNode(hasQuestPatchNode: QuestNodePrototypeIf, xp: number) {
-  const printXpVarNode = new Struct() as QuestNodePrototypeShowFadeScreen;
-  const ItemSID = hasQuestPatchNode.Conditions["0"]["0"].ItemPrototypeSID.VariableValue as string;
-
-  printXpVarNode.FadeTime = 1;
-  printXpVarNode.Launchers = getLaunchers([asTrueConnection(hasQuestPatchNode)]);
-  printXpVarNode.NodeType = "EQuestNodeType::ShowFadeScreen";
-  printXpVarNode.QuestSID = hasQuestPatchNode.QuestSID;
-  printXpVarNode.Repeatable = true;
-  printXpVarNode.ScreenText = `+${xp} XP`;
-  printXpVarNode.SID = `ShowFadeScreen_${ItemSID}`;
-
-  printXpVarNode.__internal__.isRoot = true;
-  printXpVarNode.__internal__.rawName = printXpVarNode.SID;
-  return printXpVarNode;
-}
-
 function getAdjustXPItemNode(hasQuestPatchNode: QuestNodePrototypeIf, xp: number) {
   const amount = Math.abs(xp);
   const isAdd = xp > 0;
@@ -256,9 +276,10 @@ function getDelay(launcherNodes: Array<QuestNodePrototype>, SID: string, length 
   }) as QuestNodePrototypeTechnical;
 }
 
-function getRankThresholdConditionNode(
+function getInventoryThresholdConditionNode(
   launcher: QuestNodePrototype,
   sid: string,
+  itemSID: string,
   compare: "EConditionComparance::GreaterOrEqual" | "EConditionComparance::Less",
   value: number,
 ) {
@@ -273,7 +294,7 @@ function getRankThresholdConditionNode(
     {
       ConditionType: "EQuestConditionType::ItemInInventory",
       TargetCharacter: SKIF_GUID,
-      ItemPrototypeSID: { VariableType: "EGlobalVariableType::String", VariableValue: XP_COUNTER_ITEM_SID },
+      ItemPrototypeSID: { VariableType: "EGlobalVariableType::String", VariableValue: itemSID },
       WithEquipped: true,
       WithInventory: true,
       ConditionComparance: compare,
@@ -286,41 +307,116 @@ function getRankThresholdConditionNode(
   return node;
 }
 
-function getRankThresholdConditionChain(launcher: QuestNodePrototypeTechnical, rank: ERank, lowXp: number, highXp: number) {
-  const rankName = rank.replace("ERank::", "");
+function getThresholdConditionChain(
+  launcher: QuestNodePrototypeTechnical,
+  itemSID: string,
+  sidPrefix: string,
+  lowValue: number,
+  highValue: number,
+) {
   const nodes: QuestNodePrototypeIf[] = [];
   let currentLauncher: QuestNodePrototype = launcher;
 
-  if (lowXp > 0) {
-    const minNode = getRankThresholdConditionNode(
+  if (lowValue > 0) {
+    const minNode = getInventoryThresholdConditionNode(
       currentLauncher,
-      `${modName}_rankCheck_${rankName}_Min`,
+      `${sidPrefix}_Min`,
+      itemSID,
       "EConditionComparance::GreaterOrEqual",
-      lowXp,
+      lowValue,
     );
     nodes.push(minNode);
     currentLauncher = minNode;
   }
 
-  if (Number.isFinite(highXp)) {
-    const maxNode = getRankThresholdConditionNode(
+  if (Number.isFinite(highValue)) {
+    const maxNode = getInventoryThresholdConditionNode(
       currentLauncher,
-      `${modName}_rankCheck_${rankName}`,
+      sidPrefix,
+      itemSID,
       "EConditionComparance::Less",
-      highXp,
+      highValue,
     );
     nodes.push(maxNode);
     return { finalNode: maxNode, nodes };
   }
 
-  const minOnlyNode = getRankThresholdConditionNode(
+  const minOnlyNode = getInventoryThresholdConditionNode(
     currentLauncher,
-    `${modName}_rankCheck_${rankName}`,
+    sidPrefix,
+    itemSID,
     "EConditionComparance::GreaterOrEqual",
-    lowXp,
+    lowValue,
   );
   nodes.push(minOnlyNode);
   return { finalNode: minOnlyNode, nodes };
+}
+
+function getRankThresholdConditionChain(launcher: QuestNodePrototypeTechnical, rank: ERank, lowLevel: number, highLevel: number) {
+  const rankName = rank.replace("ERank::", "");
+  return getThresholdConditionChain(launcher, LEVEL_COUNTER_ITEM_SID, `${modName}_rankCheck_${rankName}`, lowLevel, highLevel);
+}
+
+function getLevelSyncNodes(launcher: QuestNodePrototypeTechnical, level: number, lowXp: number, highXp: number) {
+  const { finalNode: xpRangeNode, nodes } = getThresholdConditionChain(
+    launcher,
+    XP_COUNTER_ITEM_SID,
+    `${modName}_levelCheck_${level}`,
+    lowXp,
+    highXp,
+  );
+  const levelMissingNode = new Struct() as QuestNodePrototypeIf;
+  levelMissingNode.SID = `${modName}_levelMissing_${level}`;
+  levelMissingNode.QuestSID = modName;
+  levelMissingNode.NodeType = "EQuestNodeType::If";
+  levelMissingNode.Repeatable = true;
+  levelMissingNode.Launchers = getLaunchers([asTrueConnection(xpRangeNode)]);
+  levelMissingNode.Conditions = getConditions([
+    {
+      ConditionType: "EQuestConditionType::ItemInInventory",
+      ConditionComparance: "EConditionComparance::Less",
+      TargetCharacter: SKIF_GUID,
+      ItemPrototypeSID: new Struct({
+        VariableType: "EGlobalVariableType::String",
+        VariableValue: LEVEL_COUNTER_ITEM_SID,
+      }) as DialogPrototypeItemPrototypeSID,
+      ItemsCount: new Struct({
+        VariableType: "EGlobalVariableType::Int",
+        VariableValue: level,
+      }) as DialogPrototypeMoney,
+      WithEquipped: true,
+      WithInventory: true,
+    },
+  ] as const);
+  levelMissingNode.__internal__.isRoot = true;
+  levelMissingNode.__internal__.rawName = levelMissingNode.SID;
+
+  const removeLevelNode = new Struct() as QuestNodePrototypeItemRemove;
+  removeLevelNode.ItemSID = LEVEL_COUNTER_ITEM_SID;
+  removeLevelNode.ItemsCount = levelThresholds[levelThresholds.length - 1].level;
+  removeLevelNode.Launchers = getLaunchers([asTrueConnection(levelMissingNode)]);
+  removeLevelNode.NodeType = "EQuestNodeType::ItemRemove";
+  removeLevelNode.QuestSID = modName;
+  removeLevelNode.Repeatable = true;
+  removeLevelNode.SID = `${modName}_clearLevel_${level}`;
+  removeLevelNode.TargetQuestGuid = SKIF_GUID;
+  removeLevelNode.__internal__.isRoot = true;
+  removeLevelNode.__internal__.rawName = removeLevelNode.SID;
+
+  const addLevelNode = new Struct() as QuestNodePrototypeItemAdd;
+  addLevelNode.AddToPlayerStash = false;
+  addLevelNode.ItemSID = LEVEL_COUNTER_ITEM_SID;
+  addLevelNode.ItemsCount = level;
+  addLevelNode.Launchers = getLaunchers([removeLevelNode]);
+  addLevelNode.NodeType = "EQuestNodeType::ItemAdd";
+  addLevelNode.QuestSID = modName;
+  addLevelNode.Repeatable = true;
+  addLevelNode.SID = `${modName}_setLevel_${level}`;
+  addLevelNode.TargetQuestGuid = SKIF_GUID;
+  addLevelNode.__internal__.isRoot = true;
+  addLevelNode.__internal__.rawName = addLevelNode.SID;
+
+  return [...nodes, levelMissingNode, removeLevelNode, addLevelNode];
 }
 
 function getSetRankNode(conditionNode: QuestNodePrototype, rank: ERank) {
@@ -373,22 +469,6 @@ function getMissingRankIndicator(launcherNode: QuestNodePrototype, rank: ERank) 
       WithInventory: true,
     },
   ] as const);
-
-  node.__internal__.isRoot = true;
-  node.__internal__.rawName = node.SID;
-  return node;
-}
-
-function getRankShowFadeScreenNode(launcherNode: QuestNodePrototype, rank: ERank) {
-  const rankName = rank.replace("ERank::", "");
-  const node = new Struct() as QuestNodePrototypeShowFadeScreen;
-  node.FadeTime = 10;
-  node.Launchers = getLaunchers([launcherNode]);
-  node.NodeType = "EQuestNodeType::ShowFadeScreen";
-  node.QuestSID = modName;
-  node.Repeatable = true;
-  node.ScreenText = `Skif advanced to ${rankName} rank`;
-  node.SID = `${modName}_ShowFadeScreen_RankAdvance_${rankName}`;
 
   node.__internal__.isRoot = true;
   node.__internal__.rawName = node.SID;
