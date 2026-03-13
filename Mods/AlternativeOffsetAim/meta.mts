@@ -1,5 +1,5 @@
-import { MetaType } from "../../src/meta-type.mts";
-import { WeaponGeneralSetupPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
+import type { WeaponGeneralSetupPrototype } from "s2cfgtojson";
 
 export const meta: MetaType<WeaponGeneralSetupPrototype> = {
   description: `

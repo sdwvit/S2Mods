@@ -1,5 +1,6 @@
-import { Struct, UpgradePrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { UpgradePrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 
 let once = false;
 

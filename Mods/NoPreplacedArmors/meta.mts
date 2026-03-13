@@ -1,5 +1,5 @@
-import { SpawnActorPrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import type { SpawnActorPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 import { allDefaultArmorPrototypesRecord } from "../../src/consts.mts";
 
 export const meta: MetaType<SpawnActorPrototype> = {

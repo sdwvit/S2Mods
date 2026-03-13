@@ -1,5 +1,6 @@
-import { QuestNodePrototype, QuestNodePrototypeSetItemGenerator, Struct } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { QuestNodePrototype, QuestNodePrototypeSetItemGenerator } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 
 const SKIF_QUEST_GUID = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 let once = false;

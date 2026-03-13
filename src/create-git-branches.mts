@@ -1,4 +1,4 @@
-import { allValidMods } from "./base-paths.mts";
+import { allValidMods } from "./mod-context.mts";
 import { spawnSync } from "child_process";
 import { cmdSync } from "./cmd.mts";
 

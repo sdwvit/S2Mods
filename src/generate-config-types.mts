@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { GetStructType, QuestNodePrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { GetStructType } from "s2cfgtojson";
+import type { QuestNodePrototype } from "s2cfgtojson";
 import { getCfgFiles } from "./get-cfg-files.mts";
 import { deepMerge } from "./deep-merge.mts";
 import { logger } from "./logger.mts";
@@ -59,8 +61,7 @@ export async function generateConfigTypes(outputFile = DEFAULT_OUTPUT) {
 
   try {
     await loadStructsWithNode(
-      cfgFiles,
-      (filePath, structs) => {
+      cfgFiles, (filePath, structs) => {
         currentFile = filePath;
         scannedFiles += 1;
         if (!L1GlobalTypeGenCache[filePath] || L1GlobalTypeGenCache[filePath].length !== structs.length) {
@@ -81,11 +82,9 @@ export async function generateConfigTypes(outputFile = DEFAULT_OUTPUT) {
           walk(s, [s.__internal__.rawName], mergedByCategory, fileCategory);
           deepMerge(merged, s);
         }
-      },
-      (file) => {
+      }, (file) => {
         currentFile = file;
-      },
-    );
+      }, );
   } finally {
     if (statusTimer) clearInterval(statusTimer);
   }
@@ -96,10 +95,7 @@ export async function generateConfigTypes(outputFile = DEFAULT_OUTPUT) {
 }
 
 async function loadStructsWithNode(
-  filePaths: string[],
-  onResult: (filePath: string, structs: Struct[]) => void,
-  setCurrentFile: (file: string) => void,
-) {
+  filePaths: string[], onResult: (filePath: string, structs: Struct[]) => void, setCurrentFile: (file: string) => void, ) {
   if (!filePaths.length) return;
 
   const queue = filePaths
@@ -138,9 +134,7 @@ async function loadStructsWithNode(
     const listFile = path.join(tempRoot, `batch-${id}.list.json`);
     fs.writeFileSync(listFile, JSON.stringify(fileBatch), "utf8");
     const exitCode = await node(workerPath, {
-      GENERATE_CONFIG_LIST: listFile,
-      GENERATE_CONFIG_OUTPUT: outputFile,
-    });
+      GENERATE_CONFIG_LIST: listFile, GENERATE_CONFIG_OUTPUT: outputFile, });
     let payload: { results: WorkerMessage[] };
     try {
       const raw = fs.readFileSync(outputFile, "utf8");
@@ -198,14 +192,7 @@ export function categorizeConfig(filePath: string): string {
   let segments = parsed.dir.split("/").filter(Boolean);
   segments = segments.slice(segments.indexOf("GameData") + 1);
   const knownFolderCategories = [
-    "SpawnActorPrototypes",
-    "DialogChainPrototypes",
-    "DialogPoolPrototypes",
-    "DialogPrototypes",
-    "JournalQuestPrototypes",
-    "QuestNodePrototypes",
-    "QuestPrototypes",
-  ];
+    "SpawnActorPrototypes", "DialogChainPrototypes", "DialogPoolPrototypes", "DialogPrototypes", "JournalQuestPrototypes", "QuestNodePrototypes", "QuestPrototypes", ];
 
   for (const folderName of knownFolderCategories) {
     if (normalized.includes(`/${folderName}/`)) return folderName.slice(0, -1);
@@ -232,210 +219,7 @@ export function categorizeConfig(filePath: string): string {
 let duplicateKeys: Record<string, string> = {};
 const usedEnums = new Set<string>();
 let KNOWN_ENUM_TYPES = new Set([
-  "EAIConstraintType",
-  "EAIMovementPose",
-  "EALifeDirectorScenarioTarget",
-  "EALifeFactionGoalType",
-  "EAbility",
-  "EAbilityStatePhase",
-  "EAgentArchetype",
-  "EAgentType",
-  "EAimAssistPresetType",
-  "EAimAssistWeightType",
-  "EAmmoCaliber",
-  "EAmmoType",
-  "EAnimationReloadTypes",
-  "EAnomalyElementType",
-  "EAnomalyType",
-  "EApplyRestrictionType",
-  "EArchiartifactType",
-  "EArmorScale",
-  "EArtifactRarity",
-  "EArtifactSpawnerExcludeRule",
-  "EArtifactType",
-  "EAspectRatio",
-  "EAttachSlot",
-  "EAttachType",
-  "EAttractionPointType",
-  "EAudioRoomPresetBandwidth",
-  "EAvailableCoverActionsSide",
-  "EAvailableCoverEnterTypes",
-  "EBehaviorType",
-  "EBeneficial",
-  "EBodyMeshType",
-  "EBoltActionWeaponState",
-  "EBoolProviderType",
-  "EBrokenGameDataFilter",
-  "ECalculateSignificance",
-  "ECameraShakeEffectSubtype",
-  "ECameraShakeGroupType",
-  "ECameraShakeType",
-  "ECauseOfDeath",
-  "EChangeValueMode",
-  "ECollisionChannel",
-  "ECollisionFormType",
-  "EColorBlindMode",
-  "EConditionCheckType",
-  "EConditionComparance",
-  "EConnectionLineState",
-  "EConsumableType",
-  "EContextualActionBodyPart",
-  "EContextualActionEffectType",
-  "EContextualActionNeeds",
-  "EContextualActionNodeType",
-  "EContextualActionPreconditionType",
-  "EContextualAgentType",
-  "ECrosshairType",
-  "ECrosshairTypeSetting",
-  "ECustomDataDistribution",
-  "EDamageBone",
-  "EDamageSource",
-  "EDamageType",
-  "EDeadZoneType",
-  "EDestructionActionType",
-  "EDetectorType",
-  "EDialogAction",
-  "EDialogAnimationType",
-  "EDialogEventCategory",
-  "EDialogEventType",
-  "EDialogPriority",
-  "EDistanceSelectorCondition",
-  "EDuplicateResolveType",
-  "EEffectDisplayType",
-  "EEffectSource",
-  "EEffectType",
-  "EEmissionAIEvent",
-  "EEmissionStage",
-  "EEmotionalFaceMasks",
-  "EEvadeActionType",
-  "EFaceBlockingBlendMasks",
-  "EFastUseGroupType",
-  "EFireType",
-  "EFlashlightAction",
-  "EFlashlightPriority",
-  "EFleeType",
-  "EFloatProviderType",
-  "EGSCTeleportType",
-  "EGameDifficulty",
-  "EGlobalVariableType",
-  "EGoalPriority",
-  "EGrenadeType",
-  "EGuardType",
-  "EHealingType",
-  "EHideViewType",
-  "EIgnoreDamageType",
-  "EInputController",
-  "EInputKey",
-  "EInputMappingContextPriority",
-  "EInteractFXType",
-  "EInventoryEquipmentSlot",
-  "EItemContainerType",
-  "EItemGenerationCategory",
-  "EItemInfoType",
-  "EItemType",
-  "EJamType",
-  "EJournalAction",
-  "EJournalEntity",
-  "EJournalState",
-  "ELairType",
-  "ELineDirection",
-  "ELoadingDestination",
-  "ELocalizationLanguage",
-  "EMagazineMeshType",
-  "EMainHandEquipmentType",
-  "EMappingContext",
-  "EMarkerState",
-  "EMarkerType",
-  "EMeshSubType",
-  "EMisansceneNodeType",
-  "EModifiedCharacterParam",
-  "EModifyAbilitySequenceQuestNodeMode",
-  "EMovementBehaviour",
-  "EMusicState",
-  "EMutantAttackType",
-  "ENPCType",
-  "ENiagaraProviderType",
-  "ENoteType",
-  "ENotificationEventType",
-  "EObjAnim",
-  "EObjFloatParams",
-  "EObjMesh",
-  "EObjSkeletalMeshTraceBone",
-  "EObjType",
-  "EOutputDeviceEffect",
-  "EOverrideDialogTopic",
-  "EOverweightLock",
-  "EPDATutorialCategory",
-  "EPassiveDetectorType",
-  "EPerformanceBoostDLSSFGMode",
-  "EPerformanceBoostFFXFIMode",
-  "EPerformanceBoostInputLatencyReflex",
-  "EPerformanceBoostUpscalingMethod",
-  "EPhysicalMaterialType",
-  "EPlayerActionInputModifier",
-  "EPlayerActionInputTrigger",
-  "EPlayerActionInputTypeCustom",
-  "EPostEffectProcessorType",
-  "EPostProcessEffectType",
-  "EPsyNPCType",
-  "EQuestConditionType",
-  "EQuestEventType",
-  "EQuestNodeState",
-  "EQuestNodeType",
-  "EQuestRewardType",
-  "ERadiationInnerOffsetPreset",
-  "ERadiationPreset",
-  "ERank",
-  "ERegion",
-  "ERelationChangingEvent",
-  "ERelationLevel",
-  "ERepetitions",
-  "ERequiredSquadMembers",
-  "ESaveType",
-  "ESaveSubType",
-  "EScenarioBranch",
-  "ESensitivityType",
-  "ESettingCategoryType",
-  "ESmartCoverType",
-  "ESortGroup",
-  "ESoundEventType",
-  "ESpaceRestrictionType",
-  "ESpawnNodeExcludeType",
-  "ESpawnType",
-  "ESpeechEventType",
-  "EStaminaAction",
-  "EStateTag",
-  "ESubtitlesSize",
-  "ESummonBehaviourOnSpawn",
-  "ESummonSpawnOrientation",
-  "EThreatActionType",
-  "EThreatAwareness",
-  "EThreatType",
-  "EThrowQueueDisarmMode",
-  "ETriggerReact",
-  "EUISound",
-  "EUpgradeTargetPartType",
-  "EUpgradeVerticalPosition",
-  "EUserNotificationType",
-  "EVitalType",
-  "EWaterImmersionLevel",
-  "EWeaponState",
-  "EWeaponType",
-  "EWeather",
-  "EALifeGroupPriorityType",
-  "ELairPreferredSpawnType",
-  "EPillowAnomalyBiomeType",
-  "ETriggerShape",
-  "EWeatherParam",
-  "EWeightStatus",
-  "EZombificationType",
-  "ESoundEffectSubtype",
-  "EInputAxisType",
-  "EActionType",
-  "EObjBoolParams",
-  "ECombatTactics",
-  "EAgentRankMask",
-]);
+  "EAIConstraintType", "EAIMovementPose", "EALifeDirectorScenarioTarget", "EALifeFactionGoalType", "EAbility", "EAbilityStatePhase", "EAgentArchetype", "EAgentType", "EAimAssistPresetType", "EAimAssistWeightType", "EAmmoCaliber", "EAmmoType", "EAnimationReloadTypes", "EAnomalyElementType", "EAnomalyType", "EApplyRestrictionType", "EArchiartifactType", "EArmorScale", "EArtifactRarity", "EArtifactSpawnerExcludeRule", "EArtifactType", "EAspectRatio", "EAttachSlot", "EAttachType", "EAttractionPointType", "EAudioRoomPresetBandwidth", "EAvailableCoverActionsSide", "EAvailableCoverEnterTypes", "EBehaviorType", "EBeneficial", "EBodyMeshType", "EBoltActionWeaponState", "EBoolProviderType", "EBrokenGameDataFilter", "ECalculateSignificance", "ECameraShakeEffectSubtype", "ECameraShakeGroupType", "ECameraShakeType", "ECauseOfDeath", "EChangeValueMode", "ECollisionChannel", "ECollisionFormType", "EColorBlindMode", "EConditionCheckType", "EConditionComparance", "EConnectionLineState", "EConsumableType", "EContextualActionBodyPart", "EContextualActionEffectType", "EContextualActionNeeds", "EContextualActionNodeType", "EContextualActionPreconditionType", "EContextualAgentType", "ECrosshairType", "ECrosshairTypeSetting", "ECustomDataDistribution", "EDamageBone", "EDamageSource", "EDamageType", "EDeadZoneType", "EDestructionActionType", "EDetectorType", "EDialogAction", "EDialogAnimationType", "EDialogEventCategory", "EDialogEventType", "EDialogPriority", "EDistanceSelectorCondition", "EDuplicateResolveType", "EEffectDisplayType", "EEffectSource", "EEffectType", "EEmissionAIEvent", "EEmissionStage", "EEmotionalFaceMasks", "EEvadeActionType", "EFaceBlockingBlendMasks", "EFastUseGroupType", "EFireType", "EFlashlightAction", "EFlashlightPriority", "EFleeType", "EFloatProviderType", "EGSCTeleportType", "EGameDifficulty", "EGlobalVariableType", "EGoalPriority", "EGrenadeType", "EGuardType", "EHealingType", "EHideViewType", "EIgnoreDamageType", "EInputController", "EInputKey", "EInputMappingContextPriority", "EInteractFXType", "EInventoryEquipmentSlot", "EItemContainerType", "EItemGenerationCategory", "EItemInfoType", "EItemType", "EJamType", "EJournalAction", "EJournalEntity", "EJournalState", "ELairType", "ELineDirection", "ELoadingDestination", "ELocalizationLanguage", "EMagazineMeshType", "EMainHandEquipmentType", "EMappingContext", "EMarkerState", "EMarkerType", "EMeshSubType", "EMisansceneNodeType", "EModifiedCharacterParam", "EModifyAbilitySequenceQuestNodeMode", "EMovementBehaviour", "EMusicState", "EMutantAttackType", "ENPCType", "ENiagaraProviderType", "ENoteType", "ENotificationEventType", "EObjAnim", "EObjFloatParams", "EObjMesh", "EObjSkeletalMeshTraceBone", "EObjType", "EOutputDeviceEffect", "EOverrideDialogTopic", "EOverweightLock", "EPDATutorialCategory", "EPassiveDetectorType", "EPerformanceBoostDLSSFGMode", "EPerformanceBoostFFXFIMode", "EPerformanceBoostInputLatencyReflex", "EPerformanceBoostUpscalingMethod", "EPhysicalMaterialType", "EPlayerActionInputModifier", "EPlayerActionInputTrigger", "EPlayerActionInputTypeCustom", "EPostEffectProcessorType", "EPostProcessEffectType", "EPsyNPCType", "EQuestConditionType", "EQuestEventType", "EQuestNodeState", "EQuestNodeType", "EQuestRewardType", "ERadiationInnerOffsetPreset", "ERadiationPreset", "ERank", "ERegion", "ERelationChangingEvent", "ERelationLevel", "ERepetitions", "ERequiredSquadMembers", "ESaveType", "ESaveSubType", "EScenarioBranch", "ESensitivityType", "ESettingCategoryType", "ESmartCoverType", "ESortGroup", "ESoundEventType", "ESpaceRestrictionType", "ESpawnNodeExcludeType", "ESpawnType", "ESpeechEventType", "EStaminaAction", "EStateTag", "ESubtitlesSize", "ESummonBehaviourOnSpawn", "ESummonSpawnOrientation", "EThreatActionType", "EThreatAwareness", "EThreatType", "EThrowQueueDisarmMode", "ETriggerReact", "EUISound", "EUpgradeTargetPartType", "EUpgradeVerticalPosition", "EUserNotificationType", "EVitalType", "EWaterImmersionLevel", "EWeaponState", "EWeaponType", "EWeather", "EALifeGroupPriorityType", "ELairPreferredSpawnType", "EPillowAnomalyBiomeType", "ETriggerShape", "EWeatherParam", "EWeightStatus", "EZombificationType", "ESoundEffectSubtype", "EInputAxisType", "EActionType", "EObjBoolParams", "ECombatTactics", "EAgentRankMask", ]);
 
 const knownEnums = KNOWN_ENUM_TYPES;
 
@@ -447,7 +231,7 @@ const getUniqueStructFingerprint = (s: GetStructType<Record<string, unknown>>) =
     .join("_\n_");
 };
 
-function renderTypesFile(mergedByCategory: Record<string, GetStructType<Record<string, unknown>>>) {
+function renderTypesFile(mergedByCategory: Record<string, Struct>) {
   duplicateKeys = {};
   usedEnums.clear();
   const lines: string[] = [];
@@ -458,7 +242,7 @@ function renderTypesFile(mergedByCategory: Record<string, GetStructType<Record<s
   lines.push("");
 
   const byFingerprint = Object.entries(mergedByCategory)
-    .map(([cat, s]) => [cat, s, getUniqueStructFingerprint(s)] as const)
+    .map(([cat, s]) => [cat, s, getUniqueStructFingerprint(s as GetStructType<Record<string, unknown>>)] as const)
     .filter(([cat, _, fingerprint]) => !cat.includes("_dupe_") && !fingerprint.includes("_dupe_"));
   const byFingerprintSorted = byFingerprint.sort(([catA], [catB]) => {
     /**

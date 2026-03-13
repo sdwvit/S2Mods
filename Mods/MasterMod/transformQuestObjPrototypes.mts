@@ -1,6 +1,6 @@
-import { ObjPrototype } from "s2cfgtojson";
+import type { ObjPrototype } from "s2cfgtojson";
 
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { guideQuestObjectPrototypeSIDs } from "../../src/consts.mts";
 
 /**

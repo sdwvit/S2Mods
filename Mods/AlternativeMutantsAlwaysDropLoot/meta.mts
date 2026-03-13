@@ -1,5 +1,6 @@
-import { ItemGeneratorPrototype, Struct } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { ItemGeneratorPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType = {
   description: `Mutants always drop 1 loot item.`,

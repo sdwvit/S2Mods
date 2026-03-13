@@ -1,5 +1,5 @@
 
-import { MetaType } from "../../src/meta-type.mts";
+import type { MetaType } from "../../src/meta-type.mts";
 import { transformAIGlobals } from "./transformAIGlobals.mts";
 import { transformALifeDirectorScenarioPrototypes } from "./transformALifeDirectorScenarioPrototypes.mts";
 
@@ -28,4 +28,3 @@ Non-bubble related changes:
   changenote: "Initial release",
   structTransformers: [transformAIGlobals, transformALifeDirectorScenarioPrototypes],
 };
-

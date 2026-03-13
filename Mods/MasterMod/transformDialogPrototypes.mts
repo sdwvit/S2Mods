@@ -1,6 +1,7 @@
-import { DialogPrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { DialogPrototype } from "s2cfgtojson";
 
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { QuestDataTableByDialogSID, rewardFormula } from "./rewardFormula.mts";
 import { alwaysShowAllMutantQuestPartsDialog } from "../MoreSideQuestOptions/meta.mts";

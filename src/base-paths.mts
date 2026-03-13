@@ -1,8 +1,8 @@
 import path from "node:path";
 import fs, { existsSync, writeFileSync } from "node:fs";
-import { projectRoot } from "./ensure-env.mts";
+import type { projectRoot } from "./ensure-env.mts";
 export { projectRoot } from "./ensure-env.mts";
-import { MetaType } from "./meta-type.mts";
+import type { MetaType } from "./meta-type.mts";
 import { mkdirSync } from "fs";
 import { modsFolder, resolveModName } from "./mod-context.mts";
 
@@ -26,10 +26,9 @@ const metaPath = path.join(modFolder, "meta.mts");
 if (!existsSync(metaPath)) {
   mkdirSync(modFolder, { recursive: true });
   writeFileSync(
-    metaPath,
-    `
+    metaPath, `
 import { Struct } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType = {
   description: \`

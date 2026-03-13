@@ -1,5 +1,7 @@
-import { ArtifactPrototype, ConsumablePrototype, EDuplicateResolveType, EEffectDisplayType, EEffectType, EffectPrototype, Struct } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { EDuplicateResolveType, EEffectDisplayType, EEffectType } from "s2cfgtojson";
+import type { ArtifactPrototype, ConsumablePrototype, EffectPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType = {
   description: `

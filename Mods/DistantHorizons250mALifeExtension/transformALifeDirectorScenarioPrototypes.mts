@@ -1,7 +1,8 @@
-import { ALifeDirectorScenarioPrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { ALifeDirectorScenarioPrototype } from "s2cfgtojson";
 
 import { SPAWN_BUBBLE_FACTOR } from "./transformAIGlobals.mts";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { StructTransformer } from "../../src/meta-type.mts";
 
 const FACTOR = SPAWN_BUBBLE_FACTOR ** 2;
 /**

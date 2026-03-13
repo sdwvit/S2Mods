@@ -1,5 +1,5 @@
-import { EffectPrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import type { EffectPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 
 const interestingSIDs = new Set<string>([
   "EnergeticStamina",

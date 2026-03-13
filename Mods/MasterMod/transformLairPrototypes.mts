@@ -1,5 +1,5 @@
-import { LairPrototype, LairPrototypeMaster, LairPrototypePossibleInhabitantFactionsItem } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { LairPrototype, LairPrototypeMaster, LairPrototypePossibleInhabitantFactionsItem } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 
 /**
  * increase zombie population in lairs, also add controllers occasionally

@@ -1,5 +1,5 @@
-import { BarbedWirePrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { BarbedWirePrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 
 /**
  * Remove barbed wire bleeding and armor damage

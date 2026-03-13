@@ -1,5 +1,7 @@
 import "../../src/ensure-env.mts";
-import { ArmorPrototype, ArmorPrototypeProtection, ERank, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { ERank } from "s2cfgtojson";
+import type { ArmorPrototype, ArmorPrototypeProtection } from "s2cfgtojson";
 import { CoreFaction } from "../../src/consts.mts";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { logger } from "../../src/logger.mts";

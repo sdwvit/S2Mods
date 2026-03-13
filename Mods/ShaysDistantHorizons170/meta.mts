@@ -1,5 +1,5 @@
 
-import { MetaType } from "../../src/meta-type.mts";
+import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType = {
   description: `

@@ -1,5 +1,6 @@
-import { Struct, TradePrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { TradePrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 
 type TG = TradePrototype["TradeGenerators"]["0"];
 

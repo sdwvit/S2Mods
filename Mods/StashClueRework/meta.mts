@@ -1,4 +1,4 @@
-import { MetaType } from "../../src/meta-type.mts";
+import type { MetaType } from "../../src/meta-type.mts";
 
 import { transformObjPrototypes } from "./transformObjPrototypes.mts";
 import { transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";

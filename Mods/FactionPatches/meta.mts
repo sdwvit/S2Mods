@@ -1,4 +1,4 @@
-import { MetaType } from "../../src/meta-type.mts";
+import type { MetaType } from "../../src/meta-type.mts";
 import { transformItemGeneratorPrototypes } from "./transformItemGeneratorPrototypes.mts";
 import { addFactionPatchItems } from "./addFactionPatchItems.mts";
 

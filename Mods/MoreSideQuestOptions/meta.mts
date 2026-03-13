@@ -1,5 +1,6 @@
-import { MetaContext, MetaType } from "../../src/meta-type.mts";
-import { DialogPrototype, DialogPrototypeNextDialogOptionsItem, QuestNodePrototypeIf, QuestNodePrototypeRandom, Struct } from "s2cfgtojson";
+import type { MetaContext, MetaType } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { DialogPrototype, DialogPrototypeNextDialogOptionsItem, QuestNodePrototypeIf, QuestNodePrototypeRandom } from "s2cfgtojson";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDs, RSQSetDialogQuestNodesSIDs } from "../../src/consts.mts";
 import { logger } from "../../src/logger.mts";

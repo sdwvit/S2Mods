@@ -1,11 +1,12 @@
-import { ArmorPrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { ArmorPrototype } from "s2cfgtojson";
 import { allDefaultArmorPrototypesRecord } from "../../src/consts.mts";
 import { backfillDef } from "../../src/backfill-def.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { logger } from "../../src/logger.mts";
 import { getGdocsArmorData } from "./gdocs-armors.mts";
 import { NPC_AVG_DURABILITY } from "./transformItemGenerators.mts";
-import { MetaContext } from "../../src/meta-type.mts";
+import type { MetaContext } from "../../src/meta-type.mts";
 import { waitFor } from "../../src/wait-for.mts";
 
 let once = false;

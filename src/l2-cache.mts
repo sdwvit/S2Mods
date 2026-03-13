@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { logger } from "./logger.mts";
 import { readWithUnzip, writeWithZip } from "./zip.mts";
-import { StructTransformer } from "./meta-type.mts";
+import type { StructTransformer } from "./meta-type.mts";
 import { modFolder } from "./base-paths.mts";
 
 export const L2CacheFileName = path.join(modFolder, ".l2.cache.zlib");

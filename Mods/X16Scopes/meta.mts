@@ -1,5 +1,6 @@
-import { MetaType } from "../../src/meta-type.mts";
-import { AttachPrototype, EffectPrototype, ItemGeneratorPrototype, MeshPrototype, Struct, WeaponGeneralSetupPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { AttachPrototype, EffectPrototype, ItemGeneratorPrototype, MeshPrototype, WeaponGeneralSetupPrototype } from "s2cfgtojson";
 import { allCompatibleAttachmentDefs } from "../MasterMod/basicAttachments.mts";
 import { xNCompatibleScopeByWeapon } from "./xNCompatibleScopeByWeapon.mts";
 

@@ -1,5 +1,5 @@
-import { MetaType } from "../../src/meta-type.mts";
-import { ItemGeneratorPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
+import type { ItemGeneratorPrototype } from "s2cfgtojson";
 
 export const meta: MetaType<ItemGeneratorPrototype> = {
   description: `

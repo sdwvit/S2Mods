@@ -1,5 +1,5 @@
-import { DialogPoolPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { DialogPoolPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 /**
  * Transforms DialogPoolPrototype structs to replace "SpeakToLeader" dialog events with "Hello" topics.
  */

@@ -1,5 +1,7 @@
-import { EItemGenerationCategory, ItemGeneratorPrototype, Struct } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { EItemGenerationCategory } from "s2cfgtojson";
+import type { ItemGeneratorPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { logger } from "../../src/logger.mts";
 import { FactionPatchSID, patchDefsRecord } from "./addFactionPatchItems.mts";
 import {

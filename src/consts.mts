@@ -1,22 +1,7 @@
-import {
-  AmmoPrototype,
-  ArmorPrototype,
-  AttachPrototype,
-  ConsumablePrototype,
-  EItemGenerationCategory,
-  ERank,
-  GeneralNPCObjPrototype,
-  GetStructType,
-  GrenadePrototype,
-  Internal,
-  ItemGeneratorPrototype,
-  NPCWeaponSettingsPrototype,
-  QuestObjPrototype,
-  SpawnActorPrototype,
-  Struct,
-  WeaponGeneralSetupPrototype,
-  WeaponPrototype,
-} from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { GetStructType, Internal } from "s2cfgtojson";
+import type { EItemGenerationCategory, ERank } from "s2cfgtojson";
+import type { AmmoPrototype, ArmorPrototype, AttachPrototype, ConsumablePrototype, GeneralNPCObjPrototype, GrenadePrototype, ItemGeneratorPrototype, NPCWeaponSettingsPrototype, QuestObjPrototype, SpawnActorPrototype, WeaponGeneralSetupPrototype, WeaponPrototype } from "s2cfgtojson";
 import { readFileAndGetStructs } from "./read-file-and-get-structs.mts";
 
 export type DeeplyPartial<T> = {

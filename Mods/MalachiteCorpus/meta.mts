@@ -1,5 +1,5 @@
 import { logger } from "../../src/logger.mts";
-import { MetaType } from "../../src/meta-type.mts";
+import type { MetaType } from "../../src/meta-type.mts";
 import { SpawnActorPrototype } from "s2cfgtojson";
 
 export const meta: MetaType<SpawnActorPrototype> = {

@@ -1,6 +1,6 @@
 import { getFilesForTransformer } from "./create-cfg-file-selector-for-transformer.mts";
 import { getCfgFileProcessor } from "./get-cfg-file-processor.mts";
-import { StructTransformer } from "./meta-type.mts";
+import type { StructTransformer } from "./meta-type.mts";
 import { Struct } from "s2cfgtojson";
 
 export async function processOneTransformer<T extends Struct>(transformer: StructTransformer<T>): Promise<(T | Struct)[][]> {

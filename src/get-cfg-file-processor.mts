@@ -1,5 +1,5 @@
 import { Struct } from "s2cfgtojson";
-import { StructTransformer } from "./meta-type.mts";
+import type { StructTransformer } from "./meta-type.mts";
 import path from "node:path";
 import fs from "node:fs";
 import { baseCfgDir, modFolderRaw, modName, rawCfgEnclosingFolder } from "./base-paths.mts";

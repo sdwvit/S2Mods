@@ -1,4 +1,5 @@
-import { ItemGeneratorPrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { ItemGeneratorPrototype } from "s2cfgtojson";
 import { ALL_RANKS_SET, generalTradersTradeItemGenerators } from "../../src/consts.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { precision } from "../../src/precision.mts";
@@ -132,10 +133,10 @@ function transformCombat(struct: ItemGeneratorPrototype) {
               __internal__: { rawName: "PossibleItems", isArray: true },
             }),
             __internal__: {
-              rawName: `${Category.replace("EItemGenerationCategory::", "")}_for_${mr.replace("ERank::", "_")}`,
+              rawName: `${String(Category).replace("EItemGenerationCategory::", "")}_for_${String(mr).replace("ERank::", "_")}`,
             },
           }),
-          `${Category.replace("EItemGenerationCategory::", "")}_for_${mr.replace("ERank::", "_")}`,
+          `${String(Category).replace("EItemGenerationCategory::", "")}_for_${String(mr).replace("ERank::", "_")}`,
         );
       });
     }

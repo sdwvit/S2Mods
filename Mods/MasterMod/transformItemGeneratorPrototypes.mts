@@ -1,5 +1,5 @@
-import { ItemGeneratorPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { ItemGeneratorPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { allDefaultAmmoPrototypesRecord, allDefaultConsumablePrototypesRecord, allDefaultGrenadePrototypesRecord } from "../../src/consts.mts";
 

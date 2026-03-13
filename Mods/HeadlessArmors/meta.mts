@@ -1,7 +1,7 @@
 import path from "node:path";
 import dotEnv from "dotenv";
-import { MetaType } from "../../src/meta-type.mts";
-import { ArmorPrototype, ItemGeneratorPrototype, QuestNodePrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
+import type { ArmorPrototype, ItemGeneratorPrototype, QuestNodePrototype } from "s2cfgtojson";
 import { transformArmorPrototypes } from "./transformArmorPrototypes.mts";
 import { transformItemGenerators } from "./transformItemGenerators.mts";
 import { transformSkifItemGeneratorQuestNodes } from "./transformSkifItemGeneratorQuestNodes.mts";
