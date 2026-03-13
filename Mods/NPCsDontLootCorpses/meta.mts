@@ -4,7 +4,7 @@ import type { MetaType } from "../../src/meta-type.mts";
 type LootingNpcPrototype = ObjPrototype | QuestObjPrototype;
 
 export const meta: MetaType<LootingNpcPrototype> = {
-  description: "This mod does only one thing: it prevents NPCs from looting corpses, so they stop taking armor and weapons from dead bodies.",
+  description: "This mod prevents NPCs from looting corpses.[hr][/hr]Prevents situations where when you loot a body you find 15 armors and 25 weapons on them.",
   changenote: "Initial release",
   structTransformers: [transformNpcCorpseProcessing],
 };
