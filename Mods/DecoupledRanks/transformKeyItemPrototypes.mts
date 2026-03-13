@@ -8,6 +8,7 @@ const NON_QUEST_SUFFIX = "_NonQuest";
 export const getNonQuestFactionPatchSID = (sid: string) => `${sid}${NON_QUEST_SUFFIX}`;
 
 export const XP_COUNTER_ITEM_SID = "DecoupledRanksXP";
+export const LEVEL_COUNTER_ITEM_SID = "DecoupledRanksLevel";
 export const RANK_INDICATOR_ITEM_SIDS = {
   "ERank::Newbie": "DecoupledRanksRankNewbie",
   "ERank::Experienced": "DecoupledRanksRankExperienced",
@@ -44,6 +45,21 @@ export function transformKeyItemPrototypes() {
     ItemGridWidth: 1,
     ItemGridHeight: 1,
   }) as QuestItemPrototype;
+  const levelCounterItem = new Struct({
+    __internal__: { refurl: "../ItemPrototypes.cfg", refkey: "[0]", rawName: LEVEL_COUNTER_ITEM_SID, isRoot: true },
+    SID: LEVEL_COUNTER_ITEM_SID,
+    Name: "Rank Level",
+    LocalizationSID: "Rank Level",
+    Icon: XP_COUNTER_ICON,
+    MeshPrototypeSID: "Icon",
+    Weight: 0,
+    Cost: 0,
+    Type: "EItemType::Other" as EItemType,
+    MaxStackCount: 100,
+    IsQuestItem: true,
+    ItemGridWidth: 1,
+    ItemGridHeight: 1,
+  }) as QuestItemPrototype;
   const rankIndicatorItems = Object.entries(RANK_INDICATOR_ITEM_SIDS).map(([rank, sid]) => {
     const rankName = rank.replace("ERank::", "");
     return new Struct({
@@ -66,6 +82,7 @@ export function transformKeyItemPrototypes() {
   templatePatch.IsQuestItem = true;
   return [
     xpCounterItem,
+    levelCounterItem,
     ...rankIndicatorItems,
     templatePatch,
     ...patches,
