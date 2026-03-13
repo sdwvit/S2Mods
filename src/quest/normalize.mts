@@ -1,5 +1,5 @@
-import { QuestNodePrototype } from "s2cfgtojson";
-import { MetaContext } from "../meta-type.mts";
+import type { QuestNodePrototype } from "s2cfgtojson";
+import type { MetaContext } from "../meta-type.mts";
 import { createNodeSidMapper, QuestIr, QuestIrNode } from "./ir.mts";
 import { logger } from "../logger.mts";
 

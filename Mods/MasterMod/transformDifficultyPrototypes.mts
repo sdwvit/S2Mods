@@ -1,5 +1,5 @@
-import { DifficultyPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { DifficultyPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 
 /**

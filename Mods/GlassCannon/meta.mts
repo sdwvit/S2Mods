@@ -1,5 +1,5 @@
-import { DifficultyPrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import type { DifficultyPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 
 export const DIFFICULTY_FACTOR = 4;
 export const meta: MetaType<DifficultyPrototype> = {

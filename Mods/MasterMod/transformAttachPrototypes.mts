@@ -1,5 +1,5 @@
-import { AttachPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { AttachPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { getX16AttachPrototypes } from "../X16Scopes/meta.mts";
 
 let oncePerFile = false;

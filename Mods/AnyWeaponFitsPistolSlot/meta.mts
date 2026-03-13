@@ -1,5 +1,5 @@
-import { MetaType } from "../../src/meta-type.mts";
-import { WeaponPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
+import type { WeaponPrototype } from "s2cfgtojson";
 import { getTemplate } from "../../src/backfill-def.mts";
 import { allDefaultWeaponPrototypesRecord } from "../../src/consts.mts";
 

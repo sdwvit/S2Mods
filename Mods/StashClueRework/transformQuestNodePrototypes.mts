@@ -1,18 +1,7 @@
-import {
-  EQuestNodeType,
-  QuestNodePrototype,
-  QuestNodePrototypeConsoleCommand,
-  QuestNodePrototypeContainer,
-  QuestNodePrototypeEnd,
-  QuestNodePrototypeGiveCache,
-  QuestNodePrototypeItemAdd,
-  QuestNodePrototypeRandom,
-  QuestNodePrototypeSetItemGenerator,
-  QuestNodePrototypeSpawn,
-  QuestNodePrototypeTechnical,
-  Struct,
-} from "s2cfgtojson";
-import { MetaContext } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { EQuestNodeType } from "s2cfgtojson";
+import type { QuestNodePrototype, QuestNodePrototypeConsoleCommand, QuestNodePrototypeContainer, QuestNodePrototypeEnd, QuestNodePrototypeGiveCache, QuestNodePrototypeItemAdd, QuestNodePrototypeRandom, QuestNodePrototypeSetItemGenerator, QuestNodePrototypeSpawn, QuestNodePrototypeTechnical } from "s2cfgtojson";
+import type { MetaContext } from "../../src/meta-type.mts";
 import { finishedTransformers } from "./meta.mts";
 import { modName } from "../../src/base-paths.mts";
 import { waitFor } from "../../src/wait-for.mts";

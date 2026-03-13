@@ -1,5 +1,6 @@
-import { ObjPrototype, QuestPrototype, Struct } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { ObjPrototype, QuestPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { modName } from "../../src/base-paths.mts";
 
 let once = false;

@@ -1,5 +1,5 @@
-import { EffectPrototype, NPCWeaponSettingsPrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import type { EffectPrototype, NPCWeaponSettingsPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 import { allDefaultPlayerWeaponSettingsPrototypesRecord } from "../../src/consts.mts";
 
 export const meta: MetaType<NPCWeaponSettingsPrototype | EffectPrototype> = {

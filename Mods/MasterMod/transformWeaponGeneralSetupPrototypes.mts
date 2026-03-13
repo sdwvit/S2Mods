@@ -1,5 +1,6 @@
-import { Struct, WeaponGeneralSetupPrototype } from "s2cfgtojson";
-import { StructTransformer, MetaContext } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { WeaponGeneralSetupPrototype } from "s2cfgtojson";
+import type { StructTransformer, MetaContext } from "../../src/meta-type.mts";
 import {
   allCompatibleAttachmentDefs,
   allCompatibleAttachmentDefsByWeaponGeneralSetupPrototypeSID,

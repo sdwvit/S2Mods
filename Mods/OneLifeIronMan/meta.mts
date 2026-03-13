@@ -1,5 +1,5 @@
-import { MetaContext, MetaType } from "../../src/meta-type.mts";
-import { QuestNodePrototype } from "s2cfgtojson";
+import type { MetaContext, MetaType } from "../../src/meta-type.mts";
+import type { QuestNodePrototype } from "s2cfgtojson";
 
 export const meta: MetaType = {
   description: `

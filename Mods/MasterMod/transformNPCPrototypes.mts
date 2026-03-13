@@ -1,4 +1,5 @@
-import { NPCPrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { NPCPrototype } from "s2cfgtojson";
 import { GunDnipro_Upgrade_HoldBreathPos75Effect } from "./transformUpgradePrototypes.mts";
 /**
  * Give Technicians some extra upgrades

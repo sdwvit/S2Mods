@@ -54,6 +54,7 @@ The following are git-ignored and should not be committed unless explicitly requ
 
 ## Development notes
 - Scripts are ESM and `.mts`; follow the existing import style and path conventions.
+- When running `.mts` directly under modern Node with native type stripping, use `import type` for type-only imports from local modules. A plain `import { Foo }` will still be treated as a runtime export request and can fail on Node 24+ if `Foo` is type-only.
 - Even on Node 22.18+ native `.mts` execution is not sufficient for this repo today, because `s2cfgtojson` currently ships `.mts` sources from `node_modules/` and Node refuses type-stripping there. Keep using `NODE_TS_TRANSFORMER` until that dependency ships JS or is vendored locally.
 - Prefer `rg` for searching and avoid wide refactors unless asked.
 - When touching scripts that integrate external tools (SDK, SteamCMD, repak), keep path/credential handling intact.

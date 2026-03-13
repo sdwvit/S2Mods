@@ -1,23 +1,8 @@
-import type {
-  DialogPrototypeItemPrototypeSID,
-  DialogPrototypeMoney,
-  ERank,
-  QuestNodePrototypeConditionsItemItem,
-  QuestNodePrototypeParams,
-} from "s2cfgtojson";
-import {
-  QuestNodePrototype,
-  QuestNodePrototypeIf,
-  QuestNodePrototypeConsoleCommand,
-  QuestNodePrototypeItemAdd,
-  QuestNodePrototypeItemRemove,
-  QuestNodePrototypeOnPlayerGetItemEvent,
-  QuestNodePrototypeSetCharacterParam,
-  QuestNodePrototypeShowFadeScreen,
-  QuestNodePrototypeTechnical,
-  Struct,
-} from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { ERank } from "s2cfgtojson";
+import type { DialogPrototypeItemPrototypeSID, DialogPrototypeMoney, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeParams } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { QuestNodePrototype, QuestNodePrototypeIf, QuestNodePrototypeConsoleCommand, QuestNodePrototypeItemAdd, QuestNodePrototypeItemRemove, QuestNodePrototypeOnPlayerGetItemEvent, QuestNodePrototypeSetCharacterParam, QuestNodePrototypeShowFadeScreen, QuestNodePrototypeTechnical } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { modName } from "../../src/base-paths.mts";
 import { FactionPatchDefinitions } from "../FactionPatches/addFactionPatchItems.mts";
 import { getNonQuestFactionPatchSID, RANK_INDICATOR_ITEM_SIDS, XP_COUNTER_ITEM_SID } from "./transformKeyItemPrototypes.mts";

@@ -1,5 +1,6 @@
-import { MetaContext } from "./meta-type.mts";
-import { ArtifactPrototype, QuestItemPrototype, QuestNodePrototype, SpawnActorPrototype, Struct } from "s2cfgtojson";
+import type { MetaContext } from "./meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { ArtifactPrototype, QuestItemPrototype, QuestNodePrototype, SpawnActorPrototype } from "s2cfgtojson";
 import { readFileAndGetStructs } from "./read-file-and-get-structs.mts";
 import { writeFileSync } from "node:fs";
 import { onL1Finish } from "./l1-cache.mts";

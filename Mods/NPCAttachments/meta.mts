@@ -1,11 +1,6 @@
-import {
-  ItemGeneratorPrototype,
-  Struct,
-  WeaponGeneralSetupPrototype,
-  WeaponGeneralSetupPrototypePreinstalledAttachmentsItemPrototypeSIDsItem,
-  WeaponPrototype,
-} from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { ItemGeneratorPrototype, WeaponGeneralSetupPrototype, WeaponGeneralSetupPrototypePreinstalledAttachmentsItemPrototypeSIDsItem, WeaponPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 import { waitFor } from "../../src/wait-for.mts";
 import {
   allDefaultAttachPrototypesRecord,
@@ -96,10 +91,9 @@ function createWeaponParamsWithPreinstalledAttachments(struct: WeaponGeneralSetu
     return;
   }
   const extraStructs = [];
-  const compatibleDroppableAttachmentsRecord = getRecordByKey(
-    compatibleDroppableAttachments.entries().map((e) => e[1]),
-    "AttachPrototypeSID",
-  );
+  const compatibleDroppableAttachmentsRecord = Object.fromEntries(
+    compatibleDroppableAttachments.entries().map((e) => [e[1].AttachPrototypeSID, e[1]]),
+  ) as Record<string, WeaponGeneralSetupPrototypePreinstalledAttachmentsItemPrototypeSIDsItem>;
   const combos = getCombinations(compatibleDroppableAttachments.entries().map((e) => e[1].AttachPrototypeSID));
   combos.forEach(({ items }) => {
     const requiredUpgrades = items

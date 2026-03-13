@@ -1,5 +1,5 @@
-import { NPCWeaponSettingsPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { NPCWeaponSettingsPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import {
   allDefaultPlayerWeaponSettingsPrototypes,
   allDefaultPlayerWeaponSettingsPrototypesRecord,

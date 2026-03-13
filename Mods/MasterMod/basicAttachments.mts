@@ -1,4 +1,5 @@
-import { Struct, WeaponGeneralSetupPrototype } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { WeaponGeneralSetupPrototype } from "s2cfgtojson";
 import { allDefaultWeaponGeneralSetupPrototypes } from "../../src/consts.mts";
 
 export const uniqueAttachmentsToAlternatives: Record<string, string> = {

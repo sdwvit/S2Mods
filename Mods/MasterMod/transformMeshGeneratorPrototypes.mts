@@ -1,5 +1,5 @@
-import { GetStructType } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { GetStructType } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 
 type MeshGeneratorPrototype = GetStructType<{

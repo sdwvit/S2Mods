@@ -1,5 +1,7 @@
-import { CluePrototype, EGlobalVariableType, Struct } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { EGlobalVariableType } from "s2cfgtojson";
+import type { CluePrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 
 let oncePerFile = false;

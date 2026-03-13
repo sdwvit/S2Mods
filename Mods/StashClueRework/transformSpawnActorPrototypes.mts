@@ -1,5 +1,5 @@
-import { SpawnActorPrototype } from "s2cfgtojson";
-import { MetaContext } from "../../src/meta-type.mts";
+import type { SpawnActorPrototype } from "s2cfgtojson";
+import type { MetaContext } from "../../src/meta-type.mts";
 
 export const allStashes: Map<string, number> = new Map();
 export function transformSpawnActorPrototypes(struct: SpawnActorPrototype, context: MetaContext<SpawnActorPrototype>) {

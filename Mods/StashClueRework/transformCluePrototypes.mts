@@ -1,4 +1,5 @@
-import { CluePrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { CluePrototype } from "s2cfgtojson";
 import { getGeneratedStashSID } from "./transformSpawnActorPrototypes.mts";
 
 let transformCluePrototypesOncePerFile = false;

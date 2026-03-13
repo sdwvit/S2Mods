@@ -1,5 +1,5 @@
-import { ExplosionPrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import type { ExplosionPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 import { logger } from "../../src/logger.mts";
 import { MergedStructs } from "../../src/merged-structs.mts";
 import { precision } from "../../src/precision.mts";

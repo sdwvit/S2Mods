@@ -1,4 +1,6 @@
-import { EItemType, ERank, QuestItemPrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { EItemType, ERank } from "s2cfgtojson";
+import type { QuestItemPrototype } from "s2cfgtojson";
 import { addFactionPatchItems } from "../FactionPatches/addFactionPatchItems.mts";
 
 const NON_QUEST_SUFFIX = "_NonQuest";

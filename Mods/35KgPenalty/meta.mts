@@ -1,5 +1,5 @@
-import { CoreVariable, ObjWeightParamsPrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import type { CoreVariable, ObjWeightParamsPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType = {
   description: `

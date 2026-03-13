@@ -1,5 +1,6 @@
-import { DialogPrototype, QuestNodePrototype, QuestNodePrototypeContainer, Struct } from "s2cfgtojson";
-import { MetaContext, MetaType, StructTransformer } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { DialogPrototype, QuestNodePrototype, QuestNodePrototypeContainer } from "s2cfgtojson";
+import type { MetaContext, MetaType, StructTransformer } from "../../src/meta-type.mts";
 
 const structTransformer: StructTransformer<QuestNodePrototype> = (struct, context) => {
   if (struct.SID === "E01_MQ01_PlayVideo") {

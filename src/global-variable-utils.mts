@@ -1,4 +1,6 @@
-import { EGlobalVariableType, GlobalVariablePrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { EGlobalVariableType } from "s2cfgtojson";
+import type { GlobalVariablePrototype } from "s2cfgtojson";
 
 export type GlobalVariableValue = boolean | number | string;
 

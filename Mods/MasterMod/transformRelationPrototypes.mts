@@ -1,5 +1,5 @@
-import { RelationPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { RelationPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 
 /**
  * Fixes some of the relationships

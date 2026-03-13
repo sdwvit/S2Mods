@@ -1,5 +1,5 @@
-import { MetaContext } from "../meta-type.mts";
-import { QuestNodePrototype } from "s2cfgtojson";
+import type { MetaContext } from "../meta-type.mts";
+import type { QuestNodePrototype } from "s2cfgtojson";
 
 export type LaunchEdge = { SID: string; Name: string };
 

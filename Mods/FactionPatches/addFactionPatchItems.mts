@@ -1,4 +1,6 @@
-import { EItemType, QuestItemPrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { EItemType } from "s2cfgtojson";
+import type { QuestItemPrototype } from "s2cfgtojson";
 import { CoreFaction, getRecord } from "../../src/consts.mts";
 
 let addFactionPatchesOnce = false;

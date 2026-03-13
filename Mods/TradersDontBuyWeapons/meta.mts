@@ -1,5 +1,6 @@
-import { MetaType } from "../../src/meta-type.mts";
-import { Struct, TradePrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { TradePrototype } from "s2cfgtojson";
 
 export const meta: MetaType<TradePrototype> = {
   description: `

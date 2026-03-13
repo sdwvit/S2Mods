@@ -1,5 +1,5 @@
-import { MetaType } from "../../src/meta-type.mts";
-import { SpawnActorPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
+import type { SpawnActorPrototype } from "s2cfgtojson";
 import { transformSpawnActorPrototypes } from "../CratesDontDropAnything/meta.mts";
 
 export const meta: MetaType<SpawnActorPrototype> = {

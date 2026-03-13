@@ -3,6 +3,10 @@
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "module": "nodenext",
+    "baseUrl": ".",
+    "paths": {
+      "s2cfgtojson": ["./src/s2cfgtojson-shim.d.ts"]
+    },
     "allowImportingTsExtensions": true,
     "noEmit": true
   }

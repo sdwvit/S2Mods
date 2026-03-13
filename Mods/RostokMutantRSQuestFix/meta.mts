@@ -1,5 +1,5 @@
-import { MetaType } from "../../src/meta-type.mts";
-import { QuestNodePrototype, QuestNodePrototypeRandom } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
+import type { QuestNodePrototype, QuestNodePrototypeRandom } from "s2cfgtojson";
 import { getConditions } from "../../src/struct-utils.mts";
 
 export const meta: MetaType<QuestNodePrototype> = {

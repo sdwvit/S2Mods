@@ -1,5 +1,5 @@
-import { EffectPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { EffectPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 
 /**
  * Makes some consumables last longer.

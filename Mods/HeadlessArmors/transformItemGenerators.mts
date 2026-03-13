@@ -1,14 +1,7 @@
-import {
-  EItemGenerationCategory,
-  ERank,
-  ItemGeneratorPrototype,
-  ItemGeneratorPrototypeItemGenerator,
-  ItemGeneratorPrototypeItemGeneratorItem,
-  ItemGeneratorPrototypePossibleItems,
-  ItemGeneratorPrototypePossibleItemsItem,
-  Struct,
-} from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { EItemGenerationCategory, ERank } from "s2cfgtojson";
+import type { ItemGeneratorPrototype, ItemGeneratorPrototypeItemGenerator, ItemGeneratorPrototypeItemGeneratorItem, ItemGeneratorPrototypePossibleItems, ItemGeneratorPrototypePossibleItemsItem } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import {
   ALL_RANKS_ARR,
   allDefaultArmorPrototypesRecord,

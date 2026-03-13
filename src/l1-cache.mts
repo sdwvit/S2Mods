@@ -4,7 +4,7 @@ import { logger } from "./logger.mts";
 import { readWithUnzip, writeWithZip } from "./zip.mts";
 import path from "node:path";
 import { modFolder } from "./base-paths.mts";
-import { StructTransformer } from "./meta-type.mts";
+import type { StructTransformer } from "./meta-type.mts";
 import { readFile } from "node:fs/promises";
 
 const L1CacheFileName = path.join(modFolder, ".l1.cache.zlib");

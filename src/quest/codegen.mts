@@ -1,12 +1,6 @@
-import {
-  EConditionComparance,
-  QuestNodePrototype,
-  QuestNodePrototypeCondition,
-  QuestNodePrototypeConditionsItemItem,
-  QuestNodePrototypeShowFadeScreen,
-  QuestNodePrototypeTechnical,
-  Struct,
-} from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { EConditionComparance } from "s2cfgtojson";
+import type { QuestNodePrototype, QuestNodePrototypeCondition, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeShowFadeScreen, QuestNodePrototypeTechnical } from "s2cfgtojson";
 import { EVENTS, EVENTS_INTERESTING_PROPS, EVENTS_INTERESTING_SIDS } from "./constants.mts";
 import { QuestIr, QuestIrNode } from "./ir.mts";
 

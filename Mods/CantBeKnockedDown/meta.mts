@@ -1,5 +1,5 @@
-import { ObjPrototype } from "s2cfgtojson";
-import { MetaType } from "../../src/meta-type.mts";
+import type { ObjPrototype } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType<ObjPrototype> = {
   description: `

@@ -1,5 +1,5 @@
-import { SpawnActorPrototype } from "s2cfgtojson";
-import { MetaContext, MetaType } from "../../src/meta-type.mts";
+import type { SpawnActorPrototype } from "s2cfgtojson";
+import type { MetaContext, MetaType } from "../../src/meta-type.mts";
 import { allDefaultAttachPrototypesRecord, allUniqueWeaponPrototypeSIDs } from "../../src/consts.mts";
 import { logger } from "../../src/logger.mts";
 

@@ -1,5 +1,5 @@
-import { QuestItemPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { QuestItemPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 
 /**
  * Remove an essential flag from various items

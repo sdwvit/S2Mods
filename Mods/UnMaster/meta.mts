@@ -1,5 +1,6 @@
-import { MetaContext, MetaType } from "../../src/meta-type.mts";
-import { DifficultyPrototype, Struct } from "s2cfgtojson";
+import type { MetaContext, MetaType } from "../../src/meta-type.mts";
+import { Struct } from "s2cfgtojson";
+import type { DifficultyPrototype } from "s2cfgtojson";
 
 export const meta: MetaType<DifficultyPrototype> = {
   description: `

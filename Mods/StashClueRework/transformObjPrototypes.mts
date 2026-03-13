@@ -1,5 +1,5 @@
-import { ObjPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { ObjPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 
 export const transformObjPrototypes: StructTransformer<ObjPrototype> = async (struct) => {
   const fork = struct.fork();

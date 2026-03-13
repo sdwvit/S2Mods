@@ -1,6 +1,7 @@
-import { ItemGeneratorPrototype, Struct } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { ItemGeneratorPrototype } from "s2cfgtojson";
 
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { QuestDataTable, rewardFormula } from "./rewardFormula.mts";
 
 let oncePerTransformer = false;

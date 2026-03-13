@@ -1,5 +1,5 @@
-import { WeaponPrototype } from "s2cfgtojson";
-import { StructTransformer } from "../../src/meta-type.mts";
+import type { WeaponPrototype } from "s2cfgtojson";
+import type { StructTransformer } from "../../src/meta-type.mts";
 import { getTemplate } from "../../src/backfill-def.mts";
 import { allDefaultWeaponPrototypesRecord } from "../../src/consts.mts";
 
