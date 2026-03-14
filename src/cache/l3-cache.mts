@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { logger } from "./logger.mts";
-import { readWithUnzip, writeWithZip } from "./zip.mts";
+import { readWithUnzip, writeWithZip } from "../publish/zip.mts";
 import { modFolder } from "./base-paths.mts";
 
 const L3CacheFileName = path.join(modFolder, ".l3.cache.zlib");

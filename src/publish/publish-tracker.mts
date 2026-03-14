@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
-import { modName, projectRoot } from "./base-paths.mts";
-import { logger } from "./logger.mts";
+import { modName, projectRoot } from "../base-paths.mts";
+import { logger } from "../logger.mts";
 
 type PublishPlatform = "steam" | "modio";
 

@@ -1,6 +1,6 @@
-import { allValidMods } from "./mod-context.mts";
+import { allValidMods } from "../mod-context.mts";
 import { spawnSync } from "child_process";
-import { cmdSync } from "./cmd.mts";
+import { cmdSync } from "../cmd.mts";
 
 cmdSync(["git", "checkout", "master"].join(" "));
 cmdSync(["git", "pull"].join(" "));

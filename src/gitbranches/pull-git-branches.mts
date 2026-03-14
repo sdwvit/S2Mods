@@ -1,6 +1,6 @@
-import { allValidMods } from "./mod-context.mts";
+import { allValidMods } from "../mod-context.mts";
 import { spawnSync } from "child_process";
-import { cmd } from "./cmd.mts";
+import { cmd } from "../cmd.mts";
 
 function getCurrentBranch() {
   const result = spawnSync("git", ["branch", "--show-current"], {

@@ -5,9 +5,14 @@ import fs from "node:fs";
 import { baseCfgDir, modFolderRaw, modName, rawCfgEnclosingFolder } from "./base-paths.mts";
 import { promisify } from "node:util";
 import { logger } from "./logger.mts";
-import { getOrUpdateFromL1Cache } from "./l1-cache.mts";
+import { getOrUpdateFromL1Cache } from "./cache/l1-cache.mts";
 import { deepMerge } from "./deep-merge.mts";
-import { MergedStructs } from "./merged-structs.mts";
+
+/**
+ * Deeply merged structs will be stored here.
+ * Used to generate correct ts types.
+ */
+const MergedStructs: Record<string, Struct> = {};
 
 const exists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);

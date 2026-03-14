@@ -3,7 +3,7 @@ import { Struct } from "s2cfgtojson";
 import type { ArtifactPrototype, QuestItemPrototype, QuestNodePrototype, SpawnActorPrototype } from "s2cfgtojson";
 import { readFileAndGetStructs } from "./read-file-and-get-structs.mts";
 import { writeFileSync } from "node:fs";
-import { onL1Finish } from "./l1-cache.mts";
+import { onL1Finish } from "./cache/l1-cache.mts";
 import { allDefaultArtifactPrototypes, allDefaultQuestItemPrototypes } from "./consts.mts";
 import { logger } from "./logger.mts";
 import { normalizeQuestNodes } from "./quest/normalize.mts";

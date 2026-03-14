@@ -2,13 +2,13 @@ import path from "node:path";
 import childProcess from "node:child_process";
 import * as fs from "node:fs";
 import * as VDF from "@node-steam/vdf";
-import "./ensure-env.mts";
+import "../ensure-env.mts";
 const STALKER_STEAM_ID = "1643320";
 import { spawnSync } from "child_process";
-import { modFolder, modFolderSteam, modMeta, modName } from "./base-paths.mts";
-import { sanitize } from "./sanitize.mts";
-import { logger } from "./logger.mts";
-import { getModifiedFiles } from "./get-modified-files.mts";
+import { modFolder, modFolderSteam, modMeta, modName } from "../base-paths.mts";
+import { sanitize } from "../sanitize.mts";
+import { logger } from "../logger.mts";
+import { getModifiedFiles } from "../get-modified-files.mts";
 import { finalizePublish } from "./publish-tracker.mts";
 const meta = await modMeta;
 const cmd = () => {
@@ -50,8 +50,8 @@ async function publishToSteam() {
   }
   const publishedAt = new Date();
   const publishNote = process.env.CHANGENOTE || meta.changenote || "Update";
-  await import("./pull-assets.mts");
-  await import("./pull-staged.mts");
+  await import("../pull-assets.mts");
+  await import("../pull-staged.mts");
   childProcess.execSync(cmd(), {
     stdio: "inherit",
     cwd: modFolder,

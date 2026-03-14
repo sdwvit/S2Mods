@@ -1,7 +1,7 @@
 import fs, { lstatSync } from "node:fs";
 import path from "node:path";
 import { baseCfgDir } from "./base-paths.mts";
-import { L3Cache, L3CacheState } from "./l3-cache.mts";
+import { L3Cache, L3CacheState } from "./cache/l3-cache.mts";
 import { logger } from "./logger.mts";
 
 let allCfgs;

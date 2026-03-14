@@ -3,7 +3,7 @@ import { baseCfgDir } from "./base-paths.mts";
 import { existsSync } from "node:fs";
 import { getCfgFiles } from "./get-cfg-files.mts";
 import { Struct } from "s2cfgtojson";
-import { getOrUpdateFromL1GlobalCache } from "./l1global-cache.mts";
+import { getOrUpdateFromL1GlobalCache } from "./cache/l1global-cache.mts";
 import { logger } from "./logger.mts";
 
 export const readFileAndGetStructs = async <T extends Struct>(filePath: string, filePreprocess?: (fileContents: string) => string): Promise<T[]> => {

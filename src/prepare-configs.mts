@@ -3,13 +3,13 @@ import * as fs from "node:fs";
 import { spawnSync } from "child_process";
 import { modFolderRaw, modFolderSteam, modMeta } from "./base-paths.mts";
 import { logger } from "./logger.mts";
-import { onL2Finish } from "./l2-cache.mts";
-import { onL3Finish } from "./l3-cache.mts";
-import { onL1Finish } from "./l1-cache.mts";
+import { onL2Finish } from "./cache/l2-cache.mts";
+import { onL3Finish } from "./cache/l3-cache.mts";
+import { onL1Finish } from "./cache/l1-cache.mts";
 import { processOneTransformer } from "./process-one-transformer.mts";
 import { recursiveCfgFind } from "./recursive-cfg-find.mts";
 import { rmSync } from "node:fs";
-import { onL1GlobalFinish } from "./l1global-cache.mts";
+import { onL1GlobalFinish } from "./cache/l1global-cache.mts";
 
 if (fs.existsSync(modFolderRaw)) {
   recursiveCfgFind(modFolderRaw, (f) => rmSync(f));

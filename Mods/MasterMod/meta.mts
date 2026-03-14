@@ -22,8 +22,6 @@ import { transformWeaponPrototypes } from "./transformWeaponPrototypes.mts";
 import { transformGlobalVariablePrototypes } from "./transformGlobalVariablePrototypes.mts";
 import type { MetaType } from "../../src/meta-type.mts";
 import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
-import { logger } from "../../src/logger.mts";
-import { MergedStructs } from "../../src/merged-structs.mts";
 import { transformDynamicItemGenerator } from "./transformItemGenerator.mts";
 
 const structTransformers = [
@@ -76,7 +74,5 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
   },
-  onFinish(): void | Promise<void> {
-    logger.log(Object.keys(MergedStructs).length);
-  },
+  onFinish(): void | Promise<void> {},
 };
