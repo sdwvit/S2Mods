@@ -1,7 +1,8 @@
 import path from "node:path";
 
 import { logger } from "./logger.mts";
-import { modFolderRaw, modFolderSdkLink, modMeta, sdkModFolder } from "./base-paths.mts";
+import { modFolderRaw, modFolderSdkLink } from "./base-paths.mts";
+import { modMeta, sdkModFolder } from "./mod-meta-paths.mts";
 import { mkdirSync, cpSync, existsSync, readdirSync, rmSync, symlinkSync } from "node:fs";
 import { createMod } from "./cook.mts";
 import { recursiveCfgFind } from "./recursive-cfg-find.mts";

@@ -1,7 +1,8 @@
 console.time('Took');
 import * as fs from "node:fs";
 import { spawnSync } from "child_process";
-import { modFolderRaw, modFolderSteam, modMeta } from "./base-paths.mts";
+import { modFolderRaw, modFolderSteam } from "./base-paths.mts";
+import { modMeta } from "./mod-meta-paths.mts";
 import { logger } from "./logger.mts";
 import { onL2Finish } from "./cache/l2-cache.mts";
 import { onL3Finish } from "./cache/l3-cache.mts";

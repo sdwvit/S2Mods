@@ -1,5 +1,6 @@
 import "./ensure-env.mts";
-import { modFolderSteamStruct, modName } from "./base-paths.mts";
+import { modName } from "./base-paths.mts";
+import { modFolderSteamStruct } from "./mod-meta-paths.mts";
 import { spawnSync } from "child_process";
 import { injectIntoGame } from "./inject-into-game.mts";
 import { getPackFileName, pack } from "./pack.mts";

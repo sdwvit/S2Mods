@@ -2,7 +2,8 @@ import path from "node:path";
 
 import * as fs from "node:fs";
 import { logger } from "./logger.mts";
-import { modFolderRaw, sdkModFolder } from "./base-paths.mts";
+import { modFolderRaw } from "./base-paths.mts";
+import { sdkModFolder } from "./mod-meta-paths.mts";
 import { cpSync } from "node:fs";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
 

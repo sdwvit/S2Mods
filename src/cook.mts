@@ -4,7 +4,8 @@ import dotEnv from "dotenv";
 import { logger } from "./logger.mts";
 import { spawnSync } from "child_process";
 import { existsSync } from "node:fs";
-import { projectRoot, sdkModFolder, sdkModName } from "./base-paths.mts";
+import { projectRoot } from "./base-paths.mts";
+import { sdkModFolder, sdkModName } from "./mod-meta-paths.mts";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
