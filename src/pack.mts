@@ -2,7 +2,8 @@ import path from "node:path";
 import fs from "node:fs";
 import { logger } from "./logger.mts";
 import childProcess from "node:child_process";
-import { modFolderRaw, modFolderSteamStruct, projectRoot, sdkModName } from "./base-paths.mts";
+import { modFolderRaw, projectRoot } from "./base-paths.mts";
+import { modFolderSteamStruct, sdkModName } from "./mod-meta-paths.mts";
 
 export async function getPackFileName() {
   return `${await sdkModName}Stalker2-Windows.pak`;

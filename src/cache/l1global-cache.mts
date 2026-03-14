@@ -1,9 +1,9 @@
 import { Struct } from "s2cfgtojson";
 import fs from "node:fs";
-import { logger } from "./logger.mts";
+import { logger } from "../logger.mts";
 import { readWithUnzip, writeWithZip } from "../publish/zip.mts";
 import path from "node:path";
-import { projectRoot } from "./base-paths.mts";
+import { projectRoot } from "../base-paths.mts";
 import { readFile } from "node:fs/promises";
 
 const L1GlobalCacheFileName = path.join(projectRoot, ".l1.cache.zlib");

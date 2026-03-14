@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { deflate, inflate } from "node:zlib";
-import { modFolderSteamStruct, modName, projectRoot, stagedFolderStruct } from "../base-paths.mts";
+import { modName, projectRoot } from "../base-paths.mts";
+import { modFolderSteamStruct, stagedFolderStruct } from "../mod-meta-paths.mts";
 import archiver from "archiver";
 import fs from "node:fs";
 import path from "node:path";

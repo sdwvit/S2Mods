@@ -1,7 +1,8 @@
 import fs, { rmSync } from "node:fs";
 import path from "node:path";
 import "../ensure-env.mts";
-import { modFolder, modFolderSteamStruct, modMeta, modName } from "../base-paths.mts";
+import { modFolder, modName } from "../base-paths.mts";
+import { modFolderSteamStruct, modMeta } from "../mod-meta-paths.mts";
 import { sanitize } from "../sanitize.mts";
 import { createModZip } from "./zip.mts";
 import { logger } from "../logger.mts";
