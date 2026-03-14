@@ -1,6 +1,8 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { projectRoot } from "../base-paths.mts";
+import { modsFolder } from "../mod-context.mts";
 
 type PublishPlatform = "steam" | "modio";
 type PlatformFilter = PublishPlatform | "any";
@@ -21,13 +23,10 @@ type PublishMarker = {
 
 type ModStatus = {
   modName: string;
-  latestChange: GitLogEntry | null;
+  recentChanges: GitLogEntry[];
   latestPublish: PublishMarker | null;
   published: boolean;
 };
-
-const projectRoot = path.resolve(import.meta.dirname, "..");
-const modsRoot = path.join(projectRoot, "Mods");
 
 function parseArgs() {
   const args = new Set(process.argv.slice(2));
@@ -69,6 +68,14 @@ function parseGitLogEntry(raw: string | null): GitLogEntry | null {
   const [sha = "", committedAt = "", ...subjectParts] = raw.split("\t");
   if (!sha || !committedAt) return null;
   return { sha, committedAt, subject: subjectParts.join("\t") };
+}
+
+function parseGitLogEntries(raw: string | null) {
+  if (!raw) return [];
+  return raw
+    .split("\n")
+    .map((line) => parseGitLogEntry(line))
+    .filter((entry): entry is GitLogEntry => Boolean(entry));
 }
 
 function parseCurrentPublishTag(tagName: string) {
@@ -113,11 +120,11 @@ function buildPublishMarkers(): PublishMarker[] {
 }
 
 async function getModNames() {
-  const entries = await fs.readdir(modsRoot, { withFileTypes: true });
+  const entries = await fs.readdir(modsFolder, { withFileTypes: true });
   const modNames: string[] = [];
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
-    const metaPath = path.join(modsRoot, entry.name, "meta.mts");
+    const metaPath = path.join(modsFolder, entry.name, "meta.mts");
     try {
       await fs.access(metaPath);
       modNames.push(entry.name);
@@ -128,8 +135,8 @@ async function getModNames() {
   return modNames.sort((a, b) => a.localeCompare(b));
 }
 
-function getLatestChangeForMod(modName: string) {
-  return parseGitLogEntry(gitOrNull(["log", "-n", "1", "--format=%H\t%cI\t%s", "--", `Mods/${modName}`]));
+function getRecentChangesForMod(modName: string) {
+  return parseGitLogEntries(gitOrNull(["log", "-n", "5", "--format=%H\t%cI\t%s", "--", `Mods/${modName}/raw`]));
 }
 
 function pickLatestPublish(markers: PublishMarker[], modName: string, platform: PlatformFilter) {
@@ -171,11 +178,19 @@ function printTable(statuses: ModStatus[], platform: PlatformFilter) {
   }
 
   for (const status of statuses) {
-    const latestChange = status.latestChange;
+    const latestChange = status.recentChanges[0] ?? null;
     const latestPublish = status.latestPublish;
     const state = status.published ? "PUBLISHED" : "UNPUBLISHED";
     console.log(`${state.padEnd(11)} ${status.modName}`);
-    console.log(`  change   ${formatShortDate(latestChange?.committedAt)}  ${latestChange?.sha.slice(0, 10) ?? "-"}  ${latestChange?.subject ?? "-"}`);
+    if (status.recentChanges.length === 0) {
+      console.log("  changes  -");
+    } else {
+      for (const [index, change] of status.recentChanges.entries()) {
+        console.log(
+          `  ${index === 0 ? "change" : "       "}   ${formatShortDate(change.committedAt)}  ${change.sha.slice(0, 10)}  ${change.subject}`,
+        );
+      }
+    }
     console.log(
       `  publish  ${formatShortDate(latestPublish?.tagDate || latestPublish?.commit.committedAt)}  ${latestPublish?.tag ?? "-"}${latestPublish?.platform ? ` (${latestPublish.platform})` : ""}`,
     );
@@ -188,10 +203,11 @@ async function main() {
   const publishMarkers = buildPublishMarkers();
 
   const statuses: ModStatus[] = modNames.map((modName) => {
-    const latestChange = getLatestChangeForMod(modName);
+    const recentChanges = getRecentChangesForMod(modName);
+    const latestChange = recentChanges[0] ?? null;
     const latestPublish = pickLatestPublish(publishMarkers, modName, platform);
     const published = isChangeIncludedInPublish(latestChange, latestPublish);
-    return { modName, latestChange, latestPublish, published };
+    return { modName, recentChanges, latestPublish, published };
   });
 
   const filtered = showAll ? statuses : statuses.filter((status) => !status.published);
@@ -202,7 +218,7 @@ async function main() {
         filtered.map((status) => ({
           modName: status.modName,
           status: status.published ? "published" : "unpublished",
-          latestChange: status.latestChange,
+          recentChanges: status.recentChanges,
           latestPublish: status.latestPublish
             ? {
                 tag: status.latestPublish.tag,
