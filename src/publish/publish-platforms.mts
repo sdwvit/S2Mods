@@ -1,5 +1,5 @@
-import { modName } from "./base-paths.mts";
-import { logger } from "./logger.mts";
+import { modName } from "../base-paths.mts";
+import { logger } from "../logger.mts";
 
 logger.log(`Publishing mod: ${modName}`);
 

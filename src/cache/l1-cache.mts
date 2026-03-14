@@ -1,7 +1,7 @@
 import { Struct } from "s2cfgtojson";
 import fs from "node:fs";
 import { logger } from "./logger.mts";
-import { readWithUnzip, writeWithZip } from "./zip.mts";
+import { readWithUnzip, writeWithZip } from "../publish/zip.mts";
 import path from "node:path";
 import { modFolder } from "./base-paths.mts";
 import type { StructTransformer } from "./meta-type.mts";

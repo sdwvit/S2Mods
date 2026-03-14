@@ -1,10 +1,10 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { deflate, inflate } from "node:zlib";
-import { modFolderSteamStruct, modName, projectRoot, stagedFolderStruct } from "./base-paths.mts";
+import { modFolderSteamStruct, modName, projectRoot, stagedFolderStruct } from "../base-paths.mts";
 import archiver from "archiver";
 import fs from "node:fs";
 import path from "node:path";
-import { logger } from "./logger.mts";
+import { logger } from "../logger.mts";
 
 const resolver = (resolve, reject) => (err, result) => (err ? reject(err) : resolve(result));
 

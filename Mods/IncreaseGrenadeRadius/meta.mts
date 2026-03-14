@@ -1,7 +1,5 @@
 import type { ExplosionPrototype } from "s2cfgtojson";
 import type { MetaType } from "../../src/meta-type.mts";
-import { logger } from "../../src/logger.mts";
-import { MergedStructs } from "../../src/merged-structs.mts";
 import { precision } from "../../src/precision.mts";
 
 export const meta: MetaType<ExplosionPrototype> = {
@@ -12,9 +10,7 @@ This aligns better with IRL danger/injury radii.
 `,
   changenote: "Improved compatibility with recent game updates.",
   structTransformers: [structTransformer],
-  onFinish(): void | Promise<void> {
-    logger.log(Object.keys(MergedStructs).length);
-  },
+  onFinish(): void | Promise<void> {},
 };
 
 function structTransformer(struct: ExplosionPrototype) {

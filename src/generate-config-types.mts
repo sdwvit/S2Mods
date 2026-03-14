@@ -8,9 +8,14 @@ import { getCfgFiles } from "./get-cfg-files.mts";
 import { deepMerge } from "./deep-merge.mts";
 import { logger } from "./logger.mts";
 import { projectRoot } from "./base-paths.mts";
-import { getFromL1GlobalTypeGenCache, L1GlobalTypeGenCache, L1GlobalTypeGenCacheState, onL1GlobalTypeGenFinish } from "./l1type-gen-cache.mts";
+import {
+  getFromL1GlobalTypeGenCache,
+  L1GlobalTypeGenCache,
+  L1GlobalTypeGenCacheState,
+  onL1GlobalTypeGenFinish,
+} from "./cache/l1type-gen-cache.mts";
 import { node } from "./cmd.mts";
-import { onL3Finish } from "./l3-cache.mts";
+import { onL3Finish } from "./cache/l3-cache.mts";
 
 const DEFAULT_OUTPUT = path.join(projectRoot, "types.mts");
 const CATEGORY_PREFIX = "$cat_";

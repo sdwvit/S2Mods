@@ -1,11 +1,11 @@
 import fs, { rmSync } from "node:fs";
 import path from "node:path";
-import "./ensure-env.mts";
-import { modFolder, modFolderSteamStruct, modMeta, modName } from "./base-paths.mts";
-import { sanitize } from "./sanitize.mts";
+import "../ensure-env.mts";
+import { modFolder, modFolderSteamStruct, modMeta, modName } from "../base-paths.mts";
+import { sanitize } from "../sanitize.mts";
 import { createModZip } from "./zip.mts";
-import { logger } from "./logger.mts";
-import { getModifiedFiles } from "./get-modified-files.mts";
+import { logger } from "../logger.mts";
+import { getModifiedFiles } from "../get-modified-files.mts";
 import { finalizePublish } from "./publish-tracker.mts";
 
 const meta = await modMeta;
@@ -166,7 +166,7 @@ async function publishToModIO() {
   }
   const publishedAt = new Date();
   const publishNote = process.env.CHANGENOTE || meta.changenote || "Update";
-  await Promise.allSettled([import("./pull-assets.mts"), import("./pull-staged.mts")]);
+  await Promise.allSettled([import("../pull-assets.mts"), import("../pull-staged.mts")]);
   const [outputZip, modId] = await Promise.all([createModZip(await modFolderSteamStruct), Promise.resolve(getStoredModId() || createMod())]);
   await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
   rmSync(outputZip);

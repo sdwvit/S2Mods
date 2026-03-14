@@ -19,7 +19,7 @@ function runPullGitBranchesInBackground() {
     process.execPath,
     [
       ...(process.env.NODE_TS_TRANSFORMER ? ["--import", `file:${process.env.NODE_TS_TRANSFORMER}`] : []),
-      path.join(import.meta.dirname, "pull-git-branches.mts"),
+      path.join(import.meta.dirname, "gitbranches", "pull-git-branches.mts"),
     ],
     {
       cwd: import.meta.dirname,
