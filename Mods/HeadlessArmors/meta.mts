@@ -51,7 +51,7 @@ export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype | QuestNodeP
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet
     [/list] 
   `,
-  changenote: `Stability improvements`,
+  changenote: `Drop quest item generator patch from HeadlessArmors.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,

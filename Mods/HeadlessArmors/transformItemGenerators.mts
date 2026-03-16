@@ -2,6 +2,7 @@ import { Struct } from "s2cfgtojson";
 import type { EItemGenerationCategory, ERank } from "s2cfgtojson";
 import type { ItemGeneratorPrototype, ItemGeneratorPrototypeItemGenerator, ItemGeneratorPrototypeItemGeneratorItem, ItemGeneratorPrototypePossibleItems, ItemGeneratorPrototypePossibleItemsItem } from "s2cfgtojson";
 import type { StructTransformer } from "../../src/meta-type.mts";
+import type { CoreFaction } from "../../src/consts.mts";
 import {
   ALL_RANKS_ARR,
   allDefaultArmorPrototypesRecord,
@@ -9,7 +10,6 @@ import {
   allDefaultItemGeneratorsRecord,
   armorFactionsBySID,
   armorRanksBySID,
-  CoreFaction,
   getFactionFromItemGeneratorSID,
   helmetFactionsBySID,
   helmetRanksBySID,
