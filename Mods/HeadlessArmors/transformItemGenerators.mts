@@ -1,6 +1,12 @@
 import { Struct } from "s2cfgtojson";
 import type { EItemGenerationCategory, ERank } from "s2cfgtojson";
-import type { ItemGeneratorPrototype, ItemGeneratorPrototypeItemGenerator, ItemGeneratorPrototypeItemGeneratorItem, ItemGeneratorPrototypePossibleItems, ItemGeneratorPrototypePossibleItemsItem } from "s2cfgtojson";
+import type {
+  ItemGeneratorPrototype,
+  ItemGeneratorPrototypeItemGenerator,
+  ItemGeneratorPrototypeItemGeneratorItem,
+  ItemGeneratorPrototypePossibleItems,
+  ItemGeneratorPrototypePossibleItemsItem,
+} from "s2cfgtojson";
 import type { StructTransformer } from "../../src/meta-type.mts";
 import type { CoreFaction } from "../../src/consts.mts";
 import {
@@ -8,6 +14,7 @@ import {
   allDefaultArmorPrototypesRecord,
   allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
   allDefaultItemGeneratorsRecord,
+  allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID,
   armorFactionsBySID,
   armorRanksBySID,
   getFactionFromItemGeneratorSID,
@@ -45,7 +52,10 @@ function shouldProcessStruct(struct: ItemGeneratorPrototype) {
     return false;
   }
 
-  return allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
+  return (
+    allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] ||
+    allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID]
+  );
 }
 
 function* getCoreItemGeneratorPrototypeForEdit<T extends ItemGeneratorPrototype>(
@@ -363,4 +373,4 @@ function resetCss(struct: ItemGeneratorPrototype, fork: ItemGeneratorPrototype) 
   });
 }
 
-transformItemGenerators.files = ["/DynamicItemGenerator.cfg", "/ItemGeneratorPrototypes.cfg"];
+transformItemGenerators.files = ["/DynamicItemGenerator.cfg", "/QuestItemGeneratorPrototypes.cfg", "/ItemGeneratorPrototypes.cfg"];
