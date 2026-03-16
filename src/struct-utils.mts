@@ -1,6 +1,6 @@
 import { Struct } from "s2cfgtojson";
 import type { DialogPrototypeConditions, DialogPrototypeConditionsItem, DialogPrototypeConditionsItemItem, QuestNodePrototypeConditions, QuestNodePrototypeConditionsItem, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeConnections, QuestNodePrototypeConnectionsItem, QuestNodePrototypeLaunchers, QuestNodePrototypeLaunchersItem } from "s2cfgtojson";
-import { DeeplyPartial } from "./consts.mts";
+import type { DeeplyPartial } from "./consts.mts";
 
 export const getLaunchers = (
   sids_names: (DeeplyPartial<QuestNodePrototypeConnectionsItem> | DeeplyPartial<QuestNodePrototypeConnectionsItem>[])[],
