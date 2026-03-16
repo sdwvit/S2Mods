@@ -6,8 +6,6 @@ import { addFactionPatchItems } from "../FactionPatches/addFactionPatchItems.mts
 const NON_QUEST_SUFFIX = "_NonQuest";
 
 export const getNonQuestFactionPatchSID = (sid: string) => `${sid}${NON_QUEST_SUFFIX}`;
-
-export const XP_COUNTER_ITEM_SID = "DecoupledRanksXP";
 export const LEVEL_COUNTER_ITEM_SID = "DecoupledRanksLevel";
 export const RANK_INDICATOR_ITEM_SIDS = {
   "ERank::Newbie": "DecoupledRanksRankNewbie",
@@ -17,8 +15,7 @@ export const RANK_INDICATOR_ITEM_SIDS = {
 } as Record<ERank, string>;
 
 let once = false;
-
-const XP_COUNTER_ICON = "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Quest/IIT_QuestItem_USB_Stalker_Big.IIT_QuestItem_USB_Stalker_Big'";
+const LEVEL_COUNTER_ICON = "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Quest/IIT_QuestItem_USB_Stalker_Big.IIT_QuestItem_USB_Stalker_Big'";
 const RANK_INDICATOR_ICONS = {
   "ERank::Newbie": "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_G.T_dev_SDCard_G'",
   "ERank::Experienced": "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_B.T_dev_SDCard_B'",
@@ -30,27 +27,12 @@ export function transformKeyItemPrototypes() {
   if (once) return;
   once = true;
 
-  const xpCounterItem = new Struct({
-    __internal__: { refurl: "../ItemPrototypes.cfg", refkey: "[0]", rawName: XP_COUNTER_ITEM_SID, isRoot: true },
-    SID: XP_COUNTER_ITEM_SID,
-    Name: "Rank XP",
-    LocalizationSID: "Rank XP",
-    Icon: XP_COUNTER_ICON,
-    MeshPrototypeSID: "Icon",
-    Weight: 0,
-    Cost: 0,
-    Type: "EItemType::Other" as EItemType,
-    MaxStackCount: 300000,
-    IsQuestItem: true,
-    ItemGridWidth: 1,
-    ItemGridHeight: 1,
-  }) as QuestItemPrototype;
   const levelCounterItem = new Struct({
     __internal__: { refurl: "../ItemPrototypes.cfg", refkey: "[0]", rawName: LEVEL_COUNTER_ITEM_SID, isRoot: true },
     SID: LEVEL_COUNTER_ITEM_SID,
     Name: "Rank Level",
     LocalizationSID: "Rank Level",
-    Icon: XP_COUNTER_ICON,
+    Icon: LEVEL_COUNTER_ICON,
     MeshPrototypeSID: "Icon",
     Weight: 0,
     Cost: 0,
@@ -81,7 +63,6 @@ export function transformKeyItemPrototypes() {
   const [templatePatch, ...patches] = addFactionPatchItems();
   templatePatch.IsQuestItem = true;
   return [
-    xpCounterItem,
     levelCounterItem,
     ...rankIndicatorItems,
     templatePatch,

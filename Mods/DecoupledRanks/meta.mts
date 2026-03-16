@@ -2,6 +2,7 @@ import type { MetaType } from "../../src/meta-type.mts";
 import { transformKeyItemPrototypes } from "./transformKeyItemPrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 import { transformItemGeneratorPrototypes } from "../FactionPatches/transformItemGeneratorPrototypes.mts";
+import { transformGlobalVariablePrototypes } from "./transformGlobalVariablePrototypes.mts";
 export const meta: MetaType = {
   description: `
 Decoupled Ranks separates player rank progression from story quest milestones.[h1][/h1]
@@ -18,6 +19,6 @@ Current implementation:[h1][/h1]
 [hr][/hr]
 With 2500 xp you advance from newbie to experienced, and that happens around Slug Heap. [h1][/h1]
 `,
-  changenote: "Initial release",
-  structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformItemGeneratorPrototypes],
+  changenote: "Move XP tracking out of inventory stacks; keep level and rank indicator items.",
+  structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformGlobalVariablePrototypes, transformItemGeneratorPrototypes],
 };
