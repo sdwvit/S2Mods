@@ -1,5 +1,5 @@
 import { allDefaultArmorPrototypesRecord } from "../../src/consts.mts";
-import { ArmorPrototype } from "s2cfgtojson";
+import type { ArmorPrototype } from "s2cfgtojson";
 import { precision } from "../../src/precision.mts";
 
 const maxDurability = Math.max(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 0));
