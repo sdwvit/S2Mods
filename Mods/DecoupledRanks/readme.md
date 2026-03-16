@@ -15,6 +15,9 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `T_inv_NoonPatch`
  - ...
 
+`GameData`:
+ - `GlobalVariablePrototypes`
+
 `ItemGeneratorPrototypes`:
  - `DynamicItemGenerator`
  - `QuestItemGeneratorPrototypes`
