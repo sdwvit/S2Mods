@@ -19,7 +19,7 @@ export const meta: MetaType = {
   description: `
 This mod does one thing only: expands the dialogue options offered by NPCs when requesting side quests.
 `,
-  changenote: "Viktoria now shows dialog option only if you have enough mutant loot parts",
+  changenote: "All RSQ quest options now appear simultaneously in fixed order instead of one random pick",
   structTransformers: [alwaysShowAllMutantQuestPartsDialog, transformQuestNodePrototypes],
 };
 
