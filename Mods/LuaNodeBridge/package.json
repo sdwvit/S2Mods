@@ -7,6 +7,7 @@
     "pack-inject": "S2_MOD=LuaNodeBridge node ../../src/pack-inject.mts",
     "cook-inject": "S2_MOD=LuaNodeBridge node ../../src/cook-inject.mts",
     "publish-steam": "S2_MOD=LuaNodeBridge node ../../src/publish/publish-steam.mts",
-    "publish-modio": "S2_MOD=LuaNodeBridge node ../../src/publish/publish-modio.mts"
+    "publish-modio": "S2_MOD=LuaNodeBridge node ../../src/publish/publish-modio.mts",
+    "zip-for-xbox": "S2_MOD=LuaNodeBridge node ../../src/publish/zip-for-xbox.mts"
   }
 }
