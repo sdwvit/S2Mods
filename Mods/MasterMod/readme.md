@@ -35,7 +35,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `GroupAgnostic_Monolith`
 
 `DialogPrototypes`:
- - `EQ197_QD_Orders`
  - `Malahit_Hub_DialogueOnEntrance`
  - `RSQ01_Dialog_Warlock_RSQ`
  - `RSQ04_Dialog_Drabadan_RSQ`
