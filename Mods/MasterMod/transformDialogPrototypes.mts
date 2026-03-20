@@ -4,7 +4,6 @@ import type { DialogPrototype } from "s2cfgtojson";
 import type { StructTransformer } from "../../src/meta-type.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { QuestDataTableByDialogSID, rewardFormula } from "./rewardFormula.mts";
-import { alwaysShowAllMutantQuestPartsDialog } from "../MoreSideQuestOptions/meta.mts";
 
 const MALACHITE_BRIBE = rewardFormula(50000).reduce((a, b) => a + b, 0) / 2;
 
@@ -17,10 +16,6 @@ export const transformDialogPrototypes: StructTransformer<DialogPrototype> = asy
   }
   if (struct.SID === "Malahit_Hub_DialogueOnEntrance_WaitForReply") {
     return adjustMalahitBribeDialogValue(struct);
-  }
-
-  if (alwaysShowAllMutantQuestPartsDialog.files.some((f) => context.filePath.endsWith(f))) {
-    return alwaysShowAllMutantQuestPartsDialog(struct);
   }
 
   const fork = adjustQuestRewards(struct);
