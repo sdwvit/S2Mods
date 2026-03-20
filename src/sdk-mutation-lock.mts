@@ -16,11 +16,7 @@ function sleep(ms: number) {
 async function tryAcquireLock(label: string) {
   try {
     await fs.mkdir(SDK_MUTATION_LOCK_DIR);
-    await fs.writeFile(
-      SDK_MUTATION_LOCK_INFO,
-      JSON.stringify({ pid: process.pid, label, startedAt: new Date().toISOString() }, null, 2),
-      "utf8",
-    );
+    await fs.writeFile(SDK_MUTATION_LOCK_INFO, JSON.stringify({ pid: process.pid, label, startedAt: new Date().toISOString() }, null, 2), "utf8");
     return true;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "EEXIST") {
@@ -31,9 +27,14 @@ async function tryAcquireLock(label: string) {
 }
 
 async function waitForLock(label: string) {
+  let cycle = 0;
   while (!(await tryAcquireLock(label))) {
-    logger.log(`[sdk-lock] waiting for SDK/game mutation lock before ${label}`);
+    logger.log(`[sdk-lock] waiting for SDK/game mutation lock before ${label} (rm -rf ${SDK_MUTATION_LOCK_DIR} to release)`);
     await sleep(SDK_MUTATION_WAIT_MS);
+    cycle++;
+    if (cycle * SDK_MUTATION_WAIT_MS > 5 * 60 * 1000) {
+      await releaseLock();
+    }
   }
 }
 
