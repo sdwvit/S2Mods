@@ -8,12 +8,14 @@ import {
 import type { MetaContext } from "../../src/meta-type.mts";
 import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDByQuestSID, RSQSetDialogQuestNodesSIDs } from "../../src/consts.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
+
 export function transformQuestNodePrototypes(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototypeRandom>) {
+  /**
+   * controls how many max items are visible. todo do we still need it?
+   */
   if (RSQLessThan3QuestNodesSIDs.has(struct.SID)) {
     const randomizerNode = context.structsById[RSQRandomizerQuestNodesSIDByQuestSID[struct.QuestSID]];
-    if (!randomizerNode) {
-      throw new Error(`please fix RSQRandomizerQuestNodesSIDByQuestSID for ${struct.QuestSID}`);
-    }
+
     const total = randomizerNode.OutputPinNames.entries().length;
     return deepMerge(struct.fork(), {
       Conditions: new Struct({
@@ -44,6 +46,7 @@ export function transformQuestNodePrototypes(struct: QuestNodePrototype, context
       }),
     }).fork(true);
   }
+
   // Replace Random nodes with Technical pass-through so all quest options appear simultaneously
   if (RSQRandomizerQuestNodesSIDByQuestSID[struct.QuestSID] === struct.SID) {
     const dependants = context.array
