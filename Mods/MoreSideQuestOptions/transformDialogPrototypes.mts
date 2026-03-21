@@ -1,8 +1,17 @@
-import { DialogPrototype, DialogPrototypeNextDialogOptions, type DialogPrototypeNextDialogOptionsItem, Struct } from "s2cfgtojson";
+import { type DialogPrototype, type DialogPrototypeNextDialogOptions, type DialogPrototypeNextDialogOptionsItem, Struct } from "s2cfgtojson";
 import { logger } from "../../src/logger.mts";
 import { getDialogPrototypeConditions } from "../../src/struct-utils.mts";
+import type { MetaContext } from "../../src/meta-type.mts";
 
-export function alwaysShowAllMutantQuestPartsDialog(struct: DialogPrototype) {
+export function transformDialogPrototypes(struct: DialogPrototype, context: MetaContext<DialogPrototype>) {
+  if (context.filePath.endsWith("/DialogPrototypes/EQ197_QD_Orders.cfg")) {
+    return alwaysShowAllMutantQuestPartsDialog(struct);
+  }
+}
+
+transformDialogPrototypes.files = ["/DialogPrototypes/EQ197_QD_Orders.cfg"];
+
+function alwaysShowAllMutantQuestPartsDialog(struct: DialogPrototype) {
   /**
    * Show all dialog options for mutant parts quests regardless of what devs intended lol
    */
@@ -43,9 +52,6 @@ export function alwaysShowAllMutantQuestPartsDialog(struct: DialogPrototype) {
     return fork.fork(true);
   }
 }
-
-alwaysShowAllMutantQuestPartsDialog.files = ["/DialogPrototypes/EQ197_QD_Orders.cfg"];
-
 const mutantPartsVarSet = new Set(["MutantLootQuestWeak", "MutantLootQuestMedium", "MutantLootQuestStrong"]);
 
 const DialogOptionToMutantPartsMap = {
