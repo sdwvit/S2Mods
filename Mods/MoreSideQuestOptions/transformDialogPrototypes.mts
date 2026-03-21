@@ -11,20 +11,6 @@ export function transformDialogPrototypes(struct: DialogPrototype, context: Meta
 
 transformDialogPrototypes.files = ["/DialogPrototypes/EQ197_QD_Orders.cfg"];
 
-function deriveItemInfo(optionSID: string, structsById: Record<string, DialogPrototype>) {
-  // option (e.g. Dog_73040) → WaitForReply_N → Done struct with GiveItem action
-  const optionStruct = structsById[optionSID];
-  const waitForReplySID = optionStruct?.NextDialogOptions?.["0"]?.NextDialogSID;
-  const waitForReply = waitForReplySID && structsById[waitForReplySID];
-  const doneSID = waitForReply?.NextDialogOptions?.["0"]?.NextDialogSID;
-  const doneStruct = doneSID && structsById[doneSID];
-  const giveAction = doneStruct?.DialogActions?.entries().find(
-    ([, a]) => a.DialogAction === "EDialogAction::GiveItem",
-  )?.[1];
-  if (!giveAction) return null;
-  return { name: giveAction.DialogActionParam.VariableValue as string, count: giveAction.ItemsCount.VariableValue as number };
-}
-
 function alwaysShowAllMutantQuestPartsDialog(struct: DialogPrototype, structsById: Record<string, DialogPrototype>) {
   /**
    * Show all dialog options for mutant parts quests regardless of what devs intended lol
@@ -36,7 +22,7 @@ function alwaysShowAllMutantQuestPartsDialog(struct: DialogPrototype, structsByI
       const optionFork = option.fork();
       const itemInfo = deriveItemInfo(option.NextDialogSID, structsById);
       if (!itemInfo) {
-        logger.error("Unknown dialog option", option.NextDialogSID);
+        fork.NextDialogOptions.addNode(optionFork, k);
         return;
       }
 
@@ -68,3 +54,15 @@ function alwaysShowAllMutantQuestPartsDialog(struct: DialogPrototype, structsByI
   }
 }
 const mutantPartsVarSet = new Set(["MutantLootQuestWeak", "MutantLootQuestMedium", "MutantLootQuestStrong"]);
+
+function deriveItemInfo(optionSID: string, structsById: Record<string, DialogPrototype>) {
+  // option (e.g. Dog_73040) → WaitForReply_N → Done struct with GiveItem action
+  const optionStruct = structsById[optionSID];
+  const waitForReplySID = optionStruct?.NextDialogOptions?.["0"]?.NextDialogSID;
+  const waitForReply = waitForReplySID && structsById[waitForReplySID];
+  const doneSID = waitForReply?.NextDialogOptions?.["0"]?.NextDialogSID;
+  const doneStruct = doneSID && structsById[doneSID];
+  const giveAction = doneStruct?.DialogActions?.entries().find(([, a]) => a.DialogAction === "EDialogAction::GiveItem")?.[1];
+  if (!giveAction) return null;
+  return { name: giveAction.DialogActionParam.VariableValue as string, count: giveAction.ItemsCount.VariableValue as number };
+}
