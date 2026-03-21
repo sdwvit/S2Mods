@@ -1,7 +1,20 @@
 import { Struct } from "s2cfgtojson";
 import type { GetStructType, Internal } from "s2cfgtojson";
 import type { EItemGenerationCategory, ERank } from "s2cfgtojson";
-import type { AmmoPrototype, ArmorPrototype, AttachPrototype, ConsumablePrototype, GeneralNPCObjPrototype, GrenadePrototype, ItemGeneratorPrototype, NPCWeaponSettingsPrototype, QuestObjPrototype, SpawnActorPrototype, WeaponGeneralSetupPrototype, WeaponPrototype } from "s2cfgtojson";
+import type {
+  AmmoPrototype,
+  ArmorPrototype,
+  AttachPrototype,
+  ConsumablePrototype,
+  GeneralNPCObjPrototype,
+  GrenadePrototype,
+  ItemGeneratorPrototype,
+  NPCWeaponSettingsPrototype,
+  QuestObjPrototype,
+  SpawnActorPrototype,
+  WeaponGeneralSetupPrototype,
+  WeaponPrototype,
+} from "s2cfgtojson";
 import { readFileAndGetStructs } from "./read-file-and-get-structs.mts";
 
 export type DeeplyPartial<T> = {
@@ -241,16 +254,17 @@ export const RSQSetDialogQuestNodesSIDs = new Set([
   "RSQ09_C00_MALAHIT_SetDialog_SichRSQ",
   "RSQ10_C00_HARPY_SetDialog_SichRSQ",
 ]);
-export const RSQRandomizerQuestNodesSIDs = [
-  "RSQ01_Random",
-  "RSQ04_Random",
-  "RSQ05_Random",
-  "RSQ06_C00___SIDOROVICH_Random",
-  "RSQ07_C00_TSEMZAVOD_Random",
-  "RSQ08_C00_ROSTOK_Random",
-  "RSQ09_C00_MALAHIT_Random",
-  "RSQ10_C00_HARPY_Random",
-];
+
+export const RSQRandomizerQuestNodesSIDByQuestSID = {
+  RSQ01: "RSQ01_Random",
+  RSQ04: "RSQ04_Random",
+  RSQ05: "RSQ05_Random",
+  RSQ06_C00___SIDOROVICH: "RSQ06_C00___SIDOROVICH_Random",
+  RSQ07_C00_TSEMZAVOD: "RSQ07_C00_TSEMZAVOD_Random",
+  RSQ08_C00_ROSTOK: "RSQ08_C00_ROSTOK_Random",
+  RSQ09_C00_MALAHIT: "RSQ09_C00_MALAHIT_Random",
+  RSQ10_C00_HARPY: "RSQ10_C00_HARPY_Random",
+};
 export const guideQuestObjectPrototypeSIDs = new Set([
   "vozatyj_0",
   "TerriconGuider",
