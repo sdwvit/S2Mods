@@ -6,14 +6,14 @@ import {
   Struct,
 } from "s2cfgtojson";
 import type { MetaContext } from "../../src/meta-type.mts";
-import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDs, RSQSetDialogQuestNodesSIDs } from "../../src/consts.mts";
+import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDByQuestSID, RSQSetDialogQuestNodesSIDs } from "../../src/consts.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
-
-const RSQRandomizerQuestNodesSet = new Set(RSQRandomizerQuestNodesSIDs);
-
 export function transformQuestNodePrototypes(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototypeRandom>) {
   if (RSQLessThan3QuestNodesSIDs.has(struct.SID)) {
-    const randomizerNode = context.structsById[RSQRandomizerQuestNodesSIDs.find((key) => !!context.structsById[key])];
+    const randomizerNode = context.structsById[RSQRandomizerQuestNodesSIDByQuestSID[struct.QuestSID]];
+    if (!randomizerNode) {
+      throw new Error(`please fix RSQRandomizerQuestNodesSIDByQuestSID for ${struct.QuestSID}`);
+    }
     const total = randomizerNode.OutputPinNames.entries().length;
     return deepMerge(struct.fork(), {
       Conditions: new Struct({
@@ -45,7 +45,7 @@ export function transformQuestNodePrototypes(struct: QuestNodePrototype, context
     }).fork(true);
   }
   // Replace Random nodes with Technical pass-through so all quest options appear simultaneously
-  if (RSQRandomizerQuestNodesSet.has(struct.SID)) {
+  if (RSQRandomizerQuestNodesSIDByQuestSID[struct.QuestSID] === struct.SID) {
     const dependants = context.array
       .filter(
         (s) =>
