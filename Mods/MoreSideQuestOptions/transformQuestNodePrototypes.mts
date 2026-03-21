@@ -13,7 +13,8 @@ const RSQRandomizerQuestNodesSet = new Set(RSQRandomizerQuestNodesSIDs);
 
 export function transformQuestNodePrototypes(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototypeRandom>) {
   if (RSQLessThan3QuestNodesSIDs.has(struct.SID)) {
-    const total = context.structsById[RSQRandomizerQuestNodesSIDs.find((key) => !!context.structsById[key])].OutputPinNames.entries().length;
+    const randomizerNode = context.structsById[RSQRandomizerQuestNodesSIDs.find((key) => !!context.structsById[key])];
+    const total = randomizerNode.OutputPinNames.entries().length;
     return deepMerge(struct.fork(), {
       Conditions: new Struct({
         // as of 1.7 all of them are [0][0]
@@ -57,23 +58,23 @@ export function transformQuestNodePrototypes(struct: QuestNodePrototype, context
 }
 
 function rerouteRandomToTechnical(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototype>, dependants: string[]) {
-  const techSID = struct.SID.replace("_Random", "_Technical");
   // Strip Random node's launchers (deactivate it)
   const randomFork = struct.fork() as QuestNodePrototypeRandom;
   randomFork.Launchers = new Struct() as any;
 
+  const techSID = struct.SID.replace("_Random", "_Technical");
   // Create new Technical node inheriting Random's launchers
   const techNode = new Struct() as QuestNodePrototypeTechnical;
   techNode.__internal__.isRoot = true;
-  techNode.__internal__.rawName = techSID;
   techNode.SID = techSID;
+  techNode.__internal__.rawName = techNode.SID;
   techNode.QuestSID = (struct as QuestNodePrototypeRandom).QuestSID;
   techNode.NodeType = "EQuestNodeType::Technical";
   techNode.StartDelay = 0;
   techNode.LaunchOnQuestStart = false;
   techNode.Launchers = (struct as QuestNodePrototypeRandom).Launchers.clone();
 
-  const structs: Struct[] = [randomFork, techNode];
+  const extraStructs: Struct[] = [randomFork, techNode];
 
   // Reroute dependants: patch connection from Random → Technical, clear Name
   for (const sid of dependants) {
@@ -94,11 +95,11 @@ function rerouteRandomToTechnical(struct: QuestNodePrototype, context: MetaConte
       }
     });
     if (Object.keys(launcherPatches).length > 0) {
-      structs.push(deepMerge(target.fork(), { Launchers: new Struct(launcherPatches) }).fork(true));
+      extraStructs.push(deepMerge(target.fork(), { Launchers: new Struct(launcherPatches) }).fork(true));
     }
   }
 
-  return structs;
+  return extraStructs;
 }
 
 transformQuestNodePrototypes.files = [
