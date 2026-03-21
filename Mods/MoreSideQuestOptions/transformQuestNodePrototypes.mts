@@ -10,22 +10,6 @@ import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDByQuestSID, RSQSe
 import { deepMerge } from "../../src/deep-merge.mts";
 
 export function transformQuestNodePrototypes(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototypeRandom>) {
-  /**
-   * controls how many max items are visible. todo do we still need it?
-   */
-  if (RSQLessThan3QuestNodesSIDs.has(struct.SID)) {
-    const randomizerNode = context.structsById[RSQRandomizerQuestNodesSIDByQuestSID[struct.QuestSID]];
-
-    const total = randomizerNode.OutputPinNames.entries().length;
-    return deepMerge(struct.fork(), {
-      Conditions: new Struct({
-        // as of 1.7 all of them are [0][0]
-        0: new Struct({
-          0: new Struct({ VariableValue: total }),
-        }),
-      }),
-    }).fork(true);
-  }
   if (RSQSetDialogQuestNodesSIDs.has(struct.SID)) {
     let connectionIndex: string;
     const [launcherIndex] = (struct as QuestNodePrototypeIf).Launchers.entries().find((e) => {
