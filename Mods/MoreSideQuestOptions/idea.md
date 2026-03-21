@@ -25,8 +25,6 @@ This requires changes at three levels:
 - **Dialog prototypes**: Build the hub/sub-menu/cancel dialog tree inside that chain
 - **Quest nodes**: Bypass the Random picker with a Technical pass-through, raise the quest count cap, add cancel cleanup infrastructure, and wire hub NPCs to the new chain
 
-RSQ07 (Cement Factory Barmen) and RSQ08 (Rostok Barmen) share the same NPC, so they get a combined dialog chain with an extra branch-selection hub.
-
 ### Mutant parts fix (EQ197)
 
 Replace the random global variable gates with `ItemInInventory` checks so all 14 mutant loot turn-in options appear when the player has the required items.
