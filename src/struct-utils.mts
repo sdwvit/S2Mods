@@ -1,9 +1,23 @@
-import { Struct } from "s2cfgtojson";
-import type { DialogPrototypeConditions, DialogPrototypeConditionsItem, DialogPrototypeConditionsItemItem, QuestNodePrototypeConditions, QuestNodePrototypeConditionsItem, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeConnections, QuestNodePrototypeConnectionsItem, QuestNodePrototypeLaunchers, QuestNodePrototypeLaunchersItem } from "s2cfgtojson";
+import { type QuestNodePrototype, Struct } from "s2cfgtojson";
+import type {
+  DialogPrototypeConditions,
+  DialogPrototypeConditionsItem,
+  DialogPrototypeConditionsItemItem,
+  QuestNodePrototypeConditions,
+  QuestNodePrototypeConditionsItem,
+  QuestNodePrototypeConditionsItemItem,
+  QuestNodePrototypeConnections,
+  QuestNodePrototypeConnectionsItem,
+  QuestNodePrototypeLaunchers,
+  QuestNodePrototypeLaunchersItem,
+} from "s2cfgtojson";
 import type { DeeplyPartial } from "./consts.mts";
 
 export const getLaunchers = (
-  sids_names: (DeeplyPartial<QuestNodePrototypeConnectionsItem> | DeeplyPartial<QuestNodePrototypeConnectionsItem>[])[],
+  sids_names: (
+    | DeeplyPartial<QuestNodePrototypeConnectionsItem>
+    | DeeplyPartial<QuestNodePrototypeConnectionsItem>[]
+  )[],
 ) => {
   const Launchers = new Struct() as QuestNodePrototypeLaunchers;
 
@@ -30,28 +44,50 @@ export const getLaunchers = (
   return Launchers;
 };
 
+export function getDependants(SID: string, contextArr: QuestNodePrototype[]) {
+  return contextArr
+    .filter((s) =>
+      s.Launchers?.entries?.().some(([, l]) =>
+        l.Connections.entries().some(([, c]) => c.SID === SID),
+      ),
+    )
+    .map((s) => s.SID);
+}
+
 export function getDialogPrototypeConditions(
-  conditionOrConditions: DeeplyPartial<DialogPrototypeConditionsItemItem>[] | DeeplyPartial<DialogPrototypeConditionsItemItem>,
+  conditionOrConditions:
+    | DeeplyPartial<DialogPrototypeConditionsItemItem>[]
+    | DeeplyPartial<DialogPrototypeConditionsItemItem>,
 ) {
   const dialogPrototypeConditions = new Struct() as DialogPrototypeConditions;
   const dialogPrototypeConditionsItem = new Struct() as DialogPrototypeConditionsItem;
   if (Array.isArray(conditionOrConditions)) {
-    conditionOrConditions.forEach((condition) => dialogPrototypeConditionsItem.addNode(new Struct(condition) as DialogPrototypeConditionsItemItem));
+    conditionOrConditions.forEach((condition) =>
+      dialogPrototypeConditionsItem.addNode(
+        new Struct(condition) as DialogPrototypeConditionsItemItem,
+      ),
+    );
   } else {
-    dialogPrototypeConditionsItem.addNode(new Struct(conditionOrConditions) as DialogPrototypeConditionsItemItem);
+    dialogPrototypeConditionsItem.addNode(
+      new Struct(conditionOrConditions) as DialogPrototypeConditionsItemItem,
+    );
   }
   dialogPrototypeConditions.addNode(dialogPrototypeConditionsItem);
   return dialogPrototypeConditions;
 }
 
 export function getConditions(
-  conditions: DeeplyPartial<QuestNodePrototypeConditionsItemItem> | DeeplyPartial<QuestNodePrototypeConditionsItemItem>[],
+  conditions:
+    | DeeplyPartial<QuestNodePrototypeConditionsItemItem>
+    | DeeplyPartial<QuestNodePrototypeConditionsItemItem>[],
 ) {
   const questNodePrototypeConditions = new Struct() as QuestNodePrototypeConditions;
   questNodePrototypeConditions.ConditionCheckType = "EConditionCheckType::And";
   const questNodePrototypeConditionsItem = new Struct() as QuestNodePrototypeConditionsItem;
   if (Array.isArray(conditions)) {
-    conditions.forEach((condition) => questNodePrototypeConditionsItem.addNode(new Struct(condition)));
+    conditions.forEach((condition) =>
+      questNodePrototypeConditionsItem.addNode(new Struct(condition)),
+    );
   } else {
     questNodePrototypeConditionsItem.addNode(new Struct(conditions));
   }
