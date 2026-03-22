@@ -254,17 +254,27 @@ export const RSQSetDialogQuestNodesSIDs = new Set([
   "RSQ09_C00_MALAHIT_SetDialog_SichRSQ",
   "RSQ10_C00_HARPY_SetDialog_SichRSQ",
 ]);
+export const RSQDeclineJobQuestNodesSIDs = new Set([
+  "RSQ01_SetDialog_RSQ01_Dialog_Warlock_DeclineJob",
+  "RSQ04_SetDialog_RSQ04_Dialog_Drabadan_DeclineJob",
+  "RSQ05_SetDialog_RSQ05_Dialog_Sich_DeclineJob",
+  "RSQ06_C00___SIDOROVICH_SetDialog_RSQ06_Dialog_Sidorovich_DeclineJob",
+  "RSQ07_C00_TSEMZAVOD_SetDialog_RSQ07_Dialog_Barmen_DeclineJob",
+  "RSQ08_C00_ROSTOK_SetDialog_RSQ08_Dialog_Barmen_DeclineJob",
+  "RSQ09_C00_MALAHIT_SetDialog_RSQ09_Dialog_Spica_DeclineJob",
+  "RSQ10_C00_HARPY_SetDialog_RSQ10_Dialog_Harpy_DeclineJob",
+]);
 
-export const RSQRandomizerQuestNodesSIDByQuestSID = {
-  RSQ01: "RSQ01_Random",
-  RSQ04: "RSQ04_Random",
-  RSQ05: "RSQ05_Random",
-  RSQ06_C00___SIDOROVICH: "RSQ06_C00___SIDOROVICH_Random",
-  RSQ07_C00_TSEMZAVOD: "RSQ07_C00_TSEMZAVOD_Random",
-  RSQ08_C00_ROSTOK: "RSQ08_C00_ROSTOK_Random",
-  RSQ09_C00_MALAHIT: "RSQ09_C00_MALAHIT_Random",
-  RSQ10_C00_HARPY: "RSQ10_C00_HARPY_Random",
-};
+export const RSQRandomizerQuestNodesSIDByQuestSID = new Set([
+  "RSQ01_Random",
+  "RSQ04_Random",
+  "RSQ05_Random",
+  "RSQ06_C00___SIDOROVICH_Random",
+  "RSQ07_C00_TSEMZAVOD_Random",
+  "RSQ08_C00_ROSTOK_Random",
+  "RSQ09_C00_MALAHIT_Random",
+  "RSQ10_C00_HARPY_Random",
+]);
 export const guideQuestObjectPrototypeSIDs = new Set([
   "vozatyj_0",
   "TerriconGuider",
