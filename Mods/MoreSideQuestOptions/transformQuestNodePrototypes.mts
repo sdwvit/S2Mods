@@ -2,13 +2,14 @@ import {
   type QuestNodePrototype,
   type QuestNodePrototypeCondition,
   type QuestNodePrototypeConditionsItemItem,
+  type QuestNodePrototypeItemAdd,
   type QuestNodePrototypeRandom,
   type QuestNodePrototypeSetDialog,
   type QuestNodePrototypeSetJournal,
   type QuestNodePrototypeTechnical,
   Struct,
 } from "s2cfgtojson";
-import type { EOverrideDialogTopic, EQuestNodeType } from "s2cfgtojson";
+import type { EQuestNodeType } from "s2cfgtojson";
 import type { MetaContext } from "../../src/meta-type.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
 import { vendors, getGlobalVarSID, getCancelDialogSID, type VendorConfig } from "./local.consts.mts";
@@ -63,9 +64,32 @@ async function generateAllModNodes(
   // Extract confirm phrase SIDs per sub-quest from Container Pin_0 conditions
   const confirmPhrases = extractConfirmPhrases(vendor, context);
 
+  // Boot node: fires on quest start to trigger ModSetDialog
+  const bootSID = `${vendor.questNodePrefix}_Boot_MoreSideQuestOptions`;
+  nodes.push(new Struct({
+    __internal__: { rawName: bootSID, isRoot: true },
+    SID: bootSID,
+    QuestSID: vendor.questSID,
+    NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
+    StartDelay: 0,
+    LaunchOnQuestStart: true,
+  }));
+
+  // ConsoleCommand node: launches from _Start, triggers Boot via XStartQuestNodeBySID
+  const bootCmdSID = `${vendor.questNodePrefix}_BootCmd_MoreSideQuestOptions`;
+  nodes.push(new Struct({
+    __internal__: { rawName: bootCmdSID, isRoot: true },
+    SID: bootCmdSID,
+    QuestSID: vendor.questNodePrefix,
+    NodeType: "EQuestNodeType::ConsoleCommand" satisfies EQuestNodeType,
+    Repeatable: true,
+    Launchers: getLaunchers([{ SID: `${vendor.questNodePrefix}_Start` }]),
+    ConsoleCommand: `XStartQuestNodeBySID ${bootSID}`,
+  }));
+
   // Generate ModSetDialog (our replacement for vanilla SetDialog)
   const modSetDialogSID = `${vendor.questNodePrefix}_ModSetDialog_MoreSideQuestOptions`;
-  const modSetDialog = generateModSetDialog(vendor, vanillaSetDialog, modSetDialogSID, confirmPhrases);
+  const modSetDialog = generateModSetDialog(vendor, vanillaSetDialog, modSetDialogSID, confirmPhrases, bootSID);
   nodes.push(modSetDialog);
 
   // Generate per-sub-quest ConsoleCommand chains
@@ -125,6 +149,7 @@ function generateModSetDialog(
   vanilla: QuestNodePrototypeSetDialog,
   modSID: string,
   confirmPhrases: Map<string, string>,
+  bootSID: string,
 ): Struct {
   // Build LastPhrases: vanilla confirms + our cancel confirms
   const lastPhrases = new Struct();
@@ -161,9 +186,27 @@ function generateModSetDialog(
   // Add Interrupt pin
   outputPins.addNode("Interrupt");
 
-  // Build launchers: fire from parent quest Start + self-loops for non-confirm phrases
+  // Build launchers: fire from boot node OR parent quest Start OR vanilla condition nodes + self-loops
+  // Each trigger must be a separate launcher entry (OR logic), not combined (AND logic)
   const startSID = `${vendor.questNodePrefix}_Start`;
-  const launcherConnections: any[] = [{ SID: startSID }];
+  const initialLaunchers: any[] = [
+    { SID: bootSID },
+    { SID: startSID },
+  ];
+  // Add vanilla condition node connections as separate entries
+  for (const [, launcher] of vanilla.Launchers.entries()) {
+    if (launcher.Excluding) continue;
+    if (!(launcher.Connections instanceof Struct)) continue;
+    let isSelfRef = false;
+    for (const [, conn] of launcher.Connections.entries()) {
+      if (conn.SID === vanilla.SID) { isSelfRef = true; break; }
+    }
+    if (isSelfRef) continue;
+    for (const [, conn] of launcher.Connections.entries()) {
+      initialLaunchers.push({ SID: conn.SID, Name: conn.Name || undefined });
+    }
+    break;
+  }
 
   // Self-loops for non-finish phrases
   const selfLoopLaunchers: any[] = [];
@@ -183,8 +226,8 @@ function generateModSetDialog(
   }
 
   const launchers = getLaunchers([
-    launcherConnections,
-    ...selfLoopLaunchers.map((l) => [l]),
+    ...initialLaunchers,
+    ...selfLoopLaunchers,
   ]);
 
   // Copy excluding launchers from vanilla (prevent dialog during certain events)
@@ -212,7 +255,7 @@ function generateModSetDialog(
     StartForcedDialog: false,
     WaitAllDialogEndingsToFinish: false,
     IsComment: false,
-    OverrideDialogTopic: "EOverrideDialogTopic::Info" satisfies EOverrideDialogTopic,
+    OverrideDialogTopic: "EOverrideDialogTopic::Info",
     CanExitAnytime: false,
     ContinueThroughRadio: false,
     CallPlayer: false,
@@ -335,7 +378,8 @@ async function generateIndependentQuest(
       }
     }
 
-    // Track journal entries for cancel
+    // Track journal entries for cancel, and neutralize Quest-level journal nodes
+    // to prevent cross-quest cancellation (all independent quests share the parent journal SID)
     if (vNode.NodeType === "EQuestNodeType::SetJournal") {
       const j = vNode as QuestNodePrototypeSetJournal;
       if (j.JournalAction === "EJournalAction::Start") {
@@ -345,16 +389,79 @@ async function generateIndependentQuest(
           action: j.JournalEntity === "EJournalEntity::Quest" ? "quest" : "stage",
         });
       }
+      // Replace Quest-level Start/Finish with Technical pass-throughs
+      // so the node chain stays intact but no shared journal action fires
+      if (j.JournalEntity === "EJournalEntity::Quest") {
+        (cloned as any).NodeType = "EQuestNodeType::Technical";
+        (cloned as QuestNodePrototypeTechnical).StartDelay = 0;
+        // Remove journal-specific fields
+        delete (cloned as any).JournalEntity;
+        delete (cloned as any).JournalAction;
+        delete (cloned as any).JournalQuestSID;
+        delete (cloned as any).JournalQuestDescriptionIndex;
+        delete (cloned as any).SetQuestActive;
+        nodes.push(cloned);
+        continue;
+      }
     }
 
     nodes.push(cloned);
   }
 
+  // Inject Spawn + delay before each ItemAdd to force-spawn containers
+  // (StashClueRework sets SpawnOnStart=false on ItemContainers, so we must spawn them explicitly)
+  const itemAddNodes = nodes.filter(n => (n as QuestNodePrototype).NodeType === "EQuestNodeType::ItemAdd");
+  for (const itemAdd of itemAddNodes) {
+    const ia = itemAdd as QuestNodePrototypeItemAdd;
+    const spawnSID = `${ia.SID}_ForceSpawn`;
+    const delaySID = `${ia.SID}_SpawnDelay`;
+
+    // Extract launcher connections from ItemAdd to reuse for Spawn and delay
+    const launcherRefs: { SID: string; Name?: string }[] = [];
+    if (ia.Launchers instanceof Struct) {
+      for (const [, launcher] of ia.Launchers.entries()) {
+        if (!launcher.Excluding && launcher.Connections instanceof Struct) {
+          for (const [, conn] of launcher.Connections.entries()) {
+            launcherRefs.push({ SID: conn.SID, Name: conn.Name || undefined });
+          }
+        }
+      }
+    }
+
+    nodes.push(new Struct({
+      __internal__: { rawName: spawnSID, isRoot: true },
+      SID: spawnSID,
+      QuestSID: newQuestSID,
+      NodeType: "EQuestNodeType::Spawn" satisfies EQuestNodeType,
+      Launchers: getLaunchers(launcherRefs),
+      TargetQuestGuid: ia.TargetQuestGuid,
+      IgnoreDamageType: "EIgnoreDamageType::None",
+      SpawnHidden: false,
+      SpawnNodeExcludeType: "ESpawnNodeExcludeType::SeamlessDespawn",
+    }));
+
+    nodes.push(new Struct({
+      __internal__: { rawName: delaySID, isRoot: true },
+      SID: delaySID,
+      QuestSID: newQuestSID,
+      NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
+      StartDelay: 1.0,
+      Launchers: getLaunchers(launcherRefs),
+    }));
+
+    // Rewire ItemAdd to launch from delay instead of original trigger
+    ia.Launchers = getLaunchers([{ SID: delaySID }]);
+  }
+
   // Add SetGlobalVariable Active=false before End (on quest completion)
+  // SetInactive must fire BEFORE End, because End with ExcludeAllNodesInContainer
+  // kills the container and would race against SetInactive.
+  // Chain: original trigger → SetInactive → End
   const completionSetVarSID = `${newQuestSID}_SetInactive`;
   const endNode = nodes.find((n) => (n as QuestNodePrototype).SID === `${newQuestSID}_End`);
   if (endNode) {
     const endProto = endNode as QuestNodePrototype;
+    // SetInactive gets the End node's original launchers
     nodes.push(new Struct({
       __internal__: { rawName: completionSetVarSID, isRoot: true },
       SID: completionSetVarSID,
@@ -365,6 +472,8 @@ async function generateIndependentQuest(
       ChangeValueMode: "EChangeValueMode::Set",
       VariableValue: false,
     }));
+    // Rewire End to fire from SetInactive completion
+    endProto.Launchers = getLaunchers([{ SID: completionSetVarSID }]);
   }
 
   // --- Cancel flow ---
@@ -398,21 +507,8 @@ async function generateIndependentQuest(
     }));
   }
 
-  // Cancel journal quest
-  const questJournal = journalCancelNodes.find((j) => j.action === "quest");
-  if (questJournal) {
-    const sid = `${newQuestSID}_CancelQuest`;
-    nodes.push(new Struct({
-      __internal__: { rawName: sid, isRoot: true },
-      SID: sid,
-      QuestSID: newQuestSID,
-      NodeType: "EQuestNodeType::SetJournal" satisfies EQuestNodeType,
-      Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
-      JournalEntity: "EJournalEntity::Quest",
-      JournalAction: "EJournalAction::Cancel",
-      JournalQuestSID: questJournal.questSID,
-    }));
-  }
+  // Skip quest-level journal cancel — it would cancel the shared parent quest journal
+  // for all other active sub-quests. Stage-level cancels above are sufficient.
 
   // Cancel SetGlobalVariable Active=false
   const cancelSetVarSID = `${newQuestSID}_CancelSetInactive`;
