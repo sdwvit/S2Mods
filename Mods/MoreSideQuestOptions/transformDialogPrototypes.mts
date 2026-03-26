@@ -73,7 +73,7 @@ function patchIfWithHubOption(struct: DialogPrototype, vendor: VendorConfig): St
     fork.NextDialogOptions.addNode(hubOption.clone(), "True");
   }
   if (struct.NextDialogOptions?.False) {
-    fork.NextDialogOptions.addNode(new Struct() as DialogPrototypeNextDialogOptionsItem, "False");
+    fork.NextDialogOptions.addNode(hubOption.clone(), "False");
   }
 
   return fork.fork(true);
