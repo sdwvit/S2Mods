@@ -1,92 +1,444 @@
 import {
   type QuestNodePrototype,
-  type QuestNodePrototypeIf,
+  type QuestNodePrototypeCondition,
+  type QuestNodePrototypeConditionsItemItem,
   type QuestNodePrototypeRandom,
+  type QuestNodePrototypeSetDialog,
+  type QuestNodePrototypeSetJournal,
   type QuestNodePrototypeTechnical,
   Struct,
 } from "s2cfgtojson";
+import type { EOverrideDialogTopic, EQuestNodeType } from "s2cfgtojson";
 import type { MetaContext } from "../../src/meta-type.mts";
-import { RSQLessThan3QuestNodesSIDs, RSQRandomizerQuestNodesSIDByQuestSID, RSQSetDialogQuestNodesSIDs } from "../../src/consts.mts";
-import { deepMerge } from "../../src/deep-merge.mts";
+import { getLaunchers } from "../../src/struct-utils.mts";
+import { vendors, getGlobalVarSID, getCancelDialogSID, type VendorConfig } from "./local.consts.mts";
+import { readFileAndGetStructs } from "../../src/read-file-and-get-structs.mts";
 
-export function transformQuestNodePrototypes(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototypeRandom>) {
-  if (RSQSetDialogQuestNodesSIDs.has(struct.SID)) {
-    let connectionIndex: string;
-    const [launcherIndex] = (struct as QuestNodePrototypeIf).Launchers.entries().find((e) => {
-      return e[1].Connections.entries().find((e1) => {
-        connectionIndex = e1[0];
-        return RSQLessThan3QuestNodesSIDs.has(e1[1].SID);
-      });
-    });
-    return deepMerge(struct.fork(), {
-      Launchers: new Struct({
-        [launcherIndex]: new Struct({
-          Connections: new Struct({
-            [connectionIndex]: new Struct({
-              Name: "True",
-            }),
-          }),
-        }),
-      }),
-    }).fork(true);
+const processedVendors = new Set<string>();
+
+export async function transformQuestNodePrototypes(
+  struct: QuestNodePrototype,
+  context: MetaContext<QuestNodePrototype>,
+) {
+  const vendor = findVendor(context.filePath);
+  if (!vendor) return;
+
+  // Disable vanilla Random node (strip launchers)
+  if (struct.NodeType === "EQuestNodeType::Random" && struct.SID === `${vendor.questNodePrefix}_Random`) {
+    const fork = struct.fork() as QuestNodePrototypeRandom;
+    fork.Launchers = new Struct() as any;
+    return fork;
   }
 
-  // Replace Random nodes with Technical pass-through so all quest options appear simultaneously
-  if (RSQRandomizerQuestNodesSIDByQuestSID[struct.QuestSID] === struct.SID) {
-    const dependants = context.array
-      .filter(
-        (s) =>
-          s.Launchers instanceof Struct &&
-          s.Launchers.entries().some(([, l]) => l.Connections instanceof Struct && l.Connections.entries().some(([, c]) => c.SID === struct.SID)),
-      )
-      .map((s) => s.SID);
-    return rerouteRandomToTechnical(struct as QuestNodePrototype, context as MetaContext<QuestNodePrototype>, dependants);
+  // Disable vanilla SetDialog (strip launchers so it never fires)
+  if (struct.SID === vendor.setDialogSID) {
+    const fork = struct.fork() as QuestNodePrototypeSetDialog;
+    fork.Launchers = new Struct() as any;
+
+    // Generate all mod nodes once per vendor (piggyback on SetDialog processing)
+    if (!processedVendors.has(vendor.questSID)) {
+      processedVendors.add(vendor.questSID);
+      const modNodes = await generateAllModNodes(vendor, struct as QuestNodePrototypeSetDialog, context);
+      return [fork, ...modNodes];
+    }
+    return fork;
   }
 }
 
-function rerouteRandomToTechnical(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototype>, dependants: string[]) {
-  // Strip Random node's launchers (deactivate it)
-  const randomFork = struct.fork() as QuestNodePrototypeRandom;
-  randomFork.Launchers = new Struct() as any;
+function findVendor(filePath: string): VendorConfig | undefined {
+  for (const v of vendors) {
+    if (filePath.endsWith(`/${v.questNodePrefix}.cfg`)) return v;
+  }
+}
 
-  const techSID = struct.SID.replace("_Random", "_Technical");
-  // Create new Technical node inheriting Random's launchers
-  const techNode = new Struct() as QuestNodePrototypeTechnical;
-  techNode.__internal__.isRoot = true;
-  techNode.SID = techSID;
-  techNode.__internal__.rawName = techNode.SID;
-  techNode.QuestSID = (struct as QuestNodePrototypeRandom).QuestSID;
-  techNode.NodeType = "EQuestNodeType::Technical";
-  techNode.StartDelay = 0;
-  techNode.LaunchOnQuestStart = false;
-  techNode.Launchers = (struct as QuestNodePrototypeRandom).Launchers.clone();
+// --- Parent quest node generation ---
 
-  const extraStructs: Struct[] = [randomFork, techNode];
+async function generateAllModNodes(
+  vendor: VendorConfig,
+  vanillaSetDialog: QuestNodePrototypeSetDialog,
+  context: MetaContext<QuestNodePrototype>,
+): Promise<Struct[]> {
+  const nodes: Struct[] = [];
 
-  // Reroute dependants: patch connection from Random → Technical, clear Name
-  for (const sid of dependants) {
-    const target = context.structsById[sid] as QuestNodePrototypeRandom;
-    if (!target?.Launchers) continue;
+  // Extract confirm phrase SIDs per sub-quest from Container Pin_0 conditions
+  const confirmPhrases = extractConfirmPhrases(vendor, context);
 
-    const launcherPatches: Record<string, any> = {};
-    target.Launchers.entries().forEach(([lIdx, launcher]) => {
-      if (!(launcher.Connections instanceof Struct)) return;
-      const connectionPatches: Record<string, any> = {};
-      launcher.Connections.entries().forEach(([cIdx, conn]) => {
-        if (conn.SID === struct.SID) {
-          connectionPatches[cIdx] = new Struct({ SID: techSID, Name: "" });
+  // Generate ModSetDialog (our replacement for vanilla SetDialog)
+  const modSetDialogSID = `${vendor.questNodePrefix}_ModSetDialog_MoreSideQuestOptions`;
+  const modSetDialog = generateModSetDialog(vendor, vanillaSetDialog, modSetDialogSID, confirmPhrases);
+  nodes.push(modSetDialog);
+
+  // Generate per-sub-quest ConsoleCommand chains
+  for (const subQuest of vendor.subQuests) {
+    const confirmPhrase = confirmPhrases.get(subQuest);
+    if (!confirmPhrase) continue;
+
+    const cancelPhrase = getCancelDialogSID(vendor.dialogChain, subQuest);
+    const newQuestSID = `MoreSideQuestOptions_${subQuest}`;
+
+    nodes.push(...generateActionChain(vendor, subQuest, modSetDialogSID, confirmPhrase, newQuestSID, "Start"));
+    nodes.push(...generateActionChain(vendor, subQuest, modSetDialogSID, cancelPhrase, newQuestSID, "Cancel"));
+  }
+
+  // Generate independent quest nodes for each sub-quest
+  for (const subQuest of vendor.subQuests) {
+    const questNodes = await generateIndependentQuest(vendor, subQuest);
+    nodes.push(...questNodes);
+  }
+
+  return nodes;
+}
+
+function extractConfirmPhrases(
+  vendor: VendorConfig,
+  context: MetaContext<QuestNodePrototype>,
+): Map<string, string> {
+  const result = new Map<string, string>();
+  for (const subQuest of vendor.subQuests) {
+    // Find the Container node for this sub-quest
+    const container = context.array.find(
+      (s) => s.NodeType === "EQuestNodeType::Container" && (s as any).ContaineredQuestPrototypeSID === subQuest,
+    );
+    if (!container?.Launchers) continue;
+
+    // The Container's launcher has a connection to a Pin_0 condition node
+    // Find the Pin_0 SID from the Container's launcher connections
+    for (const [, launcher] of container.Launchers.entries()) {
+      if (launcher.Excluding || !(launcher.Connections instanceof Struct)) continue;
+      for (const [, conn] of launcher.Connections.entries()) {
+        const pinNode = context.structsById[conn.SID] as QuestNodePrototypeCondition | undefined;
+        if (!pinNode?.Conditions || pinNode.NodeType !== "EQuestNodeType::Condition") continue;
+        const condGroup = pinNode.Conditions["0"];
+        const cond = condGroup?.["0"] as QuestNodePrototypeConditionsItemItem | undefined;
+        if (cond?.ConditionType === "EQuestConditionType::Bridge" && cond.LinkedNodePrototypeSID === vendor.setDialogSID) {
+          const phraseSID = cond.CompletedNodeLauncherNames?.["0"];
+          if (phraseSID) result.set(subQuest, String(phraseSID));
         }
-      });
-      if (Object.keys(connectionPatches).length > 0) {
-        launcherPatches[lIdx] = new Struct({ Connections: new Struct(connectionPatches) });
       }
-    });
-    if (Object.keys(launcherPatches).length > 0) {
-      extraStructs.push(deepMerge(target.fork(), { Launchers: new Struct(launcherPatches) }).fork(true));
+    }
+  }
+  return result;
+}
+
+function generateModSetDialog(
+  vendor: VendorConfig,
+  vanilla: QuestNodePrototypeSetDialog,
+  modSID: string,
+  confirmPhrases: Map<string, string>,
+): Struct {
+  // Build LastPhrases: vanilla confirms + our cancel confirms
+  const lastPhrases = new Struct();
+  const outputPins = new Struct();
+  let idx = 0;
+
+  // Add confirm phrases (from vanilla)
+  for (const [subQuest, phrase] of confirmPhrases) {
+    const pinName = `Confirm_${subQuest}`;
+    outputPins.addNode(pinName);
+    lastPhrases.addNode(new Struct({ FinishNode: true, LastPhraseSID: phrase }));
+    idx++;
+  }
+
+  // Add cancel confirm phrases (from our dialog prototypes)
+  for (const subQuest of vendor.subQuests) {
+    const cancelPhrase = getCancelDialogSID(vendor.dialogChain, subQuest);
+    const pinName = `Cancel_${subQuest}`;
+    outputPins.addNode(pinName);
+    lastPhrases.addNode(new Struct({ FinishNode: true, LastPhraseSID: cancelPhrase }));
+    idx++;
+  }
+
+  // Add vanilla non-confirm phrases (cancel_job_cancel → self-loop, postpone → self-loop, etc.)
+  for (const [, entry] of vanilla.LastPhrases.entries()) {
+    if (!entry.FinishNode) {
+      const pinName = `Relaunch_${idx}`;
+      outputPins.addNode(pinName);
+      lastPhrases.addNode(new Struct({ FinishNode: false, LastPhraseSID: entry.LastPhraseSID }));
+      idx++;
     }
   }
 
-  return extraStructs;
+  // Add Interrupt pin
+  outputPins.addNode("Interrupt");
+
+  // Build launchers: fire from parent quest Start + self-loops for non-confirm phrases
+  const startSID = `${vendor.questNodePrefix}_Start`;
+  const launcherConnections: any[] = [{ SID: startSID }];
+
+  // Self-loops for non-finish phrases
+  const selfLoopLaunchers: any[] = [];
+  for (const [, entry] of vanilla.LastPhrases.entries()) {
+    if (!entry.FinishNode) {
+      selfLoopLaunchers.push({ SID: modSID, Name: entry.LastPhraseSID });
+    }
+  }
+
+  // Also self-loop after each confirm (so dialog can be used again)
+  for (const [subQuest, phrase] of confirmPhrases) {
+    selfLoopLaunchers.push({ SID: modSID, Name: phrase });
+  }
+  for (const subQuest of vendor.subQuests) {
+    const cancelPhrase = getCancelDialogSID(vendor.dialogChain, subQuest);
+    selfLoopLaunchers.push({ SID: modSID, Name: cancelPhrase });
+  }
+
+  const launchers = getLaunchers([
+    launcherConnections,
+    ...selfLoopLaunchers.map((l) => [l]),
+  ]);
+
+  // Copy excluding launchers from vanilla (prevent dialog during certain events)
+  for (const [, launcher] of vanilla.Launchers.entries()) {
+    if (launcher.Excluding) {
+      launchers.addNode(launcher.clone());
+    }
+  }
+
+  const node = new Struct({
+    __internal__: { rawName: modSID, isRoot: true },
+    SID: modSID,
+    NodePrototypeVersion: vanilla.NodePrototypeVersion,
+    Repeatable: true,
+    QuestSID: vendor.questSID,
+    NodeType: "EQuestNodeType::SetDialog" satisfies EQuestNodeType,
+    OutputPinNames: outputPins,
+    Launchers: launchers,
+    LastPhrases: lastPhrases,
+    DialogChainPrototypeSID: vanilla.DialogChainPrototypeSID,
+    DialogMembers: vanilla.DialogMembers.clone(),
+    TalkThroughRadio: vanilla.TalkThroughRadio.clone(),
+    DialogObjectLocation: vanilla.DialogObjectLocation.clone(),
+    NPCToStartDialog: vanilla.NPCToStartDialog,
+    StartForcedDialog: false,
+    WaitAllDialogEndingsToFinish: false,
+    IsComment: false,
+    OverrideDialogTopic: "EOverrideDialogTopic::Info" satisfies EOverrideDialogTopic,
+    CanExitAnytime: false,
+    ContinueThroughRadio: false,
+    CallPlayer: false,
+    SeekPlayer: false,
+    CallPlayerRadius: 1000.0,
+  });
+
+  return node;
+}
+
+function generateActionChain(
+  vendor: VendorConfig,
+  subQuest: string,
+  modSetDialogSID: string,
+  phrase: string,
+  newQuestSID: string,
+  action: "Start" | "Cancel",
+): Struct[] {
+  const prefix = `${vendor.questNodePrefix}_${action}_${subQuest}_MoreSideQuestOptions`;
+  const globalVarSID = getGlobalVarSID(subQuest);
+  const launcherRef = { SID: modSetDialogSID, Name: phrase };
+
+  const cmdSID = `${prefix}_ConsoleCommand`;
+  const cmdNode = new Struct({
+    __internal__: { rawName: cmdSID, isRoot: true },
+    SID: cmdSID,
+    QuestSID: vendor.questSID,
+    NodeType: "EQuestNodeType::ConsoleCommand" satisfies EQuestNodeType,
+    Repeatable: true,
+    Launchers: getLaunchers([launcherRef]),
+    ConsoleCommand: `XStartQuestNodeBySID ${newQuestSID}_${action}`,
+  });
+
+  const setVarSID = `${prefix}_SetVar`;
+  const setVarNode = new Struct({
+    __internal__: { rawName: setVarSID, isRoot: true },
+    SID: setVarSID,
+    QuestSID: vendor.questSID,
+    NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+    Repeatable: true,
+    Launchers: getLaunchers([launcherRef]),
+    GlobalVariablePrototypeSID: globalVarSID,
+    ChangeValueMode: "EChangeValueMode::Set",
+    VariableValue: action === "Start",
+  });
+
+  return [cmdNode, setVarNode];
+}
+
+// --- Independent quest generation ---
+
+async function generateIndependentQuest(
+  vendor: VendorConfig,
+  subQuest: string,
+): Promise<Struct[]> {
+  const newQuestSID = `MoreSideQuestOptions_${subQuest}`;
+  const cancelTechnicalSID = `${newQuestSID}_Cancel`;
+
+  // Read vanilla sub-quest .cfg
+  const vanillaNodes = await readFileAndGetStructs<QuestNodePrototype>(`/QuestNodePrototypes/${subQuest}.cfg`);
+
+  // Build complete SID map BEFORE cloning (including special cases)
+  const sidMap = new Map<string, string>();
+  for (const vNode of vanillaNodes) {
+    sidMap.set(vNode.SID, `${newQuestSID}_${vNode.SID.replace(`${subQuest}_`, "")}`);
+  }
+  // Override Start/End to canonical names
+  sidMap.set(`${subQuest}_Start`, `${newQuestSID}_Start`);
+  sidMap.set(`${subQuest}_End`, `${newQuestSID}_End`);
+
+  // Map cross-quest cancel reference to our own cancel node
+  // Vanilla sub-quests use Bridge on `{parentQuest}_cancelQuest` for cancel detection
+  const vanillaCancelSID = `${vendor.questSID}_cancelQuest`;
+  sidMap.set(vanillaCancelSID, cancelTechnicalSID);
+
+  const journalCancelNodes: { questSID: string; stageSID?: string; action: string }[] = [];
+
+  const nodes: Struct[] = [];
+
+  for (const vNode of vanillaNodes) {
+    const newSID = sidMap.get(vNode.SID)!;
+    const cloned = vNode.clone();
+
+    // Update SID and mark as new root struct
+    cloned.SID = newSID;
+    cloned.__internal__.rawName = newSID;
+    cloned.__internal__.isRoot = true;
+    cloned.__internal__.bpatch = undefined;
+    cloned.QuestSID = newQuestSID;
+
+    // Special: Start node should not LaunchOnQuestStart (triggered externally)
+    if (vNode.SID === `${subQuest}_Start`) {
+      (cloned as QuestNodePrototypeTechnical).LaunchOnQuestStart = false;
+    }
+
+    // Update Launchers: remap SIDs
+    if (cloned.Launchers instanceof Struct) {
+      for (const [, launcher] of cloned.Launchers.entries()) {
+        if (launcher.Connections instanceof Struct) {
+          for (const [, conn] of launcher.Connections.entries()) {
+            const mapped = sidMap.get(conn.SID);
+            if (mapped) conn.SID = mapped;
+          }
+        }
+      }
+    }
+
+    // Update Bridge conditions: remap LinkedNodePrototypeSID
+    const condNode = cloned as QuestNodePrototypeCondition;
+    if (condNode.Conditions instanceof Struct) {
+      for (const [, condGroup] of condNode.Conditions.entries()) {
+        if (condGroup instanceof Struct) {
+          for (const [, cond] of (condGroup as Struct).entries() as [string, QuestNodePrototypeConditionsItemItem][]) {
+            if (cond.LinkedNodePrototypeSID) {
+              const mapped = sidMap.get(cond.LinkedNodePrototypeSID);
+              if (mapped) cond.LinkedNodePrototypeSID = mapped;
+            }
+          }
+        }
+      }
+    }
+
+    // Track journal entries for cancel
+    if (vNode.NodeType === "EQuestNodeType::SetJournal") {
+      const j = vNode as QuestNodePrototypeSetJournal;
+      if (j.JournalAction === "EJournalAction::Start") {
+        journalCancelNodes.push({
+          questSID: j.JournalQuestSID,
+          stageSID: j.JournalQuestStageSID,
+          action: j.JournalEntity === "EJournalEntity::Quest" ? "quest" : "stage",
+        });
+      }
+    }
+
+    nodes.push(cloned);
+  }
+
+  // Add SetGlobalVariable Active=false before End (on quest completion)
+  const completionSetVarSID = `${newQuestSID}_SetInactive`;
+  const endNode = nodes.find((n) => (n as QuestNodePrototype).SID === `${newQuestSID}_End`);
+  if (endNode) {
+    const endProto = endNode as QuestNodePrototype;
+    nodes.push(new Struct({
+      __internal__: { rawName: completionSetVarSID, isRoot: true },
+      SID: completionSetVarSID,
+      QuestSID: newQuestSID,
+      NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+      Launchers: endProto.Launchers?.clone(),
+      GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
+      ChangeValueMode: "EChangeValueMode::Set",
+      VariableValue: false,
+    }));
+  }
+
+  // --- Cancel flow ---
+  // Cancel Technical node (entry point, triggered by XStartQuestNodeBySID from parent quest)
+  nodes.push(new Struct({
+    __internal__: { rawName: cancelTechnicalSID, isRoot: true },
+    SID: cancelTechnicalSID,
+    QuestSID: newQuestSID,
+    NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
+    StartDelay: 0,
+    LaunchOnQuestStart: false,
+  }));
+
+  // Cancel journal stage entries (cancel all started stages)
+  const uniqueStages = journalCancelNodes.filter((j) => j.action === "stage");
+  const seenStages = new Set<string>();
+  for (const stage of uniqueStages) {
+    if (!stage.stageSID || seenStages.has(stage.stageSID)) continue;
+    seenStages.add(stage.stageSID);
+    const sid = `${newQuestSID}_CancelStage_${stage.stageSID}`;
+    nodes.push(new Struct({
+      __internal__: { rawName: sid, isRoot: true },
+      SID: sid,
+      QuestSID: newQuestSID,
+      NodeType: "EQuestNodeType::SetJournal" satisfies EQuestNodeType,
+      Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
+      JournalEntity: "EJournalEntity::QuestStage",
+      JournalAction: "EJournalAction::Cancel",
+      JournalQuestSID: stage.questSID,
+      JournalQuestStageSID: stage.stageSID,
+    }));
+  }
+
+  // Cancel journal quest
+  const questJournal = journalCancelNodes.find((j) => j.action === "quest");
+  if (questJournal) {
+    const sid = `${newQuestSID}_CancelQuest`;
+    nodes.push(new Struct({
+      __internal__: { rawName: sid, isRoot: true },
+      SID: sid,
+      QuestSID: newQuestSID,
+      NodeType: "EQuestNodeType::SetJournal" satisfies EQuestNodeType,
+      Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
+      JournalEntity: "EJournalEntity::Quest",
+      JournalAction: "EJournalAction::Cancel",
+      JournalQuestSID: questJournal.questSID,
+    }));
+  }
+
+  // Cancel SetGlobalVariable Active=false
+  const cancelSetVarSID = `${newQuestSID}_CancelSetInactive`;
+  nodes.push(new Struct({
+    __internal__: { rawName: cancelSetVarSID, isRoot: true },
+    SID: cancelSetVarSID,
+    QuestSID: newQuestSID,
+    NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+    Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
+    GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
+    ChangeValueMode: "EChangeValueMode::Set",
+    VariableValue: false,
+  }));
+
+  // Cancel End node (terminates all quest nodes including spawns)
+  const cancelEndSID = `${newQuestSID}_CancelEnd`;
+  nodes.push(new Struct({
+    __internal__: { rawName: cancelEndSID, isRoot: true },
+    SID: cancelEndSID,
+    QuestSID: newQuestSID,
+    NodeType: "EQuestNodeType::End" satisfies EQuestNodeType,
+    Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
+    ExcludeAllNodesInContainer: true,
+  }));
+
+  return nodes;
 }
 
 transformQuestNodePrototypes.files = [
