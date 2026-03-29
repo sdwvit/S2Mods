@@ -11,8 +11,17 @@ import {
 } from "s2cfgtojson";
 import type { EQuestNodeType } from "s2cfgtojson";
 import type { MetaContext } from "../../src/meta-type.mts";
-import { getLaunchers } from "../../src/struct-utils.mts";
-import { vendors, getGlobalVarSID, getCancelDialogSID, type VendorConfig } from "./local.consts.mts";
+import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
+import {
+  vendors,
+  getGlobalVarSID,
+  getCancelDialogSID,
+  getTurnInDialogSID,
+  getReadyForTurnInVarSID,
+  resetSetDialogQuestNodes,
+  declineJobQuestNodes,
+  type VendorConfig,
+} from "./local.consts.mts";
 import { readFileAndGetStructs } from "../../src/read-file-and-get-structs.mts";
 
 const processedVendors = new Set<string>();
@@ -25,21 +34,41 @@ export async function transformQuestNodePrototypes(
   if (!vendor) return;
 
   // Disable vanilla Random node (strip launchers)
-  if (struct.NodeType === "EQuestNodeType::Random" && struct.SID === `${vendor.questNodePrefix}_Random`) {
+  if (
+    struct.NodeType === "EQuestNodeType::Random" &&
+    struct.SID === `${vendor.questNodePrefix}_Random`
+  ) {
     const fork = struct.fork() as QuestNodePrototypeRandom;
     fork.Launchers = new Struct() as any;
     return fork;
   }
 
-  // Disable vanilla SetDialog (strip launchers so it never fires)
-  if (struct.SID === vendor.setDialogSID) {
+  // Disable vanilla SetDialog nodes to prevent competing dialogs with the ModSetDialog hub.
+  // Reset SetDialogs get re-launched from ModSetDialog so their downstream outputs still fire.
+  // Main and decline-job SetDialogs are fully stripped.
+  if (
+    struct.SID === vendor.setDialogSID ||
+    resetSetDialogQuestNodes.has(struct.SID) ||
+    declineJobQuestNodes.has(struct.SID)
+  ) {
     const fork = struct.fork() as QuestNodePrototypeSetDialog;
-    fork.Launchers = new Struct() as any;
+    const modSetDialogSID = `${vendor.questNodePrefix}_ModSetDialog_MoreSideQuestOptions`;
 
-    // Generate all mod nodes once per vendor (piggyback on SetDialog processing)
-    if (!processedVendors.has(vendor.questSID)) {
+    if (resetSetDialogQuestNodes.has(struct.SID)) {
+      // Reset SetDialog: rewire to launch from ModSetDialog
+      fork.Launchers = getLaunchers([{ SID: modSetDialogSID }]);
+    } else {
+      fork.Launchers = new Struct() as any;
+    }
+
+    // Generate all mod nodes once per vendor (piggyback on main SetDialog processing)
+    if (struct.SID === vendor.setDialogSID && !processedVendors.has(vendor.questSID)) {
       processedVendors.add(vendor.questSID);
-      const modNodes = await generateAllModNodes(vendor, struct as QuestNodePrototypeSetDialog, context);
+      const modNodes = await generateAllModNodes(
+        vendor,
+        struct as QuestNodePrototypeSetDialog,
+        context,
+      );
       return [fork, ...modNodes];
     }
     return fork;
@@ -66,30 +95,41 @@ async function generateAllModNodes(
 
   // Boot node: fires on quest start to trigger ModSetDialog
   const bootSID = `${vendor.questNodePrefix}_Boot_MoreSideQuestOptions`;
-  nodes.push(new Struct({
-    __internal__: { rawName: bootSID, isRoot: true },
-    SID: bootSID,
-    QuestSID: vendor.questSID,
-    NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
-    StartDelay: 0,
-    LaunchOnQuestStart: true,
-  }));
+  nodes.push(
+    new Struct({
+      __internal__: { rawName: bootSID, isRoot: true },
+      SID: bootSID,
+      QuestSID: vendor.questSID,
+      NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
+      StartDelay: 0,
+      LaunchOnQuestStart: true,
+    }),
+  );
 
   // ConsoleCommand node: launches from _Start, triggers Boot via XStartQuestNodeBySID
   const bootCmdSID = `${vendor.questNodePrefix}_BootCmd_MoreSideQuestOptions`;
-  nodes.push(new Struct({
-    __internal__: { rawName: bootCmdSID, isRoot: true },
-    SID: bootCmdSID,
-    QuestSID: vendor.questNodePrefix,
-    NodeType: "EQuestNodeType::ConsoleCommand" satisfies EQuestNodeType,
-    Repeatable: true,
-    Launchers: getLaunchers([{ SID: `${vendor.questNodePrefix}_Start` }]),
-    ConsoleCommand: `XStartQuestNodeBySID ${bootSID}`,
-  }));
+  nodes.push(
+    new Struct({
+      __internal__: { rawName: bootCmdSID, isRoot: true },
+      SID: bootCmdSID,
+      QuestSID: vendor.questNodePrefix,
+      NodeType: "EQuestNodeType::ConsoleCommand" satisfies EQuestNodeType,
+      Repeatable: true,
+      Launchers: getLaunchers([{ SID: `${vendor.questNodePrefix}_Start` }]),
+      ConsoleCommand: `XStartQuestNodeBySID ${bootSID}`,
+    }),
+  );
 
   // Generate ModSetDialog (our replacement for vanilla SetDialog)
   const modSetDialogSID = `${vendor.questNodePrefix}_ModSetDialog_MoreSideQuestOptions`;
-  const modSetDialog = generateModSetDialog(vendor, vanillaSetDialog, modSetDialogSID, confirmPhrases, bootSID);
+  const modSetDialog = generateModSetDialog(
+    vendor,
+    vanillaSetDialog,
+    modSetDialogSID,
+    confirmPhrases,
+    bootSID,
+    context,
+  );
   nodes.push(modSetDialog);
 
   // Generate per-sub-quest ConsoleCommand chains
@@ -100,8 +140,45 @@ async function generateAllModNodes(
     const cancelPhrase = getCancelDialogSID(vendor.dialogChain, subQuest);
     const newQuestSID = `MoreSideQuestOptions_${subQuest}`;
 
-    nodes.push(...generateActionChain(vendor, subQuest, modSetDialogSID, confirmPhrase, newQuestSID, "Start"));
-    nodes.push(...generateActionChain(vendor, subQuest, modSetDialogSID, cancelPhrase, newQuestSID, "Cancel"));
+    nodes.push(
+      ...generateActionChain(
+        vendor,
+        subQuest,
+        modSetDialogSID,
+        confirmPhrase,
+        newQuestSID,
+        "Start",
+      ),
+    );
+    nodes.push(
+      ...generateActionChain(
+        vendor,
+        subQuest,
+        modSetDialogSID,
+        cancelPhrase,
+        newQuestSID,
+        "Cancel",
+      ),
+    );
+  }
+
+  // Generate per-sub-quest TurnIn ConsoleCommand chains
+  for (const subQuest of vendor.subQuests) {
+    const turnInPhrase = getTurnInDialogSID(vendor.dialogChain, subQuest);
+    const newQuestSID = `MoreSideQuestOptions_${subQuest}`;
+    const prefix = `${vendor.questNodePrefix}_TurnIn_${subQuest}_MoreSideQuestOptions`;
+    const cmdSID = `${prefix}_ConsoleCommand`;
+    nodes.push(
+      new Struct({
+        __internal__: { rawName: cmdSID, isRoot: true },
+        SID: cmdSID,
+        QuestSID: vendor.questSID,
+        NodeType: "EQuestNodeType::ConsoleCommand" satisfies EQuestNodeType,
+        Repeatable: true,
+        Launchers: getLaunchers([{ SID: modSetDialogSID, Name: turnInPhrase }]),
+        ConsoleCommand: `XStartQuestNodeBySID ${newQuestSID}_Reward`,
+      }),
+    );
   }
 
   // Generate independent quest nodes for each sub-quest
@@ -121,7 +198,9 @@ function extractConfirmPhrases(
   for (const subQuest of vendor.subQuests) {
     // Find the Container node for this sub-quest
     const container = context.array.find(
-      (s) => s.NodeType === "EQuestNodeType::Container" && (s as any).ContaineredQuestPrototypeSID === subQuest,
+      (s) =>
+        s.NodeType === "EQuestNodeType::Container" &&
+        (s as any).ContaineredQuestPrototypeSID === subQuest,
     );
     if (!container?.Launchers) continue;
 
@@ -134,7 +213,10 @@ function extractConfirmPhrases(
         if (!pinNode?.Conditions || pinNode.NodeType !== "EQuestNodeType::Condition") continue;
         const condGroup = pinNode.Conditions["0"];
         const cond = condGroup?.["0"] as QuestNodePrototypeConditionsItemItem | undefined;
-        if (cond?.ConditionType === "EQuestConditionType::Bridge" && cond.LinkedNodePrototypeSID === vendor.setDialogSID) {
+        if (
+          cond?.ConditionType === "EQuestConditionType::Bridge" &&
+          cond.LinkedNodePrototypeSID === vendor.setDialogSID
+        ) {
           const phraseSID = cond.CompletedNodeLauncherNames?.["0"];
           if (phraseSID) result.set(subQuest, String(phraseSID));
         }
@@ -150,6 +232,7 @@ function generateModSetDialog(
   modSID: string,
   confirmPhrases: Map<string, string>,
   bootSID: string,
+  context: MetaContext<QuestNodePrototype>,
 ): Struct {
   // Build LastPhrases: vanilla confirms + our cancel confirms
   const lastPhrases = new Struct();
@@ -173,6 +256,15 @@ function generateModSetDialog(
     idx++;
   }
 
+  // Add turn-in confirm phrases (from our dialog prototypes)
+  for (const subQuest of vendor.subQuests) {
+    const turnInPhrase = getTurnInDialogSID(vendor.dialogChain, subQuest);
+    const pinName = `TurnIn_${subQuest}`;
+    outputPins.addNode(pinName);
+    lastPhrases.addNode(new Struct({ FinishNode: true, LastPhraseSID: turnInPhrase }));
+    idx++;
+  }
+
   // Add vanilla non-confirm phrases (cancel_job_cancel → self-loop, postpone → self-loop, etc.)
   for (const [, entry] of vanilla.LastPhrases.entries()) {
     if (!entry.FinishNode) {
@@ -189,17 +281,17 @@ function generateModSetDialog(
   // Build launchers: fire from boot node OR parent quest Start OR vanilla condition nodes + self-loops
   // Each trigger must be a separate launcher entry (OR logic), not combined (AND logic)
   const startSID = `${vendor.questNodePrefix}_Start`;
-  const initialLaunchers: any[] = [
-    { SID: bootSID },
-    { SID: startSID },
-  ];
+  const initialLaunchers: any[] = [{ SID: bootSID }, { SID: startSID }];
   // Add vanilla condition node connections as separate entries
   for (const [, launcher] of vanilla.Launchers.entries()) {
     if (launcher.Excluding) continue;
     if (!(launcher.Connections instanceof Struct)) continue;
     let isSelfRef = false;
     for (const [, conn] of launcher.Connections.entries()) {
-      if (conn.SID === vanilla.SID) { isSelfRef = true; break; }
+      if (conn.SID === vanilla.SID) {
+        isSelfRef = true;
+        break;
+      }
     }
     if (isSelfRef) continue;
     for (const [, conn] of launcher.Connections.entries()) {
@@ -224,16 +316,37 @@ function generateModSetDialog(
     const cancelPhrase = getCancelDialogSID(vendor.dialogChain, subQuest);
     selfLoopLaunchers.push({ SID: modSID, Name: cancelPhrase });
   }
+  for (const subQuest of vendor.subQuests) {
+    const turnInPhrase = getTurnInDialogSID(vendor.dialogChain, subQuest);
+    selfLoopLaunchers.push({ SID: modSID, Name: turnInPhrase });
+  }
 
-  const launchers = getLaunchers([
-    ...initialLaunchers,
-    ...selfLoopLaunchers,
-  ]);
+  const launchers = getLaunchers([...initialLaunchers, ...selfLoopLaunchers]);
 
-  // Copy excluding launchers from vanilla (prevent dialog during certain events)
-  for (const [, launcher] of vanilla.Launchers.entries()) {
-    if (launcher.Excluding) {
-      launchers.addNode(launcher.clone());
+  // Incorporate non-self-loop, non-excluding launchers from disabled reset and decline-job
+  // SetDialog nodes so the ModSetDialog fires in all the same situations vanilla dialogs would.
+  // We intentionally skip excluding launchers from ALL vanilla SetDialogs — they were designed
+  // for the vanilla quest flow (timers, quest-stage events, quest init) and conflict with
+  // the mod's own flow control (Hub menu + global variable gating).
+  for (const otherSID of [...resetSetDialogQuestNodes, ...declineJobQuestNodes]) {
+    const otherNode = context.structsById[otherSID] as QuestNodePrototypeSetDialog | undefined;
+    if (!otherNode?.Launchers || !(otherNode.Launchers instanceof Struct)) continue;
+    for (const [, launcher] of otherNode.Launchers.entries()) {
+      if (launcher.Excluding) continue;
+      if (!(launcher.Connections instanceof Struct)) continue;
+      // Skip self-loops (connections back to the disabled node itself)
+      let isSelfRef = false;
+      for (const [, conn] of launcher.Connections.entries()) {
+        if (conn.SID === otherSID) { isSelfRef = true; break; }
+      }
+      if (isSelfRef) continue;
+      // Add each connection as a separate OR launcher entry
+      for (const [, conn] of launcher.Connections.entries()) {
+        const added = getLaunchers([{ SID: conn.SID, Name: conn.Name || undefined }]);
+        for (const [, entry] of added.entries()) {
+          launchers.addNode(entry);
+        }
+      }
     }
   }
 
@@ -307,15 +420,34 @@ function generateActionChain(
 
 // --- Independent quest generation ---
 
-async function generateIndependentQuest(
-  vendor: VendorConfig,
-  subQuest: string,
-): Promise<Struct[]> {
+/**
+ * Clones a vanilla sub-quest into a standalone independent quest, applying several
+ * critical transformations to prevent interference with the parent quest and other mods:
+ *
+ * - **Start node**: LaunchOnQuestStart disabled — triggered externally via XStartQuestNodeBySID.
+ * - **RostokMutantRSQuestFix (RSQ08_C01_K_M only)**: Applies the same PinWeights and Conditions
+ *   fixes that RostokMutantRSQuestFix bpatches onto vanilla, since we read unpatched data.
+ * - **PreviousTask globals**: Skipped entirely — these SetGlobalVariable nodes write to parent-quest
+ *   globals (e.g. RSQ08_PreviousTask) that drive the parent's condition nodes. Our independent
+ *   quests use their own global vars instead.
+ * - **Quest-level SetJournal**: Converted to Technical pass-throughs — all independent quests share
+ *   the parent journal SID, so firing Quest-level journal actions would cancel/complete for everyone.
+ * - **SetDialog nodes**: Converted to Technical pass-throughs — the parent quest's ModSetDialog hub
+ *   handles all NPC dialog. A cloned SetDialog would compete for the same NPC and block the hub
+ *   entirely (no dialog options visible, e.g. RSQ08_C04_B_B).
+ * - **ItemAdd nodes**: Preceded by injected Spawn + delay nodes to force-spawn item containers,
+ *   working around StashClueRework setting SpawnOnStart=false.
+ * - **End node**: Rewired through a SetInactive node to clear the quest's global var before
+ *   ExcludeAllNodesInContainer kills the container.
+ */
+async function generateIndependentQuest(vendor: VendorConfig, subQuest: string): Promise<Struct[]> {
   const newQuestSID = `MoreSideQuestOptions_${subQuest}`;
   const cancelTechnicalSID = `${newQuestSID}_Cancel`;
 
   // Read vanilla sub-quest .cfg
-  const vanillaNodes = await readFileAndGetStructs<QuestNodePrototype>(`/QuestNodePrototypes/${subQuest}.cfg`);
+  const vanillaNodes = await readFileAndGetStructs<QuestNodePrototype>(
+    `/QuestNodePrototypes/${subQuest}.cfg`,
+  );
 
   // Build complete SID map BEFORE cloning (including special cases)
   const sidMap = new Map<string, string>();
@@ -331,7 +463,18 @@ async function generateIndependentQuest(
   const vanillaCancelSID = `${vendor.questSID}_cancelQuest`;
   sidMap.set(vanillaCancelSID, cancelTechnicalSID);
 
+  // Track vanilla SetDialog SIDs — their cloned nodes become Technical pass-throughs,
+  // so downstream launcher connections must drop their pin Name (Technical has no named pins).
+  const vanillaSetDialogSIDs = new Set(
+    vanillaNodes.filter((n) => n.NodeType === "EQuestNodeType::SetDialog").map((n) => n.SID),
+  );
+
   const journalCancelNodes: { questSID: string; stageSID?: string; action: string }[] = [];
+
+  // Track the "objectives complete" node: the SetJournal that starts the parent quest's
+  // finish stage (e.g., RSQ08_Finish). This fires when objectives are done and the player
+  // should return to the vendor. Used as the trigger for SetReadyForTurnIn.
+  let objectivesCompleteSID: string | undefined;
 
   const nodes: Struct[] = [];
 
@@ -351,11 +494,43 @@ async function generateIndependentQuest(
       (cloned as QuestNodePrototypeTechnical).LaunchOnQuestStart = false;
     }
 
+    // Apply RostokMutantRSQuestFix: fix RSQ08 bar mutant quest auto-finishing
+    if (vNode.SID === "RSQ08_C01_K_M_Random_3") {
+      (cloned as QuestNodePrototypeRandom).PinWeights = Object.assign(
+        (cloned as QuestNodePrototypeRandom).PinWeights.fork(),
+        { 0: 0.5 },
+      );
+    }
+    // Vanilla bug STL-4939: this condition node has no conditions, so it passes immediately
+    // and auto-finishes the quest. Fix: require the finish dialog node to be completed first.
+    if (vNode.SID === "RSQ08_C01_K_M_Technical_STL4939_Pin_0") {
+      const finishDialogSID = sidMap.get(
+        "RSQ08_C01_K_M_SetDialog_RSQ08_Dialog_Barmen_C01_Finish",
+      ) ?? "RSQ08_C01_K_M_SetDialog_RSQ08_Dialog_Barmen_C01_Finish";
+      (cloned as QuestNodePrototypeCondition).Conditions = getConditions([
+        {
+          ConditionType: "EQuestConditionType::NodeState",
+          ConditionComparance: "EConditionComparance::Equal",
+          TargetNode: finishDialogSID,
+          NodeState: "EQuestNodeState::Finished",
+        },
+      ]);
+    }
+
+    // Skip SetGlobalVariable nodes that modify vanilla parent-quest globals
+    // (e.g. RSQ08_PreviousTask) — changing these disrupts the parent quest's condition nodes
+    // Nothing references this node downstream, so omitting entirely is safe.
+    if (vNode.SID.includes("PreviousTask")) {
+      continue;
+    }
+
     // Update Launchers: remap SIDs
     if (cloned.Launchers instanceof Struct) {
       for (const [, launcher] of cloned.Launchers.entries()) {
         if (launcher.Connections instanceof Struct) {
           for (const [, conn] of launcher.Connections.entries()) {
+            // Clear named pin refs to SetDialog nodes (now Technical, no named outputs)
+            if (vanillaSetDialogSIDs.has(conn.SID)) conn.Name = "";
             const mapped = sidMap.get(conn.SID);
             if (mapped) conn.SID = mapped;
           }
@@ -368,7 +543,10 @@ async function generateIndependentQuest(
     if (condNode.Conditions instanceof Struct) {
       for (const [, condGroup] of condNode.Conditions.entries()) {
         if (condGroup instanceof Struct) {
-          for (const [, cond] of (condGroup as Struct).entries() as [string, QuestNodePrototypeConditionsItemItem][]) {
+          for (const [, cond] of (condGroup as Struct).entries() as [
+            string,
+            QuestNodePrototypeConditionsItemItem,
+          ][]) {
             if (cond.LinkedNodePrototypeSID) {
               const mapped = sidMap.get(cond.LinkedNodePrototypeSID);
               if (mapped) cond.LinkedNodePrototypeSID = mapped;
@@ -388,6 +566,14 @@ async function generateIndependentQuest(
           stageSID: j.JournalQuestStageSID,
           action: j.JournalEntity === "EJournalEntity::Quest" ? "quest" : "stage",
         });
+        // Track the node that starts the parent quest's finish stage — this signals
+        // objectives are complete and the player should return to the vendor.
+        if (
+          j.JournalEntity === "EJournalEntity::QuestStage" &&
+          j.JournalQuestStageSID === `${vendor.questSID}_Finish`
+        ) {
+          objectivesCompleteSID = newSID;
+        }
       }
       // Replace Quest-level Start/Finish with Technical pass-throughs
       // so the node chain stays intact but no shared journal action fires
@@ -405,12 +591,40 @@ async function generateIndependentQuest(
       }
     }
 
+    // Convert cloned SetDialog nodes to Technical pass-throughs.
+    // The parent quest's ModSetDialog hub handles all NPC dialog; a cloned SetDialog
+    // would compete for the same NPC and block the hub (no dialog options visible).
+    if (vNode.NodeType === "EQuestNodeType::SetDialog") {
+      (cloned as any).NodeType = "EQuestNodeType::Technical";
+      (cloned as QuestNodePrototypeTechnical).StartDelay = 0;
+      delete (cloned as any).OutputPinNames;
+      delete (cloned as any).LastPhrases;
+      delete (cloned as any).DialogChainPrototypeSID;
+      delete (cloned as any).DialogMembers;
+      delete (cloned as any).TalkThroughRadio;
+      delete (cloned as any).DialogObjectLocation;
+      delete (cloned as any).NPCToStartDialog;
+      delete (cloned as any).StartForcedDialog;
+      delete (cloned as any).WaitAllDialogEndingsToFinish;
+      delete (cloned as any).IsComment;
+      delete (cloned as any).OverrideDialogTopic;
+      delete (cloned as any).CanExitAnytime;
+      delete (cloned as any).ContinueThroughRadio;
+      delete (cloned as any).CallPlayer;
+      delete (cloned as any).SeekPlayer;
+      delete (cloned as any).CallPlayerRadius;
+      nodes.push(cloned);
+      continue;
+    }
+
     nodes.push(cloned);
   }
 
   // Inject Spawn + delay before each ItemAdd to force-spawn containers
   // (StashClueRework sets SpawnOnStart=false on ItemContainers, so we must spawn them explicitly)
-  const itemAddNodes = nodes.filter(n => (n as QuestNodePrototype).NodeType === "EQuestNodeType::ItemAdd");
+  const itemAddNodes = nodes.filter(
+    (n) => (n as QuestNodePrototype).NodeType === "EQuestNodeType::ItemAdd",
+  );
   for (const itemAdd of itemAddNodes) {
     const ia = itemAdd as QuestNodePrototypeItemAdd;
     const spawnSID = `${ia.SID}_ForceSpawn`;
@@ -428,29 +642,121 @@ async function generateIndependentQuest(
       }
     }
 
-    nodes.push(new Struct({
-      __internal__: { rawName: spawnSID, isRoot: true },
-      SID: spawnSID,
-      QuestSID: newQuestSID,
-      NodeType: "EQuestNodeType::Spawn" satisfies EQuestNodeType,
-      Launchers: getLaunchers(launcherRefs),
-      TargetQuestGuid: ia.TargetQuestGuid,
-      IgnoreDamageType: "EIgnoreDamageType::None",
-      SpawnHidden: false,
-      SpawnNodeExcludeType: "ESpawnNodeExcludeType::SeamlessDespawn",
-    }));
+    nodes.push(
+      new Struct({
+        __internal__: { rawName: spawnSID, isRoot: true },
+        SID: spawnSID,
+        QuestSID: newQuestSID,
+        NodeType: "EQuestNodeType::Spawn" satisfies EQuestNodeType,
+        Launchers: getLaunchers(launcherRefs),
+        TargetQuestGuid: ia.TargetQuestGuid,
+        IgnoreDamageType: "EIgnoreDamageType::None",
+        SpawnHidden: false,
+        SpawnNodeExcludeType: "ESpawnNodeExcludeType::SeamlessDespawn",
+      }),
+    );
 
-    nodes.push(new Struct({
-      __internal__: { rawName: delaySID, isRoot: true },
-      SID: delaySID,
-      QuestSID: newQuestSID,
-      NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
-      StartDelay: 1.0,
-      Launchers: getLaunchers(launcherRefs),
-    }));
+    nodes.push(
+      new Struct({
+        __internal__: { rawName: delaySID, isRoot: true },
+        SID: delaySID,
+        QuestSID: newQuestSID,
+        NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
+        StartDelay: 1.0,
+        Launchers: getLaunchers(launcherRefs),
+      }),
+    );
 
     // Rewire ItemAdd to launch from delay instead of original trigger
     ia.Launchers = getLaunchers([{ SID: delaySID }]);
+  }
+
+  // --- Turn-in reward gating ---
+  // The vanilla finish SetDialog (now Technical) fires instantly, causing rewards to trigger
+  // on quest start instead of on turn-in. Fix: add a Reward entry point triggered externally
+  // by the parent quest's ModSetDialog turn-in flow, and rewire all downstream nodes from
+  // the SetDialog Technical to fire from the Reward node instead.
+  for (const vanillaSetDialogSID of vanillaSetDialogSIDs) {
+    const mappedSetDialogSID = sidMap.get(vanillaSetDialogSID)!;
+
+    // Reward node: entry point triggered externally via XStartQuestNodeBySID
+    const rewardSID = `${newQuestSID}_Reward`;
+    nodes.push(
+      new Struct({
+        __internal__: { rawName: rewardSID, isRoot: true },
+        SID: rewardSID,
+        QuestSID: newQuestSID,
+        NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
+        StartDelay: 0,
+        LaunchOnQuestStart: false,
+      }),
+    );
+
+    // SetReadyForTurnIn: fires when objectives are complete (the node that starts the
+    // parent quest's finish stage, e.g., BackToSich starting RSQ08_Finish).
+    // Falls back to the SetDialog Technical if no objectives-complete node was found.
+    const setReadyTriggerSID = objectivesCompleteSID ?? mappedSetDialogSID;
+    const setReadySID = `${newQuestSID}_SetReadyForTurnIn`;
+    nodes.push(
+      new Struct({
+        __internal__: { rawName: setReadySID, isRoot: true },
+        SID: setReadySID,
+        QuestSID: newQuestSID,
+        NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+        Launchers: getLaunchers([{ SID: setReadyTriggerSID }]),
+        GlobalVariablePrototypeSID: getReadyForTurnInVarSID(subQuest),
+        ChangeValueMode: "EChangeValueMode::Set",
+        VariableValue: true,
+      }),
+    );
+
+    // ClearReadyForTurnIn: fires from Reward to reset the flag
+    const clearReadySID = `${newQuestSID}_ClearReadyForTurnIn`;
+    nodes.push(
+      new Struct({
+        __internal__: { rawName: clearReadySID, isRoot: true },
+        SID: clearReadySID,
+        QuestSID: newQuestSID,
+        NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+        Launchers: getLaunchers([{ SID: rewardSID }]),
+        GlobalVariablePrototypeSID: getReadyForTurnInVarSID(subQuest),
+        ChangeValueMode: "EChangeValueMode::Set",
+        VariableValue: false,
+      }),
+    );
+
+    // Rewire all non-excluding launcher connections from SetDialog Technical → Reward node
+    for (const node of nodes) {
+      const proto = node as QuestNodePrototype;
+      if (proto.SID === setReadySID) continue; // SetReadyForTurnIn must stay on SetDialog
+      if (proto.Launchers instanceof Struct) {
+        for (const [, launcher] of proto.Launchers.entries()) {
+          if (launcher.Excluding) continue;
+          if (!(launcher.Connections instanceof Struct)) continue;
+          for (const [, conn] of launcher.Connections.entries()) {
+            if (conn.SID === mappedSetDialogSID) {
+              conn.SID = rewardSID;
+            }
+          }
+        }
+      }
+      // Also rewire Bridge conditions referencing the SetDialog
+      const condNode = proto as QuestNodePrototypeCondition;
+      if (condNode.Conditions instanceof Struct) {
+        for (const [, condGroup] of condNode.Conditions.entries()) {
+          if (condGroup instanceof Struct) {
+            for (const [, cond] of (condGroup as Struct).entries() as [
+              string,
+              QuestNodePrototypeConditionsItemItem,
+            ][]) {
+              if (cond.LinkedNodePrototypeSID === mappedSetDialogSID) {
+                cond.LinkedNodePrototypeSID = rewardSID;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   // Add SetGlobalVariable Active=false before End (on quest completion)
@@ -462,30 +768,34 @@ async function generateIndependentQuest(
   if (endNode) {
     const endProto = endNode as QuestNodePrototype;
     // SetInactive gets the End node's original launchers
-    nodes.push(new Struct({
-      __internal__: { rawName: completionSetVarSID, isRoot: true },
-      SID: completionSetVarSID,
-      QuestSID: newQuestSID,
-      NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
-      Launchers: endProto.Launchers?.clone(),
-      GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
-      ChangeValueMode: "EChangeValueMode::Set",
-      VariableValue: false,
-    }));
+    nodes.push(
+      new Struct({
+        __internal__: { rawName: completionSetVarSID, isRoot: true },
+        SID: completionSetVarSID,
+        QuestSID: newQuestSID,
+        NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+        Launchers: endProto.Launchers?.clone(),
+        GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
+        ChangeValueMode: "EChangeValueMode::Set",
+        VariableValue: false,
+      }),
+    );
     // Rewire End to fire from SetInactive completion
     endProto.Launchers = getLaunchers([{ SID: completionSetVarSID }]);
   }
 
   // --- Cancel flow ---
   // Cancel Technical node (entry point, triggered by XStartQuestNodeBySID from parent quest)
-  nodes.push(new Struct({
-    __internal__: { rawName: cancelTechnicalSID, isRoot: true },
-    SID: cancelTechnicalSID,
-    QuestSID: newQuestSID,
-    NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
-    StartDelay: 0,
-    LaunchOnQuestStart: false,
-  }));
+  nodes.push(
+    new Struct({
+      __internal__: { rawName: cancelTechnicalSID, isRoot: true },
+      SID: cancelTechnicalSID,
+      QuestSID: newQuestSID,
+      NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
+      StartDelay: 0,
+      LaunchOnQuestStart: false,
+    }),
+  );
 
   // Cancel journal stage entries (cancel all started stages)
   const uniqueStages = journalCancelNodes.filter((j) => j.action === "stage");
@@ -494,45 +804,66 @@ async function generateIndependentQuest(
     if (!stage.stageSID || seenStages.has(stage.stageSID)) continue;
     seenStages.add(stage.stageSID);
     const sid = `${newQuestSID}_CancelStage_${stage.stageSID}`;
-    nodes.push(new Struct({
-      __internal__: { rawName: sid, isRoot: true },
-      SID: sid,
-      QuestSID: newQuestSID,
-      NodeType: "EQuestNodeType::SetJournal" satisfies EQuestNodeType,
-      Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
-      JournalEntity: "EJournalEntity::QuestStage",
-      JournalAction: "EJournalAction::Cancel",
-      JournalQuestSID: stage.questSID,
-      JournalQuestStageSID: stage.stageSID,
-    }));
+    nodes.push(
+      new Struct({
+        __internal__: { rawName: sid, isRoot: true },
+        SID: sid,
+        QuestSID: newQuestSID,
+        NodeType: "EQuestNodeType::SetJournal" satisfies EQuestNodeType,
+        Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
+        JournalEntity: "EJournalEntity::QuestStage",
+        JournalAction: "EJournalAction::Cancel",
+        JournalQuestSID: stage.questSID,
+        JournalQuestStageSID: stage.stageSID,
+      }),
+    );
   }
 
   // Skip quest-level journal cancel — it would cancel the shared parent quest journal
   // for all other active sub-quests. Stage-level cancels above are sufficient.
 
+  // Cancel ClearReadyForTurnIn (reset flag on cancel)
+  const cancelClearReadySID = `${newQuestSID}_CancelClearReadyForTurnIn`;
+  nodes.push(
+    new Struct({
+      __internal__: { rawName: cancelClearReadySID, isRoot: true },
+      SID: cancelClearReadySID,
+      QuestSID: newQuestSID,
+      NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+      Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
+      GlobalVariablePrototypeSID: getReadyForTurnInVarSID(subQuest),
+      ChangeValueMode: "EChangeValueMode::Set",
+      VariableValue: false,
+    }),
+  );
+
   // Cancel SetGlobalVariable Active=false
   const cancelSetVarSID = `${newQuestSID}_CancelSetInactive`;
-  nodes.push(new Struct({
-    __internal__: { rawName: cancelSetVarSID, isRoot: true },
-    SID: cancelSetVarSID,
-    QuestSID: newQuestSID,
-    NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
-    Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
-    GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
-    ChangeValueMode: "EChangeValueMode::Set",
-    VariableValue: false,
-  }));
+  nodes.push(
+    new Struct({
+      __internal__: { rawName: cancelSetVarSID, isRoot: true },
+      SID: cancelSetVarSID,
+      QuestSID: newQuestSID,
+      NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+      Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
+      GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
+      ChangeValueMode: "EChangeValueMode::Set",
+      VariableValue: false,
+    }),
+  );
 
   // Cancel End node (terminates all quest nodes including spawns)
   const cancelEndSID = `${newQuestSID}_CancelEnd`;
-  nodes.push(new Struct({
-    __internal__: { rawName: cancelEndSID, isRoot: true },
-    SID: cancelEndSID,
-    QuestSID: newQuestSID,
-    NodeType: "EQuestNodeType::End" satisfies EQuestNodeType,
-    Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
-    ExcludeAllNodesInContainer: true,
-  }));
+  nodes.push(
+    new Struct({
+      __internal__: { rawName: cancelEndSID, isRoot: true },
+      SID: cancelEndSID,
+      QuestSID: newQuestSID,
+      NodeType: "EQuestNodeType::End" satisfies EQuestNodeType,
+      Launchers: getLaunchers([{ SID: cancelTechnicalSID }]),
+      ExcludeAllNodesInContainer: true,
+    }),
+  );
 
   return nodes;
 }

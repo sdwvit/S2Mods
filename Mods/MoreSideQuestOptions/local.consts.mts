@@ -183,6 +183,14 @@ export function getCancelDialogSID(dialogChain: string, subQuestSID: string) {
   return `${dialogChain}_CancelJob_${subQuestSID}_MoreSideQuestOptions`;
 }
 
+export function getTurnInDialogSID(dialogChain: string, subQuestSID: string) {
+  return `${dialogChain}_TurnInJob_${subQuestSID}_MoreSideQuestOptions`;
+}
+
+export function getReadyForTurnInVarSID(subQuestSID: string) {
+  return `MoreSideQuestOptions_${subQuestSID}_ReadyForTurnIn`;
+}
+
 export const allSubQuests = vendors.flatMap((v) => v.subQuests);
 
 export const vendorByDialogChain = new Map(vendors.map((v) => [v.dialogChain, v]));
