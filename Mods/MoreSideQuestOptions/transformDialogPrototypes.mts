@@ -8,6 +8,8 @@ import {
   vendorByDialogChain,
   getGlobalVarSID,
   getCancelDialogSID,
+  getTurnInDialogSID,
+  getReadyForTurnInVarSID,
   type VendorConfig,
 } from "./local.consts.mts";
 import { QuestDataTableByQuestSID } from "../MasterMod/rewardFormula.mts";
@@ -86,16 +88,18 @@ function generateHubDialogs(vendor: VendorConfig): Struct[] {
   const hubSID = `${chain}_Hub_MoreSideQuestOptions`;
   const addJobSID = `${chain}_AddJob_MoreSideQuestOptions`;
   const removeJobSID = `${chain}_RemoveJob_MoreSideQuestOptions`;
+  const turnInJobSID = `${chain}_TurnInJob_MoreSideQuestOptions`;
 
-  // Hub menu: AddJob / RemoveJob / Leave
+  // Hub menu: AddJob / RemoveJob / TurnInJob / Leave
   nodes.push(getWaitForReply(hubSID, chain, [
     { sid: addJobSID },
     { sid: removeJobSID },
+    { sid: turnInJobSID },
     { sid: "", conditions: undefined }, // Terminate (Leave)
   ]));
   // Fix the leave option to be Terminate=true
   const hubNode = nodes[nodes.length - 1] as DialogPrototype;
-  const lastOpt = hubNode.NextDialogOptions?.["2"];
+  const lastOpt = hubNode.NextDialogOptions?.["3"];
   if (lastOpt) {
     lastOpt.NextDialogSID = "";
     lastOpt.Terminate = true;
@@ -149,6 +153,46 @@ function generateHubDialogs(vendor: VendorConfig): Struct[] {
   const removeLastOpt = removeNode.NextDialogOptions?.[String(removeJobOptions.length - 1)];
   if (removeLastOpt) {
     removeLastOpt.Terminate = true;
+  }
+
+  // TurnInJob menu: per-quest options conditioned on Active==true AND ReadyForTurnIn==true
+  const turnInOptions: { sid: string; conditions?: any }[] = [];
+  for (const subQuest of vendor.subQuests) {
+    const turnInSID = getTurnInDialogSID(chain, subQuest);
+    turnInOptions.push({
+      sid: turnInSID,
+      conditions: getDialogPrototypeConditions([
+        {
+          ConditionType: "EQuestConditionType::GlobalVariable",
+          ConditionComparance: "EConditionComparance::Equal",
+          GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
+          ChangeValueMode: "EChangeValueMode::Set",
+          VariableValue: true,
+        },
+        {
+          ConditionType: "EQuestConditionType::GlobalVariable",
+          ConditionComparance: "EConditionComparance::Equal",
+          GlobalVariablePrototypeSID: getReadyForTurnInVarSID(subQuest),
+          ChangeValueMode: "EChangeValueMode::Set",
+          VariableValue: true,
+        },
+      ]),
+    });
+  }
+  // Add back/terminate option
+  turnInOptions.push({ sid: "" });
+  nodes.push(getWaitForReply(turnInJobSID, chain, turnInOptions));
+  const turnInNode = nodes[nodes.length - 1] as DialogPrototype;
+  const turnInLastOpt = turnInNode.NextDialogOptions?.[String(turnInOptions.length - 1)];
+  if (turnInLastOpt) {
+    turnInLastOpt.Terminate = true;
+  }
+
+  // Per-quest TurnIn dialogs
+  for (const subQuest of vendor.subQuests) {
+    const turnInSID = getTurnInDialogSID(chain, subQuest);
+    // TurnIn confirm: terminates dialog (ModSetDialog detects this LastPhrase)
+    nodes.push(getDialogPhrase(turnInSID, chain, -1, [{ sid: "", terminate: true }]));
   }
 
   // Per-quest Cancel dialogs
