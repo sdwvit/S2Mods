@@ -11,7 +11,7 @@ Rest of Master specific things are left intact.[h1][/h1]
 [hr][/hr]
 bpatches DifficultyPrototypes
 `,
-  changenote: "Show body markers",
+  changenote: "Enable crosshair",
   structTransformers: [structTransformer],
 };
 
@@ -25,6 +25,7 @@ function structTransformer(struct: DifficultyPrototype, context: MetaContext<Dif
   fork.bShouldDisableCompass = false;
   fork.BlockSettings = false;
   fork.bShouldDisableDeadBodyMarkers = false;
+  fork.bShouldDisableCrosshair = false;
   return fork;
 }
 
