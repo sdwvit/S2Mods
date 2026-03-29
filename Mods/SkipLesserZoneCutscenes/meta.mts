@@ -2,53 +2,38 @@ import { Struct } from "s2cfgtojson";
 import type { DialogPrototype, QuestNodePrototype, QuestNodePrototypeContainer } from "s2cfgtojson";
 import type { MetaContext, MetaType, StructTransformer } from "../../src/meta-type.mts";
 
+
+/**
+ * todo this skips intro, but doesn't allow to progress past bunker
+ */
+const toReroute = new Set([
+  "E01_MQ01_Cutscene_Intro",
+  "E01_MQ01_Bunker_Start",
+  "E02_MQ03_C05_Container_PlayCutscene",
+  "E01_MQ01_PlayVideo",
+  "E01_MQ01_Cutscene_Napadenie",
+  "E02_MQ01_Container_Awakening_Cutscene",
+  "E02_MQ03_Container_Cutscene",
+  "E02_MQ03_RestrictSave",
+  "E02_MQ03_C05_RestrictSave",
+  "E02_MQ03_C05_Technical_2_PripoyKill",
+  "E02_MQ03_C05_Technical_E02_MQ03_PripoyCutscene_Dead",
+
+  "E02_MQ03_C05_ItemAdd_PripoyPDA",
+  "E02_MQ03_C05_Despawn_Pripoy",
+  "E02_MQ03_C05_Spawn_DeadBody_PripoyDead",
+  "E02_MQ03_C05_DisableNPCInteraction_PripoyDead",
+]);
+
 const structTransformer: StructTransformer<QuestNodePrototype> = (struct, context) => {
-  if (struct.SID === "E01_MQ01_PlayVideo") {
-    return reroute(struct, context, [
-      "E01_MQ01_ItemAdd_Scanner",
-      "E01_MQ01_Technical_TestWithoutTeleportTransition",
-      "E01_MQ01_Start_Point3",
-      "E01_MQ01_SendSignal_ThirdPoint_On",
-      "E01_MQ01_Technical_3",
-      "E01_MQ01_SpawnObjectNPCMonster_BP_NPC_TEST_Zombie1",
-      "E01_MQ01_Technical_ZombieAttackOnPlayer",
-    ]);
+  if (toReroute.has(struct.SID)) {
+    return reroute(struct, context);
   }
 
-  if (struct.SID === "E01_MQ01_Bunker_Start" || struct.SID === "E01_MQ01_Start_PlaceScanner" || struct.SID === "E01_MQ01_Start_PlaceScanner_1") {
-    const fork = struct.fork() as QuestNodePrototypeContainer;
-    fork.Launchers = new Struct() as QuestNodePrototypeContainer["Launchers"];
-    return fork;
-  }
-
-  if (struct.SID === "E01_MQ01_Cutscene_Napadenie") {
-    return reroute(struct, context, ["E01_MQ01_Finish"]);
-  }
-
-  if (struct.SID === "E02_MQ01_Container_Awakening_Cutscene") {
-    return reroute(struct, context, [
-      "E02_MQ01_Technical_EndPreparation",
-      "E02_MQ01_SaveGame_2",
-      "E02_MQ01_SendSignal_BP_Dogblooddecal.Receiver_Set_Object_2",
-      "E02_MQ01_SendSignal_BP_Dogbloodbody.Receiver_Set_Object_2",
-    ]);
-  }
-
-  if (struct.SID === "E02_MQ03_Container_Cutscene") {
-    return reroute(struct, context, ["E02_MQ03_Technical_BarScene", "E02_MQ03_Technical_E02_MQ01_Bar_Flashback"]);
-  }
-
-  if (struct.NodeType === "EQuestNodeType::RestrictSave") {
-    const fork = struct.fork();
-    fork.Launchers = new Struct() as any;
-    return fork;
-  }
-
-  if (struct.SID === "E02_MQ03_C05_Container_PlayCutscene") {
-    return reroute(struct, context, ["E02_MQ03_C05_Technical_PripyLive", "E02_MQ03_C05_Technical_E02_MQ03_PripoyCutscene_Alive"]);
-  }
-
-  if (context.filePath.endsWith("E02_MQ03_Dialog_Warlock_in_Bar_after_CS.cfg") && "Unskippable" in struct) {
+  if (
+    context.filePath.endsWith("E02_MQ03_Dialog_Warlock_in_Bar_after_CS.cfg") &&
+    "Unskippable" in struct
+  ) {
     const fork = struct.fork() as any as DialogPrototype;
     fork.Unskippable = false;
     return fork;
@@ -69,19 +54,32 @@ This mod skips / speeds up Intro / Scanner / Wake up with Richter / Zalissya bar
 [hr][/hr]
 Use this mod for frequent resets.[h1][/h1]
 `,
-  changenote: "Skip bunker/artifact/point1; point3 + wall-destroy + bandit fight available from start",
+  changenote:
+    "Skip bunker/artifact/point1; point3 + wall-destroy + bandit fight available from start",
   structTransformers: [structTransformer],
 };
 
-function reroute(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototype>, dependants: string[]) {
+function reroute(struct: QuestNodePrototype, context: MetaContext<QuestNodePrototype>) {
   const fork = struct.fork() as QuestNodePrototypeContainer;
   const structs = [fork];
   fork.Launchers = new Struct() as QuestNodePrototypeContainer["Launchers"];
   const sourceLaunchers = (struct as QuestNodePrototypeContainer).Launchers;
-
+  const dependants = context.array
+    .filter((s) => {
+      let hasDependant = false;
+      s.Launchers?.forEach?.(([, l]) => {
+        l.Connections.forEach(([, c]) => {
+          if (c.SID === struct.SID) {
+            hasDependant = true;
+          }
+        });
+      });
+      return hasDependant;
+    })
+    .map((s) => s.SID);
   dependants.forEach((sid) => {
     const target = context.structsById[sid] as QuestNodePrototypeContainer | undefined;
-    if (!target) return;
+    if (!target || toReroute.has(sid)) return;
 
     const finishFork = target.fork();
     const targetLaunchers = target.Launchers;
