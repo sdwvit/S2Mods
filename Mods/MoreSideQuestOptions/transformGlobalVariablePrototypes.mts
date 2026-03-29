@@ -1,7 +1,7 @@
 import { Struct } from "s2cfgtojson";
 import type { GlobalVariablePrototype } from "s2cfgtojson";
 import type { StructTransformer } from "../../src/meta-type.mts";
-import { allSubQuests, getGlobalVarSID, getReadyForTurnInVarSID } from "./local.consts.mts";
+import { allSubQuests, getGlobalVarSID, getReadyForTurnInVarSID, getReturnToAddJobVarSID, vendors } from "./local.consts.mts";
 
 let once = false;
 
@@ -9,7 +9,14 @@ export const transformGlobalVariablePrototypes: StructTransformer<GlobalVariable
   if (once) return;
   once = true;
 
-  return allSubQuests.flatMap((subQuest) => {
+  return [
+    ...vendors.map((vendor) => new Struct({
+      __internal__: { rawName: getReturnToAddJobVarSID(vendor.questSID), isRoot: true },
+      SID: getReturnToAddJobVarSID(vendor.questSID),
+      Type: "EGlobalVariableType::Bool",
+      DefaultValue: false,
+    }) as GlobalVariablePrototype),
+    ...allSubQuests.flatMap((subQuest) => {
     const activeSid = getGlobalVarSID(subQuest);
     const readySid = getReadyForTurnInVarSID(subQuest);
     return [
@@ -26,7 +33,8 @@ export const transformGlobalVariablePrototypes: StructTransformer<GlobalVariable
         DefaultValue: false,
       }) as GlobalVariablePrototype,
     ];
-  });
+    }),
+  ];
 };
 
 transformGlobalVariablePrototypes.files = ["/GlobalVariablePrototypes.cfg"];

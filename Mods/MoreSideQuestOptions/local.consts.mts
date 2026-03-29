@@ -191,6 +191,10 @@ export function getReadyForTurnInVarSID(subQuestSID: string) {
   return `MoreSideQuestOptions_${subQuestSID}_ReadyForTurnIn`;
 }
 
+export function getReturnToAddJobVarSID(questSID: string) {
+  return `MoreSideQuestOptions_${questSID}_ReturnToAddJob`;
+}
+
 export const allSubQuests = vendors.flatMap((v) => v.subQuests);
 
 export const vendorByDialogChain = new Map(vendors.map((v) => [v.dialogChain, v]));
