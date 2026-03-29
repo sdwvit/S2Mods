@@ -1,0 +1,34 @@
+import type { AbilityPrototype, ObjPrototype, Struct } from "s2cfgtojson";
+import type { MetaType } from "../../src/meta-type.mts";
+
+const targetSIDs = new Set([
+  "PseudoDogSummon_RunAttack_Base",
+  "PseudoDogSummon_BiteAttack",
+  "PseudoDogSummon_TurnAttack",
+]);
+
+export const meta: MetaType<Struct> = {
+  description: `
+This mod removes damage from pseudodog psy clones (combat summons).[h1][/h1]
+[hr][/hr]
+[list]
+[*] Pseudodog clones will still spawn and chase you, but they deal no damage and cause no bleeding.
+[*] The real pseudodog is unaffected — only its summoned copies are nerfed.
+[/list] 
+  `,
+  changenote: "Initial release",
+  structTransformers: [transformSummonAbilities],
+};
+
+function transformSummonAbilities(struct: AbilityPrototype) {
+  if (!targetSIDs.has(struct.SID as string)) {
+    return null;
+  }
+  const fork = struct.fork();
+  fork.Damage = 0;
+  fork.Bleeding = 0;
+  fork.BleedingChanceIncrement = 0;
+  return fork;
+}
+
+transformSummonAbilities.files = ["/PseudoDogAbilities.cfg"];
