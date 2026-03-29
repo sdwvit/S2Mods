@@ -18,6 +18,7 @@ import {
   getCancelDialogSID,
   getTurnInDialogSID,
   getReadyForTurnInVarSID,
+  getReturnToAddJobVarSID,
   resetSetDialogQuestNodes,
   declineJobQuestNodes,
   type VendorConfig,
@@ -25,6 +26,16 @@ import {
 import { readFileAndGetStructs } from "../../src/read-file-and-get-structs.mts";
 
 const processedVendors = new Set<string>();
+const playerQuestGuid = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+const rsq04TerriconMeetLastPhrases = [
+  "Terricon_Hub_drabadan_0_Meet_1_63431",
+  "Terricon_Hub_drabadan_0_Meet_Terricon_Hub_drabadan_0_Meet_1_63431_2",
+  "Terricon_Hub_drabadan_0_Meet_2_63433",
+  "Terricon_Hub_drabadan_0_Meet_Terricon_Hub_drabadan_0_Meet_2_63433_2",
+  "Terricon_Hub_drabadan_0_Meet_2_1_63465",
+  "Terricon_Hub_drabadan_0_Meet_3_1_63483",
+  "Terricon_Hub_drabadan_0_Meet_4_1_63491",
+];
 
 export async function transformQuestNodePrototypes(
   struct: QuestNodePrototype,
@@ -320,6 +331,11 @@ function generateModSetDialog(
     const turnInPhrase = getTurnInDialogSID(vendor.dialogChain, subQuest);
     selfLoopLaunchers.push({ SID: modSID, Name: turnInPhrase });
   }
+  if (vendor.questSID === "RSQ04") {
+    for (const phrase of rsq04TerriconMeetLastPhrases) {
+      selfLoopLaunchers.push({ SID: modSID, Name: phrase });
+    }
+  }
 
   const launchers = getLaunchers([...initialLaunchers, ...selfLoopLaunchers]);
 
@@ -368,7 +384,7 @@ function generateModSetDialog(
     StartForcedDialog: false,
     WaitAllDialogEndingsToFinish: false,
     IsComment: false,
-    OverrideDialogTopic: "EOverrideDialogTopic::Info",
+    OverrideDialogTopic: "EOverrideDialogTopic::None",
     CanExitAnytime: false,
     ContinueThroughRadio: false,
     CallPlayer: false,
@@ -390,6 +406,7 @@ function generateActionChain(
   const prefix = `${vendor.questNodePrefix}_${action}_${subQuest}_MoreSideQuestOptions`;
   const globalVarSID = getGlobalVarSID(subQuest);
   const launcherRef = { SID: modSetDialogSID, Name: phrase };
+  const returnToAddJobVarSID = getReturnToAddJobVarSID(vendor.questSID);
 
   const cmdSID = `${prefix}_ConsoleCommand`;
   const cmdNode = new Struct({
@@ -415,7 +432,24 @@ function generateActionChain(
     VariableValue: action === "Start",
   });
 
-  return [cmdNode, setVarNode];
+  if (action !== "Start") {
+    return [cmdNode, setVarNode];
+  }
+
+  const setReturnToAddJobSID = `${prefix}_SetReturnToAddJob`;
+  const setReturnToAddJobNode = new Struct({
+    __internal__: { rawName: setReturnToAddJobSID, isRoot: true },
+    SID: setReturnToAddJobSID,
+    QuestSID: vendor.questSID,
+    NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+    Repeatable: true,
+    Launchers: getLaunchers([launcherRef]),
+    GlobalVariablePrototypeSID: returnToAddJobVarSID,
+    ChangeValueMode: "EChangeValueMode::Set",
+    VariableValue: true,
+  });
+
+  return [cmdNode, setVarNode, setReturnToAddJobNode];
 }
 
 // --- Independent quest generation ---
@@ -538,7 +572,7 @@ async function generateIndependentQuest(vendor: VendorConfig, subQuest: string):
       }
     }
 
-    // Update Bridge conditions: remap LinkedNodePrototypeSID
+    // Update condition node references: remap any linked SIDs in conditions
     const condNode = cloned as QuestNodePrototypeCondition;
     if (condNode.Conditions instanceof Struct) {
       for (const [, condGroup] of condNode.Conditions.entries()) {
@@ -550,6 +584,10 @@ async function generateIndependentQuest(vendor: VendorConfig, subQuest: string):
             if (cond.LinkedNodePrototypeSID) {
               const mapped = sidMap.get(cond.LinkedNodePrototypeSID);
               if (mapped) cond.LinkedNodePrototypeSID = mapped;
+            }
+            if (cond.TargetNode) {
+              const mapped = sidMap.get(cond.TargetNode);
+              if (mapped) cond.TargetNode = mapped;
             }
           }
         }
@@ -740,7 +778,7 @@ async function generateIndependentQuest(vendor: VendorConfig, subQuest: string):
           }
         }
       }
-      // Also rewire Bridge conditions referencing the SetDialog
+      // Also rewire condition refs referencing the SetDialog
       const condNode = proto as QuestNodePrototypeCondition;
       if (condNode.Conditions instanceof Struct) {
         for (const [, condGroup] of condNode.Conditions.entries()) {
@@ -751,6 +789,126 @@ async function generateIndependentQuest(vendor: VendorConfig, subQuest: string):
             ][]) {
               if (cond.LinkedNodePrototypeSID === mappedSetDialogSID) {
                 cond.LinkedNodePrototypeSID = rewardSID;
+              }
+              if (cond.TargetNode === mappedSetDialogSID) {
+                cond.TargetNode = rewardSID;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    const deliveryRewardGate = getDeliveryRewardGate(nodes, rewardSID);
+    const rewardResultSID = deliveryRewardGate ? `${newQuestSID}_RewardGranted` : rewardSID;
+
+    if (deliveryRewardGate) {
+      const validationSID = `${newQuestSID}_RewardValidated`;
+      const rewardGrantedSID = rewardResultSID;
+
+      const validationConditions = getConditions(
+        deliveryRewardGate.requiredItems.map((requiredItem) => ({
+          ConditionType: "EQuestConditionType::ItemInInventory",
+          ConditionComparance: "EConditionComparance::GreaterOrEqual",
+          TargetCharacter: playerQuestGuid,
+          ItemPrototypeSID: {
+            VariableType: "EGlobalVariableType::String",
+            VariableValue: requiredItem.itemSID,
+          },
+          ItemsCount: {
+            VariableType: "EGlobalVariableType::Int",
+            VariableValue: requiredItem.itemsCount,
+          },
+          WithEquipped: false,
+          WithInventory: true,
+        })),
+      );
+      validationConditions.ConditionCheckType = "EConditionCheckType::Or";
+
+      nodes.push(
+        new Struct({
+          __internal__: { rawName: validationSID, isRoot: true },
+          SID: validationSID,
+          QuestSID: newQuestSID,
+          NodeType: "EQuestNodeType::Condition" satisfies EQuestNodeType,
+          Launchers: getLaunchers([{ SID: rewardSID }]),
+          Conditions: validationConditions,
+        }),
+      );
+
+      nodes.push(
+        new Struct({
+          __internal__: { rawName: rewardGrantedSID, isRoot: true },
+          SID: rewardGrantedSID,
+          QuestSID: newQuestSID,
+          NodeType: "EQuestNodeType::Technical" satisfies EQuestNodeType,
+          StartDelay: 0,
+          LaunchOnQuestStart: false,
+          Launchers: getLaunchers(
+            deliveryRewardGate.itemRemoveSIDs.map((itemRemoveSID) => ({ SID: itemRemoveSID })),
+          ),
+        }),
+      );
+
+      for (const node of nodes) {
+        const proto = node as QuestNodePrototype;
+        if (proto.SID === validationSID || proto.SID === rewardGrantedSID) continue;
+
+        if (deliveryRewardGate.gateNodeSIDs.has(proto.SID)) {
+          if (proto.Launchers instanceof Struct) {
+            for (const [, launcher] of proto.Launchers.entries()) {
+              if (launcher.Excluding || !(launcher.Connections instanceof Struct)) continue;
+
+              const hasAlternateRewardPath = launcher.Connections
+                .entries()
+                .some(([, conn]) => conn.SID !== rewardSID);
+              const nextConnections = new Struct();
+
+              for (const [, conn] of launcher.Connections.entries()) {
+                if (conn.SID === rewardSID) {
+                  if (
+                    hasAlternateRewardPath &&
+                    deliveryRewardGate.itemRemoveSIDs.includes(proto.SID)
+                  ) {
+                    continue;
+                  }
+                  const forkedConn = conn.clone();
+                  forkedConn.SID = validationSID;
+                  nextConnections.addNode(forkedConn);
+                  continue;
+                }
+
+                nextConnections.addNode(conn.clone());
+              }
+
+              launcher.Connections = nextConnections as any;
+            }
+          }
+          continue;
+        }
+
+        if (proto.Launchers instanceof Struct) {
+          for (const [, launcher] of proto.Launchers.entries()) {
+            if (launcher.Excluding || !(launcher.Connections instanceof Struct)) continue;
+            for (const [, conn] of launcher.Connections.entries()) {
+              if (conn.SID === rewardSID) conn.SID = rewardGrantedSID;
+            }
+          }
+        }
+
+        const condNode = proto as QuestNodePrototypeCondition;
+        if (condNode.Conditions instanceof Struct) {
+          for (const [, condGroup] of condNode.Conditions.entries()) {
+            if (!(condGroup instanceof Struct)) continue;
+            for (const [, cond] of (condGroup as Struct).entries() as [
+              string,
+              QuestNodePrototypeConditionsItemItem,
+            ][]) {
+              if (cond.LinkedNodePrototypeSID === rewardSID) {
+                cond.LinkedNodePrototypeSID = rewardGrantedSID;
+              }
+              if (cond.TargetNode === rewardSID) {
+                cond.TargetNode = rewardGrantedSID;
               }
             }
           }
@@ -866,6 +1024,96 @@ async function generateIndependentQuest(vendor: VendorConfig, subQuest: string):
   );
 
   return nodes;
+}
+
+function getDeliveryRewardGate(nodes: Struct[], rewardSID: string) {
+  const gateNodeSIDs = new Set<string>();
+  const itemRemoveSIDs = new Set<string>();
+  const requiredItems = new Map<string, { itemSID: string; itemsCount: number }>();
+
+  for (const node of nodes) {
+    const proto = node as QuestNodePrototype & {
+      TargetQuestGuid?: string;
+      ItemSID?: string;
+      ItemsCount?: number;
+    };
+    if (
+      proto.NodeType !== "EQuestNodeType::ItemRemove" ||
+      proto.TargetQuestGuid !== playerQuestGuid ||
+      !(proto.Launchers instanceof Struct)
+    ) {
+      continue;
+    }
+
+    let rewardTriggered = false;
+    const conditionSourceSIDs = new Set<string>();
+
+    for (const [, launcher] of proto.Launchers.entries()) {
+      if (launcher.Excluding || !(launcher.Connections instanceof Struct)) continue;
+      for (const [, conn] of launcher.Connections.entries()) {
+        if (conn.SID === rewardSID) rewardTriggered = true;
+        conditionSourceSIDs.add(conn.SID);
+      }
+    }
+
+    for (const sourceSID of conditionSourceSIDs) {
+      const sourceNode = nodes.find((candidate) => (candidate as QuestNodePrototype).SID === sourceSID) as
+        | QuestNodePrototypeCondition
+        | undefined;
+      if (
+        !sourceNode ||
+        sourceNode.NodeType !== "EQuestNodeType::Condition" ||
+        !(sourceNode.Launchers instanceof Struct)
+      ) {
+        continue;
+      }
+
+      const launchedFromReward = sourceNode.Launchers.entries().some(([, launcher]) =>
+        !launcher.Excluding &&
+        launcher.Connections instanceof Struct &&
+        launcher.Connections.entries().some(([, conn]) => conn.SID === rewardSID),
+      );
+      if (!launchedFromReward) continue;
+
+      rewardTriggered = true;
+      gateNodeSIDs.add(sourceSID);
+
+      if (!(sourceNode.Conditions instanceof Struct)) continue;
+      for (const [, condGroup] of sourceNode.Conditions.entries()) {
+        if (!(condGroup instanceof Struct)) continue;
+        for (const [, cond] of (condGroup as Struct).entries() as [
+          string,
+          QuestNodePrototypeConditionsItemItem,
+        ][]) {
+          if (cond.ConditionType !== "EQuestConditionType::ItemInInventory") continue;
+          const itemSID = cond.ItemPrototypeSID?.VariableValue;
+          const itemsCount = cond.ItemsCount?.VariableValue;
+          if (typeof itemSID !== "string" || typeof itemsCount !== "number") continue;
+          requiredItems.set(`${itemSID}:${itemsCount}`, { itemSID, itemsCount });
+        }
+      }
+    }
+
+    if (!rewardTriggered) continue;
+
+    gateNodeSIDs.add(proto.SID);
+    itemRemoveSIDs.add(proto.SID);
+
+    if (requiredItems.size === 0 && typeof proto.ItemSID === "string") {
+      requiredItems.set(`${proto.ItemSID}:${proto.ItemsCount ?? 1}`, {
+        itemSID: proto.ItemSID,
+        itemsCount: proto.ItemsCount ?? 1,
+      });
+    }
+  }
+
+  if (!itemRemoveSIDs.size || !requiredItems.size) return undefined;
+
+  return {
+    gateNodeSIDs,
+    itemRemoveSIDs: [...itemRemoveSIDs],
+    requiredItems: [...requiredItems.values()],
+  };
 }
 
 transformQuestNodePrototypes.files = [

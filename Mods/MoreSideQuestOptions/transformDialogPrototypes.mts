@@ -10,9 +10,10 @@ import {
   getCancelDialogSID,
   getTurnInDialogSID,
   getReadyForTurnInVarSID,
+  getReturnToAddJobVarSID,
   type VendorConfig,
 } from "./local.consts.mts";
-import { QuestDataTableByQuestSID } from "../MasterMod/rewardFormula.mts";
+import { QuestDataTableByQuestSID } from "./quest-data-cache.mts";
 
 const processedChains = new Set<string>();
 
@@ -55,7 +56,7 @@ transformDialogPrototypes.files = [
 // --- RSQ Hub Dialog Generation ---
 
 function patchIfWithHubOption(struct: DialogPrototype, vendor: VendorConfig): Struct {
-  const hubSID = `${vendor.dialogChain}_Hub_MoreSideQuestOptions`;
+  const hubSID = `${vendor.dialogChain}_Entry_MoreSideQuestOptions`;
   const fork = struct.fork();
 
   // Redirect both True and False branches to hub
@@ -86,15 +87,18 @@ function generateHubDialogs(vendor: VendorConfig): Struct[] {
   const nodes: Struct[] = [];
 
   const hubSID = `${chain}_Hub_MoreSideQuestOptions`;
+  const entrySID = `${chain}_Entry_MoreSideQuestOptions`;
   const addJobSID = `${chain}_AddJob_MoreSideQuestOptions`;
   const removeJobSID = `${chain}_RemoveJob_MoreSideQuestOptions`;
   const turnInJobSID = `${chain}_TurnInJob_MoreSideQuestOptions`;
 
+  nodes.push(getEntryDialog(vendor, entrySID, addJobSID, hubSID));
+
   // Hub menu: AddJob / RemoveJob / TurnInJob / Leave
   nodes.push(getWaitForReply(hubSID, chain, [
-    { sid: addJobSID },
-    { sid: removeJobSID },
-    { sid: turnInJobSID },
+    { sid: addJobSID, conditions: getAnyQuestInactiveCondition(vendor.subQuests) },
+    { sid: removeJobSID, conditions: getAnyQuestActiveCondition(vendor.subQuests) },
+    { sid: turnInJobSID, conditions: getAnyQuestReadyForTurnInCondition(vendor.subQuests) },
     { sid: "", conditions: undefined }, // Terminate (Leave)
   ]));
   // Fix the leave option to be Terminate=true
@@ -126,6 +130,8 @@ function generateHubDialogs(vendor: VendorConfig): Struct[] {
   nodes.push(getWaitForReply(addJobSID, chain, addJobOptions));
   // Fix last option to Terminate=true
   const addNode = nodes[nodes.length - 1] as DialogPrototype;
+  addNode.DialogActions = getSetGlobalVariableDialogActions(getReturnToAddJobVarSID(vendor.questSID), false);
+  addNode.DialogAnswerActions = getSetGlobalVariableDialogActions(getReturnToAddJobVarSID(vendor.questSID), false);
   const addLastOpt = addNode.NextDialogOptions?.[String(addJobOptions.length - 1)];
   if (addLastOpt) {
     addLastOpt.Terminate = true;
@@ -209,6 +215,106 @@ function getQuestDescriptionDialogSID(subQuest: string): string | undefined {
   const entries = QuestDataTableByQuestSID[subQuest];
   if (!entries?.length) return;
   return entries[0]["Dialog SID"];
+}
+
+function getEntryDialog(vendor: VendorConfig, entrySID: string, addJobSID: string, hubSID: string) {
+  return new Struct({
+    __internal__: { rawName: entrySID, isRoot: true },
+    SID: entrySID,
+    DialogChainPrototypeSID: vendor.dialogChain,
+    DialogMemberIndex: -1,
+    NextDialogOptions: new Struct({
+      True: new Struct({
+        Conditions: getDialogPrototypeConditions({
+          ConditionType: "EQuestConditionType::GlobalVariable",
+          ConditionComparance: "EConditionComparance::Equal",
+          GlobalVariablePrototypeSID: getReturnToAddJobVarSID(vendor.questSID),
+          ChangeValueMode: "EChangeValueMode::Set",
+          VariableValue: true,
+        }),
+        NextDialogSID: addJobSID,
+        Terminate: false,
+      }),
+      False: new Struct({
+        NextDialogSID: hubSID,
+        Terminate: false,
+      }),
+    }),
+    VisibleOnFailedCondition: true,
+    MainReply: true,
+    NodePrototypeVersion: 1,
+  }) as DialogPrototype;
+}
+
+function getSetGlobalVariableDialogActions(globalVariablePrototypeSID: string, value: boolean) {
+  return new Struct({
+    0: new Struct({
+      DialogAction: "EDialogAction::SetGlobalVariable",
+      GlobalVariablePrototypeSID: globalVariablePrototypeSID,
+      ChangeValueMode: "EChangeValueMode::Set",
+      VariableValue: value,
+    }),
+  });
+}
+
+function getAnyQuestInactiveCondition(subQuests: string[]) {
+  return getAnyDialogConditions(
+    subQuests.map((subQuest) => ({
+      ConditionType: "EQuestConditionType::GlobalVariable",
+      ConditionComparance: "EConditionComparance::Equal",
+      GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
+      ChangeValueMode: "EChangeValueMode::Set",
+      VariableValue: false,
+    })),
+  );
+}
+
+function getAnyQuestActiveCondition(subQuests: string[]) {
+  return getAnyDialogConditions(
+    subQuests.map((subQuest) => ({
+      ConditionType: "EQuestConditionType::GlobalVariable",
+      ConditionComparance: "EConditionComparance::Equal",
+      GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
+      ChangeValueMode: "EChangeValueMode::Set",
+      VariableValue: true,
+    })),
+  );
+}
+
+function getAnyQuestReadyForTurnInCondition(subQuests: string[]) {
+  return getAnyDialogConditions(
+    subQuests.map((subQuest) => ([
+      {
+        ConditionType: "EQuestConditionType::GlobalVariable",
+        ConditionComparance: "EConditionComparance::Equal",
+        GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
+        ChangeValueMode: "EChangeValueMode::Set",
+        VariableValue: true,
+      },
+      {
+        ConditionType: "EQuestConditionType::GlobalVariable",
+        ConditionComparance: "EConditionComparance::Equal",
+        GlobalVariablePrototypeSID: getReadyForTurnInVarSID(subQuest),
+        ChangeValueMode: "EChangeValueMode::Set",
+        VariableValue: true,
+      },
+    ])),
+  );
+}
+
+function getAnyDialogConditions(
+  groups: Array<Record<string, unknown> | Record<string, unknown>[]>,
+) {
+  const conditions = new Struct();
+  for (const group of groups) {
+    const item = new Struct();
+    const entries = Array.isArray(group) ? group : [group];
+    for (const condition of entries) {
+      item.addNode(new Struct(condition));
+    }
+    conditions.addNode(item);
+  }
+  return conditions;
 }
 
 // --- EQ197 Mutant Parts Dialog ---
