@@ -5,10 +5,9 @@ import type { MetaType } from "../../src/meta-type.mts";
 function transformArtifactPrototypes(struct: ArtifactPrototype) {
   if (struct.SID === "AArtifactWeirdFlower") {
     const fork = struct.fork();
-    fork.EffectsDuration = 0;
-    const effectSIDs = new Struct({ __internal__: { bpatch: true } });
-    effectSIDs.addNode("FlairDistanceModifierEffect", "FlairDistanceModifierEffect");
-    fork.EffectPrototypeSIDs = effectSIDs;
+    fork.EffectsDuration = 31536000;
+    fork.EffectPrototypeSIDs = fork.EffectPrototypeSIDs.fork();
+    fork.EffectPrototypeSIDs.addNode("FlairDistanceModifierEffect", "FlairDistanceModifierEffect");
     return fork;
   }
 
