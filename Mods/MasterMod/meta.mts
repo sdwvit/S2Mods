@@ -10,11 +10,9 @@ import { transformMeshGeneratorPrototypes } from "./transformMeshGeneratorProtot
 import { transformNPCWeaponSettingsPrototypes } from "./transformNPCWeaponSettingsPrototypes.mts";
 import { transformQuestArtifactPrototypes } from "./transformQuestArtifactPrototypes.mts";
 import { transformQuestItemPrototypes } from "./transformQuestItemPrototypes.mts";
-import { transformQuestObjPrototypes } from "./transformQuestObjPrototypes.mts";
 import { transformQuestRewardsPrototypes } from "./transformQuestRewardsPrototypes.mts";
 import { transformRelationPrototypes } from "./transformRelationPrototypes.mts";
 import { transformStashPrototypes } from "./transformStashPrototypes.mts";
-import { transformTradePrototypes } from "./transformTradePrototypes.mts";
 import { transformUpgradePrototypes } from "./transformUpgradePrototypes.mts";
 import { transformWeaponGeneralSetupPrototypes } from "./transformWeaponGeneralSetupPrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
@@ -41,11 +39,9 @@ const structTransformers = [
   transformQuestArtifactPrototypes,
   transformQuestItemPrototypes,
   transformQuestNodePrototypes,
-  transformQuestObjPrototypes,
   transformQuestRewardsPrototypes,
   transformRelationPrototypes,
   transformStashPrototypes,
-  transformTradePrototypes,
   transformUpgradePrototypes,
   transformWeaponGeneralSetupPrototypes,
   transformWeaponPrototypes,
@@ -59,7 +55,6 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
 [h3]All changes to the base game:[/h3]
 [list]
  [*] [Challenge] Reduced 💊 Consumables, 🔫 Ammo, and 💣 Grenades drops from bodies and stashes.  
- [*] [Challenge] Traders or Bartenders are not allowed to buy gear. Regular stalkers can buy gear, but only at >=99% durability.
  [*] [Challenge] Enemy's weapons damage is increased to be on par with player's weapons.
  [*] [QoL] X8 Scope compatible with more weapons. For X16 scopes use my other mod called X16Scopes.
  [*] [QoL] Unlocks blocking upgrades. 
@@ -69,7 +64,7 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [QoL] Allows buying/selling/dropping quest items.
  [*] [Balance] Unique and fair rewards for each possible variant of repeating quests.
 [/list]`,
-  changenote: `Extracted mutant related changes into a separate mod.`,
+  changenote: `Extracted trade specialization into a separate mod (SpecialistMerchants).`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
