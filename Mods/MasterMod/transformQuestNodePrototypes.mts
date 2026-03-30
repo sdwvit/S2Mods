@@ -2,7 +2,8 @@ import { Struct } from "s2cfgtojson";
 import type { QuestNodePrototype, QuestNodePrototypeCondition, QuestNodePrototypeSetGlobalVariable, QuestNodePrototypeSetItemGenerator } from "s2cfgtojson";
 import type { StructTransformer } from "../../src/meta-type.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
-import { QuestDataTableByQuestSID, QuestDataTableEntry } from "./rewardFormula.mts";
+import type { QuestDataTableEntry } from "./rewardFormula.mts";
+import { QuestDataTableByQuestSID } from "./rewardFormula.mts";
 import { logger } from "../../src/logger.mts";
 import { recurringQuestsFilenames } from "../StashClueRework/transformQuestNodePrototypes.mts";
 

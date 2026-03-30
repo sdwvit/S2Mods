@@ -25,7 +25,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `NPCPrototypes`
  - `RelationPrototypes`
  - `StashPrototypes`
- - `TradePrototypes`
  - `UpgradePrototypes`
 
 `DialogPoolPrototypes`:
@@ -60,9 +59,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 
 `LairPrototypes`:
  - `GenericLairPrototypes`
-
-`ObjPrototypes`:
- - `QuestObjPrototypes`
 
 `QuestNodePrototypes`
 
