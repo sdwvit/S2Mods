@@ -2,7 +2,7 @@ import { Struct } from "s2cfgtojson";
 import type { TradePrototype } from "s2cfgtojson";
 
 import type { StructTransformer } from "../../src/meta-type.mts";
-import { bartendersTradePrototypes, generalTradersTradePrototypes, medicsTradePrototypes, technicianTradePrototypes } from "../../src/consts.mts";
+import { bartendersTradePrototypes, medicsTradePrototypes, technicianTradePrototypes } from "../../src/consts.mts";
 
 let oncePerFile = false;
 /**
@@ -54,22 +54,7 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
           "EItemType::Detector",
           "EItemType::Grenade",
           "EItemType::Other",
-          "EItemType::NightVisionGoggles",
-        ],
-      );
-    }
-
-    if (generalTradersTradePrototypes.has(struct.SID)) {
-      limitations.push(
-        ...[
-          "EItemType::Armor",
-          "EItemType::Consumable",
-          "EItemType::Weapon",
-          "EItemType::Ammo",
-          "EItemType::Detector",
-          "EItemType::Grenade",
-          "EItemType::Other",
-          "EItemType::Attach",
+          "EItemType::MutantLoot",
           "EItemType::NightVisionGoggles",
         ],
       );

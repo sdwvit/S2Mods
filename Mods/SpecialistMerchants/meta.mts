@@ -7,11 +7,10 @@ export const meta: MetaType = {
 [hr][/hr]
 [list]
  [*] Bartenders only buy consumables and other misc items.
- [*] Medics only buy consumables and mutant loot.
- [*] General traders only buy artifacts.
+ [*] Medics only buy consumables (no mutant loot).
+ [*] General traders buy everything at bad prices (except mutant loot).
  [*] Technicians only buy attachments, detectors, grenades, and night vision goggles.
- [*] All traders refuse to buy mutant loot.
- [*] Guides can trade with high prices and rank-based discounts.
+ [*] Guides buy and sell key items like PDAs, with rank-based discounts.
  [*] Technicians and guides across the Zone now offer trading.
 [/list]`,
   changenote: "Initial release",
