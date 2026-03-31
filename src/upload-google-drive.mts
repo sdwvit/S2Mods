@@ -9,8 +9,8 @@ const DRIVE_UPLOAD_URL = `https://www.googleapis.com/upload/drive/v3/files?uploa
 const OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const DRIVE_API_URL = "https://www.googleapis.com/drive/v3/files";
 const OAUTH_PLAYGROUND_URL = "https://developers.google.com/oauthplayground/#step1&scopes=https://www.googleapis.com/auth/drive.file";
-const TOKEN_CACHE_PATH = path.resolve(process.cwd(), ".gdrive.access-token.cache.json");
-const TOKEN_CACHE_TTL_MS = 60 * 60 * 1000;
+const TOKEN_CACHE_PATH = path.resolve(import.meta.dirname, ".gdrive.access-token.cache.json");
+const TOKEN_CACHE_TTL_MS = 55 * 60 * 1000;
 
 type DriveFile = { id: string; name?: string };
 type DriveListResponse = { files?: DriveFile[] };
@@ -78,7 +78,7 @@ async function configureGoogleDriveAuthInteractively() {
   if (token) {
     process.env.GDRIVE_ACCESS_TOKEN = token;
     await writeTokenCache(token, TOKEN_CACHE_TTL_MS);
-    logger.log("Using provided GDRIVE_ACCESS_TOKEN for current run.");
+    logger.log("Token cached and will be reused for ~55 minutes.");
   }
 }
 
@@ -164,7 +164,7 @@ async function getAccessToken(forceRefresh = false) {
     throw new Error("Google OAuth token response did not include access_token.");
   }
 
-  const ttlMs = Math.min(TOKEN_CACHE_TTL_MS, (json.expires_in || 3600) * 1000);
+  const ttlMs = ((json.expires_in || 3600) - 300) * 1000;
   await writeTokenCache(json.access_token, ttlMs);
   return json.access_token;
 }
