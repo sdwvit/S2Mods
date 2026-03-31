@@ -44,9 +44,14 @@ export async function createModZip(sourceDir?: string, dest?: string | false) {
 
   return new Promise<string>((resolve, reject) => {
     output.on("close", () => {
+      if (!fs.existsSync(outZipPath)) {
+        reject(new Error(`ZIP file was not created: ${outZipPath}`));
+        return;
+      }
       logger.log("ZIP ready:", outZipPath);
       resolve(outZipPath);
     });
+    output.on("error", reject);
     archive.on("error", reject);
 
     archive.pipe(output);
