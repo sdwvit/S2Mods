@@ -10,12 +10,15 @@ import { precision } from "../../src/precision.mts";
 
 const BASE_COST = 12000;
 const BASE_ARTIFACT_CHANCE = 0.001;
+const SUB_GEN_CHANCE = 0.001;
+const DETECTORS_SUB_GEN_SID = "RareNPCDrops_Detectors_SubItemGenerator";
+const ARTIFACTS_SUB_GEN_SID = "RareNPCDrops_Artifacts_SubItemGenerator";
 
 const detectors = [
-  { sid: "Echo", chance: 0.01 },
-  { sid: "Gilka", chance: 0.0001 },
-  { sid: "Bear", chance: 0.000001 },
-  { sid: "Veles", chance: 0.00000001 },
+  { sid: "Echo", chance: Math.min(1, 0.01 / SUB_GEN_CHANCE) },
+  { sid: "Gilka", chance: Math.min(1, 0.0001 / SUB_GEN_CHANCE) },
+  { sid: "Bear", chance: Math.min(1, 0.000001 / SUB_GEN_CHANCE) },
+  { sid: "Veles", chance: Math.min(1, 0.00000001 / SUB_GEN_CHANCE) },
 ];
 
 const artifactDrops = allDefaultArtifactPrototypes
@@ -25,8 +28,62 @@ const artifactDrops = allDefaultArtifactPrototypes
   })
   .map((a) => ({
     sid: a.SID,
-    chance: precision(BASE_ARTIFACT_CHANCE / Math.pow(10, Math.log2(a.Cost / BASE_COST)), 1e6),
+    chance: precision(Math.min(1, BASE_ARTIFACT_CHANCE / Math.pow(10, Math.log2(a.Cost / BASE_COST)) / SUB_GEN_CHANCE), 1e6),
   }));
+
+function buildDetectorEntries() {
+  return detectors
+    .map(
+      (d, i) => `
+            [${i}] : struct.begin
+               ItemPrototypeSID = ${d.sid}
+               Chance = ${d.chance}
+               Weight = 1
+               MinCount = 1
+            struct.end`,
+    )
+    .join("\n");
+}
+
+function buildArtifactEntries() {
+  return artifactDrops
+    .map(
+      (a, i) => `
+            [${i}] : struct.begin
+               ItemPrototypeSID = ${a.sid}
+               Chance = ${a.chance}
+               Weight = 1
+               MinCount = 1
+               MaxCount = 1
+            struct.end`,
+    )
+    .join("\n");
+}
+
+const detectorSubGenCfg = `${DETECTORS_SUB_GEN_SID} : struct.begin
+   SID = ${DETECTORS_SUB_GEN_SID}
+   ItemGenerator : struct.begin
+      RareDetectorDrop : struct.begin
+         Category = EItemGenerationCategory::Detector
+         PossibleItems : struct.begin${buildDetectorEntries()}
+         struct.end
+      struct.end
+   struct.end
+struct.end`;
+
+const artifactSubGenCfg = `${ARTIFACTS_SUB_GEN_SID} : struct.begin
+   SID = ${ARTIFACTS_SUB_GEN_SID}
+   ItemGenerator : struct.begin
+      RareArtifactDrop : struct.begin
+         Category = EItemGenerationCategory::Artifact
+         PossibleItems : struct.begin${buildArtifactEntries()}
+         struct.end
+      struct.end
+   struct.end
+struct.end`;
+
+const detectorSubGenStruct = Struct.fromString<ItemGeneratorPrototype>(detectorSubGenCfg)[0];
+const artifactSubGenStruct = Struct.fromString<ItemGeneratorPrototype>(artifactSubGenCfg)[0];
 
 function shouldProcessStruct(struct: ItemGeneratorPrototype) {
   if (!struct?.ItemGenerator) return false;
@@ -42,54 +99,41 @@ function shouldProcessStruct(struct: ItemGeneratorPrototype) {
   );
 }
 
-function buildDetectorEntries() {
-  return detectors
-    .map(
-      (d, i) => `
-            [${i}] : struct.begin
-               ItemPrototypeSID = ${d.sid}
-               Chance = ${d.chance}
-               MinCount = 1
-            struct.end`,
-    )
-    .join("\n");
-}
-
-function buildArtifactEntries() {
-  return artifactDrops
-    .map(
-      (a, i) => `
-            [${i}] : struct.begin
-               ItemPrototypeSID = ${a.sid}
-               Chance = ${a.chance}
-               MinCount = 1
-               MaxCount = 1
-            struct.end`,
-    )
-    .join("\n");
-}
-
-const detectorCfg = buildDetectorEntries();
-const artifactCfg = buildArtifactEntries();
+let emittedSubGen = false;
 
 export const transformItemGenerators: StructTransformer<ItemGeneratorPrototype> = (struct) => {
   if (!shouldProcessStruct(struct)) return;
 
   const cfg = `${struct.SID} : struct.begin {bpatch}
    ItemGenerator : struct.begin {bpatch}
-      RareDetectorDrop : struct.begin
-         Category = EItemGenerationCategory::Detector
-         PossibleItems : struct.begin${detectorCfg}
+      RareNPCDrops_Detectors : struct.begin
+         Category = EItemGenerationCategory::SubItemGenerator
+         PossibleItems : struct.begin
+            [0] : struct.begin
+               ItemGeneratorPrototypeSID = ${DETECTORS_SUB_GEN_SID}
+               Chance = ${SUB_GEN_CHANCE}
+            struct.end
          struct.end
       struct.end
-      RareArtifactDrop : struct.begin
-         Category = EItemGenerationCategory::Artifact
-         PossibleItems : struct.begin${artifactCfg}
+      RareNPCDrops_Artifacts : struct.begin
+         Category = EItemGenerationCategory::SubItemGenerator
+         PossibleItems : struct.begin
+            [0] : struct.begin
+               ItemGeneratorPrototypeSID = ${ARTIFACTS_SUB_GEN_SID}
+               Chance = ${SUB_GEN_CHANCE}
+            struct.end
          struct.end
       struct.end
    struct.end
 struct.end`;
 
-  return Struct.fromString<ItemGeneratorPrototype>(cfg)[0];
+  const result = Struct.fromString<ItemGeneratorPrototype>(cfg)[0];
+
+  if (!emittedSubGen) {
+    emittedSubGen = true;
+    return [result, detectorSubGenStruct, artifactSubGenStruct];
+  }
+
+  return result;
 };
 transformItemGenerators.files = ["/DynamicItemGenerator.cfg"];
