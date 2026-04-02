@@ -3,7 +3,7 @@ import { Struct } from "s2cfgtojson";
 import type { QuestNodePrototype } from "s2cfgtojson";
 import type { MetaContext } from "../../src/meta-type.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
-import { meta } from "./meta.mts";
+import { extraDependantsByParentSID, meta } from "./meta.mts";
 
 const structTransformer = meta.structTransformers[0];
 
@@ -130,9 +130,10 @@ describe("SkipLesserZoneCutscenes reroute", () => {
     expect(Array.isArray(result)).toBe(true);
     const forkedC = result[1] as any as QuestNodePrototype;
     const connections = getAddedConnectionSIDs(forkedC);
-    // Only the launcher with NodeTarget should be added
-    expect(connections).toHaveLength(1);
-    expect(connections[0]).toEqual(["NodeTarget"]);
+    // Original launcher connection is cleared (undefined SID) + only the launcher with NodeTarget is added
+    expect(connections).toHaveLength(2);
+    expect(connections[0]).toEqual([undefined]);
+    expect(connections[1]).toEqual(["NodeTarget"]);
   });
 
   it("does not reroute to structs that are themselves in toReroute", () => {
@@ -158,6 +159,65 @@ describe("SkipLesserZoneCutscenes reroute", () => {
     expect(allConnectionSIDs).toContain("NodeTarget");
     expect(allConnectionSIDs).not.toContain("E01_MQ01_Cutscene_Napadenie");
     expect(allConnectionSIDs).not.toContain("E01_MQ01_SetItemGenerator_Player_Empty");
+  });
+
+  it("includes extra dependants from extraDependantsByParentSID", () => {
+    // E01_MQ01_Start_PlaceScanner is in toReroute and has an extraDependantsByParentSID entry
+    // EventListener is not in the normal dependency chain but listed as extra dependant
+    const savedExtras = extraDependantsByParentSID.E01_MQ01_Start_PlaceScanner;
+    extraDependantsByParentSID.E01_MQ01_Start_PlaceScanner = ["EventListener"];
+    try {
+      const nodeA = makeNode("E01_MQ01_Start_PlaceScanner", [["NodeTarget"]]);
+      const nodeTarget = makeNode("NodeTarget");
+      const nodeC = makeNode("NodeC", [["E01_MQ01_Start_PlaceScanner"]]);
+      const eventListener = makeNode("EventListener", [["SomeOther"]]);
+      const ctx = makeContext([nodeA, nodeTarget, nodeC, eventListener]);
+
+      const result = structTransformer(nodeA, ctx) as Struct[];
+
+      expect(Array.isArray(result)).toBe(true);
+      // forked A + forked C (normal dependant) + forked EventListener (extra dependant)
+      expect(result).toHaveLength(3);
+
+      const forkedC = result[1] as any as QuestNodePrototype;
+      const forkedEvent = result[2] as any as QuestNodePrototype;
+      expect(getAddedConnectionSIDs(forkedC)).toContainEqual(["NodeTarget"]);
+      expect(getAddedConnectionSIDs(forkedEvent)).toContainEqual(["NodeTarget"]);
+    } finally {
+      extraDependantsByParentSID.E01_MQ01_Start_PlaceScanner = savedExtras;
+    }
+  });
+
+  it("includes extra dependants from intermediate toReroute nodes in chain", () => {
+    // A (toReroute) → B (toReroute, has extra dependant) → C (not toReroute)
+    // EventListener should also get A's launchers because B is traversed during expansion
+    const savedExtras = { ...extraDependantsByParentSID };
+    extraDependantsByParentSID.E01_MQ01_SetItemGenerator_Player_Empty = ["EventListener"];
+    try {
+      const nodeA = makeNode("E01_MQ01_PlayVideo", [["FinalTarget"]]);
+      const nodeB = makeNode("E01_MQ01_SetItemGenerator_Player_Empty", [
+        ["E01_MQ01_PlayVideo"],
+      ]);
+      const nodeC = makeNode("NodeC", [["E01_MQ01_SetItemGenerator_Player_Empty"]]);
+      const finalTarget = makeNode("FinalTarget");
+      const eventListener = makeNode("EventListener", [["SomeOther"]]);
+      const ctx = makeContext([nodeA, nodeB, nodeC, finalTarget, eventListener]);
+
+      const result = structTransformer(nodeA, ctx) as Struct[];
+
+      expect(Array.isArray(result)).toBe(true);
+      // forked A + forked C + forked EventListener
+      expect(result).toHaveLength(3);
+
+      const allConnectionSIDs = (result.slice(1) as any as QuestNodePrototype[]).flatMap((s) =>
+        getAddedConnectionSIDs(s).flat(),
+      );
+      expect(allConnectionSIDs).toContain("FinalTarget");
+    } finally {
+      // restore
+      delete extraDependantsByParentSID.E01_MQ01_SetItemGenerator_Player_Empty;
+      Object.assign(extraDependantsByParentSID, savedExtras);
+    }
   });
 
   it("handles multiple dependants", () => {
