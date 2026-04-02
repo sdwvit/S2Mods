@@ -5,7 +5,6 @@ import { transformDialogPrototypes } from "./transformDialogPrototypes.mts";
 import { transformDifficultyPrototypes } from "./transformDifficultyPrototypes.mts";
 import { transformEffectPrototypes } from "./transformEffectPrototypes.mts";
 import { transformItemGeneratorPrototypes } from "./transformItemGeneratorPrototypes.mts";
-import { transformLairPrototypes } from "./transformLairPrototypes.mts";
 import { transformMeshGeneratorPrototypes } from "./transformMeshGeneratorPrototypes.mts";
 import { transformNPCWeaponSettingsPrototypes } from "./transformNPCWeaponSettingsPrototypes.mts";
 import { transformQuestArtifactPrototypes } from "./transformQuestArtifactPrototypes.mts";
@@ -21,6 +20,7 @@ import { transformGlobalVariablePrototypes } from "./transformGlobalVariableProt
 import type { MetaType } from "../../src/meta-type.mts";
 import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
 import { transformDynamicItemGenerator } from "./transformItemGenerator.mts";
+import { transformTradePrototypes } from "./transformTradePrototypes.mts";
 
 const structTransformers = [
   transformNPCPrototypes,
@@ -33,7 +33,6 @@ const structTransformers = [
   transformEffectPrototypes,
   transformGlobalVariablePrototypes,
   transformItemGeneratorPrototypes,
-  transformLairPrototypes,
   transformMeshGeneratorPrototypes,
   transformNPCWeaponSettingsPrototypes,
   transformQuestArtifactPrototypes,
@@ -42,6 +41,7 @@ const structTransformers = [
   transformQuestRewardsPrototypes,
   transformRelationPrototypes,
   transformStashPrototypes,
+  transformTradePrototypes,
   transformUpgradePrototypes,
   transformWeaponGeneralSetupPrototypes,
   transformWeaponPrototypes,
@@ -64,7 +64,7 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [QoL] Allows buying/selling/dropping quest items.
  [*] [Balance] Unique and fair rewards for each possible variant of repeating quests.
 [/list]`,
-  changenote: `Extracted trade specialization into a separate mod (SpecialistMerchants).`,
+  changenote: `GeneralNPCs have faction-scaled money, buy weapons/armor only at 99%+ durability. Removed zombie lair population changes.`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
