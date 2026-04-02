@@ -1,21 +1,69 @@
-import { Struct } from "s2cfgtojson";
-import type { TradePrototype } from "s2cfgtojson";
+import { Struct, TradePrototype } from "s2cfgtojson";
 
-import type { StructTransformer } from "../../src/meta-type.mts";
-import { bartendersTradePrototypes, generalTradersTradePrototypes, medicsTradePrototypes, technicianTradePrototypes } from "../../src/consts.mts";
+import { StructTransformer } from "../../src/meta-type.mts";
 import { precision } from "../../src/precision.mts";
 import { semiRandom } from "../../src/semi-random.mts";
-
-let oncePerFile = false;
+import { bartendersTradePrototypes, generalTradersTradePrototypes, medicsTradePrototypes, technicianTradePrototypes } from "../../src/consts.mts";
+import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
+const GAMMA_FACTOR = DIFFICULTY_FACTOR / 1.6;
+const oncePerFile = new Set<string>();
 /**
- * Restrict what each trader category can buy, and create Guide_TradePrototype.
+ * Don't allow traders to buy weapons and armor.
  */
 export const transformTradePrototypes: StructTransformer<TradePrototype> = async (struct, context) => {
   const extraStructs: TradePrototype[] = [];
-  if (!oncePerFile) {
-    oncePerFile = true;
-    const guideTP = getGuideTp();
-    extraStructs.push(guideTP);
+  if (!oncePerFile.has(context.filePath)) {
+    oncePerFile.add(context.filePath);
+    extraStructs.push(
+      new Struct({
+        __internal__: {
+          rawName: "Guide_TradePrototype",
+          refkey: "[0]",
+          isRoot: true,
+        },
+        SID: "Guide_TradePrototype",
+        TradeTimeLength: 24,
+        TradeGenerators: {
+          __internal__: { isArray: true },
+          0: {
+            ConditionSID: "ConstTrue",
+            ItemGeneratorPrototypeSID: "empty",
+            BuyModifier: 10,
+            SellModifier: 10 * 2.5,
+            BuyLimitations: {
+              __internal__: { isArray: true },
+              0: "EItemType::Weapon",
+              1: "EItemType::Armor",
+              2: "EItemType::Artifact",
+              3: "EItemType::Attach",
+              4: "EItemType::Consumable",
+              5: "EItemType::Detector",
+              6: "EItemType::Grenade",
+              7: "EItemType::MutantLoot",
+              8: "EItemType::Ammo",
+              9: "EItemType::NightVisionGoggles",
+            },
+          },
+        },
+        BuyDiscounts: {
+          __internal__: { isArray: true },
+          0: {
+            ConditionSID: "PlayerRankExperienced",
+            Modifier: 1.15,
+          },
+          1: {
+            ConditionSID: "PlayerRankVeteran",
+            Modifier: 1.2,
+          },
+          2: {
+            ConditionSID: "PlayerRankMaster",
+            Modifier: 1.25,
+          },
+        },
+        bInfiniteMoney: true,
+        RefreshConditionSID: "TradeRegenHoursPassed8",
+      }) as TradePrototype,
+    );
   }
 
   if (!struct.TradeGenerators || ignoreSIDs.has(struct.SID)) {
@@ -23,15 +71,15 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
   }
   const fork = struct.fork();
 
-  if (generalNPCTradePrototypesMoneyMult.has(struct.SID)) {
+  if (GeneralNPCTradePrototypesMoneyMult.has(struct.SID)) {
     fork.Money = precision(
-      generalNPCTradePrototypesMoneyMult.get(struct.SID)! * (struct.Money ?? 1000) * (semiRandom(context.index) + 1),
+      GeneralNPCTradePrototypesMoneyMult.get(struct.SID)! * DIFFICULTY_FACTOR * (struct.Money ?? 1000) * (semiRandom(context.index) + 1),
       1,
     );
   }
-
   const TradeGenerators = struct.TradeGenerators.map(([_k, tg]) => {
     const fork = tg.fork();
+    fork.SellModifier = GAMMA_FACTOR;
     fork.BuyLimitations = tg.BuyLimitations?.fork?.() || (new Struct({ __internal__: { isArray: true, bpatch: true } }) as any);
 
     const limitations = ["EItemType::MutantLoot"];
@@ -63,7 +111,6 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
           "EItemType::Detector",
           "EItemType::Grenade",
           "EItemType::Other",
-          "EItemType::MutantLoot",
           "EItemType::NightVisionGoggles",
         ],
       );
@@ -73,13 +120,13 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
       limitations.push(
         ...[
           "EItemType::Armor",
+          "EItemType::Consumable",
           "EItemType::Weapon",
           "EItemType::Ammo",
-          "EItemType::Attach",
-          "EItemType::Consumable",
           "EItemType::Detector",
           "EItemType::Grenade",
           "EItemType::Other",
+          "EItemType::Attach",
           "EItemType::NightVisionGoggles",
         ],
       );
@@ -93,7 +140,7 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
 
     limitations.forEach((l) => fork.BuyLimitations.addNode(l));
 
-    if (generalNPCTradePrototypesMoneyMult.has(struct.SID)) {
+    if (GeneralNPCTradePrototypesMoneyMult.has(struct.SID)) {
       fork.ArmorSellMinDurability = 0.99;
       fork.WeaponSellMinDurability = 0.99;
       fork.BuyLimitations = new Struct() as any;
@@ -109,9 +156,7 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
 
 transformTradePrototypes.files = ["/TradePrototypes.cfg"];
 
-const ignoreSIDs = new Set(["BaseTraderNPC_Template", "BasicTrader", "TraderNPC", "AllTraderNPC", "RC_TraderNPC", "TradeTest"]);
-
-const generalNPCTradePrototypesMoneyMult = new Map([
+export const GeneralNPCTradePrototypesMoneyMult = new Map([
   ["GeneralNPC_TradePrototype_Bandit", 0.8],
   ["GeneralNPC_TradePrototype", 1],
   ["GeneralNPC_TradePrototype_Militaries", 1.1],
@@ -123,53 +168,4 @@ const generalNPCTradePrototypesMoneyMult = new Map([
   ["GeneralNPC_TradePrototype_Corpus", 5],
 ]);
 
-function getGuideTp() {
-  return new Struct({
-    __internal__: {
-      rawName: "Guide_TradePrototype",
-      refkey: "[0]",
-      isRoot: true,
-    },
-    SID: "Guide_TradePrototype",
-    TradeTimeLength: 24,
-    TradeGenerators: {
-      __internal__: { isArray: true },
-      0: {
-        ConditionSID: "ConstTrue",
-        ItemGeneratorPrototypeSID: "empty",
-        BuyModifier: 10,
-        SellModifier: 10 * 2.5,
-        BuyLimitations: {
-          __internal__: { isArray: true },
-          0: "EItemType::Weapon",
-          1: "EItemType::Armor",
-          2: "EItemType::Artifact",
-          3: "EItemType::Attach",
-          4: "EItemType::Consumable",
-          5: "EItemType::Detector",
-          6: "EItemType::Grenade",
-          7: "EItemType::MutantLoot",
-          8: "EItemType::Ammo",
-          9: "EItemType::NightVisionGoggles",
-        },
-      },
-    },
-    BuyDiscounts: {
-      __internal__: { isArray: true },
-      0: {
-        ConditionSID: "PlayerRankExperienced",
-        Modifier: 1.15,
-      },
-      1: {
-        ConditionSID: "PlayerRankVeteran",
-        Modifier: 1.2,
-      },
-      2: {
-        ConditionSID: "PlayerRankMaster",
-        Modifier: 1.25,
-      },
-    },
-    bInfiniteMoney: true,
-    RefreshConditionSID: "TradeRegenHoursPassed8",
-  }) as TradePrototype;
-}
+const ignoreSIDs = new Set(["BaseTraderNPC_Template", "BasicTrader", "TraderNPC", "AllTraderNPC", "RC_TraderNPC", "TradeTest"]);
