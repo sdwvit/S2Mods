@@ -1,5 +1,5 @@
 import { Struct } from "s2cfgtojson";
-import type { ItemGeneratorPrototype } from "s2cfgtojson";
+import type { EItemGenerationCategory, ERank, ItemGeneratorPrototype } from "s2cfgtojson";
 import type { StructTransformer } from "../../src/meta-type.mts";
 import {
   allDefaultArtifactPrototypes,
@@ -11,8 +11,16 @@ import { precision } from "../../src/precision.mts";
 const BASE_COST = 12000;
 const BASE_ARTIFACT_CHANCE = 0.001;
 const SUB_GEN_CHANCE = 0.001;
-const DETECTORS_SUB_GEN_SID = "RareNPCDrops_Detectors_SubItemGenerator";
-const ARTIFACTS_SUB_GEN_SID = "RareNPCDrops_Artifacts_SubItemGenerator";
+
+const RANKS = ["Newbie", "Experienced", "Veteran", "Master"] as const;
+type Rank = (typeof RANKS)[number];
+
+const RANK_ERANKS: Record<Rank, ERank> = {
+  Newbie: "ERank::Newbie" as ERank,
+  Experienced: "ERank::Experienced" as ERank,
+  Veteran: "ERank::Veteran" as ERank,
+  Master: "ERank::Master" as ERank,
+};
 
 const detectors = [
   { sid: "Echo", chance: Math.min(1, 0.01 / SUB_GEN_CHANCE) },
@@ -24,66 +32,95 @@ const detectors = [
 const artifactDrops = allDefaultArtifactPrototypes
   .filter((a) => {
     const sid = a.SID;
-    return sid && a.Cost && !sid.includes("_Fake") && !sid.startsWith("Template") && !sid.startsWith("AA") && !sid.startsWith("PQuest") && !sid.startsWith("CProlog");
+    return (
+      sid &&
+      a.Cost &&
+      !sid.includes("_Fake") &&
+      !sid.startsWith("Template") &&
+      !sid.startsWith("AA") &&
+      !sid.startsWith("PQuest") &&
+      !sid.startsWith("CProlog")
+    );
   })
+  .sort((a, b) => a.Cost - b.Cost)
   .map((a) => ({
     sid: a.SID,
-    chance: precision(Math.min(1, BASE_ARTIFACT_CHANCE / Math.pow(10, Math.log2(a.Cost / BASE_COST)) / SUB_GEN_CHANCE), 1e6),
+    cost: a.Cost,
+    chance: precision(
+      Math.min(
+        1,
+        BASE_ARTIFACT_CHANCE / Math.pow(10, Math.log2(a.Cost / BASE_COST)) / SUB_GEN_CHANCE,
+      ),
+      1e6,
+    ),
   }));
 
-function buildDetectorEntries() {
-  return detectors
-    .map(
-      (d, i) => `
-            [${i}] : struct.begin
-               ItemPrototypeSID = ${d.sid}
-               Chance = ${d.chance}
-               Weight = 1
-               MinCount = 1
-            struct.end`,
-    )
-    .join("\n");
+const quarterSize = Math.ceil(artifactDrops.length / 4);
+const artifactQuarters = [
+  artifactDrops.slice(0, quarterSize),
+  artifactDrops.slice(0, quarterSize * 2),
+  artifactDrops.slice(0, quarterSize * 3),
+  artifactDrops,
+];
+
+function rankIndex(rank: Rank): number {
+  return RANKS.indexOf(rank);
 }
 
-function buildArtifactEntries() {
-  return artifactDrops
-    .map(
-      (a, i) => `
-            [${i}] : struct.begin
-               ItemPrototypeSID = ${a.sid}
-               Chance = ${a.chance}
-               Weight = 1
-               MinCount = 1
-               MaxCount = 1
-            struct.end`,
-    )
-    .join("\n");
+function buildDetectorSubGen(rank: Rank): ItemGeneratorPrototype {
+  const idx = rankIndex(rank);
+  const sid = `RareNPCDrops_Detectors_${rank}_SubItemGenerator`;
+  const possibleItems: Record<string, unknown> = {};
+  for (let i = 0; i <= idx; i++) {
+    possibleItems[i] = new Struct({
+      ItemPrototypeSID: detectors[i].sid,
+      Chance: detectors[i].chance,
+      Weight: 1,
+      MinCount: 1,
+    });
+  }
+  return new Struct({
+    __internal__: { isRoot: true, rawName: sid },
+    SID: sid,
+    ItemGenerator: new Struct({
+      RareDetectorDrop: new Struct({
+        Category: "EItemGenerationCategory::Detector" satisfies EItemGenerationCategory,
+        PossibleItems: new Struct(possibleItems),
+      }),
+    }),
+  }) as ItemGeneratorPrototype;
 }
 
-const detectorSubGenCfg = `${DETECTORS_SUB_GEN_SID} : struct.begin
-   SID = ${DETECTORS_SUB_GEN_SID}
-   ItemGenerator : struct.begin
-      RareDetectorDrop : struct.begin
-         Category = EItemGenerationCategory::Detector
-         PossibleItems : struct.begin${buildDetectorEntries()}
-         struct.end
-      struct.end
-   struct.end
-struct.end`;
+function buildArtifactSubGen(rank: Rank): ItemGeneratorPrototype {
+  const idx = rankIndex(rank);
+  const sid = `RareNPCDrops_Artifacts_${rank}_SubItemGenerator`;
+  const arts = artifactQuarters[idx];
+  const possibleItems: Record<string, unknown> = {};
+  for (let i = 0; i < arts.length; i++) {
+    possibleItems[i] = new Struct({
+      ItemPrototypeSID: arts[i].sid,
+      Chance: arts[i].chance,
+      Weight: 1,
+      MinCount: 1,
+      MaxCount: 1,
+    });
+  }
+  return new Struct({
+    __internal__: { isRoot: true, rawName: sid },
+    SID: sid,
+    ItemGenerator: new Struct({
+      RareArtifactDrop: new Struct({
+        Category: "EItemGenerationCategory::Artifact" satisfies EItemGenerationCategory,
+        PossibleItems: new Struct(possibleItems),
+      }),
+    }),
+  }) as ItemGeneratorPrototype;
+}
 
-const artifactSubGenCfg = `${ARTIFACTS_SUB_GEN_SID} : struct.begin
-   SID = ${ARTIFACTS_SUB_GEN_SID}
-   ItemGenerator : struct.begin
-      RareArtifactDrop : struct.begin
-         Category = EItemGenerationCategory::Artifact
-         PossibleItems : struct.begin${buildArtifactEntries()}
-         struct.end
-      struct.end
-   struct.end
-struct.end`;
-
-const detectorSubGenStruct = Struct.fromString<ItemGeneratorPrototype>(detectorSubGenCfg)[0];
-const artifactSubGenStruct = Struct.fromString<ItemGeneratorPrototype>(artifactSubGenCfg)[0];
+const subGenStructs = RANKS.flatMap((rank) => [
+  buildDetectorSubGen(rank),
+  buildArtifactSubGen(rank),
+]);
 
 function shouldProcessStruct(struct: ItemGeneratorPrototype) {
   if (!struct?.ItemGenerator) return false;
@@ -99,41 +136,54 @@ function shouldProcessStruct(struct: ItemGeneratorPrototype) {
   );
 }
 
-let emittedSubGen = false;
+let emittedSubGens = false;
 
 export const transformItemGenerators: StructTransformer<ItemGeneratorPrototype> = (struct) => {
   if (!shouldProcessStruct(struct)) return;
 
-  const cfg = `${struct.SID} : struct.begin {bpatch}
-   ItemGenerator : struct.begin {bpatch}
-      RareNPCDrops_Detectors : struct.begin
-         Category = EItemGenerationCategory::SubItemGenerator
-         PossibleItems : struct.begin
-            [0] : struct.begin
-               ItemGeneratorPrototypeSID = ${DETECTORS_SUB_GEN_SID}
-               Chance = ${SUB_GEN_CHANCE}
-            struct.end
-         struct.end
-      struct.end
-      RareNPCDrops_Artifacts : struct.begin
-         Category = EItemGenerationCategory::SubItemGenerator
-         PossibleItems : struct.begin
-            [0] : struct.begin
-               ItemGeneratorPrototypeSID = ${ARTIFACTS_SUB_GEN_SID}
-               Chance = ${SUB_GEN_CHANCE}
-            struct.end
-         struct.end
-      struct.end
-   struct.end
-struct.end`;
+  const fork = struct.fork();
 
-  const result = Struct.fromString<ItemGeneratorPrototype>(cfg)[0];
+  fork.ItemGenerator = new Struct() as ItemGeneratorPrototype["ItemGenerator"];
+  fork.ItemGenerator.__internal__.bpatch = true;
 
-  if (!emittedSubGen) {
-    emittedSubGen = true;
-    return [result, detectorSubGenStruct, artifactSubGenStruct];
+  for (const rank of RANKS) {
+    const detectorSubGenSID = `RareNPCDrops_Detectors_${rank}_SubItemGenerator`;
+    const artifactSubGenSID = `RareNPCDrops_Artifacts_${rank}_SubItemGenerator`;
+
+    fork.ItemGenerator.addNode(
+      new Struct({
+        Category: "EItemGenerationCategory::SubItemGenerator" satisfies EItemGenerationCategory,
+        PlayerRank: RANK_ERANKS[rank],
+        PossibleItems: new Struct({
+          0: new Struct({
+            ItemGeneratorPrototypeSID: detectorSubGenSID,
+            Chance: SUB_GEN_CHANCE,
+          }),
+        }),
+      }),
+      `RareNPCDrops_Detectors_${rank}`,
+    );
+
+    fork.ItemGenerator.addNode(
+      new Struct({
+        Category: "EItemGenerationCategory::SubItemGenerator" satisfies EItemGenerationCategory,
+        PlayerRank: RANK_ERANKS[rank],
+        PossibleItems: new Struct({
+          0: new Struct({
+            ItemGeneratorPrototypeSID: artifactSubGenSID,
+            Chance: SUB_GEN_CHANCE,
+          }),
+        }),
+      }),
+      `RareNPCDrops_Artifacts_${rank}`,
+    );
   }
 
-  return result;
+  if (!emittedSubGens) {
+    emittedSubGens = true;
+    return [fork, ...subGenStructs];
+  }
+
+  return fork;
 };
 transformItemGenerators.files = ["/DynamicItemGenerator.cfg"];
