@@ -61,7 +61,6 @@ export function transformKeyItemPrototypes() {
     }) as QuestItemPrototype;
   });
   const [templatePatch, ...patches] = addFactionPatchItems();
-  templatePatch.IsQuestItem = true;
   return [
     levelCounterItem,
     ...rankIndicatorItems,
