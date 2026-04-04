@@ -14,8 +14,8 @@ Now you can speedrun main questline and easily outrun bloodsuckers.
 [*] Total 50% movement speed increase possible
 [/list]
 `,
-  changenote: "Initial release",
-  structTransformers: [transformEffectPrototypes, transformArtifactPrototypes],
+  changenote: "Fix energetic movement speed effect not being applied",
+  structTransformers: [transformEffectPrototypes, transformArtifactPrototypes, transformConsumablePrototypes],
 };
 
 let oncePerFile = false;
