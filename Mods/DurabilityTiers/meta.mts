@@ -124,6 +124,32 @@ transformWeaponsAndArmors.files = [
   "/ArmorPrototypes.cfg",
 ];
 
+// All new tier SIDs flattened, populated after transformUpgrades runs
+let allNewTierSIDs: string[] = [];
+
+const transformTechnicians: StructTransformer<any> = (struct, context) => {
+  if (!allNewTierSIDs.length) {
+    allNewTierSIDs = [...tierMap.values()].flat();
+  }
+
+  const npcType =
+    struct.NPCType ??
+    context.structsById[struct.__internal__.refkey?.toString()]?.NPCType;
+  if (npcType !== "ENPCType::Technician") return null;
+
+  const fork = struct.fork();
+  fork.Upgrades = struct.Upgrades?.fork() ?? new Struct();
+  fork.Upgrades.__internal__.bpatch = true;
+  for (const sid of allNewTierSIDs) {
+    fork.Upgrades.addNode(
+      new Struct({ UpgradePrototypeSID: sid, Enabled: true }),
+      sid,
+    );
+  }
+  return fork;
+};
+transformTechnicians.files = ["/NPCPrototypes.cfg"];
+
 export const meta: MetaType<any> = {
   description: `
 Adds 3 extra tiers for every durability upgrade on weapons and armors.
@@ -140,8 +166,9 @@ bPatches:
  [*] UpgradePrototypes.cfg
  [*] WeaponGeneralSetupPrototypes.cfg
  [*] ArmorPrototypes.cfg
+ [*] NPCPrototypes.cfg
 [/list]
 `,
-  changenote: "Initial release",
-  structTransformers: [transformUpgrades, transformWeaponsAndArmors] as any,
+  changenote: "Add new tier upgrades to all technicians' allow lists",
+  structTransformers: [transformUpgrades, transformWeaponsAndArmors, transformTechnicians] as any,
 };
