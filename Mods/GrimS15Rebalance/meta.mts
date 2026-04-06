@@ -30,14 +30,13 @@ export const meta: MetaType<Struct> = {
   description: `
 Rebalances the Grim S-15 assault rifle.[h3][/h3]
 [list]
-  [*] Durability doubled: 2700 → 5400
   [*] Durability damage per shot reduced 5x
   [*] Default magazine: 30 rounds
   [*] Increased magazine: 45 rounds
   [*] Large magazine: 60 rounds
 [/list]
 `,
-  changenote: "Initial release",
+  changenote: "Removed base durability increase; now only reduces durability damage per shot",
   structTransformers: [
     transformWeaponPrototypes,
     transformPlayerWeaponAttrs,
@@ -49,7 +48,6 @@ Rebalances the Grim S-15 assault rifle.[h3][/h3]
 function transformWeaponPrototypes(struct: WeaponPrototype) {
   if (struct.SID === "Gun_S15_AR") {
     const fork = struct.fork();
-    fork.BaseDurability = 5400;
     fork.PlayerWeaponAttributes = S15_PLAYER_ATTRS_SID;
     return fork;
   }
