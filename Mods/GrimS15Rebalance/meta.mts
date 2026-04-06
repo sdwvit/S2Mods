@@ -20,7 +20,7 @@ s15PlayerAttrs.__internal__.refkey = "GunGrim_ST_Player";
 
 const s15PlayerSettings = new Struct({
   SID: S15_PLAYER_SETTINGS_SID,
-  DurabilityDamagePerShot: 1.76 / 5,
+  DurabilityDamagePerShot: 1.76 / 2,
 }) as PlayerWeaponSettingsPrototype;
 s15PlayerSettings.__internal__.isRoot = true;
 s15PlayerSettings.__internal__.rawName = S15_PLAYER_SETTINGS_SID;
@@ -30,7 +30,7 @@ export const meta: MetaType<Struct> = {
   description: `
 Rebalances the Grim S-15 assault rifle.[h3][/h3]
 [list]
-  [*] Durability damage per shot reduced 5x
+  [*] Durability damage per shot reduced 2x
   [*] Default magazine: 30 rounds
   [*] Increased magazine: 45 rounds
   [*] Large magazine: 60 rounds
