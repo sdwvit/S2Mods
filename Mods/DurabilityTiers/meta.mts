@@ -63,7 +63,6 @@ const transformUpgrades: StructTransformer<UpgradePrototype> = (struct, context)
   if (!tierMap.has(struct.SID)) return null;
 
   const tiers = tierMap.get(struct.SID)!;
-  const baseHPos = (struct.HorizontalPosition as number) ?? 0;
   const baseCost = struct.BaseCost as number;
   const vPos = (struct.VerticalPosition as string) ?? "EUpgradeVerticalPosition::Down";
 
@@ -82,10 +81,11 @@ const transformUpgrades: StructTransformer<UpgradePrototype> = (struct, context)
     const newUpgrade = struct.fork(true) as UpgradePrototype;
     newUpgrade.__internal__.isRoot = true;
     newUpgrade.__internal__.rawName = tiers[i];
-    delete newUpgrade.__internal__.refkey;
+    newUpgrade.__internal__.refkey = struct.SID;
+    delete newUpgrade.__internal__.refurl;
     (newUpgrade as any).SID = tiers[i];
     (newUpgrade as any).BaseCost = Math.round(baseCost * Math.pow(COST_SCALE, tierNum - 1));
-    (newUpgrade as any).HorizontalPosition = baseHPos + (i + 1);
+    (newUpgrade as any).HorizontalPosition = i + 1;
     (newUpgrade as any).RequiredUpgradePrototypeSIDs = new Struct({ 0: prevSID });
     (newUpgrade as any).ConnectionLines = new Struct({ 0: connectionLine });
 
