@@ -1,14 +1,15 @@
 import path from "node:path";
 import dotEnv from "dotenv";
 import type { MetaType } from "../../src/meta-type.mts";
-import type { ArmorPrototype, ItemGeneratorPrototype, QuestNodePrototype } from "s2cfgtojson";
+import type { ArmorPrototype, ItemGeneratorPrototype, QuestNodePrototype, SpawnActorPrototype } from "s2cfgtojson";
 import { transformArmorPrototypes } from "./transformArmorPrototypes.mts";
 import { transformItemGenerators } from "./transformItemGenerators.mts";
 import { transformSkifItemGeneratorQuestNodes } from "./transformSkifItemGeneratorQuestNodes.mts";
+import { transformSpawnActors } from "./transformSpawnActors.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 
-export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype | QuestNodePrototype> = {
+export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype | QuestNodePrototype | SpawnActorPrototype> = {
   description: `
     This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection.[h2][/h2]
     It also adds corresponding helmets for exoskeleton and heavy armors, to balance things out.[h2][/h2]
@@ -51,10 +52,11 @@ export const meta: MetaType<ArmorPrototype | ItemGeneratorPrototype | QuestNodeP
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet
     [/list] 
   `,
-  changenote: `Drop quest item generator patch from HeadlessArmors.`,
+  changenote: `Remove hardcoded NPC rank overrides from spawn actors so loot tier matches player rank instead of a fixed NPC rank.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,
     transformSkifItemGeneratorQuestNodes,
+    transformSpawnActors,
   ],
 };

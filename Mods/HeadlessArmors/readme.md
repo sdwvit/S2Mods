@@ -26,3 +26,13 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `ArmorPrototypes`
 
 `QuestNodePrototypes`
+
+`Depo_Camp_LogicLevel_WP`:
+ - `25730FC14C83AA2166610788E5B381E2`
+
+`QuestToolCombatTestMap_WP`:
+ - `29D9CD0C408446A49E8E0E81861AE592`
+ - `B4EF361B42D2FA72DC709C8B0DC572FC`
+ - `C5ECB05446309E981A711C948DD4E1D7`
+
+`SpawnActorPrototypes`
