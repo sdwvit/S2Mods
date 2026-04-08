@@ -3,6 +3,8 @@ import type { MetaType } from "../../src/meta-type.mts";
 
 const targetSIDs = new Set([
   "PseudoDogSummon_RunAttack_Base",
+  "PseudoDogSummon_RunAttack_Left",
+  "PseudoDogSummon_RunAttack_Right",
   "PseudoDogSummon_BiteAttack",
   "PseudoDogSummon_TurnAttack",
 ]);
@@ -16,7 +18,7 @@ This mod removes damage from pseudodog psy clones (combat summons).[h1][/h1]
 [*] The real pseudodog is unaffected — only its summoned copies are nerfed.
 [/list] 
   `,
-  changenote: "Initial release",
+  changenote: "Fix: also disable damage on left/right run attack variants",
   structTransformers: [transformSummonAbilities],
 };
 
