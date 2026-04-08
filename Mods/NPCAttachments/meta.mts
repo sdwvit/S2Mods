@@ -6,12 +6,12 @@ import {
   allDefaultAttachPrototypesRecord,
   allDefaultDroppableAttachments,
   allDefaultWeaponPrototypesRecord,
-  DeeplyPartial,
   getCorePrototype,
   getRecordByKey,
   guessAttachmentSlot,
   allUniqueWeaponGeneralSetupPrototypesSIDs,
 } from "../../src/consts.mts";
+import type { DeeplyPartial } from "../../src/consts.mts";
 import { precision } from "../../src/precision.mts";
 
 const finishedTransformers = new Set<string>();
@@ -24,7 +24,7 @@ Way more variety to what NPCs wield on the battlefield. That being friend or foe
 [h1][/h1]
 Attachments are still rare: probability of meeting such NPC is 1/100 - 1/50.
 `,
-  changenote: "Initial release",
+  changenote: "Fix GP37 variants with rail upgrade spawning with blocked default scope, causing broken fire modes and grenade launcher",
   structTransformers: [createWeaponParamsWithPreinstalledAttachments, createWeapons, addNewWeaponsToDynamicItemGenerators],
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
@@ -94,13 +94,33 @@ function createWeaponParamsWithPreinstalledAttachments(struct: WeaponGeneralSetu
   const compatibleDroppableAttachmentsRecord = Object.fromEntries(
     compatibleDroppableAttachments.entries().map((e) => [e[1].AttachPrototypeSID, e[1]]),
   ) as Record<string, WeaponGeneralSetupPrototypePreinstalledAttachmentsItemPrototypeSIDsItem>;
+  // Build lookup: attachment SID → set of upgrade IDs that block it
+  const blockingUpgradesByAttach = new Map<string, Set<string>>();
+  struct.CompatibleAttachments.entries().forEach(([_, a]) => {
+    if (a.BlockingUpgradeIds) {
+      blockingUpgradesByAttach.set(a.AttachPrototypeSID, new Set(a.BlockingUpgradeIds.entries().map((e) => e[1])));
+    }
+  });
   const combos = getCombinations(compatibleDroppableAttachments.entries().map((e) => e[1].AttachPrototypeSID));
   combos.forEach(({ items }) => {
     const requiredUpgrades = items
       .map((a) => compatibleDroppableAttachmentsRecord[a].RequiredUpgradeIDs?.entries().map((e) => e[1]))
       .flat()
       .filter((e) => !!e);
+    const requiredUpgradesSet = new Set(requiredUpgrades);
     const newSID = `${struct.SID}_with_${items.join("_")}`;
+
+    // Filter out base preinstalled attachments that are blocked by required upgrades
+    const basePreinstalled = (struct.PreinstalledAttachmentsItemPrototypeSIDs?.entries().map((e) => e[1]) || []).filter(
+      (a) => {
+        const blocking = blockingUpgradesByAttach.get(a.AttachSID);
+        if (!blocking) return true;
+        for (const u of requiredUpgradesSet) {
+          if (blocking.has(u)) return false;
+        }
+        return true;
+      },
+    );
 
     const newWeaponSetup = new Struct({
       __internal__: {
@@ -118,7 +138,7 @@ function createWeaponParamsWithPreinstalledAttachments(struct: WeaponGeneralSetu
             bHiddenInInventory: false,
           } as Partial<WeaponGeneralSetupPrototypePreinstalledAttachmentsItemPrototypeSIDsItem>;
         }),
-        ...(struct.PreinstalledAttachmentsItemPrototypeSIDs?.entries().map((e) => e[1]) || []),
+        ...basePreinstalled,
       ],
     } as DeeplyPartial<WeaponGeneralSetupPrototype>) as WeaponGeneralSetupPrototype;
     newWeaponSetupCost[newWeaponSetup.SID] = items.reduce((mem, item) => mem + allDefaultAttachPrototypesRecord[item].Cost, 0);
