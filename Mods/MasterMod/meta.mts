@@ -9,14 +9,10 @@ import { transformMeshGeneratorPrototypes } from "./transformMeshGeneratorProtot
 import { transformNPCWeaponSettingsPrototypes } from "./transformNPCWeaponSettingsPrototypes.mts";
 import { transformQuestArtifactPrototypes } from "./transformQuestArtifactPrototypes.mts";
 import { transformQuestItemPrototypes } from "./transformQuestItemPrototypes.mts";
-import { transformQuestRewardsPrototypes } from "./transformQuestRewardsPrototypes.mts";
-import { transformRelationPrototypes } from "./transformRelationPrototypes.mts";
 import { transformStashPrototypes } from "./transformStashPrototypes.mts";
 import { transformUpgradePrototypes } from "./transformUpgradePrototypes.mts";
 import { transformWeaponGeneralSetupPrototypes } from "./transformWeaponGeneralSetupPrototypes.mts";
-import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 import { transformWeaponPrototypes } from "./transformWeaponPrototypes.mts";
-import { transformGlobalVariablePrototypes } from "./transformGlobalVariablePrototypes.mts";
 import type { MetaType } from "../../src/meta-type.mts";
 import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
 import { transformDynamicItemGenerator } from "./transformItemGenerator.mts";
@@ -31,15 +27,11 @@ const structTransformers = [
   transformDifficultyPrototypes,
   transformDynamicItemGenerator,
   transformEffectPrototypes,
-  transformGlobalVariablePrototypes,
   transformItemGeneratorPrototypes,
   transformMeshGeneratorPrototypes,
   transformNPCWeaponSettingsPrototypes,
   transformQuestArtifactPrototypes,
   transformQuestItemPrototypes,
-  transformQuestNodePrototypes,
-  transformQuestRewardsPrototypes,
-  transformRelationPrototypes,
   transformStashPrototypes,
   transformTradePrototypes,
   transformUpgradePrototypes,
@@ -62,9 +54,8 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [QoL] Unique weapons are now compatible with basic scopes. 
  [*] [Balance] Rifles default scopes can now be detached and sold.
  [*] [QoL] Allows buying/selling/dropping quest items.
- [*] [Balance] Unique and fair rewards for each possible variant of repeating quests.
 [/list]`,
-  changenote: `GeneralNPCs have faction-scaled money, buy weapons/armor only at 99%+ durability. Removed zombie lair population changes.`,
+  changenote: `Extracted faction relations into a separate mod (TrilogyFactionRelations). Extracted quest rewards into a separate mod (BetterQuestRewards).`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
