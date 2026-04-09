@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { renderBooleanComparison, renderConditionResultBlock, shouldDeclareResultVar } from "./codegen.mts";
+import { getEventHandler, renderBooleanComparison, renderConditionResultBlock, shouldDeclareResultVar } from "./codegen.mts";
 
 describe("renderBooleanComparison", () => {
   it("keeps positive boolean comparisons as direct expressions", () => {
@@ -20,11 +20,25 @@ describe("renderBooleanComparison", () => {
 
 describe("renderConditionResultBlock", () => {
   it("formats Condition node result without spacing artifacts", () => {
-    expect(renderConditionResultBlock("isItemInInventory(Foo, 1) ", false)).toBe("result = isItemInInventory(Foo, 1);\nif (!result) return;");
+    expect(renderConditionResultBlock("isItemInInventory(Foo, 1) ", false)).toBe("result = isItemInInventory(Foo, 1);");
   });
 
   it("formats If node result as a single statement", () => {
     expect(renderConditionResultBlock(" foo() && bar() ", true)).toBe("result = foo() && bar();");
+  });
+});
+
+describe("getEventHandler", () => {
+  it("produces a valid call expression without trailing semicolon", () => {
+    const handler = getEventHandler("OnSignalReceived");
+    const call = handler("MyNode", "questActors['abc']");
+    expect(call).toBe("OnSignalReceived(MyNode, questActors['abc'])");
+  });
+
+  it("works without extra content args", () => {
+    const handler = getEventHandler("OnTickEvent");
+    const call = handler("MyTickNode");
+    expect(call).toBe("OnTickEvent(MyTickNode)");
   });
 });
 

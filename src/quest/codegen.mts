@@ -1,6 +1,6 @@
 import { Struct } from "s2cfgtojson";
 import type { EConditionComparance } from "s2cfgtojson";
-import type { QuestNodePrototype, QuestNodePrototypeCondition, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeShowFadeScreen, QuestNodePrototypeTechnical } from "s2cfgtojson";
+import type { QuestNodePrototype, QuestNodePrototypeCondition, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeSequenceStart, QuestNodePrototypeShowFadeScreen, QuestNodePrototypeTechnical } from "s2cfgtojson";
 import { EVENTS, EVENTS_INTERESTING_PROPS, EVENTS_INTERESTING_SIDS } from "./constants.mts";
 import { QuestIr, QuestIrNode } from "./ir.mts";
 
@@ -79,6 +79,11 @@ function questNodeToJavascript(
   const struct = structr as QuestNodePrototype;
   const subType = String(struct.NodeType).split("::").pop();
 
+  if (subType && EVENTS.includes(subType)) {
+    globalFunctions.set(subType, "");
+    return "";
+  }
+
   const renderSubType = <T extends QuestNodePrototype>(subType: string) =>
     `${subType}(${(struct as T as any)
       .entries()
@@ -109,7 +114,10 @@ function questNodeToJavascript(
       return renderSubType<T>(subType);
     }
 
-    return `${subType}({ ${pairs.join(", ")} });`;
+    const base = renderSubType<T>(subType);
+    const propsObj = `{ ${pairs.join(", ")} }`;
+    const hasArgs = !base.includes("();");
+    return base.replace(");", `${hasArgs ? ", " : ""}${propsObj});`);
   };
 
   // noinspection FallThroughInSwitchStatementJS
@@ -128,94 +136,20 @@ function questNodeToJavascript(
       return processConditionNode(struct, globalVars, globalFunctions, questActors, getNodeSid);
     case "EQuestNodeType::Despawn":
       questActors.add(struct.TargetQuestGuid);
-      globalFunctions.set("despawn", "(actor) => { delete spawnedActors[actor]; __questLog(`despawn(${actor})`); }; ");
+      globalFunctions.set("despawn", "(actor) => { delete spawnedActors[actor]; __questLogStub(`despawn(${actor})`); }; ");
       return `despawn(questActors['${struct.TargetQuestGuid}']);`;
     case "EQuestNodeType::End":
       return "";
-    case "EQuestNodeType::OnAbilityEndedEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnAbilityUsedEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnDialogStartEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnEmissionFinishEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnEmissionStageActivated":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnEmissionStageFinished":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnEmissionStartEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnFactionBecomeEnemyEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnFactionBecomeFriendEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnGetCompatibleAttachEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnHitEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnInfotopicFinishEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnInteractEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnJournalQuestEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnKillerCheckEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnMoneyAmountReachedEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnNPCDeathEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnNPCBecomeEnemyEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnNPCBecomeFriendEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnNPCCreateEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnNPCDefeatEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnPlayerGetItemEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnPlayerLostItemEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnPlayerNoticedEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnPlayerRankReachedEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnUpgradeInstallEvent":
-      globalFunctions.set(subType, "");
-      return "";
-    case "EQuestNodeType::OnSignalReceived":
-      globalFunctions.set(subType, "");
-      return "";
     case "EQuestNodeType::ItemAdd":
+    case "EQuestNodeType::ItemRemove": {
       globalFunctions.set(subType, "");
-      return renderSubType(subType);
+      const itemSid = String(struct.ItemSID || struct.ItemPrototypeSID || "");
+      const count = struct.ItemsCount ?? 1;
+      const target = String(struct.TargetQuestGuid || "");
+      if (itemSid) questActors.add(itemSid);
+      if (target) questActors.add(target);
+      return `${subType}(${target ? `questActors['${target}']` : "Skif"}, ${itemSid ? `questActors['${itemSid}']` : "''"}, ${count});`;
+    }
     case "EQuestNodeType::ConsoleCommand":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
@@ -300,18 +234,42 @@ function questNodeToJavascript(
     case "EQuestNodeType::SearchPoint":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
-    case "EQuestNodeType::SendSignal":
+    case "EQuestNodeType::SendSignal": {
       globalFunctions.set(subType, "");
-      return renderSubType(subType);
-    case "EQuestNodeType::SequenceStart":
+      const guid = String((structr as any).SignalReceiverGuid || "");
+      return guid ? `${subType}('${guid}');` : `${subType}();`;
+    }
+    case "EQuestNodeType::SequenceStart": {
       globalFunctions.set(subType, "");
-      return renderSubType(subType);
+      const seqs = (structr as unknown as QuestNodePrototypeSequenceStart).LocalizedSequences;
+      if (seqs) {
+        const names = [...new Set(seqs.entries().map(([_k, v]: [string, string]) => {
+          const cleaned = String(v).replace(/'/g, "");
+          return cleaned.split(".").pop() || cleaned.split("/").pop() || cleaned;
+        }))].filter(Boolean);
+        if (names.length) return `${subType}(${names.map((n) => `'${n}'`).join(", ")});`;
+      }
+      return `${subType}();`;
+    }
     case "EQuestNodeType::SetCharacterEffect":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
-    case "EQuestNodeType::SetCharacterParam":
+    case "EQuestNodeType::SetCharacterParam": {
       globalFunctions.set(subType, "");
-      return renderSubType(subType);
+      const base = renderSubType(subType);
+      const params = struct.Params;
+      if (params) {
+        const compact = Array.from(params.entries()).map(([_k, v]: [string, any]) => {
+          const param = String(v.ModifiedCharacterParam || "").split("::").pop() || "?";
+          const mode = String(v.ChangeValueMode || "").split("::").pop() || "Set";
+          const val = v.ChangeValue ?? 0;
+          const op = mode === "Set" ? "=" : mode === "Add" ? "+=" : mode === "Subtract" ? "-=" : `${mode} `;
+          return `${param} ${op} ${val}`;
+        }).join(", ");
+        return base.replace(");", `, '${compact}');`);
+      }
+      return base;
+    }
     case "EQuestNodeType::SetDurabilityParam":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
@@ -369,27 +327,42 @@ function questNodeToJavascript(
     case "EQuestNodeType::TeleportCharacter":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
-    case "EQuestNodeType::Technical":
+    case "EQuestNodeType::Technical": {
       globalFunctions.set(subType, "");
-      return renderSubTypeWithProps<QuestNodePrototypeTechnical>(subType, ["StartDelay", "LaunchOnQuestStart"]);
+      const techStruct = structr as unknown as QuestNodePrototypeTechnical;
+      const parts: string[] = [];
+      if (techStruct.StartDelay) parts.push(`delay=${techStruct.StartDelay}`);
+      if (techStruct.LaunchOnQuestStart) parts.push("onStart");
+      return parts.length ? `${subType}('${parts.join(", ")}');` : `${subType}();`;
+    }
     case "EQuestNodeType::TimeLock":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
     case "EQuestNodeType::ToggleLairActivity":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
-    case "EQuestNodeType::ToggleNPCHidden":
+    case "EQuestNodeType::ToggleNPCHidden": {
       globalFunctions.set(subType, "");
-      return renderSubType(subType);
+      const base = renderSubType(subType);
+      const hideType = String((structr as any).HideViewType || "").split("::").pop();
+      return hideType ? base.replace(");", `, '${hideType}');`) : base;
+    }
     case "EQuestNodeType::TrackJournal":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
     case "EQuestNodeType::TrackShelter":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
-    case "EQuestNodeType::Trigger":
-      globalFunctions.set(subType, "");
-      return renderSubType(subType);
+    case "EQuestNodeType::Trigger": {
+      const eventType = String((structr as any).EventType || "").split("::").pop() || "OnTrigger";
+      globalFunctions.set(eventType, "");
+      const triggerGuid = String((structr as any).TriggerQuestGuid || "");
+      if (triggerGuid) questActors.add(triggerGuid);
+      const target = struct.TargetQuestGuid;
+      if (target) questActors.add(String(target));
+      const args = [target ? `questActors['${target}']` : "", triggerGuid ? `questActors['${triggerGuid}']` : ""].filter(Boolean);
+      return `${eventType}(${args.join(", ")});`;
+    }
     case "EQuestNodeType::DisableNPCBark":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
@@ -420,6 +393,15 @@ function questNodeToJavascript(
     case "EQuestNodeType::HideLoadingScreen":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
+    case "EQuestNodeType::SetJournal": {
+      globalFunctions.set(subType, "");
+      const entity = String(struct.JournalEntity || "").split("::").pop() || "";
+      const action = String(struct.JournalAction || "").split("::").pop() || "";
+      const questSid = String(struct.JournalQuestSID || "");
+      const stageSid = String(struct.JournalQuestStageSID || "");
+      const parts = [action, entity, stageSid || questSid].filter(Boolean);
+      return `${subType}('${parts.join(" ")}');`;
+    }
     default:
       globalFunctions.set(subType, "");
       return renderSubType(subType);
@@ -896,8 +878,8 @@ function processConditionNode(
   return renderConditionResultBlock(conditionExpr, conditionSubType === "If");
 }
 
-function getEventHandler(eventName: string) {
-  return (target: string, content?: string) => `${eventName}(${target}${content ? `, ${content}` : ""});`;
+export function getEventHandler(eventName: string) {
+  return (target: string, content?: string) => `${eventName}(${target}${content ? `, ${content}` : ""})`;
 }
 
 function indentBlock(content: string, indent = "  ") {
@@ -943,21 +925,20 @@ function getStructBody(
   }
   const isCoDep =
     node.launchersByJsSid && Object.entries(node.launchersByJsSid).length && Object.entries(node.launchersByJsSid).some(([_k, v]) => v.length > 1);
-  const consoleLog = isCoDep ? `__questLog('// ${node.jsSid}(', callerName, ',', name, ');');` : `__questLog('// ${node.jsSid}();');`;
   const nodeBody = questNodeToJavascript(node.raw, globalVars, globalFunctions, questActors, getNodeSid);
   const needsResultVar = shouldDeclareResultVar(nodeBody, usesResultBasedLaunches);
-  const bodyLines = [nodeBody, launches, isCoDep ? consoleLog : "", `__questNodeComplete(f, ${needsResultVar ? "result" : "None"});`]
+  const bodyLines = [nodeBody, launches, `__questNodeComplete(f, ${needsResultVar ? "result" : "None"});`]
     .filter(Boolean)
     .join("\n");
 
   const lines = [
     `function ${node.jsSid}(caller, name) {`,
     `  const f = ${node.jsSid};`,
-    ...(isCoDep ? ["  const callerName = __questNodeInit(f, caller, name);"] : ["  __questNodeInit(f, caller, name);"]),
+    "  __questNodeInit(f, caller, name);",
     ...(isCoDep ? [`  f.Conditions ??= ${JSON.stringify(node.launchersByJsSid || {})};`] : []),
     ...(needsResultVar ? ["  let result = None;"] : []),
     ...(isCoDep
-      ? ["  waitForCallers(1000, f, caller)", "    .then(() => {", indentBlock(bodyLines, "      "), "    })", "    .catch((e) => __questLog(e));"]
+      ? ["  __questDepth--;", "  waitForCallers(1000, f, caller)", "    .then(() => {", "      __questDepth++;", indentBlock(bodyLines, "      "), "    })", "    .catch((e) => __questLog(e));"]
       : [indentBlock(bodyLines, "  ")]),
     "}",
   ];
@@ -1002,7 +983,7 @@ function getContent(
           }),
       );
 
-      return `${structBody}\n${subscription(node.jsSid, [...args].join(", "))}`;
+      return `${structBody}\n${subscription(node.jsSid, [...args].join(", "))};`;
     })
     .join("\n\n");
 }

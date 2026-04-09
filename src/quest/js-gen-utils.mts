@@ -1,10 +1,13 @@
 import path from "node:path";
+import { EVENTS } from "./constants.mts";
+
+const EVENTS_SET = new Set(EVENTS);
 
 export function renderQuestJsGlobalFunctionStub(v: string, i?: string) {
   if (v === "ItemAdd") {
     return [
       "const ItemAdd = (...args) => {",
-      "  const [itemSid, count = 1, actor = 'Skif'] = args;",
+      "  const [actor, itemSid, count = 1] = args;",
       "  __questAddItem(itemSid, count, actor);",
       "  __questLogStub(`ItemAdd(${__questFmtArgs(args)})`);",
       "  return 'ItemAdd';",
@@ -14,7 +17,7 @@ export function renderQuestJsGlobalFunctionStub(v: string, i?: string) {
   if (v === "ItemRemove") {
     return [
       "const ItemRemove = (...args) => {",
-      "  const [itemSid, count = 1, actor = 'Skif'] = args;",
+      "  const [actor, itemSid, count = 1] = args;",
       "  __questRemoveItem(itemSid, count, actor);",
       "  __questLogStub(`ItemRemove(${__questFmtArgs(args)})`);",
       "  return 'ItemRemove';",
@@ -23,6 +26,14 @@ export function renderQuestJsGlobalFunctionStub(v: string, i?: string) {
   }
   if (v === "isItemInInventory") {
     return `const isItemInInventory = (itemSid, count = 1) => __questIsItemInInventory(itemSid, count, 'Skif');`;
+  }
+  if (!i && EVENTS_SET.has(v)) {
+    return [
+      `function ${v}(questNodeFn, ...args) {`,
+      `  __questLog(\`${v}(\${__questFmtArgs([questNodeFn, ...args])})\`);`,
+      `  setTimeout(() => { __questDepth = 0; __questLog('\\n// ' + questNodeFn.name + '()'); questNodeFn({ name: '${v}' }, ''); });`,
+      "}",
+    ].join("\n");
   }
   return i
     ? `const ${v} = ${i}`
