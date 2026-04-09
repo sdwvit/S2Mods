@@ -170,6 +170,14 @@ export const QuestDataTableByQuestSID = QuestDataTable.reduce(
   },
   {} as Record<string, typeof QuestDataTable>,
 );
+export const QuestDataTableByDialogSID = QuestDataTable.reduce(
+  (acc, curr) => {
+    acc[curr["Dialog SID"]] ||= [];
+    acc[curr["Dialog SID"]].push(curr);
+    return acc;
+  },
+  {} as Record<string, typeof QuestDataTable>,
+);
 
 const spread = [0.8, 1.2];
 
