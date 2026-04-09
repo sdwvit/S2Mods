@@ -1,8 +1,9 @@
 import { Struct } from "s2cfgtojson";
 import type { GetStructType, Internal } from "s2cfgtojson";
-import type { EItemGenerationCategory, ERank } from "s2cfgtojson";
+import type { ERank } from "s2cfgtojson";
 import type {
   AmmoPrototype,
+  ArtifactPrototype,
   ArmorPrototype,
   AttachPrototype,
   ConsumablePrototype,
@@ -31,7 +32,7 @@ export const ALL_RANKS_SET = new Set(ALL_RANKS_ARR);
 export let allDefaultWeaponGeneralSetupPrototypes: WeaponGeneralSetupPrototype[];
 export let allDefaultPlayerWeaponSettingsPrototypes: NPCWeaponSettingsPrototype[];
 export let allDefaultArmorPrototypes: ArmorPrototype[];
-export let allDefaultArtifactPrototypes: SpawnActorPrototype[];
+export let allDefaultArtifactPrototypes: ArtifactPrototype[];
 export let allDefaultNightVisionGogglesPrototypes: ArmorPrototype[];
 export let allDefaultAmmoPrototypes: AmmoPrototype[];
 export let allDefaultConsumablePrototypes: ConsumablePrototype[];
@@ -64,9 +65,11 @@ export let allDefaultQuestItemGeneratorPrototypes: ItemGeneratorPrototype[];
   allDefaultQuestItemGeneratorPrototypes,
 ] = await Promise.all([
   readFileAndGetStructs<WeaponGeneralSetupPrototype>("WeaponData/WeaponGeneralSetupPrototypes.cfg"),
-  readFileAndGetStructs<NPCWeaponSettingsPrototype>("WeaponData/CharacterWeaponSettingsPrototypes/PlayerWeaponSettingsPrototypes.cfg"),
+  readFileAndGetStructs<NPCWeaponSettingsPrototype>(
+    "WeaponData/CharacterWeaponSettingsPrototypes/PlayerWeaponSettingsPrototypes.cfg",
+  ),
   readFileAndGetStructs<ArmorPrototype>("ItemPrototypes/ArmorPrototypes.cfg"),
-  readFileAndGetStructs<SpawnActorPrototype>(`/ArtifactPrototypes.cfg`),
+  readFileAndGetStructs<ArtifactPrototype>(`/ArtifactPrototypes.cfg`),
   readFileAndGetStructs<ArmorPrototype>("ItemPrototypes/NightVisionGogglesPrototypes.cfg"),
   readFileAndGetStructs<AmmoPrototype>("ItemPrototypes/AmmoPrototypes.cfg"),
   readFileAndGetStructs<ConsumablePrototype>("ItemPrototypes/ConsumablePrototypes.cfg"),
@@ -78,22 +81,30 @@ export let allDefaultQuestItemGeneratorPrototypes: ItemGeneratorPrototype[];
   readFileAndGetStructs<QuestObjPrototype>("ObjPrototypes/QuestObjPrototypes.cfg"),
   readFileAndGetStructs<ItemGeneratorPrototype>("ItemGeneratorPrototypes.cfg"),
   readFileAndGetStructs<ItemGeneratorPrototype>("ItemGeneratorPrototypes/DynamicItemGenerator.cfg"),
-  readFileAndGetStructs<ItemGeneratorPrototype>("ItemGeneratorPrototypes/QuestItemGeneratorPrototypes.cfg"),
+  readFileAndGetStructs<ItemGeneratorPrototype>(
+    "ItemGeneratorPrototypes/QuestItemGeneratorPrototypes.cfg",
+  ),
 ]);
 
 // Records:
-export const getRecord = <T extends { SID: string }>(arr: T[]) => Object.fromEntries(arr.map((e) => [e.SID, e]));
-export const getRecordByKey = <T extends GetStructType<{}>, K extends keyof T>(arr: T[], key: K) => Object.fromEntries(arr.map((e) => [e[key], e]));
+export const getRecord = <T extends { SID: string }>(arr: T[]) =>
+  Object.fromEntries(arr.map((e) => [e.SID, e]));
+export const getRecordByKey = <T extends GetStructType<{}>, K extends keyof T>(arr: T[], key: K) =>
+  Object.fromEntries(arr.map((e) => [e[key], e]));
 
 export const allDefaultArmorPrototypesRecord = getRecord(allDefaultArmorPrototypes);
 export const allDefaultArtifactPrototypesRecord = getRecord(allDefaultArtifactPrototypes);
-export const allDefaultNightVisionGogglesPrototypesRecord = getRecord(allDefaultNightVisionGogglesPrototypes);
+export const allDefaultNightVisionGogglesPrototypesRecord = getRecord(
+  allDefaultNightVisionGogglesPrototypes,
+);
 export const allDefaultAmmoPrototypesRecord = getRecord(allDefaultAmmoPrototypes);
 export const allDefaultConsumablePrototypesRecord = getRecord(allDefaultConsumablePrototypes);
 export const allDefaultGrenadePrototypesRecord = getRecord(allDefaultGrenadePrototypes);
 export const allDefaultQuestItemPrototypesRecord = getRecord(allDefaultQuestItemPrototypes);
 export const allDefaultWeaponPrototypesRecord = getRecord(allDefaultWeaponPrototypes);
-export const allDefaultPlayerWeaponSettingsPrototypesRecord = getRecord(allDefaultPlayerWeaponSettingsPrototypes);
+export const allDefaultPlayerWeaponSettingsPrototypesRecord = getRecord(
+  allDefaultPlayerWeaponSettingsPrototypes,
+);
 export const allDefaultAttachPrototypesRecord = getRecord(allDefaultAttachPrototypes);
 export const allDefaultGeneralNPCObjPrototypesRecord = getRecord(allDefaultGeneralNPCObjPrototypes);
 export const allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID = getRecordByKey(
@@ -232,7 +243,9 @@ export const armorFactionsBySID: Record<string, CoreFaction> = {
   Exoskeleton_Neutral_Armor: "Neutrals",
 };
 
-export const allDefaultDroppableAttachments = new Set(allDefaultAttachPrototypes.filter((a) => a.Icon && a.Cost).map((a) => a.SID));
+export const allDefaultDroppableAttachments = new Set(
+  allDefaultAttachPrototypes.filter((a) => a.Icon && a.Cost).map((a) => a.SID),
+);
 
 export const RSQRandomizerQuestNodesSIDByQuestSID = new Set([
   "RSQ01_Random",
@@ -410,7 +423,8 @@ export const technicianTradePrototypes = new Set([
   "VartaTechnician_TradeItemGenerator",
 ]);
 
-export const MalachiteMutantQuestPartsQuestsDoneNode = "BodyParts_Malahit_SetDialog_EQ197_QD_Orders";
+export const MalachiteMutantQuestPartsQuestsDoneNode =
+  "BodyParts_Malahit_SetDialog_EQ197_QD_Orders";
 export const MalachiteMutantQuestPartsQuestsDoneDialogs = [
   "EQ197_QD_Orders_Done_73061",
   "EQ197_QD_Orders_Done2_73167",
@@ -525,7 +539,8 @@ export const Factions = {
 export type CoreFaction = (typeof Factions)[keyof typeof Factions];
 
 function guessGeneralNPC(itemGeneratorPrototypeSID: string) {
-  let npc = allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[itemGeneratorPrototypeSID];
+  let npc =
+    allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[itemGeneratorPrototypeSID];
   if (!npc) {
     return;
   }
@@ -535,7 +550,8 @@ function guessGeneralNPC(itemGeneratorPrototypeSID: string) {
   return npc;
 }
 function guessQuestNPC(itemGeneratorPrototypeSID: string) {
-  let npc = allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[itemGeneratorPrototypeSID];
+  let npc =
+    allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[itemGeneratorPrototypeSID];
   if (!npc) {
     return;
   }
@@ -545,12 +561,15 @@ function guessQuestNPC(itemGeneratorPrototypeSID: string) {
   return npc;
 }
 
-export function getFactionFromItemGeneratorSID(itemGeneratorPrototypeSID: string): CoreFaction | undefined {
+export function getFactionFromItemGeneratorSID(
+  itemGeneratorPrototypeSID: string,
+): CoreFaction | undefined {
   if (itemGeneratorFactionMapFallback[itemGeneratorPrototypeSID]) {
     return itemGeneratorFactionMapFallback[itemGeneratorPrototypeSID];
   }
 
-  const npc = guessGeneralNPC(itemGeneratorPrototypeSID) || guessQuestNPC(itemGeneratorPrototypeSID);
+  const npc =
+    guessGeneralNPC(itemGeneratorPrototypeSID) || guessQuestNPC(itemGeneratorPrototypeSID);
 
   if (!npc) {
     // this may happen if quest npc gets assigned item generator. at this point we can just skip these.
@@ -798,13 +817,20 @@ function guessNVG(SID: string | number, refkey?: string | number) {
   return allDefaultNightVisionGogglesPrototypesRecord[refkey];
 }
 
-export function getArmorNVGCorePrototype(descriptor: { SID: string | number; __internal__: { refkey?: string | number } }) {
+export function getArmorNVGCorePrototype(descriptor: {
+  SID: string | number;
+  __internal__: { refkey?: string | number };
+}) {
   const SID = descriptor.SID;
   const refkey = descriptor.__internal__.refkey;
   return guessArmor(SID, refkey) || guessNVG(SID, refkey);
 }
 
-export function getCorePrototype<T extends Struct>(itemSID: string | number, collection: Record<string, T>, stopSignal: (t: T) => any) {
+export function getCorePrototype<T extends Struct>(
+  itemSID: string | number,
+  collection: Record<string, T>,
+  stopSignal: (t: T) => any,
+) {
   let ref: string | number = itemSID;
   while (collection[ref] && !stopSignal(collection[ref])) {
     ref = collection[ref].__internal__.refkey;
