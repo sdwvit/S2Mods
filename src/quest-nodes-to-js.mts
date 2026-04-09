@@ -32,7 +32,13 @@ export async function questNodesToJs(context: MetaContext<QuestNodePrototype>) {
     .filter(([v]) => v && !context.structsById[v])
     .map(([v, i]) => renderQuestJsGlobalFunctionStub(v, i))
     .join("\n");
-  const launchOnQuestStartStr = launchOnQuestStart.map((sid) => `${sid}(QuestStartCaller, '');`).join("\n");
+  // Sort so the main _Start entry point runs last, after all other LaunchOnQuestStart nodes
+  launchOnQuestStart.sort((a, b) => {
+    const aIsStart = a.endsWith("_Start");
+    const bIsStart = b.endsWith("_Start");
+    return aIsStart === bIsStart ? 0 : aIsStart ? 1 : -1;
+  });
+  const launchOnQuestStartStr = launchOnQuestStart.map((sid) => `console.log('\\n// ${sid}()');\n${sid}(QuestStartCaller, '');`).join("\n");
   const usesSpawnedActors = globalFunctionsStr.includes("spawnedActors[") || content.includes("spawnedActors[");
   const usesQuestStartCaller = launchOnQuestStart.length > 0;
   const usesHasQuestNodeExecuted = content.includes("hasQuestNodeExecuted(");
@@ -57,10 +63,10 @@ export async function questNodesToJs(context: MetaContext<QuestNodePrototype>) {
     "",
     content,
     "",
+    launchOnQuestStartStr,
     "setTimeout(() => {",
     "  intervals.forEach((i) => clearInterval(i));",
     "}, 1500);",
-    launchOnQuestStartStr,
     "",
   ].join("\n");
 }
@@ -140,7 +146,7 @@ export function resolveQuestNodesToJsInputPath(inputPath: string, cfgRoot = base
 
 export async function runQuestNodesToJsDebug(
   input = `
-/home/sdwvit/IdeaProjects/S2Mods/Mods/DecoupledRanks/raw/Stalker2/Content/GameLite/GameData/QuestNodePrototypes/rootgraph/rootgraph_patch_DecoupledRanks.cfg
+/media/nvme/STALKER2ZoneKit/Stalker2/Content/GameLite/GameData/QuestNodePrototypes/E01_MQ01.cfg
  `,
 ) {
   await Promise.all(

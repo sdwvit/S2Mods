@@ -105,9 +105,9 @@ function waitForCallers(timeout, questFn, caller) {
     const state = questFn.State;
     const conditions = questFn.Conditions;
     const callerName = caller.name;
-    const getConditions = () => conditions[callerName] || [];
+    function getConditions() { return conditions[callerName] || []; }
 
-    const hasCallerPin = (fnName, outputPin) => {
+    function hasCallerPin(fnName, outputPin) {
       const relevantState = state[fnName];
       if (!relevantState) {
         return false;
@@ -117,19 +117,20 @@ function waitForCallers(timeout, questFn, caller) {
         const pinTheSame = callerOutputPin === (outputPin || true);
         return sidTheSame && pinTheSame;
       });
-    };
+    }
 
-    const pendingMessage = () =>
-      getConditions()
+    function pendingMessage() {
+      return getConditions()
         .map(({ SID: fnName, Name: outputPin }) =>
           hasCallerPin(fnName, outputPin) ? "" : \`\${questFn.name} to be called by \${fnName} \${outputPin ? "with " + outputPin : ""}\`,
         )
         .filter((r) => r);
+    }
 
-    const allMet = () => {
+    function allMet() {
       const items = getConditions();
       return items.length > 0 && items.every(({ SID: fnName, Name: outputPin }) => hasCallerPin(fnName, outputPin));
-    };
+    }
 
     const to = setTimeout(() => {
       clearInterval(interval);
