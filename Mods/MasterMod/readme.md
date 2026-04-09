@@ -19,11 +19,9 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `BarbedWirePrototypes`
  - `DifficultyPrototypes`
  - `EffectPrototypes`
- - `GlobalVariablePrototypes`
  - `ItemGeneratorPrototypes`
  - `MeshGeneratorPrototypes`
  - `NPCPrototypes`
- - `RelationPrototypes`
  - `StashPrototypes`
  - `TradePrototypes`
  - `UpgradePrototypes`
@@ -36,29 +34,16 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 
 `DialogPrototypes`:
  - `Malahit_Hub_DialogueOnEntrance`
- - `RSQ01_Dialog_Warlock_RSQ`
- - `RSQ04_Dialog_Drabadan_RSQ`
- - `RSQ05_Dialog_Sich_RSQ`
- - `RSQ06_Dialog_Sidorovich_RSQ`
- - `RSQ07_Dialog_Barmen_RSQ`
- - `RSQ08_Dialog_Barmen_RSQ`
- - `RSQ09_Dialog_Spica_RSQ`
- - `RSQ10_Dialog_Harpy_RSQ`
 
 `ItemGeneratorPrototypes`:
  - `DynamicItemGenerator`
  - `Gamepass_ItemGenerators`
  - `QuestItemGeneratorPrototypes`
 
-`QuestRewardsPrototypes`:
- - `RSQ00_Reward`
-
 `ItemPrototypes`:
  - `AttachPrototypes`
  - `QuestItemPrototypes`
  - `WeaponPrototypes`
-
-`QuestNodePrototypes`
 
 `CharacterWeaponSettingsPrototypes`:
  - `NPCWeaponSettingsPrototypes`
