@@ -1,9 +1,11 @@
 import type { MetaType } from "../../src/meta-type.mts";
+import { transformDialogPrototypes } from "./transformDialogPrototypes.mts";
 import { transformGlobalVariablePrototypes } from "./transformGlobalVariablePrototypes.mts";
 import { transformQuestRewardsPrototypes } from "./transformQuestRewardsPrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 
 const structTransformers = [
+  transformDialogPrototypes,
   transformGlobalVariablePrototypes,
   transformQuestRewardsPrototypes,
   transformQuestNodePrototypes,
@@ -21,6 +23,6 @@ export const meta: MetaType = {
  [*] Rewards use a +/-20% spread around the calculated fair value.
  [*] Covers all recurring quest vendors: Warlock, Boozer, Owl, Sidorovych, Hera, Barkeep, Needle, Harpy.
 [/list]`,
-  changenote: "Initial release — extracted from MasterMod.",
+  changenote: "Added dialog reward display for repeatable quests.",
   structTransformers: structTransformers as any,
 };
