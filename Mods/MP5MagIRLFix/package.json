@@ -1,0 +1,13 @@
+{
+  "name": "@s2mods/mp5-mag-irl-fix",
+  "private": true,
+  "scripts": {
+    "prepare-configs": "S2_MOD=MP5MagIRLFix node ../../src/prepare-configs.mts",
+    "update-readme": "S2_MOD=MP5MagIRLFix node ../../src/update-readme.mts",
+    "pack-inject": "S2_MOD=MP5MagIRLFix node ../../src/pack-inject.mts",
+    "cook-inject": "S2_MOD=MP5MagIRLFix node ../../src/cook-inject.mts",
+    "publish-steam": "S2_MOD=MP5MagIRLFix node ../../src/publish/publish-steam.mts",
+    "publish-modio": "S2_MOD=MP5MagIRLFix node ../../src/publish/publish-modio.mts",
+    "zip-for-xbox": "S2_MOD=MP5MagIRLFix node ../../src/publish/zip-for-xbox.mts"
+  }
+}
