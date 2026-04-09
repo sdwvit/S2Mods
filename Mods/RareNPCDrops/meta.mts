@@ -14,10 +14,10 @@ export const meta: MetaType<ItemGeneratorPrototype> = {
     [h2][/h2]
     Detector drop chances:[h2][/h2]
     [list]
-    [*] Echo: 1/100
-    [*] Gilka: 1/1,000
-    [*] Bear: 1/10,000
-    [*] Veles: 1/100,000
+    [*] Echo: 1/1,000
+    [*] Gilka: 1/10,000
+    [*] Bear: 1/1,000,000
+    [*] Veles: 1/100,000,000
     [/list]
     [h2][/h2]
     Artifacts also have a tiny chance to drop, scaling logarithmically by their cost (cheaper artifacts drop more often).
