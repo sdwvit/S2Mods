@@ -3,6 +3,8 @@ import { transformKeyItemPrototypes } from "./transformKeyItemPrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 import { transformItemGeneratorPrototypes } from "../FactionPatches/transformItemGeneratorPrototypes.mts";
 import { transformGlobalVariablePrototypes } from "./transformGlobalVariablePrototypes.mts";
+import { addMutantPartItems } from "./addMutantPartItems.mts";
+import { transformMutantLootGenerators } from "./transformMutantLootGenerators.mts";
 export const meta: MetaType = {
   description: `
 Decoupled Ranks separates player rank progression from story quest milestones.[h1][/h1]
@@ -15,10 +17,10 @@ Current implementation:[h1][/h1]
 - Removes quest-driven rank setters.[h1][/h1]
 - Introduces score thresholds that map to rank tiers.[h1][/h1]
 - Apply rank updates through collecting XP.[h1][/h1]
-- Get XP by picking up faction patches from dead bodies.[h1][/h1]
+- Get XP by picking up faction patches from dead bodies and mutant parts from killed mutants.[h1][/h1]
 [hr][/hr]
 With 2500 xp you advance from newbie to experienced, and that happens around Slug Heap. [h1][/h1]
 `,
-  changenote: "Move XP tracking out of inventory stacks; keep level and rank indicator items.",
-  structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformGlobalVariablePrototypes, transformItemGeneratorPrototypes],
+  changenote: "Add XP from mutant parts: 14 mutant types grant XP on pickup (HP/10), then swap to vanilla loot.",
+  structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformGlobalVariablePrototypes, transformItemGeneratorPrototypes, addMutantPartItems, transformMutantLootGenerators],
 };
