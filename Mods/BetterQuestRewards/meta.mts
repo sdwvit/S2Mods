@@ -22,7 +22,8 @@ export const meta: MetaType = {
  [*] Each repeating side quest variant now has a unique money reward based on travel distance, target danger, and effort required.
  [*] Rewards use a +/-20% spread around the calculated fair value.
  [*] Covers all recurring quest vendors: Warlock, Boozer, Owl, Sidorovych, Hera, Barkeep, Needle, Harpy.
+ [*] Dialog now shows the correct reward amount for each quest.
 [/list]`,
-  changenote: "Added dialog reward display for repeatable quests.",
+  changenote: "Dialog now shows the correct reward amount for each quest.",
   structTransformers: structTransformers as any,
 };
