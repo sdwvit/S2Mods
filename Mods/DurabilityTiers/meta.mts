@@ -3,7 +3,9 @@ import { Struct } from "s2cfgtojson";
 import type { ArmorPrototype, UpgradePrototype, WeaponGeneralSetupPrototype } from "s2cfgtojson";
 
 const EXTRA_TIERS = 3;
-const COST_SCALE = 1.2;
+const COST_SCALE = 2;
+const MAX_TIER1_COST = 10_000;
+const MAX_COST = 100_000;
 
 // Map from leaf durability upgrade SID to array of new tier SIDs
 const tierMap = new Map<string, string[]>();
@@ -84,7 +86,9 @@ const transformUpgrades: StructTransformer<UpgradePrototype> = (struct, context)
     newUpgrade.__internal__.refkey = struct.SID;
     delete newUpgrade.__internal__.refurl;
     (newUpgrade as any).SID = tiers[i];
-    (newUpgrade as any).BaseCost = Math.round(baseCost * Math.pow(COST_SCALE, tierNum - 1));
+    const rawCost = Math.round(baseCost * Math.pow(COST_SCALE, tierNum - 1));
+    const cap = tierNum === 2 ? MAX_TIER1_COST : MAX_COST;
+    (newUpgrade as any).BaseCost = Math.min(rawCost, cap);
     (newUpgrade as any).HorizontalPosition = i + 1;
     (newUpgrade as any).RequiredUpgradePrototypeSIDs = new Struct({ 0: prevSID });
     (newUpgrade as any).ConnectionLines = new Struct({ 0: connectionLine });
@@ -154,11 +158,11 @@ export const meta: MetaType<any> = {
   description: `
 Adds 3 extra tiers for every durability upgrade on weapons and armors.
 [hr][/hr]
-Each tier has the same effect as the original, with cost scaling up 20% per tier.
+Each tier has the same effect as the original, with cost scaling up 2x per tier (capped at 10k for tier 2, 100k overall).
 [list]
- [*] Tier 2: 1.2x cost
- [*] Tier 3: 1.44x cost
- [*] Tier 4: ~1.73x cost
+ [*] Tier 2: 2x cost
+ [*] Tier 3: 4x cost
+ [*] Tier 4: 8x cost
 [/list]
 [hr][/hr]
 bPatches:
@@ -169,6 +173,6 @@ bPatches:
  [*] NPCPrototypes.cfg
 [/list]
 `,
-  changenote: "Add new tier upgrades to all technicians' allow lists",
+  changenote: "Price scaling changed to 2x per tier with caps (10k for tier 2, 100k overall)",
   structTransformers: [transformUpgrades, transformWeaponsAndArmors, transformTechnicians] as any,
 };
