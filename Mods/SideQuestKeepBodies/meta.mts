@@ -6,9 +6,9 @@ export const meta: MetaType<QuestNodePrototype> = {
   description: `
 Side Quest Keep Bodies
 [hr][/hr]
-Prevents Hera's kill/eliminate quest targets from despawning on quest completion.[h1][/h1]
+Prevents kill/eliminate quest targets from despawning on quest completion.[h1][/h1]
 Affected quests: Kill Zombies, Kill Mutants, Kill Bandits, Eliminate Squad.[h1][/h1]
-Now you can loot the bodies after turning in the quest.[h1][/h1]
+Now you can loot the bodies after completing the quest.[h1][/h1]
 `,
   changenote: "Prevent explicit ForceDespawn nodes from running.",
   structTransformers: [structTransformer],
