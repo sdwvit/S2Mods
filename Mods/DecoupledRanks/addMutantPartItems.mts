@@ -1,21 +1,22 @@
 import { Struct } from "s2cfgtojson";
 import type { MutantLootPrototype } from "s2cfgtojson";
 
+// XP = MaxHP / 10 (rounded)
 export const MutantLootDefinitions = [
-  { SID: "TushkanLoot", questSID: "TushkanLoot_Quest", xp: 3 },
-  { SID: "BlinddogLoot", questSID: "BlinddogLoot_Quest", xp: 5 },
-  { SID: "FleshLoot", questSID: "FleshLoot_Quest", xp: 5 },
-  { SID: "BoarLoot", questSID: "BoarLoot_Quest", xp: 8 },
-  { SID: "PseudodogLoot", questSID: "PseudodogLoot_Quest", xp: 10 },
-  { SID: "SnorkLoot", questSID: "SnorkLoot_Quest", xp: 10 },
-  { SID: "BloodsuckerLoot", questSID: "BloodsuckerLoot_Quest", xp: 12 },
-  { SID: "BurerLoot", questSID: "BurerLoot_Quest", xp: 12 },
-  { SID: "ControllerLoot", questSID: "ControllerLoot_Quest", xp: 12 },
-  { SID: "PoltergeistLoot", questSID: "PoltergeistLoot_Quest", xp: 15 },
-  { SID: "CatLoot", questSID: "CatLoot_Quest", xp: 18 },
-  { SID: "DeerLoot", questSID: "DeerLoot_Quest", xp: 20 },
-  { SID: "PseudogiantLoot", questSID: "PseudogiantLoot_Quest", xp: 22 },
-  { SID: "ChimeraLoot", questSID: "ChimeraLoot_Quest", xp: 25 },
+  { SID: "TushkanLoot", questSID: "TushkanLoot_Quest", xp: 2 },       // 19 HP
+  { SID: "BlinddogLoot", questSID: "BlinddogLoot_Quest", xp: 6 },    // 63 HP
+  { SID: "SnorkLoot", questSID: "SnorkLoot_Quest", xp: 15 },         // 150 HP
+  { SID: "FleshLoot", questSID: "FleshLoot_Quest", xp: 28 },         // 280 HP
+  { SID: "BoarLoot", questSID: "BoarLoot_Quest", xp: 30 },           // 300 HP
+  { SID: "PseudodogLoot", questSID: "PseudodogLoot_Quest", xp: 30 }, // 300 HP
+  { SID: "BurerLoot", questSID: "BurerLoot_Quest", xp: 40 },         // 400 HP
+  { SID: "CatLoot", questSID: "CatLoot_Quest", xp: 40 },             // 400 HP
+  { SID: "PoltergeistLoot", questSID: "PoltergeistLoot_Quest", xp: 40 }, // 400 HP
+  { SID: "BloodsuckerLoot", questSID: "BloodsuckerLoot_Quest", xp: 50 }, // 500 HP
+  { SID: "ControllerLoot", questSID: "ControllerLoot_Quest", xp: 50 },   // 500 HP
+  { SID: "DeerLoot", questSID: "DeerLoot_Quest", xp: 60 },           // 600 HP
+  { SID: "ChimeraLoot", questSID: "ChimeraLoot_Quest", xp: 140 },    // 1400 HP
+  { SID: "PseudogiantLoot", questSID: "PseudogiantLoot_Quest", xp: 250 }, // 2500 HP
 ] as const;
 
 let once = false;

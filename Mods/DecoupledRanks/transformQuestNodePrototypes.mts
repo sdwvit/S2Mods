@@ -15,6 +15,7 @@ import type {
 import type { StructTransformer } from "../../src/meta-type.mts";
 import { modName } from "../../src/base-paths.mts";
 import { FactionPatchDefinitions } from "../FactionPatches/addFactionPatchItems.mts";
+import { MutantLootDefinitions } from "./addMutantPartItems.mts";
 import { getNonQuestFactionPatchSID, LEVEL_COUNTER_ITEM_SID, RANK_INDICATOR_ITEM_SIDS } from "./transformKeyItemPrototypes.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
 import { NPCRank } from "../../src/consts.mts";
@@ -144,6 +145,23 @@ function createOnPlayerGetFactionPatchEventListeners() {
     xpAdjustNodes.push(adjustXpVariableNode);
     extraStructs.push(removeQuestPatchNode);
     extraStructs.push(addNonQuestPatchNode);
+  });
+
+  MutantLootDefinitions.forEach((mutantDef) => {
+    const onMutantPartReceivedNode = getOnItemReceivedNode(mutantDef.questSID);
+    const hasQuestMutantPartNode = getConditionNode(onMutantPartReceivedNode);
+    const removeQuestMutantPartNode = getRemovePatchNode(hasQuestMutantPartNode);
+    hasQuestMutantPartNode.Launchers = getLaunchers([onMutantPartReceivedNode, removeQuestMutantPartNode]);
+
+    const adjustXpVariableNode = getAdjustXPVariableNode(hasQuestMutantPartNode, mutantDef.xp);
+    const addVanillaMutantPartNode = getAddVanillaMutantPartNode(hasQuestMutantPartNode, mutantDef.SID);
+
+    extraStructs.push(onMutantPartReceivedNode);
+    extraStructs.push(hasQuestMutantPartNode);
+    extraStructs.push(adjustXpVariableNode);
+    xpAdjustNodes.push(adjustXpVariableNode);
+    extraStructs.push(removeQuestMutantPartNode);
+    extraStructs.push(addVanillaMutantPartNode);
   });
 
   const levelThresholdNode = getDelay(xpAdjustNodes, `${modName}_SharedLevelThresholdNode`);
@@ -626,6 +644,25 @@ function getAddNonQuestPatchNode(hasQuestPatchNode: QuestNodePrototypeIf) {
   addNonQuestPatchNode.__internal__.rawName = addNonQuestPatchNode.SID;
 
   return addNonQuestPatchNode;
+}
+
+function getAddVanillaMutantPartNode(hasQuestNode: QuestNodePrototypeIf, vanillaSID: string) {
+  const questSID = hasQuestNode.Conditions["0"]["0"].ItemPrototypeSID.VariableValue as string;
+
+  const node = new Struct() as QuestNodePrototypeItemAdd;
+  node.AddToPlayerStash = false;
+  node.ItemSID = vanillaSID;
+  node.ItemsCount = 1;
+  node.Launchers = getLaunchers([asTrueConnection(hasQuestNode)]);
+  node.NodeType = "EQuestNodeType::ItemAdd";
+  node.QuestSID = hasQuestNode.QuestSID;
+  node.Repeatable = true;
+  node.SID = `${modName}_addVanillaMutantPart_${questSID}`;
+  node.TargetQuestGuid = SKIF_GUID;
+  node.__internal__.isRoot = true;
+  node.__internal__.rawName = node.SID;
+
+  return node;
 }
 
 transformQuestNodePrototypes.files = [
