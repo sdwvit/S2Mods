@@ -7,10 +7,10 @@ export const meta: MetaType<QuestNodePrototype> = {
 Side Quest Keep Bodies
 [hr][/hr]
 Prevents kill/eliminate quest targets from despawning on quest completion.[h1][/h1]
-Affected quests: Kill Zombies, Kill Mutants, Kill Bandits, Eliminate Squad.[h1][/h1]
+Affected quests: Kill Zombies, Kill Mutants, Kill Bandits, Kill Stalkers, Eliminate Squad — all vendors.[h1][/h1]
 Now you can loot the bodies after completing the quest.[h1][/h1]
 `,
-  changenote: "Prevent explicit ForceDespawn nodes from running.",
+  changenote: "Cover all vendor kill quests (Sidorovich, Rostok Barmen, Malahit, Harpy).",
   structTransformers: [structTransformer],
 };
 
@@ -31,9 +31,29 @@ function structTransformer(struct: QuestNodePrototype, context: MetaContext<Ques
 }
 
 structTransformer.files = [
+  // Sidorovich
+  "/QuestNodePrototypes/RSQ06_C01___K_Z.cfg",
+  "/QuestNodePrototypes/RSQ06_C02___K_M.cfg",
+  "/QuestNodePrototypes/RSQ06_C03___K_B.cfg",
+  "/QuestNodePrototypes/RSQ06_C04___K_S.cfg",
+  // Tsemzavod Barmen
   "/QuestNodePrototypes/RSQ07_C01_K_Z.cfg",
   "/QuestNodePrototypes/RSQ07_C02_K_M.cfg",
   "/QuestNodePrototypes/RSQ07_C03_K_M.cfg",
   "/QuestNodePrototypes/RSQ07_C04_K_B.cfg",
   "/QuestNodePrototypes/RSQ07_C09_S_P.cfg",
+  // Rostok Barmen
+  "/QuestNodePrototypes/RSQ08_C01_K_M.cfg",
+  "/QuestNodePrototypes/RSQ08_C02_K_B.cfg",
+  "/QuestNodePrototypes/RSQ08_C03_K_S.cfg",
+  // Malahit
+  "/QuestNodePrototypes/RSQ09_C01_K_M.cfg",
+  "/QuestNodePrototypes/RSQ09_C02_K_M.cfg",
+  "/QuestNodePrototypes/RSQ09_C03_K_M.cfg",
+  "/QuestNodePrototypes/RSQ09_C04_K_S.cfg",
+  // Harpy
+  "/QuestNodePrototypes/RSQ10_C01_K_M.cfg",
+  "/QuestNodePrototypes/RSQ10_C02_K_M.cfg",
+  "/QuestNodePrototypes/RSQ10_C03_K_S.cfg",
+  "/QuestNodePrototypes/RSQ10_C04_K_S.cfg",
 ];
