@@ -54,6 +54,14 @@ export async function transformQuestNodePrototypes(
     return fork;
   }
 
+  // Remove E08_MQ01 main quest gate from RSQ08 Duty kill quest so it appears in rotation
+  if (struct.SID === "RSQ08_C00_ROSTOK_If_C09_NotAdded") {
+    const forked = struct.fork();
+    forked.Conditions = struct.Conditions.filter(([key]: [string, unknown]) => key !== "3");
+    forked.Conditions.__internal__.bpatch = false;
+    return forked;
+  }
+
   // Disable vanilla SetDialog nodes to prevent competing dialogs with the ModSetDialog hub.
   // Reset SetDialogs get re-launched from ModSetDialog so their downstream outputs still fire.
   // Main and decline-job SetDialogs are fully stripped.
@@ -405,6 +413,7 @@ function generateActionChain(
 ): Struct[] {
   const prefix = `${vendor.questNodePrefix}_${action}_${subQuest}_MoreSideQuestOptions`;
   const globalVarSID = getGlobalVarSID(subQuest);
+  const readyForTurnInVarSID = getReadyForTurnInVarSID(subQuest);
   const launcherRef = { SID: modSetDialogSID, Name: phrase };
   const returnToAddJobVarSID = getReturnToAddJobVarSID(vendor.questSID);
 
@@ -436,6 +445,19 @@ function generateActionChain(
     return [cmdNode, setVarNode];
   }
 
+  const clearReadyOnStartSID = `${prefix}_ClearReadyForTurnIn`;
+  const clearReadyOnStartNode = new Struct({
+    __internal__: { rawName: clearReadyOnStartSID, isRoot: true },
+    SID: clearReadyOnStartSID,
+    QuestSID: vendor.questSID,
+    NodeType: "EQuestNodeType::SetGlobalVariable" satisfies EQuestNodeType,
+    Repeatable: true,
+    Launchers: getLaunchers([launcherRef]),
+    GlobalVariablePrototypeSID: readyForTurnInVarSID,
+    ChangeValueMode: "EChangeValueMode::Set",
+    VariableValue: false,
+  });
+
   const setReturnToAddJobSID = `${prefix}_SetReturnToAddJob`;
   const setReturnToAddJobNode = new Struct({
     __internal__: { rawName: setReturnToAddJobSID, isRoot: true },
@@ -449,7 +471,7 @@ function generateActionChain(
     VariableValue: true,
   });
 
-  return [cmdNode, setVarNode, setReturnToAddJobNode];
+  return [cmdNode, setVarNode, clearReadyOnStartNode, setReturnToAddJobNode];
 }
 
 // --- Independent quest generation ---
@@ -505,10 +527,10 @@ async function generateIndependentQuest(vendor: VendorConfig, subQuest: string):
 
   const journalCancelNodes: { questSID: string; stageSID?: string; action: string }[] = [];
 
-  // Track the "objectives complete" node: the SetJournal that starts the parent quest's
-  // finish stage (e.g., RSQ08_Finish). This fires when objectives are done and the player
-  // should return to the vendor. Used as the trigger for SetReadyForTurnIn.
-  let objectivesCompleteSID: string | undefined;
+  // Track the vanilla node that starts the parent quest's finish stage (e.g., RSQ08_Finish).
+  // We use this to locate the matching finish SetDialog that vanilla surfaces when the player
+  // is actually ready to turn the job in.
+  let objectivesCompleteVanillaSID: string | undefined;
 
   const nodes: Struct[] = [];
 
@@ -610,7 +632,7 @@ async function generateIndependentQuest(vendor: VendorConfig, subQuest: string):
           j.JournalEntity === "EJournalEntity::QuestStage" &&
           j.JournalQuestStageSID === `${vendor.questSID}_Finish`
         ) {
-          objectivesCompleteSID = newSID;
+          objectivesCompleteVanillaSID = vNode.SID;
         }
       }
       // Replace Quest-level Start/Finish with Technical pass-throughs
@@ -713,8 +735,28 @@ async function generateIndependentQuest(vendor: VendorConfig, subQuest: string):
   // The vanilla finish SetDialog (now Technical) fires instantly, causing rewards to trigger
   // on quest start instead of on turn-in. Fix: add a Reward entry point triggered externally
   // by the parent quest's ModSetDialog turn-in flow, and rewire all downstream nodes from
-  // the SetDialog Technical to fire from the Reward node instead.
-  for (const vanillaSetDialogSID of vanillaSetDialogSIDs) {
+  // the finish SetDialog Technical to fire from the Reward node instead.
+  const rewardSetDialogSID =
+    vanillaNodes.find(
+      (node) =>
+        node.NodeType === "EQuestNodeType::SetDialog" &&
+        objectivesCompleteVanillaSID &&
+        node.Launchers instanceof Struct &&
+        node.Launchers.entries().some(([, launcher]) =>
+          !launcher.Excluding &&
+          launcher.Connections instanceof Struct &&
+          launcher.Connections.entries().some(([, conn]) => conn.SID === objectivesCompleteVanillaSID),
+        ),
+    )?.SID ??
+    vanillaNodes.find(
+      (node) =>
+        node.NodeType === "EQuestNodeType::SetDialog" &&
+        (node as QuestNodePrototypeSetDialog).DialogChainPrototypeSID?.includes("_Finish"),
+    )?.SID ??
+    [...vanillaSetDialogSIDs][0];
+
+  if (rewardSetDialogSID) {
+    const vanillaSetDialogSID = rewardSetDialogSID;
     const mappedSetDialogSID = sidMap.get(vanillaSetDialogSID)!;
 
     // Reward node: entry point triggered externally via XStartQuestNodeBySID
@@ -730,10 +772,9 @@ async function generateIndependentQuest(vendor: VendorConfig, subQuest: string):
       }),
     );
 
-    // SetReadyForTurnIn: fires when objectives are complete (the node that starts the
-    // parent quest's finish stage, e.g., BackToSich starting RSQ08_Finish).
-    // Falls back to the SetDialog Technical if no objectives-complete node was found.
-    const setReadyTriggerSID = objectivesCompleteSID ?? mappedSetDialogSID;
+    // SetReadyForTurnIn: mirror vanilla by setting the flag when the finish SetDialog itself
+    // becomes reachable, not at an earlier "return to vendor" journal transition.
+    const setReadyTriggerSID = mappedSetDialogSID;
     const setReadySID = `${newQuestSID}_SetReadyForTurnIn`;
     nodes.push(
       new Struct({
