@@ -10,7 +10,7 @@ This mod expands the dialogue options offered by NPCs when requesting side quest
 Each repeatable sub-quest is recreated as an independent quest, startable from a hub menu.
 `,
   changenote:
-    "Independent quest system: all RSQ sub-quests available via hub dialog, with per-quest cancel",
+    "Enable Rostok Duty kill quest (RSQ08_C09_S_P) by removing main quest gate from rotation",
   structTransformers: [
     transformDialogPrototypes,
     transformGlobalVariablePrototypes,
@@ -18,3 +18,6 @@ Each repeatable sub-quest is recreated as an independent quest, startable from a
     transformQuestPrototypes,
   ],
 };
+
+// todo there is still problem with turning in incomplete jobs.
+//   also some vendors don't have the job hub from get-go, like warlock, likely due to the main quest dialogs he has

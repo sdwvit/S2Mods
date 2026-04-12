@@ -96,9 +96,9 @@ function generateHubDialogs(vendor: VendorConfig): Struct[] {
 
   // Hub menu: AddJob / RemoveJob / TurnInJob / Leave
   nodes.push(getWaitForReply(hubSID, chain, [
-    { sid: addJobSID, conditions: getAnyQuestInactiveCondition(vendor.subQuests) },
-    { sid: removeJobSID, conditions: getAnyQuestActiveCondition(vendor.subQuests) },
-    { sid: turnInJobSID, conditions: getAnyQuestReadyForTurnInCondition(vendor.subQuests) },
+    { sid: addJobSID },
+    { sid: removeJobSID },
+    { sid: turnInJobSID },
     { sid: "", conditions: undefined }, // Terminate (Leave)
   ]));
   // Fix the leave option to be Terminate=true
@@ -255,66 +255,6 @@ function getSetGlobalVariableDialogActions(globalVariablePrototypeSID: string, v
       VariableValue: value,
     }),
   });
-}
-
-function getAnyQuestInactiveCondition(subQuests: string[]) {
-  return getAnyDialogConditions(
-    subQuests.map((subQuest) => ({
-      ConditionType: "EQuestConditionType::GlobalVariable",
-      ConditionComparance: "EConditionComparance::Equal",
-      GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
-      ChangeValueMode: "EChangeValueMode::Set",
-      VariableValue: false,
-    })),
-  );
-}
-
-function getAnyQuestActiveCondition(subQuests: string[]) {
-  return getAnyDialogConditions(
-    subQuests.map((subQuest) => ({
-      ConditionType: "EQuestConditionType::GlobalVariable",
-      ConditionComparance: "EConditionComparance::Equal",
-      GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
-      ChangeValueMode: "EChangeValueMode::Set",
-      VariableValue: true,
-    })),
-  );
-}
-
-function getAnyQuestReadyForTurnInCondition(subQuests: string[]) {
-  return getAnyDialogConditions(
-    subQuests.map((subQuest) => ([
-      {
-        ConditionType: "EQuestConditionType::GlobalVariable",
-        ConditionComparance: "EConditionComparance::Equal",
-        GlobalVariablePrototypeSID: getGlobalVarSID(subQuest),
-        ChangeValueMode: "EChangeValueMode::Set",
-        VariableValue: true,
-      },
-      {
-        ConditionType: "EQuestConditionType::GlobalVariable",
-        ConditionComparance: "EConditionComparance::Equal",
-        GlobalVariablePrototypeSID: getReadyForTurnInVarSID(subQuest),
-        ChangeValueMode: "EChangeValueMode::Set",
-        VariableValue: true,
-      },
-    ])),
-  );
-}
-
-function getAnyDialogConditions(
-  groups: Array<Record<string, unknown> | Record<string, unknown>[]>,
-) {
-  const conditions = new Struct();
-  for (const group of groups) {
-    const item = new Struct();
-    const entries = Array.isArray(group) ? group : [group];
-    for (const condition of entries) {
-      item.addNode(new Struct(condition));
-    }
-    conditions.addNode(item);
-  }
-  return conditions;
 }
 
 // --- EQ197 Mutant Parts Dialog ---
