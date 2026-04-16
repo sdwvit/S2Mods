@@ -42,7 +42,35 @@ async function transformQuestNodePrototypes(
     launcher2.Connections.addNode(conn2);
     fork.Launchers.addNode(launcher2, ifNode.SID);
 
-    return [fork, ifNode];
+    // Pin_0: only fire when SQ103 is NOT active (no ConditionCheckType)
+    const pin0 = context.structsById["Garbage_L_Container_SQ103_Pin_0"].fork();
+    const pin0Conditions = new Struct() as any;
+    const pin0ConditionsItem = new Struct() as any;
+    pin0ConditionsItem.addNode(
+      new Struct({
+        ConditionType: "EQuestConditionType::JournalState",
+        ConditionComparance: "EConditionComparance::NotEqual",
+        JournalEntity: "EJournalEntity::Quest",
+        JournalState: "EJournalState::Active",
+        JournalQuestSID: "SQ103",
+      }),
+    );
+    pin0Conditions.addNode(pin0ConditionsItem);
+    pin0.Conditions = pin0Conditions;
+
+    // Pin_2: only fire when SQ103 IS active
+    const pin2 = context.structsById["Garbage_L_Container_SQ103_Pin_2"].fork();
+    pin2.Conditions = getConditions([
+      {
+        ConditionType: "EQuestConditionType::JournalState",
+        ConditionComparance: "EConditionComparance::Equal",
+        JournalEntity: "EJournalEntity::Quest",
+        JournalState: "EJournalState::Active",
+        JournalQuestSID: "SQ103",
+      },
+    ]);
+
+    return [fork, ifNode, pin0, pin2];
   }
 }
 transformQuestNodePrototypes.files = ["GameLite/GameData/QuestNodePrototypes/Garbage_L.cfg"];
