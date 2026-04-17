@@ -1,86 +1,87 @@
 import type { MetaType } from "../../src/meta-type.mts";
-import type { QuestNodePrototype, QuestNodePrototypeIf } from "s2cfgtojson";
+import type { QuestNodePrototype } from "s2cfgtojson";
 import { Struct } from "s2cfgtojson";
 import type { MetaContext } from "../../src/meta-type.mts";
-import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
+
+function buildLauncher(excluding: boolean, connections: { SID: string; withName?: boolean }[]) {
+  const launcher = new Struct() as any;
+  launcher.Excluding = excluding;
+  launcher.Connections = new Struct() as any;
+  for (const c of connections) {
+    const conn = new Struct() as any;
+    conn.SID = c.SID;
+    if (c.withName) {
+      conn.Name = "";
+    }
+    launcher.Connections.addNode(conn);
+  }
+  return launcher;
+}
 
 async function transformQuestNodePrototypes(
   struct: QuestNodePrototype,
   context: MetaContext<QuestNodePrototype>,
 ) {
-  // Remove main quest conditions from the SQ103 container so the quest starts on any tick
   if (struct.SID === "Garbage_L_Container_SQ103") {
     const fork = struct.fork();
-    fork.Launchers = struct.Launchers.fork();
+    fork.Launchers = new Struct() as any;
+    fork.Launchers.addNode(
+      buildLauncher(false, [
+        { SID: "Garbage_L_OnTickEvent_SQ103Start", withName: true },
+        { SID: "Garbage_L_Container_SQ103_Pin_0" },
+      ]),
+    );
+    fork.Launchers.addNode(
+      buildLauncher(true, [
+        { SID: "Garbage_L_Container_SQ103_Pin_2" },
+        { SID: "Garbage_L_OnTickEvent_SQ103Start", withName: true },
+      ]),
+    );
+    fork.Launchers.addNode(
+      buildLauncher(true, [{ SID: "Garbage_L_SetJournal_SQ103_Stage_GetToLab", withName: true }]),
+    );
 
-    // New If node: guard against re-triggering when SQ103 is already active
-    const ifNode = new Struct() as QuestNodePrototypeIf;
-    ifNode.SID = "Garbage_L_If_SQ103_NotActive_EarlyX18Lab";
-    ifNode.QuestSID = struct.QuestSID;
-    ifNode.NodeType = "EQuestNodeType::If";
-    ifNode.Repeatable = true;
-    ifNode.Launchers = getLaunchers([{ SID: "Garbage_L_OnTickEvent_SQ103Start" }]);
-    ifNode.Conditions = getConditions([
-      {
-        ConditionType: "EQuestConditionType::JournalState",
-        ConditionComparance: "EConditionComparance::NotEqual",
-        JournalEntity: "EJournalEntity::Quest",
-        JournalState: "EJournalState::Active",
-        JournalQuestSID: "SQ103",
-      },
-    ]);
-    ifNode.__internal__.isRoot = true;
-    ifNode.__internal__.rawName = ifNode.SID;
-
-    // Launcher 2: require the If node to pass (SQ103 not already active)
-    const launcher2 = new Struct() as any;
-    launcher2.Excluding = false;
-    launcher2.Connections = new Struct() as any;
-    const conn2 = new Struct() as any;
-    conn2.SID = ifNode.SID;
-    conn2.Name = "True";
-    launcher2.Connections.addNode(conn2);
-    fork.Launchers.addNode(launcher2, ifNode.SID);
-
-    // Pin_0: only fire when SQ103 is NOT active (no ConditionCheckType)
     const pin0 = context.structsById["Garbage_L_Container_SQ103_Pin_0"].fork();
     const pin0Conditions = new Struct() as any;
     const pin0ConditionsItem = new Struct() as any;
     pin0ConditionsItem.addNode(
       new Struct({
         ConditionType: "EQuestConditionType::JournalState",
-        ConditionComparance: "EConditionComparance::NotEqual",
+        ConditionComparance: "EConditionComparance::Equal",
         JournalEntity: "EJournalEntity::Quest",
-        JournalState: "EJournalState::Active",
-        JournalQuestSID: "SQ103",
+        JournalState: "EJournalState::Finished",
+        JournalQuestSID: "E03_MQ06",
       }),
     );
     pin0Conditions.addNode(pin0ConditionsItem);
     pin0.Conditions = pin0Conditions;
 
-    // Pin_2: only fire when SQ103 IS active
-    const pin2 = context.structsById["Garbage_L_Container_SQ103_Pin_2"].fork();
-    pin2.Conditions = getConditions([
-      {
+    const setJournalPin0 = context.structsById["Garbage_L_SetJournal_SQ103_Stage_GetToLab_Pin_0"].fork();
+    const setJournalPin0Conditions = new Struct() as any;
+    const setJournalPin0ConditionsItem = new Struct() as any;
+    setJournalPin0ConditionsItem.addNode(
+      new Struct({
         ConditionType: "EQuestConditionType::JournalState",
         ConditionComparance: "EConditionComparance::Equal",
         JournalEntity: "EJournalEntity::Quest",
         JournalState: "EJournalState::Active",
         JournalQuestSID: "SQ103",
-      },
-    ]);
+      }),
+    );
+    setJournalPin0Conditions.addNode(setJournalPin0ConditionsItem);
+    setJournalPin0.Conditions = setJournalPin0Conditions;
 
-    return [fork, ifNode, pin0, pin2];
+    return [fork, pin0, setJournalPin0];
   }
 }
 transformQuestNodePrototypes.files = ["GameLite/GameData/QuestNodePrototypes/Garbage_L.cfg"];
 
 export const meta: MetaType = {
   description: `
-Removes the main quest progression gate from the X18 Lab side quest (SQ103).
-Normally this quest only becomes available after completing E03_MQ06 and before E08_MQ01 starts.
-With this mod, Diod's radio call can trigger at any point in the game.
+Unblocks the X18 Lab side quest (SQ103) from the later main-quest gate.
+Normally Diod's radio call only fires in the narrow window between completing E03_MQ06 and starting E08_MQ01.
+With this mod, E03_MQ06 is still required, but the upper E08_MQ01 gate is lifted so the call fires any time afterwards.
 `,
-  changenote: "Fix quest conditions to properly free SQ103 from main quest gates",
+  changenote: "Fix missing triggers when entering X-18 lab",
   structTransformers: [transformQuestNodePrototypes],
 };
