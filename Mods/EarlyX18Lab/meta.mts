@@ -13,20 +13,12 @@ async function transformQuestNodePrototypes(struct: QuestNodePrototype) {
   if (struct.SID === "Garbage_L_Container_SQ103") {
     const fork = struct.fork();
 
-    const resetQuest = struct.fork() as QuestNodePrototypeConsoleCommand;
-    resetQuest.SID = struct.SID + "_Reset";
-    resetQuest.__internal__.rawName = resetQuest.SID;
-    resetQuest.NodeType = "EQuestNodeType::ConsoleCommand";
-    resetQuest.QuestSID = struct.QuestSID;
-    resetQuest.Launchers = getLaunchers([
+    fork.Launchers = getLaunchers([
       { SID: "Garbage_L_OnTickEvent_SQ103Start" },
       { SID: "Garbage_L_SetJournal_SQ103_Stage_GetToLab", Excluding: true },
     ]);
-    resetQuest.ConsoleCommand = "XResetQuestBySID SQ103";
 
-    fork.Launchers = getLaunchers([{ SID: resetQuest.SID }]);
-
-    return [resetQuest, fork];
+    return fork;
   }
 
   if (struct.SID === "SQ103_OnJournalQuestEvent_E08_MQ01_GetToMalahit") {
@@ -46,6 +38,6 @@ export const meta: MetaType = {
 Unblocks the X18 Lab side quest (SQ103) from the later main-quest gate.
 Normally Diod's radio call only fires in the narrow window between completing E03_MQ06 and starting E08_MQ01.
 `,
-  changenote: "Force reset SQ103 before triggering it. Also remove extra exclusion trigger.",
+  changenote: "Roll back to the simplest variant",
   structTransformers: [transformQuestNodePrototypes],
 };
