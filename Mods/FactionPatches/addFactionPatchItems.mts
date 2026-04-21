@@ -65,4 +65,4 @@ export function addFactionPatchItems() {
   return [template, ...patches] as QuestItemPrototype[];
 }
 
-addFactionPatchItems.files = ["/KeyItemPrototypes.cfg"];
+addFactionPatchItems.files = ["/DetectorPrototypes.cfg"];
