@@ -79,4 +79,4 @@ export function transformKeyItemPrototypes() {
   ] as QuestItemPrototype[];
 }
 
-transformKeyItemPrototypes.files = ["/KeyItemPrototypes.cfg"];
+transformKeyItemPrototypes.files = ["/DetectorPrototypes.cfg"];
