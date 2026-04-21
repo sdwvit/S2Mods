@@ -1,5 +1,9 @@
 import type { ERank } from "s2cfgtojson";
-import type { DialogPrototypeItemPrototypeSID, DialogPrototypeMoney, QuestNodePrototypeParams } from "s2cfgtojson";
+import type {
+  DialogPrototypeItemPrototypeSID,
+  DialogPrototypeMoney,
+  QuestNodePrototypeParams,
+} from "s2cfgtojson";
 import { Struct } from "s2cfgtojson";
 import type {
   QuestNodePrototype,
@@ -16,10 +20,19 @@ import type { StructTransformer } from "../../src/meta-type.mts";
 import { modName } from "../../src/base-paths.mts";
 import { FactionPatchDefinitions } from "../FactionPatches/addFactionPatchItems.mts";
 import { MutantLootDefinitions } from "./addMutantPartItems.mts";
-import { getNonQuestFactionPatchSID, LEVEL_COUNTER_ITEM_SID, RANK_INDICATOR_ITEM_SIDS } from "./transformKeyItemPrototypes.mts";
+import {
+  getNonQuestFactionPatchSID,
+  LEVEL_COUNTER_ITEM_SID,
+  RANK_INDICATOR_ITEM_SIDS,
+} from "./transformKeyItemPrototypes.mts";
 import { getConditions, getLaunchers } from "../../src/struct-utils.mts";
-import { NPCRank } from "../../src/consts.mts";
-import { LEVEL_GLOBAL_VARIABLE_SID, RANK_GLOBAL_VARIABLE_SID, XP_GLOBAL_VARIABLE_SID } from "./transformGlobalVariablePrototypes.mts";
+import {
+  LEVEL_GLOBAL_VARIABLE_SID,
+  RANK_GLOBAL_VARIABLE_SID,
+  XP_GLOBAL_VARIABLE_SID,
+} from "./transformGlobalVariablePrototypes.mts";
+import { type Rank } from "s2cfgtojson/utility-types";
+import { type CoreFaction } from "../../src/consts.mts";
 
 export const levelThresholds = [
   { level: 1, xp: 0 },
@@ -37,22 +50,41 @@ export const levelThresholds = [
   { level: 13, xp: 8300 },
   { level: 14, xp: 9800 },
   { level: 15, xp: 11500 },
-  { level: 16, xp: 13300 },
-  { level: 17, xp: 15000 },
-  { level: 18, xp: 16300 },
-  { level: 19, xp: 17200 },
-  { level: 20, xp: 18000 },
-  { level: 21, xp: 19600 },
-  { level: 22, xp: 21400 },
-  { level: 23, xp: 23400 },
-  { level: 24, xp: 25600 },
-  { level: 25, xp: 28000 },
-  { level: 26, xp: 30300 },
-  { level: 27, xp: 32300 },
-  { level: 28, xp: 33900 },
-  { level: 29, xp: 35100 },
-  { level: 30, xp: 36000 },
+  { level: 16, xp: 14500 },
+  { level: 17, xp: 18000 },
+  { level: 18, xp: 22500 },
+  { level: 19, xp: 28000 },
+  { level: 20, xp: 35000 },
+  { level: 21, xp: 44000 },
+  { level: 22, xp: 55000 },
+  { level: 23, xp: 69000 },
+  { level: 24, xp: 86000 },
+  { level: 25, xp: 108000 },
+  { level: 26, xp: 135000 },
+  { level: 27, xp: 169000 },
+  { level: 28, xp: 211000 },
+  { level: 29, xp: 264000 },
+  { level: 30, xp: 330000 },
 ] as const;
+
+export const NPCRank: Record<Exclude<CoreFaction, "Mutant">, number> = {
+  Bandits: 10, // fallback (no clean armor-rarity aggregate extracted yet)
+  Scientists: 10, // data-informed
+  FreeStalkers: 10, // fallback (between Neutrals and Duty/Freedom)
+  Neutrals: 10,
+
+  Duty: 20, // data-informed
+  Militaries: 20, // data-informed
+  Freedom: 20, // data-informed
+  Mercenaries: 20, // data-informed
+  Noon: 20, // fallback
+
+  Corpus: 25, // fallback (assumed high-tier)
+  Spark: 25, // data-informed
+  Varta: 25, // data-informed outlier (armor rarity proxy was extremely high-end)
+
+  Monolith: 30, // data-informed
+};
 
 export const rankThresholdsByLevel: Array<{ lowLevel: number; highLevel?: number; rank: ERank }> = [
   { lowLevel: 1, highLevel: 10, rank: "ERank::Newbie" },
@@ -62,7 +94,7 @@ export const rankThresholdsByLevel: Array<{ lowLevel: number; highLevel?: number
 ];
 
 const SKIF_GUID = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-const RANK_ORDINAL_BY_RANK: Record<ERank, number> = {
+const RANK_ORDINAL_BY_RANK: Record<`ERank::${Rank}`, number> = {
   "ERank::Newbie": 1,
   "ERank::Experienced": 2,
   "ERank::Veteran": 3,
@@ -102,7 +134,9 @@ function getLaunchQuestNode(struct: QuestNodePrototype) {
   }) as QuestNodePrototypeConsoleCommand;
 }
 
-export const transformQuestNodePrototypes: StructTransformer<QuestNodePrototypeSetCharacterParam> = (struct, context) => {
+export const transformQuestNodePrototypes: StructTransformer<
+  QuestNodePrototypeSetCharacterParam
+> = (struct, context) => {
   const extraStructs = [];
 
   if (context.filePath.endsWith("/QuestNodePrototypes/rootgraph.cfg") && !once) {
@@ -131,13 +165,16 @@ function createOnPlayerGetFactionPatchEventListeners() {
   const xpAdjustNodes: QuestNodePrototypeSetGlobalVariable[] = [];
 
   FactionPatchDefinitions.forEach((patchDef) => {
-    const onPatchReceivedNode = getOnItemReceivedNode(patchDef.SID);                                                                               // Trigger when player gets this faction patch item.
-    const hasQuestPatchNode = getConditionNode(onPatchReceivedNode);                                                                 //  Check that the received patch is a quest variant.
-    const removeQuestPatchNode = getRemovePatchNode(hasQuestPatchNode);                                                                // Remove quest patch item after check.
+    const onPatchReceivedNode = getOnItemReceivedNode(patchDef.SID); // Trigger when player gets this faction patch item.
+    const hasQuestPatchNode = getConditionNode(onPatchReceivedNode); //  Check that the received patch is a quest variant.
+    const removeQuestPatchNode = getRemovePatchNode(hasQuestPatchNode); // Remove quest patch item after check.
     hasQuestPatchNode.Launchers = getLaunchers([onPatchReceivedNode, removeQuestPatchNode]);
 
-    const adjustXpVariableNode = getAdjustXPVariableNode(hasQuestPatchNode, NPCRank[patchDef.Faction]);                                         // Add XP to the DecoupledRanks global counter.
-    const addNonQuestPatchNode = getAddNonQuestPatchNode(hasQuestPatchNode);                                                            // Grant normalized non-quest patch item.
+    const adjustXpVariableNode = getAdjustXPVariableNode(
+      hasQuestPatchNode,
+      NPCRank[patchDef.Faction],
+    ); // Add XP to the DecoupledRanks global counter.
+    const addNonQuestPatchNode = getAddNonQuestPatchNode(hasQuestPatchNode); // Grant normalized non-quest patch item.
 
     extraStructs.push(onPatchReceivedNode);
     extraStructs.push(hasQuestPatchNode);
@@ -151,10 +188,16 @@ function createOnPlayerGetFactionPatchEventListeners() {
     const onMutantPartReceivedNode = getOnItemReceivedNode(mutantDef.questSID);
     const hasQuestMutantPartNode = getConditionNode(onMutantPartReceivedNode);
     const removeQuestMutantPartNode = getRemovePatchNode(hasQuestMutantPartNode);
-    hasQuestMutantPartNode.Launchers = getLaunchers([onMutantPartReceivedNode, removeQuestMutantPartNode]);
+    hasQuestMutantPartNode.Launchers = getLaunchers([
+      onMutantPartReceivedNode,
+      removeQuestMutantPartNode,
+    ]);
 
     const adjustXpVariableNode = getAdjustXPVariableNode(hasQuestMutantPartNode, mutantDef.xp);
-    const addVanillaMutantPartNode = getAddVanillaMutantPartNode(hasQuestMutantPartNode, mutantDef.SID);
+    const addVanillaMutantPartNode = getAddVanillaMutantPartNode(
+      hasQuestMutantPartNode,
+      mutantDef.SID,
+    );
 
     extraStructs.push(onMutantPartReceivedNode);
     extraStructs.push(hasQuestMutantPartNode);
@@ -172,19 +215,34 @@ function createOnPlayerGetFactionPatchEventListeners() {
   });
   extraStructs.push(...levelSyncNodes);
 
-  const rankThresholdNode = getDelay(levelSyncNodes.filter((node): node is QuestNodePrototypeSetGlobalVariable => node.NodeType === "EQuestNodeType::SetGlobalVariable"), `${modName}_SharedRankThresholdNode`);
+  const rankThresholdNode = getDelay(
+    levelSyncNodes.filter(
+      (node): node is QuestNodePrototypeSetGlobalVariable =>
+        node.NodeType === "EQuestNodeType::SetGlobalVariable",
+    ),
+    `${modName}_SharedRankThresholdNode`,
+  );
   extraStructs.push(rankThresholdNode);
   const missingRankIndicators = [];
 
   rankThresholdsByLevel.forEach(({ lowLevel, highLevel, rank }) => {
-    const { finalNode: conditionNode, nodes: thresholdNodes } = getRankThresholdConditionChain(rankThresholdNode, rank, lowLevel, highLevel ?? Infinity); // Match current level against this rank bracket.
-    const missingRankOrdinalNode = getMissingRankOrdinalNode(conditionNode, rank);                                                       // Continue only if this rank has not already been applied.
+    const { finalNode: conditionNode, nodes: thresholdNodes } = getRankThresholdConditionChain(
+      rankThresholdNode,
+      rank,
+      lowLevel,
+      highLevel ?? Infinity,
+    ); // Match current level against this rank bracket.
+    const missingRankOrdinalNode = getMissingRankOrdinalNode(conditionNode, rank); // Continue only if this rank has not already been applied.
     const missingRankIndicatorNode = getMissingRankIndicatorNode(conditionNode, rank);
     missingRankIndicators.push(missingRankIndicatorNode);
-    const delay = getDelay([missingRankOrdinalNode], `${modName}_${rank.split("::").pop()}_delay`, 1);                   // Small sequencing delay before rank apply.
+    const delay = getDelay(
+      [missingRankOrdinalNode],
+      `${modName}_${rank.split("::").pop()}_delay`,
+      1,
+    ); // Small sequencing delay before rank apply.
     delay.Launchers = getLaunchers([asTrueConnection(missingRankOrdinalNode)]);
-    const setRankNode = getSetRankNode(delay, rank);                                                                                   // Write resolved player rank param.
-    const setCurrentRankOrdinalNode = getSetCurrentRankOrdinalNode(delay, rank);                                                    // Persist the last applied rank ordinal.
+    const setRankNode = getSetRankNode(delay, rank); // Write resolved player rank param.
+    const setCurrentRankOrdinalNode = getSetCurrentRankOrdinalNode(delay, rank); // Persist the last applied rank ordinal.
     const addCurrentRankIndicatorNode = getAddCurrentRankIndicatorNode(delay, rank);
 
     extraStructs.push(...thresholdNodes);
@@ -204,7 +262,11 @@ function createOnPlayerGetFactionPatchEventListeners() {
 /**
  * Preserve any non-rank param writes and remove only rank writes.
  */
-function handleNonRank(struct: QuestNodePrototypeSetCharacterParam, rankParamKeys: string[], extraStructs: QuestNodePrototype[]) {
+function handleNonRank(
+  struct: QuestNodePrototypeSetCharacterParam,
+  rankParamKeys: string[],
+  extraStructs: QuestNodePrototype[],
+) {
   const fork = struct.fork();
   fork.Params = struct.Params.fork();
   rankParamKeys.forEach((k) => {
@@ -217,10 +279,14 @@ function handleNonRank(struct: QuestNodePrototypeSetCharacterParam, rankParamKey
 /**
  * If the node only sets Rank for Skif, replace it with a Technical noop.
  */
-function handleRank(struct: QuestNodePrototypeSetCharacterParam, extraStructs: QuestNodePrototype[]) {
+function handleRank(
+  struct: QuestNodePrototypeSetCharacterParam,
+  extraStructs: QuestNodePrototype[],
+) {
   const techNode = struct.fork();
 
-  (techNode as QuestNodePrototype as QuestNodePrototypeTechnical).NodeType = "EQuestNodeType::Technical";
+  (techNode as QuestNodePrototype as QuestNodePrototypeTechnical).NodeType =
+    "EQuestNodeType::Technical";
   (techNode as QuestNodePrototype as QuestNodePrototypeTechnical).StartDelay = 0;
   (techNode as QuestNodePrototype as QuestNodePrototypeTechnical).LaunchOnQuestStart = false;
 
@@ -235,7 +301,11 @@ function collectRelevantKeys(struct: QuestNodePrototypeSetCharacterParam): {
   rankParamKeys: string[];
   hasNonRank: boolean;
 } {
-  if (struct.NodeType !== "EQuestNodeType::SetCharacterParam" || struct.TargetQuestGuid !== SKIF_GUID || !struct.Launchers) {
+  if (
+    struct.NodeType !== "EQuestNodeType::SetCharacterParam" ||
+    struct.TargetQuestGuid !== SKIF_GUID ||
+    !struct.Launchers
+  ) {
     return { rankParamKeys: [] as string[], hasNonRank: false };
   }
   const rankParamKeys: string[] = [];
@@ -377,12 +447,28 @@ function getThresholdConditionChain(
   return { finalNode: minOnlyNode, nodes };
 }
 
-function getRankThresholdConditionChain(launcher: QuestNodePrototypeTechnical, rank: ERank, lowLevel: number, highLevel: number) {
+function getRankThresholdConditionChain(
+  launcher: QuestNodePrototypeTechnical,
+  rank: ERank,
+  lowLevel: number,
+  highLevel: number,
+) {
   const rankName = rank.replace("ERank::", "");
-  return getThresholdConditionChain(launcher, LEVEL_GLOBAL_VARIABLE_SID, `${modName}_rankCheck_${rankName}`, lowLevel, highLevel);
+  return getThresholdConditionChain(
+    launcher,
+    LEVEL_GLOBAL_VARIABLE_SID,
+    `${modName}_rankCheck_${rankName}`,
+    lowLevel,
+    highLevel,
+  );
 }
 
-function getLevelSyncNodes(launcher: QuestNodePrototypeTechnical, level: number, lowXp: number, highXp: number) {
+function getLevelSyncNodes(
+  launcher: QuestNodePrototypeTechnical,
+  level: number,
+  lowXp: number,
+  highXp: number,
+) {
   const { finalNode: xpRangeNode, nodes } = getThresholdConditionChain(
     launcher,
     XP_GLOBAL_VARIABLE_SID,
@@ -583,7 +669,9 @@ function getAddCurrentRankIndicatorNode(launcherNode: QuestNodePrototype, rank: 
   return node;
 }
 
-function getConditionNode(onPatchReceivedNode: QuestNodePrototypeOnPlayerGetItemEvent): QuestNodePrototypeIf {
+function getConditionNode(
+  onPatchReceivedNode: QuestNodePrototypeOnPlayerGetItemEvent,
+): QuestNodePrototypeIf {
   const hasQuestPatchNode = new Struct() as QuestNodePrototypeIf;
   hasQuestPatchNode.SID = `${modName}_hasQuestPatch_${onPatchReceivedNode.ItemPrototypeSID}`;
   hasQuestPatchNode.QuestSID = onPatchReceivedNode.QuestSID;
