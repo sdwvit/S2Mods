@@ -6,7 +6,6 @@ import crypto from "node:crypto";
 import { gameRootFolder, modFolder, modName, projectRoot } from "./base-paths.mts";
 import { logger } from "./logger.mts";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
-import { maybeLaunchStalker2 } from "./launch-stalker2.mts";
 
 const gameWin64 = path.join(gameRootFolder, "Stalker2", "Binaries", "Win64");
 const gameBridgeRoot = path.join(gameWin64, "NodeBridge");
@@ -131,5 +130,4 @@ async function watch(): Promise<void> {
 
 const shouldWatch = process.argv.includes("--watch");
 await main();
-maybeLaunchStalker2();
 if (shouldWatch) await watch();
