@@ -1,10 +1,14 @@
 #include "fname.h"
 
+#include <windows.h>
+
+#include <algorithm>
 #include <atomic>
 #include <codecvt>
 #include <locale>
 #include <mutex>
 #include <string>
+#include <vector>
 
 #include "aob_scanner.h"
 #include "logging.h"
@@ -73,6 +77,32 @@ using FNameToString_Fn = void (*)(const FName*, FString*);
 std::atomic<FNameToString_Fn> g_fname_to_string{nullptr};
 std::atomic<bool> g_resolver_tried{false};
 
+// Run fn(&test, &out) inside SEH guard. Returns true iff the call didn't
+// crash AND produced a plausible UTF-16 string (first char printable ASCII).
+// Compiled as extern "C" + no local C++ objects so __try works under /EHsc.
+extern "C" {
+static int nb_try_fname_tostring(void* fn_raw, void* name_raw, void* out_raw) {
+  auto fn = reinterpret_cast<void (*)(const void*, void*)>(fn_raw);
+  __try {
+    fn(name_raw, out_raw);
+    return 1;
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
+}
+}
+
+bool verify_fname_to_string(FNameToString_Fn fn) {
+  if (!fn) return false;
+  FName test{0, 0};  // FName 0 = "None" in every UE build
+  FString out{};
+  int ok = nb_try_fname_tostring(reinterpret_cast<void*>(fn), &test, &out);
+  if (!ok) return false;
+  if (!out.data || out.num < 2) return false;
+  wchar_t c = out.data[0];
+  return c >= L' ' && c <= L'~';  // leaks out.data on success; accepted.
+}
+
 std::string wide_to_utf8(const wchar_t* ws, size_t len) {
   if (!ws || len == 0) return {};
   // std::wstring_convert is deprecated but still works — good enough for our
@@ -92,6 +122,13 @@ bool resolve_fname_to_string() {
     return g_fname_to_string.load() != nullptr;
   }
 
+  // Scan all candidates, collecting every resolved address. Then verify
+  // each in order (trusted first) by calling it with FName{0,0} and
+  // checking it produces a printable wide string. The first to pass gets
+  // installed as FName::ToString.
+  struct Resolved { const char* name; const uint8_t* target; bool trusted; };
+  std::vector<Resolved> resolved;
+
   for (const auto& cand : kFNameToStringCandidates) {
     auto pattern = nb::aob::parse(cand.pattern);
     if (!pattern.valid()) {
@@ -110,16 +147,28 @@ bool resolve_fname_to_string() {
       int32_t disp = *reinterpret_cast<const int32_t*>(call_instr + 1);
       target = next_instr + disp;
     } else {
-      target = hit;  // entry prologue — match address IS the function
+      target = hit;
     }
     nb::log::info("fname", "candidate '{}' (trusted={}) hit={} → ToString={}",
                   cand.name, cand.trusted ? "yes" : "no",
-                  static_cast<const void*>(hit),
-                  static_cast<const void*>(target));
-    if (cand.trusted && g_fname_to_string.load() == nullptr) {
-      g_fname_to_string.store(reinterpret_cast<FNameToString_Fn>(const_cast<uint8_t*>(target)));
-      nb::log::info("fname", "accepting '{}' as FName::ToString", cand.name);
+                  static_cast<const void*>(hit), static_cast<const void*>(target));
+    resolved.push_back({cand.name, target, cand.trusted});
+  }
+
+  // Stable sort: trusted first, candidate order preserved.
+  std::stable_sort(resolved.begin(), resolved.end(),
+                   [](const Resolved& a, const Resolved& b) { return a.trusted && !b.trusted; });
+
+  for (const auto& r : resolved) {
+    auto fn = reinterpret_cast<FNameToString_Fn>(const_cast<uint8_t*>(r.target));
+    if (verify_fname_to_string(fn)) {
+      g_fname_to_string.store(fn);
+      nb::log::info("fname", "verified '{}' as FName::ToString (FName{{0,0}} → 'None')",
+                    r.name);
+      break;
     }
+    nb::log::warn("fname", "rejected '{}' — verification call returned empty/garbage",
+                  r.name);
   }
 
   if (g_fname_to_string.load() == nullptr) {
