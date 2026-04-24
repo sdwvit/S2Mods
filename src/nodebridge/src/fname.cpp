@@ -77,6 +77,12 @@ using FNameToString_Fn = void (*)(const FName*, FString*);
 std::atomic<FNameToString_Fn> g_fname_to_string{nullptr};
 std::atomic<bool> g_resolver_tried{false};
 
+// Collected resolved addresses from phase 1, kept for phase 2 verification
+// once FNamePool is populated.
+struct ResolvedCandidate { const char* name; const uint8_t* target; bool trusted; };
+std::vector<ResolvedCandidate> g_pending_candidates;
+std::atomic<bool> g_phase1_done{false};
+
 // Run fn(&test, &out) inside SEH guard. Returns true iff the call didn't
 // crash AND produced a plausible UTF-16 string (first char printable ASCII).
 // Compiled as extern "C" + no local C++ objects so __try works under /EHsc.
@@ -117,17 +123,8 @@ std::string wide_to_utf8(const wchar_t* ws, size_t len) {
 
 }  // namespace
 
-bool resolve_fname_to_string() {
-  if (g_resolver_tried.exchange(true)) {
-    return g_fname_to_string.load() != nullptr;
-  }
-
-  // Scan all candidates, collecting every resolved address. Then verify
-  // each in order (trusted first) by calling it with FName{0,0} and
-  // checking it produces a printable wide string. The first to pass gets
-  // installed as FName::ToString.
-  struct Resolved { const char* name; const uint8_t* target; bool trusted; };
-  std::vector<Resolved> resolved;
+bool scan_fname_to_string_candidates() {
+  if (g_phase1_done.exchange(true)) return !g_pending_candidates.empty();
 
   for (const auto& cand : kFNameToStringCandidates) {
     auto pattern = nb::aob::parse(cand.pattern);
@@ -152,31 +149,44 @@ bool resolve_fname_to_string() {
     nb::log::info("fname", "candidate '{}' (trusted={}) hit={} → ToString={}",
                   cand.name, cand.trusted ? "yes" : "no",
                   static_cast<const void*>(hit), static_cast<const void*>(target));
-    resolved.push_back({cand.name, target, cand.trusted});
+    g_pending_candidates.push_back({cand.name, target, cand.trusted});
   }
 
-  // Stable sort: trusted first, candidate order preserved.
-  std::stable_sort(resolved.begin(), resolved.end(),
-                   [](const Resolved& a, const Resolved& b) { return a.trusted && !b.trusted; });
-
-  for (const auto& r : resolved) {
-    auto fn = reinterpret_cast<FNameToString_Fn>(const_cast<uint8_t*>(r.target));
-    if (verify_fname_to_string(fn)) {
-      g_fname_to_string.store(fn);
-      nb::log::info("fname", "verified '{}' as FName::ToString (FName{{0,0}} → 'None')",
-                    r.name);
-      break;
-    }
-    nb::log::warn("fname", "rejected '{}' — verification call returned empty/garbage",
-                  r.name);
-  }
-
-  if (g_fname_to_string.load() == nullptr) {
-    nb::log::warn("fname", "all FName::ToString candidates missed; names will be empty");
-    return false;
-  }
-  return true;
+  // Stable sort: trusted first.
+  std::stable_sort(g_pending_candidates.begin(), g_pending_candidates.end(),
+                   [](const ResolvedCandidate& a, const ResolvedCandidate& b) {
+                     return a.trusted && !b.trusted;
+                   });
+  return !g_pending_candidates.empty();
 }
+
+bool verify_and_install_fname_to_string(const FName& sample) {
+  if (g_fname_to_string.load()) return true;  // already installed
+  for (const auto& r : g_pending_candidates) {
+    auto fn = reinterpret_cast<FNameToString_Fn>(const_cast<uint8_t*>(r.target));
+    FString out{};
+    int ok = nb_try_fname_tostring(reinterpret_cast<void*>(fn),
+                                   const_cast<FName*>(&sample), &out);
+    bool looks_good = ok && out.data && out.num >= 2 && out.num < 256 &&
+                      out.data[0] >= L' ' && out.data[0] <= L'~';
+    nb::log::info(
+        "fname",
+        "verify '{}' ({}): ok={} num={} data={} first=U+{:04x}",
+        r.name, r.trusted ? "trusted" : "untrusted",
+        ok ? 1 : 0, out.num,
+        static_cast<const void*>(out.data),
+        out.data ? static_cast<uint32_t>(out.data[0]) : 0);
+    if (looks_good) {
+      g_fname_to_string.store(fn);
+      nb::log::info("fname", "accepted '{}' as FName::ToString", r.name);
+      return true;
+    }
+  }
+  nb::log::warn("fname", "no candidate passed verification against sample FName");
+  return false;
+}
+
+bool resolve_fname_to_string() { return scan_fname_to_string_candidates(); }
 
 bool fname_resolver_ready() { return g_fname_to_string.load() != nullptr; }
 
