@@ -1,25 +1,22 @@
 import type { MetaType } from "../../src/meta-type.mts";
-import { SPAWN_BUBBLE_FACTOR, transformAIGlobals } from "./transformAIGlobals.mts";
-import {
-  SQUARED_FACTOR,
-  transformALifeDirectorScenarioPrototypes,
-} from "./transformALifeDirectorScenarioPrototypes.mts";
+import { SQUARED_FACTOR, transformAIGlobals } from "./transformAIGlobals.mts";
+import { transformALifeDirectorScenarioPrototypes } from "./transformALifeDirectorScenarioPrototypes.mts";
 import { CoreVariable } from "s2cfgtojson";
 
 export const meta: MetaType = {
   description: `
-Distant Horizons (Shay's) 250m: ALife Extension 
+Distant Horizons (Shay's) 170m: ALife Extension 
 [hr][/hr]
-This is an extension for Shay's 250m Distant Horizons mod[h1][/h1]
+This is an extension for Shay's 170m Distant Horizons mod[h1][/h1]
 It modifies numerous parameters of Alife to account for increased spawn/despawn bubble
 [hr][/hr]
-For the best results, please install this mod after [url=https://www.nexusmods.com/stalker2heartofchornobyl/mods/1879?tab=files]Shay's 250m Distant Horizons mod.[/url]
+For the best results, please install this mod after [url=https://www.nexusmods.com/stalker2heartofchornobyl/mods/1879?tab=files]Shay's 170m Distant Horizons mod.[/url]
 [hr][/hr]
 [list]
-[*] MinALifeDespawnDistance increased 2.5x (to 75m)
-[*] MinALifeSpawnDistance increased 2.5x (to 62.5m)
-[*] MaxAgentsCount increased 18.75x (to 975)
-[*] Reduce delay 6.25x for spawns in various contexts like Emission, Global, Local, Hub, Quiet, and others
+[*] MinALifeDespawnDistance increased 1.7x (to 51m)
+[*] MinALifeSpawnDistance increased 1.7x (to 42.5m)
+[*] MaxAgentsCount increased 2.9x (to 150)
+[*] Reduce delay 2.9x for spawns in various contexts like Emission, Global, Local, Hub, Quiet, and others
 [/list]
 Non-bubble related changes:
 [list]
