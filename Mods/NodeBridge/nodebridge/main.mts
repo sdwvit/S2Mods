@@ -21,23 +21,29 @@ async function waitForPlayer(
     const pawn = await bridge.game.getPlayerPawn();
     if ("found" in pawn && pawn.found) return pawn;
 
-    // Fallback: broad scan across the FULL object array (not just first
-    // 4096 — those are class definitions; actor instances are higher up).
-    // Filter by substring — server-side decodes name + class once per
-    // object, much faster than per-candidate loops from the client.
+    // Diagnostic dump: the previous attempt matched only UClass/UPackage
+    // metadata (className='Class', 'Package', etc.) — those define types
+    // but aren't spawned actors. Filter those out client-side and push the
+    // limit up so real instances near the WorldMap_WP index surface.
     if (attempt % 2 === 1) {
+      const META = new Set(["Class", "Package", "ScriptStruct", "Enum", "Function", "StructProperty", "ObjectProperty"]);
       const report = async (filter: string, label: string) => {
-        const list = await bridge.game.listObjects({ filter, limit: 32 });
+        const list = await bridge.game.listObjects({ filter, limit: 1024 });
         if ("unresolved" in list) return;
-        // Strip Default__ CDOs — we want live instances.
-        const items = list.items.filter((it) => !it.name.startsWith("Default__"));
-        if (!items.length) { bridge.log(`${label}: none`); return; }
-        const line = items.slice(0, 8).map((h) => `[${h.index}] ${h.className}='${h.name}'`).join(" | ");
-        bridge.log(`${label} (${items.length}+): ${line}`);
+        const items = list.items.filter(
+          (it) => !it.name.startsWith("Default__") && !META.has(it.className),
+        );
+        if (!items.length) { bridge.log(`${label}: no real instances`); return; }
+        const line = items
+          .slice(0, 10)
+          .map((h) => `[${h.index}] ${h.className}='${h.name}'`)
+          .join(" | ");
+        bridge.log(`${label} (${items.length} real): ${line}`);
       };
+      await report("Stalker",   "class~Stalker");
       await report("Character", "class~Character");
       await report("Pawn",      "class~Pawn");
-      await report("Stalker",   "class~Stalker");
+      await report("Player",    "class~Player");
     }
 
     if (attempt >= 10) {
@@ -51,6 +57,7 @@ async function waitForPlayer(
 const WORLD_NAME = "WorldMap_WP";
 
 const init: ModInit = async (bridge) => {
+  bridge.log("----------------------------------------");
   bridge.log("mod boot; waiting for reflection...");
   while (true) {
     const { ready } = await bridge.game.isReady();
@@ -127,3 +134,5 @@ const init: ModInit = async (bridge) => {
 };
 
 export default init;
+
+
