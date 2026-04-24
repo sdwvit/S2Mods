@@ -76,6 +76,7 @@ export interface GameApi {
   setPlayerLocation(value: Vector3): Promise<{ ok: boolean; reason?: string; rootOffset: number; locOffset: number; x: number; y: number; z: number } | Unresolved>;
   getProperty(target: number | string, prop: string): Promise<{ ok: true; offset: number } | { ok: false; reason: string } | Unresolved>;
   listProperties(target: number, max?: number): Promise<{ target: number; count: number; properties: Array<{ name: string; offset: number; class: string }> } | { found: false; target: number } | Unresolved>;
+  dumpClassMemory(target: number, offset: number, count?: number): Promise<{ target: number; offset: number; count: number; classPtr: number; hex: string } | { fault: true; target: number; offset: number } | { found: false; reason?: string } | Unresolved>;
 
   // --- Write (v3, setProperty/callFunction stubbed today) ---
   setProperty(target: number | string, prop: string, value: unknown): Promise<boolean | Unresolved>;
