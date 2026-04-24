@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstdio>
 
+#include "aob_scanner.h"
 #include "fname.h"
 #include "logging.h"
 #include "rpc.h"
@@ -293,6 +294,66 @@ json game_dump_class_memory(const json& params) {
           {"classPtr", reinterpret_cast<uint64_t>(class_ptr)}, {"hex", hex}};
 }
 
+// Generic primitives for JS-side debugging without DLL rebuilds.
+// Address arguments come over JSON as numbers; JS's number can hold up
+// to 2^53 cleanly — game addresses sit at 0x140000000–0x200000000 range,
+// well within safe int. nlohmann/json round-trips them.
+
+json game_read_memory(const json& params) {
+  if (!nb::ue::is_ready()) return unresolved_reason("not ready");
+  uint64_t addr = params.value("addr", 0ULL);
+  int32_t count = std::min(params.value("count", 64), 4096);
+  if (!addr || count <= 0) return {{"error", "bad params"}};
+  std::vector<uint8_t> buf(count);
+  if (!nb_try_dump(reinterpret_cast<const void*>(addr), buf.data(), count)) {
+    return {{"addr", addr}, {"fault", true}};
+  }
+  std::string hex;
+  hex.reserve(count * 3);
+  char b[4];
+  for (int i = 0; i < count; ++i) {
+    snprintf(b, sizeof(b), "%02x ", buf[i]);
+    hex += b;
+  }
+  return {{"addr", addr}, {"count", count}, {"hex", hex}};
+}
+
+json game_scan_aob(const json& params) {
+  std::string pattern_str = params.value("pattern", "");
+  auto pat = nb::aob::parse(pattern_str);
+  if (!pat.valid()) return {{"error", "invalid pattern"}};
+  const uint8_t* hit = nb::aob::scan_main_exe(pat);
+  return {{"pattern", pattern_str}, {"hit", hit ? reinterpret_cast<uint64_t>(hit) : 0}};
+}
+
+json game_main_exe_base(const json&) {
+  HMODULE main_module = GetModuleHandleW(nullptr);
+  return {{"base", reinterpret_cast<uint64_t>(main_module)}};
+}
+
+// Read raw bytes from obj + offset (instance memory, not class memory).
+json game_dump_object_memory(const json& params) {
+  if (!nb::ue::is_ready()) return unresolved_reason("not ready");
+  int32_t target = params.value("target", -1);
+  int32_t offset = params.value("offset", 0);
+  int32_t count = std::min(params.value("count", 64), 1024);
+  const auto* item = nb::ue::get_item(target);
+  if (!item || !item->object) return {{"found", false}};
+  std::vector<uint8_t> buf(count);
+  if (!nb_try_dump(reinterpret_cast<const uint8_t*>(item->object) + offset, buf.data(), count)) {
+    return {{"target", target}, {"offset", offset}, {"fault", true}};
+  }
+  std::string hex;
+  hex.reserve(count * 3);
+  char b[4];
+  for (int i = 0; i < count; ++i) {
+    snprintf(b, sizeof(b), "%02x ", buf[i]);
+    hex += b;
+  }
+  return {{"target", target}, {"offset", offset}, {"count", count},
+          {"objPtr", reinterpret_cast<uint64_t>(item->object)}, {"hex", hex}};
+}
+
 json game_get_property(const json& params) {
   if (!nb::ue::is_ready()) return unresolved_reason("reflection not populated yet");
   if (!nb::ue::fname_resolver_ready()) return unresolved_reason("FName::ToString not resolved");
@@ -329,6 +390,10 @@ void install(nb::rpc::Router& router) {
   router.handle("game.getProperty", game_get_property);
   router.handle("game.listProperties", game_list_properties);
   router.handle("game.dumpClassMemory", game_dump_class_memory);
+  router.handle("game.dumpObjectMemory", game_dump_object_memory);
+  router.handle("game.readMemory", game_read_memory);
+  router.handle("game.scanAOB", game_scan_aob);
+  router.handle("game.mainExeBase", game_main_exe_base);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
 

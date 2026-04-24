@@ -77,6 +77,14 @@ export interface GameApi {
   getProperty(target: number | string, prop: string): Promise<{ ok: true; offset: number } | { ok: false; reason: string } | Unresolved>;
   listProperties(target: number, max?: number): Promise<{ target: number; count: number; properties: Array<{ name: string; offset: number; class: string }> } | { found: false; target: number } | Unresolved>;
   dumpClassMemory(target: number, offset: number, count?: number): Promise<{ target: number; offset: number; count: number; classPtr: number; hex: string } | { fault: true; target: number; offset: number } | { found: false; reason?: string } | Unresolved>;
+  /** Read raw bytes at obj+offset (instance memory, not class memory). */
+  dumpObjectMemory(target: number, offset: number, count?: number): Promise<{ target: number; offset: number; count: number; objPtr: number; hex: string } | { fault: true; target: number; offset: number } | { found: false } | Unresolved>;
+  /** Read N bytes from any address. count capped at 4096. */
+  readMemory(addr: number, count?: number): Promise<{ addr: number; count: number; hex: string } | { addr: number; fault: true } | { error: string } | Unresolved>;
+  /** AOB scan over the main exe. Returns hit address or 0. */
+  scanAOB(pattern: string): Promise<{ pattern: string; hit: number } | { error: string }>;
+  /** Image base of Stalker2-Win64-Shipping.exe — useful for relative-offset math. */
+  mainExeBase(): Promise<{ base: number }>;
 
   // --- Write (v3, setProperty/callFunction stubbed today) ---
   setProperty(target: number | string, prop: string, value: unknown): Promise<boolean | Unresolved>;
