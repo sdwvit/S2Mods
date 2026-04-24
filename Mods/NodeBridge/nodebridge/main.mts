@@ -351,50 +351,35 @@ async function probeUStructLayout(bridge: Bridge, classPtr: number) {
   return { ...best, internalOff: internal.off, classSize };
 }
 
+// Wait until BP_Stalker2Character_C exists in GUObjectArray. The pawn
+// only spawns once the gameplay world is fully loaded, so this is the
+// single, reliable signal that "we're in-game" — no need to also poll
+// for a UWorld instance by name. Loops indefinitely; logs object-count
+// progress every ~10s so it's obvious when the engine is still loading
+// vs genuinely stuck.
 async function waitForPlayer(
-  bridge: Awaited<Parameters<ModInit>[0]>,
-): Promise<
-  | { index: number; name: string; className: string; fullPath: string }
-  | null
-> {
-  for (let attempt = 1; ; attempt++) {
+  bridge: Bridge,
+): Promise<{ index: number; name: string; className: string; fullPath: string }> {
+  let lastCount = 0;
+  let stuckTicks = 0;
+  for (let attempt = 0; ; attempt++) {
     const pawn = await bridge.game.getPlayerPawn();
     if ("found" in pawn && pawn.found) return pawn;
 
-    // Diagnostic dump: the previous attempt matched only UClass/UPackage
-    // metadata (className='Class', 'Package', etc.) — those define types
-    // but aren't spawned actors. Filter those out client-side and push the
-    // limit up so real instances near the WorldMap_WP index surface.
-    if (attempt % 2 === 1) {
-      const META = new Set(["Class", "Package", "ScriptStruct", "Enum", "Function", "StructProperty", "ObjectProperty"]);
-      const report = async (filter: string, label: string) => {
-        const list = await bridge.game.listObjects({ filter, limit: 1024 });
-        if ("unresolved" in list) return;
-        const items = list.items.filter(
-          (it) => !it.name.startsWith("Default__") && !META.has(it.className),
-        );
-        if (!items.length) { bridge.log(`${label}: no real instances`); return; }
-        const line = items
-          .slice(0, 10)
-          .map((h) => `[${h.index}] ${h.className}='${h.name}'`)
-          .join(" | ");
-        bridge.log(`${label} (${items.length} real): ${line}`);
-      };
-      await report("Stalker",   "class~Stalker");
-      await report("Character", "class~Character");
-      await report("Pawn",      "class~Pawn");
-      await report("Player",    "class~Player");
+    // Every ~10s log progress: object count growing → engine still loading,
+    // count stuck → save not loaded yet (probably at main menu).
+    if (attempt > 0 && attempt % 5 === 0) {
+      const r = await bridge.game.getObjectCount();
+      const count = "count" in r ? r.count : -1;
+      const delta = count - lastCount;
+      if (delta < 100) stuckTicks++; else stuckTicks = 0;
+      const hint = stuckTicks >= 2 ? "  (count stable — load a save)" : "";
+      bridge.log(`waiting for player pawn… objectCount=${count} (Δ${delta >= 0 ? "+" : ""}${delta})${hint}`);
+      lastCount = count;
     }
-
-    if (attempt >= 10) {
-      bridge.log.error("gave up waiting for player pawn after 10 attempts");
-      return null;
-    }
-    await sleep(5000);
+    await sleep(2000);
   }
 }
-
-const WORLD_NAME = "WorldMap_WP";
 
 const init: ModInit = async (bridge) => {
   bridge.log("----------------------------------------");
@@ -407,7 +392,7 @@ const init: ModInit = async (bridge) => {
   // The C++ poller declares ready when GUObjectArray's `objects` ptr is
   // non-null — but UE may not have registered any UObjects yet
   // (num_elements=0). Wait until the count looks plausible before
-  // querying for World, otherwise we'd loop on an empty array forever.
+  // proceeding, otherwise we'd loop on an empty array forever.
   while (true) {
     const r = await bridge.game.getObjectCount();
     if ("count" in r && r.count > 1000) {
@@ -416,36 +401,13 @@ const init: ModInit = async (bridge) => {
     }
     await sleep(500);
   }
-  bridge.log("reflection ready; waiting for " + WORLD_NAME);
 
-  // Don't touch the player until we're actually in-world. Poll the UObject
-  // list for class='World' instances; one should be named WorldMap_WP when
-  // the gameplay level is loaded. Dump the full list if not — tells us
-  // what the world is actually called if our assumption is wrong.
-  let worldTick = 0;
-  while (true) {
-    const worlds = await bridge.game.listObjects({ className: "World", limit: 64 });
-    if ("unresolved" in worlds) {
-      bridge.log.error(`listObjects unresolved: ${worlds.reason}`);
-      await sleep(5000);
-      continue;
-    }
-    const match = worlds.items.find((w) => w.name === WORLD_NAME);
-    if (match) {
-      bridge.log(`world loaded: ${WORLD_NAME} (idx=${match.index})`);
-      break;
-    }
-    worldTick++;
-    if (worldTick === 1 || worldTick % 6 === 1) {
-      const list = worlds.items.map((w) => `${w.name}`).join(", ");
-      bridge.log(`waiting for ${WORLD_NAME}. current Worlds (${worlds.items.length}): [${list || "(none)"}]`);
-    }
-    await sleep(5000);
-  }
-
-  bridge.log("locating player pawn");
+  // No separate "wait for world" phase — `getPlayerPawn` only succeeds
+  // once the gameplay level is fully loaded (the pawn doesn't spawn
+  // until then). Polling for the pawn is a tighter signal than polling
+  // a hard-coded world name, and survives world-name changes.
+  bridge.log("waiting for player pawn (load a save if you're at the menu)");
   const pawn = await waitForPlayer(bridge);
-  if (!pawn) return;
   bridge.log(`pawn ${JSON.stringify(pawn)}`);
 
   // Sanity: FName{0,0} should always decode to "None".
