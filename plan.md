@@ -117,10 +117,46 @@ access. DLL ↔ Node over a named pipe. No Lua, no UE4SS. DLL source lives in
 - [ ] Kill `node.exe` externally; DLL should respawn and reconnect.
 - [ ] Crash Stalker 2 mid-run; next launch boots clean (no locked files).
 
-## 8. Deferred past MVP
+## 8. Status (2026-04-24)
 
-- [ ] Mutation API: UObject write access, UFunction invocation, event hooks. This is the big one — roughly a subset of UE4SS. Separate plan when scoped.
-- [ ] JS hot-reload without game restart.
-- [ ] TypeScript pipeline per mod.
-- [ ] ImGui overlay / in-game dev console.
-- [ ] Shared-runtime publish model (NodeBridge as dependency mod) to avoid every zip carrying 40 MB of Node.
+**Shipped:**
+- [x] Proxy DLL builds in CI, attached to GitHub releases on tag.
+- [x] `nodebridge-v0.1.2` is the current release — loop-accept IPC fix.
+- [x] Portable Node puller, pre-inject hash-skipped copy, `inject-nodebridge --watch`.
+- [x] Folder-presence = enabled (no `enabled.json`).
+- [x] End-to-end verified in-game on Proton. See `DesignDocs/NodeBridge.md` for the `WINEDLLOVERRIDES` requirement.
+- [x] **Hot reload**: edit `Mods/<mod>/nodebridge/main.mjs`, watcher syncs to game dir, bootstrap exits, DLL supervisor respawns `node.exe`. ~300 ms feedback loop.
+- [x] S2 AOB catalog (UE version, GUObjectArray signature, hook/settings block) captured in `DesignDocs/NodeBridge.md`.
+
+## 9. Near-term roadmap
+
+Ordered by effort/value. Pick any.
+
+### DX wins (~30 min each)
+
+- [ ] **TypeScript mod authoring.** Node 25 strips types natively. Have `bootstrap.mjs` accept `main.ts` alongside `main.mjs`; ship a `bridge.d.ts` from the runtime so IDEs give completion. No bundler, no toolchain.
+- [ ] **Stderr surfacing.** `node.exe` stderr is currently lost (`INVALID_HANDLE_VALUE` in `node_host.cpp`). Pipe it back, log it in `bridge.log` so JS crashes are visible without a custom handler.
+- [ ] **Reload trigger via log line.** `inject-nodebridge:watch` prints "reload pending" immediately on edit; right now the only feedback is the downstream bridge.log line.
+
+### Non-reflection bindings (~half day)
+
+`bridge.game.*` is stubbed on engine reflection, but Node can already do useful things from the subprocess:
+
+- [ ] `bridge.log.tailGame()` — read Stalker 2's own log at `Saved/Logs/Stalker2.log`, stream new lines to a JS callback.
+- [ ] `bridge.saves.on(event, cb)` — watch `Saved/SaveGames/`, emit `save`/`delete` events.
+- [ ] `bridge.cfg.read(path)` — load a `.cfg` out of the raw pak dirs or SDK path, parsed via `s2cfgtojson`.
+
+### Engine reflection — v2 (~multi-session)
+
+- [ ] MinHook-based AOB pattern scanner in the DLL.
+- [ ] Port GUObjectArray AOB from the S2 UE4SS build (see `DesignDocs/NodeBridge.md`), resolve the struct pointer.
+- [ ] Expose `bridge.game.listObjects({ filter })` and `bridge.game.getObjectByName(name)` via game-thread queue.
+- [ ] Once UObject enumeration works: `bridge.game.callFunction` (UFunction invocation via `UObject::ProcessEvent`).
+- [ ] Ship `nodebridge-v0.2.0` when the above works end-to-end.
+
+### Bigger bets (later)
+
+- [ ] Publish pipeline for `NodeBridge` and dependent mods to Steam Workshop / mod.io. Decide carrier-mod vs bundled-per-mod tradeoff.
+- [ ] ImGui overlay for in-game dev console.
+- [ ] Automated test harness: run inject against a sandbox game folder, spin up a fake pipe, verify handshake.
+- [ ] Support multiple mods running concurrently without interfering (already loads them all; need real use-case testing).
