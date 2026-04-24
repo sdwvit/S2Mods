@@ -37,6 +37,15 @@ extern "C" int nb_try_read_i32_u(const void* ptr, int32_t* out) {
     return 0;
   }
 }
+extern "C" int nb_try_memcpy(void* dst, const void* src, size_t n) {
+  __try {
+    for (size_t i = 0; i < n; ++i)
+      reinterpret_cast<uint8_t*>(dst)[i] = reinterpret_cast<const uint8_t*>(src)[i];
+    return 1;
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
+}
 
 }  // namespace
 
@@ -98,32 +107,43 @@ std::optional<int32_t> find_property_offset(const UObjectBase* obj, std::string_
   return std::nullopt;
 }
 
+// All typed reads/writes below go through the SEH-guarded primitives above
+// so a wrong offset, stale pointer, or blueprint-class with an unexpected
+// layout can't crash the game — we just log and return default values.
+
 void* read_ptr(const void* base, size_t offset) {
   if (!base) return nullptr;
   const auto* p = static_cast<const uint8_t*>(base) + offset;
   void* v = nullptr;
-  std::memcpy(&v, p, sizeof(v));
+  if (!nb_try_read_ptr_u(p, &v)) {
+    nb::log::warn("uprop", "fault reading ptr at offset 0x{:x}", offset);
+    return nullptr;
+  }
   return v;
 }
 
 void write_ptr(void* base, size_t offset, void* value) {
   if (!base) return;
-  auto* p = static_cast<uint8_t*>(base) + offset;
-  std::memcpy(p, &value, sizeof(value));
+  if (!nb_try_memcpy(static_cast<uint8_t*>(base) + offset, &value, sizeof(value))) {
+    nb::log::warn("uprop", "fault writing ptr at offset 0x{:x}", offset);
+  }
 }
 
 FVector3d read_vector3d(const void* base, size_t offset) {
   FVector3d v{0, 0, 0};
   if (!base) return v;
-  const auto* p = static_cast<const uint8_t*>(base) + offset;
-  std::memcpy(&v, p, sizeof(v));
+  if (!nb_try_memcpy(&v, static_cast<const uint8_t*>(base) + offset, sizeof(v))) {
+    nb::log::warn("uprop", "fault reading FVector3d at offset 0x{:x}", offset);
+    v = {0, 0, 0};
+  }
   return v;
 }
 
 void write_vector3d(void* base, size_t offset, FVector3d v) {
   if (!base) return;
-  auto* p = static_cast<uint8_t*>(base) + offset;
-  std::memcpy(p, &v, sizeof(v));
+  if (!nb_try_memcpy(static_cast<uint8_t*>(base) + offset, &v, sizeof(v))) {
+    nb::log::warn("uprop", "fault writing FVector3d at offset 0x{:x}", offset);
+  }
 }
 
 }  // namespace nb::ue
