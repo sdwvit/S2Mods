@@ -1,8 +1,11 @@
 // NodeBridge proxy DLL entry.
 //
 // Takes the dwmapi.dll slot in <game>/Stalker2/Binaries/Win64/. Windows loads us
-// before the real system DLL; our dwmapi.def forwards every export to
-// C:\Windows\System32\dwmapi.* so the game proceeds as if we weren't there.
+// before the real system DLL; dwmapi.def forwards every export to a sibling
+// file named dwmapi_orig.dll so the game proceeds as if we weren't there.
+// On first load we copy %SystemRoot%\System32\dwmapi.dll → dwmapi_orig.dll
+// next to ourselves (guarded by existence check) so the forwarders resolve.
+// CopyFileW does not take the loader lock, so doing this in DllMain is safe.
 //
 // We adopt UE4SS's loader-lock-safe init pattern (main_ue4ss_rewritten.cpp):
 // DllMain must return quickly. Instead of CreateThread (which is technically
@@ -29,6 +32,29 @@
 #include "rpc.h"
 
 namespace {
+
+// Ensure dwmapi_orig.dll exists next to us so forwarders in dwmapi.def
+// resolve. Safe to call from DllMain: only file-I/O APIs, no LoadLibrary.
+void ensure_dwmapi_orig(HMODULE self) {
+  wchar_t self_path[MAX_PATH]{};
+  if (!GetModuleFileNameW(self, self_path, MAX_PATH)) return;
+  wchar_t* last_slash = wcsrchr(self_path, L'\\');
+  if (!last_slash) return;
+  *(last_slash + 1) = L'\0';
+  wchar_t orig_path[MAX_PATH]{};
+  swprintf_s(orig_path, L"%s%s", self_path, L"dwmapi_orig.dll");
+  DWORD attrs = GetFileAttributesW(orig_path);
+  if (attrs != INVALID_FILE_ATTRIBUTES) return;  // already present
+  wchar_t sys_path[MAX_PATH]{};
+  UINT got = GetSystemDirectoryW(sys_path, MAX_PATH);
+  if (!got || got >= MAX_PATH) return;
+  wchar_t src[MAX_PATH]{};
+  swprintf_s(src, L"%s\\%s", sys_path, L"dwmapi.dll");
+  CopyFileW(src, orig_path, TRUE /* fail if exists */);
+  // If this fails the game will fail to start because forwarders won't
+  // resolve — but there's nothing else we can do from here; log once
+  // the runtime is up (bootstrap() below).
+}
 
 struct Runtime {
   nb::ipc::PipeServer pipe;
@@ -89,6 +115,10 @@ BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID) {
     case DLL_PROCESS_ATTACH: {
       g_self = module;
       DisableThreadLibraryCalls(module);
+      // MUST happen before DllMain returns: Windows resolves our forwarders
+      // (→ dwmapi_orig.dll) immediately after this function exits and aborts
+      // the game's startup if that file is missing.
+      ensure_dwmapi_orig(module);
       // If we're on the main thread (typical proxy-load path), queue an APC so
       // init runs after loader lock is released. Otherwise we were injected
       // from a worker thread and can bootstrap directly on a new thread —

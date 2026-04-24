@@ -1,34 +1,46 @@
+; Proxy DLL forwarders for dwmapi.
+;
+; MSVC .def forwarders only accept `module.exportname` where `module` is a
+; bare DLL basename — absolute paths don't work (linker treats them as
+; unresolved local exports). So we forward to a neighbour DLL named
+; `dwmapi_orig.dll` and have DllMain copy the real %SystemRoot%\System32
+; copy into the game folder under that name on first load. See dllmain.cpp.
+;
+; The game's Binaries\Win64 is ahead of System32 in the DLL search order, so
+; dwmapi_orig is resolved locally and the real DwmFlush (etc.) runs as if
+; we weren't in the middle.
+
 LIBRARY dwmapi
 
 EXPORTS
-    DwmAttachMilContent                 = C:\Windows\System32\dwmapi.DwmAttachMilContent
-    DwmDefWindowProc                    = C:\Windows\System32\dwmapi.DwmDefWindowProc
-    DwmDetachMilContent                 = C:\Windows\System32\dwmapi.DwmDetachMilContent
-    DwmEnableBlurBehindWindow           = C:\Windows\System32\dwmapi.DwmEnableBlurBehindWindow
-    DwmEnableComposition                = C:\Windows\System32\dwmapi.DwmEnableComposition
-    DwmEnableMMCSS                      = C:\Windows\System32\dwmapi.DwmEnableMMCSS
-    DwmExtendFrameIntoClientArea        = C:\Windows\System32\dwmapi.DwmExtendFrameIntoClientArea
-    DwmFlush                            = C:\Windows\System32\dwmapi.DwmFlush
-    DwmGetColorizationColor             = C:\Windows\System32\dwmapi.DwmGetColorizationColor
-    DwmGetCompositionTimingInfo         = C:\Windows\System32\dwmapi.DwmGetCompositionTimingInfo
-    DwmGetGraphicsStreamClient          = C:\Windows\System32\dwmapi.DwmGetGraphicsStreamClient
-    DwmGetGraphicsStreamTransformHint   = C:\Windows\System32\dwmapi.DwmGetGraphicsStreamTransformHint
-    DwmGetTransportAttributes           = C:\Windows\System32\dwmapi.DwmGetTransportAttributes
-    DwmGetUnmetTabRequirements          = C:\Windows\System32\dwmapi.DwmGetUnmetTabRequirements
-    DwmGetWindowAttribute               = C:\Windows\System32\dwmapi.DwmGetWindowAttribute
-    DwmInvalidateIconicBitmaps          = C:\Windows\System32\dwmapi.DwmInvalidateIconicBitmaps
-    DwmIsCompositionEnabled             = C:\Windows\System32\dwmapi.DwmIsCompositionEnabled
-    DwmModifyPreviousDxFrameDuration    = C:\Windows\System32\dwmapi.DwmModifyPreviousDxFrameDuration
-    DwmQueryThumbnailSourceSize         = C:\Windows\System32\dwmapi.DwmQueryThumbnailSourceSize
-    DwmRegisterThumbnail                = C:\Windows\System32\dwmapi.DwmRegisterThumbnail
-    DwmRenderGesture                    = C:\Windows\System32\dwmapi.DwmRenderGesture
-    DwmSetDxFrameDuration               = C:\Windows\System32\dwmapi.DwmSetDxFrameDuration
-    DwmSetIconicLivePreviewBitmap       = C:\Windows\System32\dwmapi.DwmSetIconicLivePreviewBitmap
-    DwmSetIconicThumbnail               = C:\Windows\System32\dwmapi.DwmSetIconicThumbnail
-    DwmSetPresentParameters             = C:\Windows\System32\dwmapi.DwmSetPresentParameters
-    DwmSetWindowAttribute               = C:\Windows\System32\dwmapi.DwmSetWindowAttribute
-    DwmShowContact                      = C:\Windows\System32\dwmapi.DwmShowContact
-    DwmTetherContact                    = C:\Windows\System32\dwmapi.DwmTetherContact
-    DwmTransitionOwnedWindow            = C:\Windows\System32\dwmapi.DwmTransitionOwnedWindow
-    DwmUnregisterThumbnail              = C:\Windows\System32\dwmapi.DwmUnregisterThumbnail
-    DwmUpdateThumbnailProperties        = C:\Windows\System32\dwmapi.DwmUpdateThumbnailProperties
+    DwmAttachMilContent                 = dwmapi_orig.DwmAttachMilContent
+    DwmDefWindowProc                    = dwmapi_orig.DwmDefWindowProc
+    DwmDetachMilContent                 = dwmapi_orig.DwmDetachMilContent
+    DwmEnableBlurBehindWindow           = dwmapi_orig.DwmEnableBlurBehindWindow
+    DwmEnableComposition                = dwmapi_orig.DwmEnableComposition
+    DwmEnableMMCSS                      = dwmapi_orig.DwmEnableMMCSS
+    DwmExtendFrameIntoClientArea        = dwmapi_orig.DwmExtendFrameIntoClientArea
+    DwmFlush                            = dwmapi_orig.DwmFlush
+    DwmGetColorizationColor             = dwmapi_orig.DwmGetColorizationColor
+    DwmGetCompositionTimingInfo         = dwmapi_orig.DwmGetCompositionTimingInfo
+    DwmGetGraphicsStreamClient          = dwmapi_orig.DwmGetGraphicsStreamClient
+    DwmGetGraphicsStreamTransformHint   = dwmapi_orig.DwmGetGraphicsStreamTransformHint
+    DwmGetTransportAttributes           = dwmapi_orig.DwmGetTransportAttributes
+    DwmGetUnmetTabRequirements          = dwmapi_orig.DwmGetUnmetTabRequirements
+    DwmGetWindowAttribute               = dwmapi_orig.DwmGetWindowAttribute
+    DwmInvalidateIconicBitmaps          = dwmapi_orig.DwmInvalidateIconicBitmaps
+    DwmIsCompositionEnabled             = dwmapi_orig.DwmIsCompositionEnabled
+    DwmModifyPreviousDxFrameDuration    = dwmapi_orig.DwmModifyPreviousDxFrameDuration
+    DwmQueryThumbnailSourceSize         = dwmapi_orig.DwmQueryThumbnailSourceSize
+    DwmRegisterThumbnail                = dwmapi_orig.DwmRegisterThumbnail
+    DwmRenderGesture                    = dwmapi_orig.DwmRenderGesture
+    DwmSetDxFrameDuration               = dwmapi_orig.DwmSetDxFrameDuration
+    DwmSetIconicLivePreviewBitmap       = dwmapi_orig.DwmSetIconicLivePreviewBitmap
+    DwmSetIconicThumbnail               = dwmapi_orig.DwmSetIconicThumbnail
+    DwmSetPresentParameters             = dwmapi_orig.DwmSetPresentParameters
+    DwmSetWindowAttribute               = dwmapi_orig.DwmSetWindowAttribute
+    DwmShowContact                      = dwmapi_orig.DwmShowContact
+    DwmTetherContact                    = dwmapi_orig.DwmTetherContact
+    DwmTransitionOwnedWindow            = dwmapi_orig.DwmTransitionOwnedWindow
+    DwmUnregisterThumbnail              = dwmapi_orig.DwmUnregisterThumbnail
+    DwmUpdateThumbnailProperties        = dwmapi_orig.DwmUpdateThumbnailProperties
