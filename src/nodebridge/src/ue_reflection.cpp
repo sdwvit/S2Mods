@@ -5,6 +5,7 @@
 #include <thread>
 
 #include "aob_scanner.h"
+#include "fname.h"
 #include "logging.h"
 
 namespace nb::ue {
@@ -99,6 +100,14 @@ void dump_region(const FUObjectArray* arr) {
 
 bool initialize() {
   if (g_array.load()) return true;  // already resolved
+
+  // Resolve FName::ToString up-front so the rest of the stack can decode
+  // names. Not fatal if this fails — list/get* bindings will degrade to
+  // numeric indices only.
+  if (!resolve_fname_to_string()) {
+    nb::log::warn("ue", "FName::ToString not resolved; object names will be empty");
+  }
+
   const FUObjectArray* arr = resolve_guobject_array();
   if (!arr) return false;
   g_array.store(arr);
