@@ -7,6 +7,7 @@
     "pack-inject": "S2_MOD=NodeBridge node ../../src/pack-inject.mts",
     "cook-inject": "S2_MOD=NodeBridge node ../../src/cook-inject.mts",
     "inject-nodebridge": "S2_MOD=NodeBridge node ../../src/inject-nodebridge.mts",
+    "inject-nodebridge:watch": "S2_MOD=NodeBridge node ../../src/inject-nodebridge.mts --watch",
     "pull-nodebridge": "node ../../src/pull-nodebridge.mts",
     "pull-node-runtime": "node ../../src/pull-node-runtime.mts",
     "publish-steam": "S2_MOD=NodeBridge node ../../src/publish/publish-steam.mts",

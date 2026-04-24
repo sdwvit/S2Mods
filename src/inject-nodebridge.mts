@@ -46,23 +46,6 @@ async function copyTreeIfChanged(src: string, dst: string): Promise<number> {
   return changed;
 }
 
-async function readEnabled(): Promise<Record<string, boolean>> {
-  const f = path.join(gameBridgeRoot, "mods", "enabled.json");
-  if (!fs.existsSync(f)) return {};
-  try {
-    const parsed = JSON.parse(await fsp.readFile(f, "utf8"));
-    if (Array.isArray(parsed)) return Object.fromEntries(parsed.map((n) => [n, true]));
-    if (parsed && typeof parsed === "object") return parsed;
-  } catch {}
-  return {};
-}
-
-async function writeEnabled(map: Record<string, boolean>): Promise<void> {
-  const f = path.join(gameBridgeRoot, "mods", "enabled.json");
-  await fsp.mkdir(path.dirname(f), { recursive: true });
-  await fsp.writeFile(f, JSON.stringify(map, null, 2));
-}
-
 async function main(): Promise<void> {
   await withSdkMutationLock(`inject-nodebridge:${modName}`, async () => {
     if (!fs.existsSync(modNodeBridgePayload)) {
@@ -89,17 +72,62 @@ async function main(): Promise<void> {
     // Bundled Node + runtime live under <Win64>/NodeBridge/
     changed += await copyTreeIfChanged(distNode, path.join(gameBridgeRoot, "node"));
     changed += await copyTreeIfChanged(srcRuntime, path.join(gameBridgeRoot, "runtime"));
-    // Per-mod JS payload
+    // Per-mod JS payload. Folder presence = enabled; no registry file needed.
     const modDst = path.join(gameBridgeRoot, "mods", modName);
     changed += await copyTreeIfChanged(modNodeBridgePayload, modDst);
-    // Register this mod in enabled.json without clobbering siblings
-    const enabled = await readEnabled();
-    if (enabled[modName] !== true) {
-      enabled[modName] = true;
-      await writeEnabled(enabled);
-    }
-    logger.log(`[inject-nodebridge] ${changed} file(s) updated; mod "${modName}" enabled`);
+    logger.log(`[inject-nodebridge] ${changed} file(s) updated; mod "${modName}" installed`);
   });
 }
 
+async function watch(): Promise<void> {
+  const modDst = path.join(gameBridgeRoot, "mods", modName);
+  const triggers = /\.(mjs|js|cjs|json)$/;
+  let pending: NodeJS.Timeout | null = null;
+  const pendingPaths = new Set<string>();
+
+  const flush = async () => {
+    pending = null;
+    const items = [...pendingPaths];
+    pendingPaths.clear();
+    for (const rel of items) {
+      const src = path.join(modNodeBridgePayload, rel);
+      const dst = path.join(modDst, rel);
+      try {
+        if (!fs.existsSync(src)) continue;
+        if (await copyIfChanged(src, dst)) logger.log(`[watch] ${rel}`);
+      } catch (err) {
+        logger.error(`[watch] sync ${rel} failed:`, err);
+      }
+    }
+  };
+
+  logger.log(`[watch] repo ${modNodeBridgePayload} → game ${modDst}`);
+  fs.watch(modNodeBridgePayload, { recursive: true }, (_event, filename) => {
+    if (!filename || !triggers.test(filename.toString())) return;
+    pendingPaths.add(filename.toString());
+    if (pending) clearTimeout(pending);
+    pending = setTimeout(flush, 100);
+  });
+
+  // Also watch the runtime/ tree so changes to bootstrap.mjs / bridge.mjs
+  // propagate during DLL-runtime development. Same debounce, separate dst.
+  fs.watch(srcRuntime, { recursive: true }, (_event, filename) => {
+    if (!filename || !triggers.test(filename.toString())) return;
+    const src = path.join(srcRuntime, filename.toString());
+    const dst = path.join(gameBridgeRoot, "runtime", filename.toString());
+    setTimeout(async () => {
+      try {
+        if (!fs.existsSync(src)) return;
+        if (await copyIfChanged(src, dst)) logger.log(`[watch] runtime/${filename}`);
+      } catch (err) {
+        logger.error(`[watch] runtime sync failed:`, err);
+      }
+    }, 100);
+  });
+
+  await new Promise(() => {});  // park forever; SIGINT exits
+}
+
+const shouldWatch = process.argv.includes("--watch");
 await main();
+if (shouldWatch) await watch();
