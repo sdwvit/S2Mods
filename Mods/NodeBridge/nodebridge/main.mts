@@ -101,6 +101,23 @@ const init: ModInit = async (bridge) => {
     bridge.log.error(
       `getPlayerLocation unresolved: ${home.reason} (rootOff=${home.rootOffset} locOff=${home.locOffset})`,
     );
+    // Dump the pawn's properties so we see what's actually on the class.
+    const props = await bridge.game.listProperties(pawn.index, 200);
+    if ("properties" in props) {
+      bridge.log(`pawn has ${props.count} properties; first 30:`);
+      for (let i = 0; i < Math.min(30, props.properties.length); i++) {
+        const p = props.properties[i];
+        bridge.log(`  [${p.class}] ${p.name} @ +0x${p.offset.toString(16)}`);
+      }
+      // Also call out anything containing "Root" or "Component" — the
+      // actual member name we want is probably one of these.
+      const rootish = props.properties.filter((p) => /root|component|location/i.test(p.name));
+      if (rootish.length) {
+        bridge.log(`root-ish properties: ${rootish.map((p) => `${p.name}@${p.offset}`).join(", ")}`);
+      }
+    } else {
+      bridge.log.error(`listProperties failed: ${JSON.stringify(props)}`);
+    }
     return;
   }
   const origin: Vector3 = { x: home.x, y: home.y, z: home.z };

@@ -234,6 +234,24 @@ json game_set_player_location(const json& params) {
 // substring to resolve first. Handles pointer, FName, FVector3d, int/uint,
 // double/float by type-name; unknown types return the raw byte offset so
 // JS can read in a followup call.
+// Diagnostic: dump every property name/offset on an object's class hierarchy.
+// Use when find_property_offset can't locate something we expect — tells us
+// what the actual property names are on this class.
+json game_list_properties(const json& params) {
+  if (!nb::ue::is_ready()) return unresolved_reason("reflection not populated yet");
+  if (!nb::ue::fname_resolver_ready()) return unresolved_reason("FName::ToString not resolved");
+  int32_t target = params.value("target", -1);
+  int32_t max = params.value("max", 256);
+  const auto* item = nb::ue::get_item(target);
+  if (!item || !item->object) return {{"found", false}, {"target", target}};
+  auto entries = nb::ue::list_properties(item->object, max);
+  json arr = json::array();
+  for (const auto& e : entries) {
+    arr.push_back({{"name", e.name}, {"offset", e.offset}, {"class", e.class_name}});
+  }
+  return {{"target", target}, {"count", entries.size()}, {"properties", arr}};
+}
+
 json game_get_property(const json& params) {
   if (!nb::ue::is_ready()) return unresolved_reason("reflection not populated yet");
   if (!nb::ue::fname_resolver_ready()) return unresolved_reason("FName::ToString not resolved");
@@ -268,6 +286,7 @@ void install(nb::rpc::Router& router) {
   router.handle("game.getPlayerLocation", game_get_player_location);
   router.handle("game.setPlayerLocation", game_set_player_location);
   router.handle("game.getProperty", game_get_property);
+  router.handle("game.listProperties", game_list_properties);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
 

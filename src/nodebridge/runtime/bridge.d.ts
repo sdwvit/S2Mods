@@ -75,6 +75,7 @@ export interface GameApi {
   getPlayerLocation(): Promise<Vector3 & { rootOffset: number; locOffset: number } | Unresolved>;
   setPlayerLocation(value: Vector3): Promise<{ ok: boolean; reason?: string; rootOffset: number; locOffset: number; x: number; y: number; z: number } | Unresolved>;
   getProperty(target: number | string, prop: string): Promise<{ ok: true; offset: number } | { ok: false; reason: string } | Unresolved>;
+  listProperties(target: number, max?: number): Promise<{ target: number; count: number; properties: Array<{ name: string; offset: number; class: string }> } | { found: false; target: number } | Unresolved>;
 
   // --- Write (v3, setProperty/callFunction stubbed today) ---
   setProperty(target: number | string, prop: string, value: unknown): Promise<boolean | Unresolved>;

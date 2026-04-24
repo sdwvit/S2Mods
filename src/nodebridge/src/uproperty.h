@@ -3,6 +3,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "ue_reflection.h"
 
@@ -53,6 +54,12 @@ constexpr size_t kUStructSuperStructOffset = 0x30;
 // to find a property whose FName decodes to exactly `name`. Returns the
 // byte offset within the object, or nullopt on miss.
 std::optional<int32_t> find_property_offset(const UObjectBase* obj, std::string_view name);
+
+// Walk every property on the object's class hierarchy, returning {name,
+// offset_internal} pairs. Used for diagnostics when a specific property
+// can't be found.
+struct PropertyEntry { std::string name; int32_t offset; std::string class_name; };
+std::vector<PropertyEntry> list_properties(const UObjectBase* obj, int32_t max);
 
 // Simpler: given any struct pointer (UObject or FField), read an FName at
 // `name_offset` and decode to UTF-8.
