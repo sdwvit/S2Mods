@@ -1,7 +1,10 @@
-
 import type { MetaType } from "../../src/meta-type.mts";
-import { transformAIGlobals } from "./transformAIGlobals.mts";
-import { transformALifeDirectorScenarioPrototypes } from "./transformALifeDirectorScenarioPrototypes.mts";
+import { SPAWN_BUBBLE_FACTOR, transformAIGlobals } from "./transformAIGlobals.mts";
+import {
+  SQUARED_FACTOR,
+  transformALifeDirectorScenarioPrototypes,
+} from "./transformALifeDirectorScenarioPrototypes.mts";
+import { type CoreVariable } from "s2cfgtojson";
 
 export const meta: MetaType = {
   description: `
@@ -15,16 +18,40 @@ For the best results, please install this mod after [url=https://www.nexusmods.c
 [list]
 [*] MinALifeDespawnDistance increased 2.5x (to 75m)
 [*] MinALifeSpawnDistance increased 2.5x (to 62.5m)
-[*] MaxAgentsCount increased 18.75x (to 975)
+[*] MaxAgentsCount increased 6.25x (to 325)
 [*] Reduce delay 6.25x for spawns in various contexts like Emission, Global, Local, Hub, Quiet, and others
+[*] Reduce corpse/dead body timeouts 6.25x to keep up with the larger spawn volume
 [/list]
 Non-bubble related changes:
 [list]
 [*] Allow Pseudogiants to spawn (max 0, 1, 2, 3 based on rank)
-[*] Remove restrictions on which mutants can spawn naturally. 
-[*] Remove restrictions on which NPC factions can spawn naturally. 
+[*] Remove restrictions on which mutants can spawn naturally.
+[*] Remove restrictions on which NPC factions can spawn naturally.
 [/list]
 `,
-  changenote: "Initial release",
-  structTransformers: [transformAIGlobals, transformALifeDirectorScenarioPrototypes],
+  changenote: `
+[list]
+[*] Rebalanced Swamp_ScenarioGroups weights: generic Mutant scenarios (Mutant3_5VsMutant3_5, Mutant5_7VsMutant5_7 - the only Pseudogiant spawn vector) lowered from 5 to 1, and specific-mutant scenarios (BlinddogPack, BoarPack, FleshPack, SnorkPack, BloodsuckerSingle, BloodsuckerDuo, CatPack) added at weight 5. Pseudogiants become ~2/37 of swamp rolls instead of dominating.
+[/list]
+`,
+  structTransformers: [
+    coreVarsTransformer,
+    transformAIGlobals,
+    transformALifeDirectorScenarioPrototypes,
+  ],
 };
+
+function coreVarsTransformer(struct: CoreVariable) {
+  if (struct.__internal__.rawName !== "DefaultConfig") {
+    return;
+  }
+  const fork = struct.fork();
+  fork.CorpseTimeout = Math.ceil(struct.CorpseTimeout / SQUARED_FACTOR);
+  fork.CorpseOffscreenLifetime = Math.ceil(struct.CorpseOffscreenLifetime / SQUARED_FACTOR);
+  fork.CorpseOnlineTime = Math.ceil(struct.CorpseOnlineTime / SQUARED_FACTOR);
+  fork.CorpseALifeOnlineTime = Math.ceil(struct.CorpseALifeOnlineTime / SQUARED_FACTOR);
+  fork.DeadBodyInvalidationTime = Math.ceil(struct.DeadBodyInvalidationTime / SQUARED_FACTOR);
+  return fork;
+}
+
+coreVarsTransformer.files = ["/CoreVariables.cfg"];

@@ -4,7 +4,7 @@ import type { ALifeDirectorScenarioPrototype } from "s2cfgtojson";
 import { SPAWN_BUBBLE_FACTOR } from "./transformAIGlobals.mts";
 import type { StructTransformer } from "../../src/meta-type.mts";
 
-const FACTOR = SPAWN_BUBBLE_FACTOR ** 2;
+export const SQUARED_FACTOR = SPAWN_BUBBLE_FACTOR ** 2;
 /**
  * Transforms ALifeDirectorScenarioPrototypes to adjust NPC limits and spawn parameters.
  */
@@ -33,12 +33,30 @@ export const transformALifeDirectorScenarioPrototypes: StructTransformer<ALifeDi
   });
   ALifeScenarioNPCArchetypesLimitsPerPlayerRank.__internal__.useAsterisk = false;
 
-  const ScenarioGroups = struct.ScenarioGroups.map(([_, v]) => {
+  const ScenarioGroups = struct.ScenarioGroups.map(([k, v]) => {
     const fork = v.fork();
-    if (v.SpawnDelayMin) fork.SpawnDelayMin = Math.ceil(v.SpawnDelayMin / FACTOR);
-    if (v.SpawnDelayMax) fork.SpawnDelayMax = Math.ceil(v.SpawnDelayMax / FACTOR);
-    if (v.PostSpawnDirectorTimeoutMin) fork.PostSpawnDirectorTimeoutMin = Math.ceil(v.PostSpawnDirectorTimeoutMin / FACTOR);
-    if (v.PostSpawnDirectorTimeoutMax) fork.PostSpawnDirectorTimeoutMax = Math.ceil(v.PostSpawnDirectorTimeoutMax / FACTOR);
+    if (v.SpawnDelayMin) fork.SpawnDelayMin = Math.ceil(v.SpawnDelayMin / SQUARED_FACTOR);
+    if (v.SpawnDelayMax) fork.SpawnDelayMax = Math.ceil(v.SpawnDelayMax / SQUARED_FACTOR);
+    if (v.PostSpawnDirectorTimeoutMin) fork.PostSpawnDirectorTimeoutMin = Math.ceil(v.PostSpawnDirectorTimeoutMin / SQUARED_FACTOR);
+    if (v.PostSpawnDirectorTimeoutMax) fork.PostSpawnDirectorTimeoutMax = Math.ceil(v.PostSpawnDirectorTimeoutMax / SQUARED_FACTOR);
+    if (k === "Swamp_ScenarioGroups") {
+      const ScenarioSIDs = v.ScenarioSIDs.fork();
+      ScenarioSIDs.__internal__.useAsterisk = false;
+      const reweight = (sid: string, weight: number) => {
+        const entry = new Struct({ ScenarioWeight: weight, __internal__: { rawName: sid } });
+        ScenarioSIDs.addNode(entry, sid);
+      };
+      reweight("Mutant3_5VsMutant3_5", 1);
+      reweight("Mutant5_7VsMutant5_7", 1);
+      reweight("BlinddogPack", 5);
+      reweight("BoarPack", 5);
+      reweight("FleshPack", 5);
+      reweight("SnorkPack", 5);
+      reweight("BloodsuckerSingle", 5);
+      reweight("BloodsuckerDuo", 5);
+      reweight("CatPack", 5);
+      fork.ScenarioSIDs = ScenarioSIDs;
+    }
     if (fork.entries().length) {
       return fork;
     }
@@ -50,10 +68,10 @@ export const transformALifeDirectorScenarioPrototypes: StructTransformer<ALifeDi
     RestrictedObjPrototypeSIDs,
     ProhibitedAgentTypes,
     ScenarioGroups,
-    DefaultALifeLairExpansionToPlayerTimeMax: Math.ceil(struct.DefaultALifeLairExpansionToPlayerTimeMax / FACTOR),
-    DefaultALifeLairExpansionToPlayerTimeMin: Math.ceil(struct.DefaultALifeLairExpansionToPlayerTimeMin / FACTOR),
-    DefaultSpawnDelayMax: Math.ceil(struct.DefaultSpawnDelayMax / FACTOR),
-    DefaultSpawnDelayMin: Math.ceil(struct.DefaultSpawnDelayMin / FACTOR),
+    DefaultALifeLairExpansionToPlayerTimeMax: Math.ceil(struct.DefaultALifeLairExpansionToPlayerTimeMax / SQUARED_FACTOR),
+    DefaultALifeLairExpansionToPlayerTimeMin: Math.ceil(struct.DefaultALifeLairExpansionToPlayerTimeMin / SQUARED_FACTOR),
+    DefaultSpawnDelayMax: Math.ceil(struct.DefaultSpawnDelayMax / SQUARED_FACTOR),
+    DefaultSpawnDelayMin: Math.ceil(struct.DefaultSpawnDelayMin / SQUARED_FACTOR),
   });
   return newStruct.fork(true);
 };
