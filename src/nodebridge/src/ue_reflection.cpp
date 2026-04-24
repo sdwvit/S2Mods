@@ -231,6 +231,13 @@ UObjectBase* find_player_pawn() {
   // AnimBP_Player_C. Widened to include generic Stalker / Character / Pawn
   // roots since the custom GSC naming for the S2 player is unknown.
   static const std::vector<std::string> kCandidates = {
+      // Actual Stalker 2 player character class — BP_Stalker2Character_C,
+      // confirmed from a live listObjects scan (BlueprintGeneratedClass at
+      // index ~41407). The substring "Stalker2Character" matches both the
+      // UClass itself and any spawned instance of that class.
+      "Stalker2Character",
+      // Other plausible S2 / UE candidates, kept as fallbacks in case the
+      // engine spawns a different class after cut-scenes or map transitions.
       "StalkerPlayerCharacter",
       "PlayerCharacter_C",
       "StalkerPlayer",
