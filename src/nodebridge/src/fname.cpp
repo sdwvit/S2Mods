@@ -50,6 +50,17 @@ struct AobCandidate {
 };
 
 constexpr AobCandidate kFNameToStringCandidates[] = {
+    // Lifted verbatim from patternsleuth (the AOB engine UE4SS uses) —
+    // /patternsleuth/src/resolvers/unreal/fname.rs. These match UE 5.1
+    // FName::ToString(FString&) and are field-tested across many UE5
+    // titles; most trustworthy of anything we have.
+    //   ps.void-entry: PUSH RSI / PUSH RDI / SUB RSP,0x28 / MOV RSI,RDX /
+    //                  MOV RDI,RCX / CMP [RCX+??],0 / JZ
+    //   ps.void-cs:    MOV RCX,[RAX+??] / MOV [RSP+??],RCX / LEA RCX,[RSP+??] / CALL
+    //                  (E8 at offset 14)
+    {"ps.void-entry",    "56 57 48 83 EC 28 48 89 D6 48 89 CF 83 79 ?? 00 74", AobKind::Entry, 0, true},
+    {"ps.void-cs",       "48 8B 48 ?? 48 89 4C 24 ?? 48 8D 4C 24 ?? E8",      AobKind::Callsite, 14, true},
+
     // Callsite patterns: match a CALL whose target is FName::ToString. The
     // zero-RAX + LEA RDX,[RSP+X] + MOV RCX,this + MOV [RSP+X],RAX × 2 + E8
     // sequence is very specific — trusted.
