@@ -11,6 +11,11 @@ void init();
 void shutdown();
 void write(Level level, std::string_view source, std::string_view msg);
 
+// Writes a blank line and a horizontal separator directly to the log,
+// without timestamp/level/source prefix. Use at session boundaries
+// (DLL attach) to make consecutive launches easy to eyeball.
+void banner();
+
 template <typename... Args>
 inline void info(std::string_view source, std::format_string<Args...> fmt, Args&&... args) {
   write(Level::Info, source, std::format(fmt, std::forward<Args>(args)...));
