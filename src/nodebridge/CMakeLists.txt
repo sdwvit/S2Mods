@@ -43,6 +43,7 @@ set(NB_SOURCES
   src/paths.cpp
   src/aob_scanner.cpp
   src/ue_reflection.cpp
+  src/fname.cpp
 )
 
 add_library(dwmapi SHARED ${NB_SOURCES})
