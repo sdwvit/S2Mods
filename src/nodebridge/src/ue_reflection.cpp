@@ -1,6 +1,8 @@
 #include "ue_reflection.h"
 
 #include <atomic>
+#include <chrono>
+#include <thread>
 
 #include "aob_scanner.h"
 #include "logging.h"
@@ -96,22 +98,36 @@ void dump_region(const FUObjectArray* arr) {
 }  // namespace
 
 bool initialize() {
-  if (g_ready.load()) return true;
+  if (g_array.load()) return true;  // already resolved
   const FUObjectArray* arr = resolve_guobject_array();
-  if (!plausible(arr)) {
-    nb::log::error("ue", "GUObjectArray sanity check failed — layout mismatch or AOB bad?");
-    if (arr) {
-      nb::log::info("ue", "dumping 64 bytes at {} for layout reverse-engineering:",
-                    static_cast<const void*>(arr));
-      dump_region(arr);
-    }
-    return false;
-  }
-  nb::log::info("ue", "GUObjectArray OK: num_elements={}, max_elements={}, num_chunks={}",
-                arr->obj_objects.num_elements, arr->obj_objects.max_elements,
-                arr->obj_objects.num_chunks);
+  if (!arr) return false;
   g_array.store(arr);
-  g_ready.store(true);
+
+  // The array's zeroed at DLL-attach time — UE populates it as it registers
+  // UObjects over the first few hundred ms after this. Poll on a detached
+  // worker until it looks plausible, then flip g_ready. Gives up after the
+  // timeout so a layout mismatch doesn't silently hang a ready flag.
+  std::thread([arr]() {
+    using namespace std::chrono_literals;
+    constexpr int kMaxAttempts = 600;   // 60s at 100ms per tick
+    for (int i = 0; i < kMaxAttempts; ++i) {
+      if (plausible(arr)) {
+        nb::log::info("ue",
+                      "GUObjectArray populated after ~{}ms: num_elements={}, max_elements={}, num_chunks={}",
+                      i * 100,
+                      arr->obj_objects.num_elements,
+                      arr->obj_objects.max_elements,
+                      arr->obj_objects.num_chunks);
+        g_ready.store(true);
+        return;
+      }
+      std::this_thread::sleep_for(100ms);
+    }
+    nb::log::error("ue", "GUObjectArray never populated after 60s; dumping region:");
+    dump_region(arr);
+  }).detach();
+
+  nb::log::info("ue", "GUObjectArray pointer resolved; waiting for engine to populate it");
   return true;
 }
 
