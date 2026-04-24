@@ -1,81 +1,76 @@
 // Smoke-test mod for NodeBridge.
 //
-// Current goal: identify the Stalker 2 player pawn class name so the next
-// commit can target it with a read+write (teleport) loop.
-//
-// Emits one "scan" line per tick with:
-//   - engine-reflection status
-//   - UObject count
-//   - the top 10 most common class names among currently-live objects
-//   - any object whose class name includes "Player"/"Pawn"/"Stalker"
+// Reads the player pawn, logs its location, then teleports between the
+// requested target and the origin every 5 seconds. If property resolution
+// fails, logs the reason with the partial offsets we got so the next
+// iteration has concrete data to debug with — no silent failure.
 
-import type { ModInit } from "../../../src/nodebridge/runtime/bridge.d.ts";
+import type { ModInit, Vector3 } from "../../../src/nodebridge/runtime/bridge.d.ts";
+
+const TARGET: Vector3 = { x: 404533, y: 550669, z: 579 };
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 const init: ModInit = async (bridge) => {
-  bridge.log("mod boot");
+  bridge.log("mod boot; waiting for reflection...");
+
+  // Wait until the DLL reports GUObjectArray populated.
+  while (true) {
+    const { ready } = await bridge.game.isReady();
+    if (ready) break;
+    await sleep(500);
+  }
+  bridge.log("reflection ready; locating player pawn");
+
+  const pawn = await bridge.game.getPlayerPawn();
+  if ("found" in pawn && pawn.found) {
+    bridge.log(`pawn idx=${pawn.index} class=${pawn.className} path=${pawn.fullPath}`);
+  } else if ("found" in pawn && !pawn.found) {
+    bridge.log.error(`player pawn not found: ${pawn.reason}`);
+    return;
+  } else {
+    bridge.log.error(`player pawn unresolved: ${pawn.reason}`);
+    return;
+  }
+
+  // Read current location once — becomes the "home" to bounce back to.
+  const home = await bridge.game.getPlayerLocation();
+  if ("unresolved" in home) {
+    bridge.log.error(
+      `getPlayerLocation unresolved: ${home.reason} (rootOff=${home.rootOffset} locOff=${home.locOffset})`,
+    );
+    return;
+  }
+  const origin: Vector3 = { x: home.x, y: home.y, z: home.z };
+  bridge.log(
+    `home=(${origin.x.toFixed(1)}, ${origin.y.toFixed(1)}, ${origin.z.toFixed(1)}) rootOff=${home.rootOffset} locOff=${home.locOffset}`,
+  );
+
+  let atHome = true;
   let tick = 0;
-
-  setInterval(async () => {
+  while (true) {
+    await sleep(5000);
     tick++;
-    try {
-      const { ready } = await bridge.game.isReady();
-      if (!ready) {
-        bridge.log(`tick ${tick} reflection not ready yet`);
-        return;
-      }
-      const [ver, count] = await Promise.all([
-        bridge.game.getEngineVersion(),
-        bridge.game.getObjectCount(),
-      ]);
-      bridge.log(
-        `tick ${tick} UE=${ver.major}.${ver.minor} ${JSON.stringify(count)}`,
-      );
-
-      // Pull a decent-sized slice and do histogram-y things with it.
-      const list = await bridge.game.listObjects({ limit: 4096 });
-      if ("unresolved" in list) {
-        bridge.log(`listObjects unresolved: ${list.reason}`);
-        return;
-      }
-
-      const items = list.items as Array<{
-        index: number;
-        name: string;
-        className: string;
-        fullPath: string;
-      }>;
-
-      // Class-name histogram, top 10.
-      const classCounts = new Map<string, number>();
-      for (const it of items) {
-        classCounts.set(it.className, (classCounts.get(it.className) ?? 0) + 1);
-      }
-      const top = [...classCounts.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10)
-        .map(([k, v]) => `${k}:${v}`)
-        .join(" ");
-      bridge.log(`top10 classes (of first ${items.length}): ${top}`);
-
-      // Anything player-ish — print the first few hits.
-      const playery = items.filter((it) =>
-        /player|pawn|stalker/i.test(`${it.className} ${it.name}`),
-      );
-      if (playery.length) {
-        bridge.log(
-          `player candidates (${playery.length}): ` +
-            playery
-              .slice(0, 5)
-              .map((p) => `[${p.index}] ${p.className} '${p.name}'`)
-              .join(" | "),
-        );
-      }
-    } catch (e) {
-      bridge.log.error(
-        `tick ${tick} failed: ${(e as Error)?.stack ?? String(e)}`,
-      );
+    const destination = atHome ? TARGET : origin;
+    const result = await bridge.game.setPlayerLocation(destination);
+    if ("unresolved" in result) {
+      bridge.log.error(`setPlayerLocation unresolved: ${result.reason}`);
+      continue;
     }
-  }, 5000);
+    if (!result.ok) {
+      bridge.log.error(`tick ${tick} tp failed: ${result.reason}`);
+      continue;
+    }
+    const verify = await bridge.game.getPlayerLocation();
+    const verifyStr =
+      "unresolved" in verify
+        ? verify.reason
+        : `(${verify.x.toFixed(1)}, ${verify.y.toFixed(1)}, ${verify.z.toFixed(1)})`;
+    bridge.log(
+      `tick ${tick} tp -> (${destination.x}, ${destination.y}, ${destination.z}); read-back=${verifyStr}`,
+    );
+    atHome = !atHome;
+  }
 };
 
 export default init;

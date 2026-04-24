@@ -39,6 +39,7 @@ export function createBridge(rpc, modName) {
     getObjectByName: (name) => call("game.getObjectByName", { name }),
     getPlayerPawn: () => call("game.getPlayerPawn"),
     getPlayerLocation: () => call("game.getPlayerLocation"),
+    setPlayerLocation: (value) => call("game.setPlayerLocation", { value }),
 
     // Read — properties
     getProperty: (target, prop) => call("game.getProperty", { target, prop }),

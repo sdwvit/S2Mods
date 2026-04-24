@@ -161,4 +161,60 @@ const FUObjectItem* get_item(int32_t index) {
   return chunks + slot;
 }
 
+namespace {
+
+bool icontains(std::string_view hay, std::string_view needle) {
+  if (needle.empty() || hay.empty()) return false;
+  if (needle.size() > hay.size()) return false;
+  for (size_t i = 0; i + needle.size() <= hay.size(); ++i) {
+    bool ok = true;
+    for (size_t j = 0; j < needle.size(); ++j) {
+      char a = hay[i + j];
+      char b = needle[j];
+      if (a >= 'A' && a <= 'Z') a = static_cast<char>(a + 32);
+      if (b >= 'A' && b <= 'Z') b = static_cast<char>(b + 32);
+      if (a != b) { ok = false; break; }
+    }
+    if (ok) return true;
+  }
+  return false;
+}
+
+}  // namespace
+
+UObjectBase* find_object_by_class_substring(const std::vector<std::string>& candidates) {
+  const FUObjectArray* a = g_array.load();
+  if (!a) return nullptr;
+  int32_t total = a->obj_objects.num_elements;
+  for (int32_t i = 0; i < total; ++i) {
+    const FUObjectItem* item = get_item(i);
+    if (!item || !item->object) continue;
+    auto* obj = const_cast<UObjectBase*>(item->object);
+    std::string cls = get_object_class_name(obj);  // from fname.h
+    for (const auto& c : candidates) {
+      if (icontains(cls, c)) return obj;
+    }
+  }
+  return nullptr;
+}
+
+UObjectBase* find_player_pawn() {
+  // Typical Stalker 2 / UE candidates we'll try in order. Iterates GUObject
+  // array once per candidate class-name substring — good enough for a
+  // pre-tick lookup; the JS caller should cache the index it gets back.
+  static const std::vector<std::string> kCandidates = {
+      "StalkerPlayerCharacter",
+      "PlayerCharacter",
+      "PlayerPawn",
+      "StalkerPlayer",
+      "Player_Pawn",
+      "Player_C",
+  };
+  for (const auto& c : kCandidates) {
+    std::vector<std::string> one = {c};
+    if (auto* o = find_object_by_class_substring(one)) return o;
+  }
+  return nullptr;
+}
+
 }  // namespace nb::ue

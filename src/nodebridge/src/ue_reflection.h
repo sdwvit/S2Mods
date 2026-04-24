@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace nb::ue {
 
@@ -73,5 +74,13 @@ int32_t num_objects();
 
 // Get the i-th FUObjectItem, or nullptr if out of range / not ready.
 const FUObjectItem* get_item(int32_t index);
+
+// First UObject whose class-chain name matches one of the substrings in
+// `candidates` (case-insensitive). Iterates GUObjectArray linearly; suitable
+// for occasional lookups, not per-frame polling.
+UObjectBase* find_object_by_class_substring(const std::vector<std::string>& candidates);
+
+// Well-known helpers that chain property walks. Return nullptr on miss.
+UObjectBase* find_player_pawn();
 
 }  // namespace nb::ue
