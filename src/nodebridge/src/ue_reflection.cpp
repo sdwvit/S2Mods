@@ -206,7 +206,15 @@ UObjectBase* find_object_by_class_substring(const std::vector<std::string>& cand
     const FUObjectItem* item = get_item(i);
     if (!item || !item->object) continue;
     auto* obj = const_cast<UObjectBase*>(item->object);
-    std::string cls = get_object_class_name(obj);  // from fname.h
+
+    // Skip Class Default Objects — UE names them "Default__<ClassName>".
+    // They share the class's type but are templates, not spawned actors.
+    // Reading RootComponent etc. on a CDO either returns nullptr or walks
+    // into bad memory on blueprint-derived classes.
+    std::string name = get_object_name(obj);
+    if (name.rfind("Default__", 0) == 0) continue;
+
+    std::string cls = get_object_class_name(obj);
     for (const auto& c : candidates) {
       if (icontains(cls, c)) return obj;
     }
@@ -215,16 +223,16 @@ UObjectBase* find_object_by_class_substring(const std::vector<std::string>& cand
 }
 
 UObjectBase* find_player_pawn() {
-  // Typical Stalker 2 / UE candidates we'll try in order. Iterates GUObject
-  // array once per candidate class-name substring — good enough for a
-  // pre-tick lookup; the JS caller should cache the index it gets back.
+  // Class-name substrings prioritised most-specific first. Dropped "Player_C"
+  // from the candidate list — it matched AnimBP_Player_C (an animation
+  // blueprint class, not a pawn), causing a downstream crash when we tried
+  // to read RootComponent off it.
   static const std::vector<std::string> kCandidates = {
       "StalkerPlayerCharacter",
+      "PlayerCharacter_C",
+      "StalkerPlayer",
       "PlayerCharacter",
       "PlayerPawn",
-      "StalkerPlayer",
-      "Player_Pawn",
-      "Player_C",
   };
   for (const auto& c : kCandidates) {
     std::vector<std::string> one = {c};
