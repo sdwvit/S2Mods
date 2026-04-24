@@ -331,6 +331,17 @@ json game_main_exe_base(const json&) {
   return {{"base", reinterpret_cast<uint64_t>(main_module)}};
 }
 
+// Decode an FName by (comparison_index, number) → UTF-8 string.
+// The single primitive that lets JS walk arbitrary FProperty/FField
+// chains without needing a C++ helper for each new struct shape.
+json game_fname_to_string(const json& params) {
+  if (!nb::ue::fname_resolver_ready()) return unresolved_reason("FName::ToString not resolved");
+  uint32_t comp = params.value("comp", 0u);
+  uint32_t num = params.value("num", 0u);
+  nb::ue::FName fn{comp, num};
+  return {{"comp", comp}, {"num", num}, {"name", nb::ue::fname_to_string(fn)}};
+}
+
 // Read raw bytes from obj + offset (instance memory, not class memory).
 json game_dump_object_memory(const json& params) {
   if (!nb::ue::is_ready()) return unresolved_reason("not ready");
@@ -394,6 +405,7 @@ void install(nb::rpc::Router& router) {
   router.handle("game.readMemory", game_read_memory);
   router.handle("game.scanAOB", game_scan_aob);
   router.handle("game.mainExeBase", game_main_exe_base);
+  router.handle("game.fnameToString", game_fname_to_string);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
 
