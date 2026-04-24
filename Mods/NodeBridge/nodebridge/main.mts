@@ -50,18 +50,19 @@ async function decodeFName(bridge: Bridge, comp: number, num: number): Promise<s
   return "";
 }
 
-// Heuristic chain walk. Given a head pointer and three candidate offsets
-// inside an FField/FProperty record, walk the property_link_next chain,
-// decoding the FName at each node. Bounded to avoid loops on garbage.
+// Heuristic chain walk. Given a head pointer plus the FField/FProperty
+// `name` and `next` offsets, walk the property_link_next chain and
+// decode the FName at each node. Bounded to avoid runaway loops on
+// garbage. We cache each entry's raw bytes so a follow-up pass can
+// disambiguate offset_internal without re-reading memory.
 async function walkPropertyChain(
   bridge: Bridge,
   head: number,
   nameOff: number,
   nextOff: number,
-  offsetInternalOff: number,
-  max = 64,
-): Promise<{ name: string; ptr: number; offset: number }[]> {
-  const out: { name: string; ptr: number; offset: number }[] = [];
+  max = 256,
+): Promise<{ name: string; ptr: number; bytes: Uint8Array }[]> {
+  const out: { name: string; ptr: number; bytes: Uint8Array }[] = [];
   let cur = head;
   const seen = new Set<number>();
   while (cur && !seen.has(cur) && out.length < max) {
@@ -69,19 +70,44 @@ async function walkPropertyChain(
     const r = await bridge.game.readMemory(cur, 0x80);
     if (!("hex" in r)) break;
     const bytes = parseHex(r.hex);
-    if (bytes.length < Math.max(nameOff + 8, nextOff + 8, offsetInternalOff + 4)) break;
+    if (bytes.length < Math.max(nameOff + 8, nextOff + 8)) break;
     const comp = readU32LE(bytes, nameOff);
     const num = readU32LE(bytes, nameOff + 4);
     // Sanity: comparison_index for valid FNames is never absurdly huge in
     // practice (FNamePool entries fit in ~24 bits). Bail early on trash.
     if (comp > 0x10_000_000 || num > 0x10_000_000) break;
     const name = await decodeFName(bridge, comp, num);
-    const offset = readU32LE(bytes, offsetInternalOff) | 0;  // signed
-    out.push({ name, ptr: cur, offset });
+    out.push({ name, ptr: cur, bytes });
     const next = readU64LE(bytes, nextOff);
     cur = next;
   }
   return out;
+}
+
+// Once the chain is decoded, scan each entry's cached bytes for the
+// offset_internal field. Stock UE 5.1 has it at +0x4C; the GSC build
+// shifts FProperty members by +0x08, so +0x54 is most likely. Pick by
+// "how many values fall inside [0, classSize]" — a real offset_internal
+// is the byte offset of the property within an instance, so it must
+// be < the class's PropertiesSize.
+function probeOffsetInternal(
+  entries: { bytes: Uint8Array }[],
+  classSize: number,
+): { off: number; valid: number; total: number; samples: number[] } {
+  const candidates = [0x44, 0x4C, 0x50, 0x54, 0x58, 0x5C, 0x60];
+  let best = { off: candidates[0], valid: -1, total: entries.length, samples: [] as number[] };
+  for (const off of candidates) {
+    let valid = 0;
+    const samples: number[] = [];
+    for (const e of entries) {
+      if (e.bytes.length < off + 4) continue;
+      const v = readU32LE(e.bytes, off) | 0;
+      if (v >= 0 && v < classSize) valid++;
+      if (samples.length < 8) samples.push(v);
+    }
+    if (valid > best.valid) best = { off, valid, total: entries.length, samples };
+  }
+  return best;
 }
 
 const EXPECTED_PAWN_PROPS = new Set([
@@ -104,22 +130,23 @@ function scoreNames(names: string[]): { score: number; matched: string[] } {
   return { score: matched.length * 10 - empty, matched };
 }
 
-// Try every (linkOff, nameOff, nextOff, offsetInternalOff) quadruple that's
-// plausible for stock UE 5.1 ± an FFieldVariant size shift. Pick the combo
-// that decodes the most expected pawn-class property names.
+// Sweep candidate UStruct/FField offsets, pick the combo that decodes
+// the most expected pawn-class names. Internal-offset is determined in
+// a *second* pass (probeOffsetInternal) because it doesn't affect chain
+// walking — making it part of this sweep would be tiebreaker noise.
 async function probeUStructLayout(bridge: Bridge, classPtr: number) {
+  // Stock UE 5.1 has PropertyLink at +0x60 within UStruct; the GSC fork
+  // shifts UStruct fields, so try a window above that too.
   const linkOffsets = [0x60, 0x68, 0x70, 0x78];
-  // FField in stock UE 5.1: NamePrivate at +0x28. With FFieldVariant=24
-  // bytes (instead of 16), it shifts to +0x30. With +16 shift, +0x38.
+  // FField stock NamePrivate is +0x28. With FFieldVariant=24 bytes
+  // (instead of 16) it shifts to +0x30; with +16 shift, +0x38.
   const nameOffsets = [0x28, 0x30, 0x38];
-  // FProperty.property_link_next in stock UE 5.1: +0x58. Same shifts.
+  // FProperty.property_link_next stock is +0x58. Same shifts.
   const nextOffsets = [0x58, 0x60, 0x68];
-  // FProperty.offset_internal: stock +0x4C. Could shift +/- 8.
-  const internalOffsets = [0x44, 0x4C, 0x54];
 
   bridge.log(`UStruct layout probe @ classPtr=0x${classPtr.toString(16)}`);
 
-  // First, log the head pointer at each linkOff so we know which look real.
+  // Log the head pointer at each linkOff so we know which look real.
   const heads: { off: number; ptr: number }[] = [];
   for (const off of linkOffsets) {
     const ptr = await readU64At(bridge, classPtr + off);
@@ -127,28 +154,38 @@ async function probeUStructLayout(bridge: Bridge, classPtr: number) {
     if (ptr) heads.push({ off, ptr });
   }
 
+  // Read PropertiesSize from the class so the internal-offset probe has
+  // a valid range to score against. Stock UE 5.1 has it at +0x48; with
+  // the +0x10 UStruct-field shift seen in the GSC build, +0x58. Try
+  // both — pick whichever returns a small positive int.
+  const sizeAt48 = await (async () => {
+    const r = await bridge.game.readMemory(classPtr + 0x48, 4);
+    return "hex" in r ? readU32LE(parseHex(r.hex), 0) : 0;
+  })();
+  const sizeAt58 = await (async () => {
+    const r = await bridge.game.readMemory(classPtr + 0x58, 4);
+    return "hex" in r ? readU32LE(parseHex(r.hex), 0) : 0;
+  })();
+  const classSize = [sizeAt48, sizeAt58].filter((s) => s > 0 && s < 0x100_000)[0] ?? 0x10_000;
+  bridge.log(`  PropertiesSize candidates: +0x48=${sizeAt48}, +0x58=${sizeAt58} → using ${classSize}`);
+
   let best: {
     linkOff: number;
     nameOff: number;
     nextOff: number;
-    internalOff: number;
     score: number;
     matched: string[];
-    chain: { name: string; ptr: number; offset: number }[];
+    chain: { name: string; ptr: number; bytes: Uint8Array }[];
   } | null = null;
 
   for (const { off: linkOff, ptr: head } of heads) {
     for (const nameOff of nameOffsets) {
       for (const nextOff of nextOffsets) {
-        for (const internalOff of internalOffsets) {
-          const chain = await walkPropertyChain(
-            bridge, head, nameOff, nextOff, internalOff, 64,
-          );
-          if (chain.length === 0) continue;
-          const { score, matched } = scoreNames(chain.map((e) => e.name));
-          if (!best || score > best.score) {
-            best = { linkOff, nameOff, nextOff, internalOff, score, matched, chain };
-          }
+        const chain = await walkPropertyChain(bridge, head, nameOff, nextOff, 256);
+        if (chain.length === 0) continue;
+        const { score, matched } = scoreNames(chain.map((e) => e.name));
+        if (!best || score > best.score) {
+          best = { linkOff, nameOff, nextOff, score, matched, chain };
         }
       }
     }
@@ -159,16 +196,33 @@ async function probeUStructLayout(bridge: Bridge, classPtr: number) {
     return null;
   }
 
+  // Phase 2: disambiguate offset_internal against the now-fixed chain.
+  const internal = probeOffsetInternal(best.chain, classSize);
   bridge.log(
-    `BEST: linkOff=+0x${best.linkOff.toString(16)} nameOff=+0x${best.nameOff.toString(16)} nextOff=+0x${best.nextOff.toString(16)} internalOff=+0x${best.internalOff.toString(16)} score=${best.score} matched=${best.matched.length}/${best.chain.length}`,
+    `BEST: linkOff=+0x${best.linkOff.toString(16)} nameOff=+0x${best.nameOff.toString(16)} nextOff=+0x${best.nextOff.toString(16)} internalOff=+0x${internal.off.toString(16)} (${internal.valid}/${internal.total} valid; samples ${internal.samples.join(", ")}) score=${best.score} matched=${best.matched.length}/${best.chain.length}`,
   );
   bridge.log(`matched names: ${best.matched.join(", ")}`);
-  bridge.log(`first ${Math.min(30, best.chain.length)} chain entries:`);
-  for (let i = 0; i < Math.min(30, best.chain.length); i++) {
-    const e = best.chain[i];
-    bridge.log(`  [${i}] ${e.name || "<empty>"} @ +0x${e.offset.toString(16)} (ptr=0x${e.ptr.toString(16)})`);
+  bridge.log(`chain length: ${best.chain.length}`);
+
+  // Hunt for RootComponent (and a few other AActor natives) so Phase C
+  // can pick up the offset directly without a second log round-trip.
+  const wanted = new Set(["RootComponent", "Mesh", "CapsuleComponent", "CharacterMovement"]);
+  for (const e of best.chain) {
+    if (wanted.has(e.name)) {
+      const offset = readU32LE(e.bytes, internal.off) | 0;
+      bridge.log(`  → ${e.name} @ +0x${offset.toString(16)} (ptr=0x${e.ptr.toString(16)})`);
+    }
   }
-  return best;
+
+  // Also dump the first 40 entries (up from 30) so we can eyeball any
+  // BP-specific properties that didn't make it into the wanted set.
+  bridge.log(`first ${Math.min(40, best.chain.length)} chain entries:`);
+  for (let i = 0; i < Math.min(40, best.chain.length); i++) {
+    const e = best.chain[i];
+    const off = readU32LE(e.bytes, internal.off) | 0;
+    bridge.log(`  [${i}] ${e.name || "<empty>"} @ +0x${off.toString(16)} (ptr=0x${e.ptr.toString(16)})`);
+  }
+  return { ...best, internalOff: internal.off, classSize };
 }
 
 async function waitForPlayer(
