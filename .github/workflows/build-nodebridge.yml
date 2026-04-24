@@ -6,6 +6,9 @@ on:
     tags:
       - "nodebridge-v*"
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   build:
     runs-on: windows-latest
@@ -13,7 +16,7 @@ jobs:
       run:
         shell: pwsh
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Configure MSVC
         uses: ilammy/msvc-dev-cmd@v1
