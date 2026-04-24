@@ -101,11 +101,11 @@ void dump_region(const FUObjectArray* arr) {
 bool initialize() {
   if (g_array.load()) return true;  // already resolved
 
-  // Resolve FName::ToString up-front so the rest of the stack can decode
-  // names. Not fatal if this fails — list/get* bindings will degrade to
-  // numeric indices only.
-  if (!resolve_fname_to_string()) {
-    nb::log::warn("ue", "FName::ToString not resolved; object names will be empty");
+  // Phase 1: scan AOB candidates for FName::ToString. Verification is
+  // deferred to phase 2 (below) so we can test against a real FName from
+  // a live UObject, avoiding pool-not-ready-yet false negatives.
+  if (!scan_fname_to_string_candidates()) {
+    nb::log::warn("ue", "FName::ToString: no candidates resolved; names will be empty");
   }
 
   const FUObjectArray* arr = resolve_guobject_array();
@@ -128,6 +128,22 @@ bool initialize() {
                       arr->obj_objects.max_elements,
                       arr->obj_objects.num_chunks);
         g_ready.store(true);
+
+        // Phase 2 FName verification: now that the pool is live, pick a
+        // real UObject's FName and use it as the sample. If verification
+        // still rejects everything, it's genuinely none-of-the-above and
+        // we'll need the FNamePool walker.
+        int32_t total = arr->obj_objects.num_elements;
+        for (int32_t idx = 0; idx < total; ++idx) {
+          const FUObjectItem* item = get_item(idx);
+          if (!item || !item->object) continue;
+          FName sample = item->object->name_private;
+          nb::log::info("ue", "verifying FName::ToString candidates against obj[{}] "
+                              "name_private={{{},{}}}",
+                        idx, sample.comparison_index, sample.number);
+          verify_and_install_fname_to_string(sample);
+          break;
+        }
         return;
       }
       std::this_thread::sleep_for(100ms);

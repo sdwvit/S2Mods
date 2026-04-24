@@ -15,9 +15,17 @@ struct FString {
 };
 static_assert(sizeof(FString) == 16);
 
-// Resolves FName::ToString(FString&) via the standard UE4SS AOB. Idempotent.
-// Returns true on success; false if the pattern didn't match (game patch
-// shifted the signature). On failure, fname_to_string() returns a stub.
+// Phase 1: scan all AOB candidates, collect resolved addresses. Does not
+// install any as the active FName::ToString — just logs matches. Called at
+// DLL attach (before FNamePool may be fully populated).
+bool scan_fname_to_string_candidates();
+
+// Phase 2: call each collected candidate with a REAL UObject's FName
+// (guaranteed to be in the pool). First one producing non-empty, printable
+// output wins. Call only after ue::is_ready() is true.
+bool verify_and_install_fname_to_string(const FName& sample);
+
+// Back-compat: calls phase 1 only. Kept so older call sites still compile.
 bool resolve_fname_to_string();
 
 // Is FName::ToString resolved and callable?
