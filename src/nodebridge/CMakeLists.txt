@@ -31,6 +31,7 @@ FetchContent_MakeAvailable(json)
 
 set(NB_SOURCES
   src/dllmain.cpp
+  src/dwmapi_exports.cpp
   src/hook_init.cpp
   src/node_host.cpp
   src/ipc_server.cpp
@@ -42,7 +43,7 @@ set(NB_SOURCES
   src/paths.cpp
 )
 
-add_library(dwmapi SHARED ${NB_SOURCES} src/dwmapi.def)
+add_library(dwmapi SHARED ${NB_SOURCES})
 
 set_target_properties(dwmapi PROPERTIES
   OUTPUT_NAME "dwmapi"
