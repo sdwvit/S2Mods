@@ -1,0 +1,7 @@
+DefaultConfig : struct.begin {bpatch}
+   CorpseTimeout = 960
+   CorpseOffscreenLifetime = 1
+   CorpseOnlineTime = 288
+   CorpseALifeOnlineTime = 288
+   DeadBodyInvalidationTime = 1
+struct.end
