@@ -16,7 +16,6 @@ const transformPrototypes: StructTransformer<Struct> = (struct) => {
 transformPrototypes.files = [
   "/QuestItemPrototypes.cfg",
   "/ArtifactPrototypes.cfg",
-  "/QuestArtifactPrototypes.cfg",
   "/WeaponPrototypes.cfg",
   "/ConsumablePrototypes.cfg",
 ];
