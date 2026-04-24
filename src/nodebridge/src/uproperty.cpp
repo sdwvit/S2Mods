@@ -107,6 +107,41 @@ std::optional<int32_t> find_property_offset(const UObjectBase* obj, std::string_
   return std::nullopt;
 }
 
+std::vector<PropertyEntry> list_properties(const UObjectBase* obj, int32_t max) {
+  std::vector<PropertyEntry> out;
+  if (!obj || !obj->class_ptr || max <= 0) return out;
+  const void* cls = obj->class_ptr;
+  int parent_walks = 0;
+  while (cls && parent_walks < 16 && static_cast<int32_t>(out.size()) < max) {
+    // Each parent class is itself a UObjectBase (UClass derives from UObject).
+    auto* class_obj = reinterpret_cast<const UObjectBase*>(cls);
+    std::string class_name = get_object_name(class_obj);
+
+    void* head_raw = nullptr;
+    if (!nb_try_read_ptr_u(static_cast<const uint8_t*>(cls) + kUStructPropertyLinkOffset, &head_raw)) break;
+    const FProperty* cur = static_cast<const FProperty*>(head_raw);
+    int seen = 0;
+    while (cur && seen < 2048 && static_cast<int32_t>(out.size()) < max) {
+      uint32_t comp = 0, num = 0;
+      if (!nb_try_read_fname_u(&cur->hdr.name_private, &comp, &num)) break;
+      FName fn{comp, num};
+      std::string pn = fname_to_string(fn);
+      int32_t off = 0;
+      nb_try_read_i32_u(&cur->offset_internal, &off);
+      out.push_back({pn, off, class_name});
+      void* next_raw = nullptr;
+      if (!nb_try_read_ptr_u(&cur->property_link_next, &next_raw)) break;
+      cur = static_cast<const FProperty*>(next_raw);
+      ++seen;
+    }
+    void* super_raw = nullptr;
+    if (!nb_try_read_ptr_u(static_cast<const uint8_t*>(cls) + kUStructSuperStructOffset, &super_raw)) break;
+    cls = super_raw;
+    ++parent_walks;
+  }
+  return out;
+}
+
 // All typed reads/writes below go through the SEH-guarded primitives above
 // so a wrong offset, stale pointer, or blueprint-class with an unexpected
 // layout can't crash the game — we just log and return default values.
