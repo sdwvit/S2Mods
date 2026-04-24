@@ -1,0 +1,34 @@
+LIBRARY dwmapi
+
+EXPORTS
+    DwmAttachMilContent                 = C:\Windows\System32\dwmapi.DwmAttachMilContent
+    DwmDefWindowProc                    = C:\Windows\System32\dwmapi.DwmDefWindowProc
+    DwmDetachMilContent                 = C:\Windows\System32\dwmapi.DwmDetachMilContent
+    DwmEnableBlurBehindWindow           = C:\Windows\System32\dwmapi.DwmEnableBlurBehindWindow
+    DwmEnableComposition                = C:\Windows\System32\dwmapi.DwmEnableComposition
+    DwmEnableMMCSS                      = C:\Windows\System32\dwmapi.DwmEnableMMCSS
+    DwmExtendFrameIntoClientArea        = C:\Windows\System32\dwmapi.DwmExtendFrameIntoClientArea
+    DwmFlush                            = C:\Windows\System32\dwmapi.DwmFlush
+    DwmGetColorizationColor             = C:\Windows\System32\dwmapi.DwmGetColorizationColor
+    DwmGetCompositionTimingInfo         = C:\Windows\System32\dwmapi.DwmGetCompositionTimingInfo
+    DwmGetGraphicsStreamClient          = C:\Windows\System32\dwmapi.DwmGetGraphicsStreamClient
+    DwmGetGraphicsStreamTransformHint   = C:\Windows\System32\dwmapi.DwmGetGraphicsStreamTransformHint
+    DwmGetTransportAttributes           = C:\Windows\System32\dwmapi.DwmGetTransportAttributes
+    DwmGetUnmetTabRequirements          = C:\Windows\System32\dwmapi.DwmGetUnmetTabRequirements
+    DwmGetWindowAttribute               = C:\Windows\System32\dwmapi.DwmGetWindowAttribute
+    DwmInvalidateIconicBitmaps          = C:\Windows\System32\dwmapi.DwmInvalidateIconicBitmaps
+    DwmIsCompositionEnabled             = C:\Windows\System32\dwmapi.DwmIsCompositionEnabled
+    DwmModifyPreviousDxFrameDuration    = C:\Windows\System32\dwmapi.DwmModifyPreviousDxFrameDuration
+    DwmQueryThumbnailSourceSize         = C:\Windows\System32\dwmapi.DwmQueryThumbnailSourceSize
+    DwmRegisterThumbnail                = C:\Windows\System32\dwmapi.DwmRegisterThumbnail
+    DwmRenderGesture                    = C:\Windows\System32\dwmapi.DwmRenderGesture
+    DwmSetDxFrameDuration               = C:\Windows\System32\dwmapi.DwmSetDxFrameDuration
+    DwmSetIconicLivePreviewBitmap       = C:\Windows\System32\dwmapi.DwmSetIconicLivePreviewBitmap
+    DwmSetIconicThumbnail               = C:\Windows\System32\dwmapi.DwmSetIconicThumbnail
+    DwmSetPresentParameters             = C:\Windows\System32\dwmapi.DwmSetPresentParameters
+    DwmSetWindowAttribute               = C:\Windows\System32\dwmapi.DwmSetWindowAttribute
+    DwmShowContact                      = C:\Windows\System32\dwmapi.DwmShowContact
+    DwmTetherContact                    = C:\Windows\System32\dwmapi.DwmTetherContact
+    DwmTransitionOwnedWindow            = C:\Windows\System32\dwmapi.DwmTransitionOwnedWindow
+    DwmUnregisterThumbnail              = C:\Windows\System32\dwmapi.DwmUnregisterThumbnail
+    DwmUpdateThumbnailProperties        = C:\Windows\System32\dwmapi.DwmUpdateThumbnailProperties
