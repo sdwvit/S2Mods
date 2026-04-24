@@ -51,6 +51,7 @@ export function createBridge(rpc, modName) {
     readMemory: (addr, count) => call("game.readMemory", { addr, count: count ?? 64 }),
     scanAOB: (pattern) => call("game.scanAOB", { pattern }),
     mainExeBase: () => call("game.mainExeBase"),
+    fnameToString: (comp, num) => call("game.fnameToString", { comp, num: num ?? 0 }),
 
     // Write — UObject / UProperty / UFunction. Stubbed until v3; returns
     // { unresolved: true } today so JS authors can wire up code against the

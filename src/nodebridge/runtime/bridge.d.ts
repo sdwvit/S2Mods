@@ -85,6 +85,8 @@ export interface GameApi {
   scanAOB(pattern: string): Promise<{ pattern: string; hit: number } | { error: string }>;
   /** Image base of Stalker2-Win64-Shipping.exe — useful for relative-offset math. */
   mainExeBase(): Promise<{ base: number }>;
+  /** Decode an FName (comparison_index, number) to a UTF-8 string via FName::ToString. */
+  fnameToString(comp: number, num?: number): Promise<{ comp: number; num: number; name: string } | Unresolved>;
 
   // --- Write (v3, setProperty/callFunction stubbed today) ---
   setProperty(target: number | string, prop: string, value: unknown): Promise<boolean | Unresolved>;
