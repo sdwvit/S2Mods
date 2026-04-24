@@ -21,35 +21,27 @@ async function waitForPlayer(
     const pawn = await bridge.game.getPlayerPawn();
     if ("found" in pawn && pawn.found) return pawn;
 
-    // Dump diagnostic every few attempts: what DOES exist right now, and
-    // does anything vaguely player-ish show up even if our substrings missed?
-    if (attempt % 3 === 1) {
-      const list = await bridge.game.listObjects({ limit: 4096 });
-      if ("unresolved" in list) {
-        bridge.log.warn(`listObjects unresolved: ${list.reason}`);
-      } else {
-        const counts = new Map<string, number>();
-        for (const it of list.items) counts.set(it.className, (counts.get(it.className) ?? 0) + 1);
-        const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15)
-          .map(([k, v]) => `${k}:${v}`).join(" ");
-        bridge.log(`classes (of ${list.items.length}): ${top}`);
-
-        const hits = list.items.filter((it) =>
-          /player|pawn|character|controller|stalker/i.test(`${it.className} ${it.name}`),
-        );
-        if (hits.length) {
-          bridge.log(
-            `player-ish (${hits.length}): ` +
-              hits.slice(0, 8).map((h) => `[${h.index}] ${h.className}='${h.name}'`).join(" | "),
-          );
-        } else {
-          bridge.log("no player-ish classes yet — are you in a save?");
-        }
-      }
+    // Fallback: broad scan across the FULL object array (not just first
+    // 4096 — those are class definitions; actor instances are higher up).
+    // Filter by substring — server-side decodes name + class once per
+    // object, much faster than per-candidate loops from the client.
+    if (attempt % 2 === 1) {
+      const report = async (filter: string, label: string) => {
+        const list = await bridge.game.listObjects({ filter, limit: 32 });
+        if ("unresolved" in list) return;
+        // Strip Default__ CDOs — we want live instances.
+        const items = list.items.filter((it) => !it.name.startsWith("Default__"));
+        if (!items.length) { bridge.log(`${label}: none`); return; }
+        const line = items.slice(0, 8).map((h) => `[${h.index}] ${h.className}='${h.name}'`).join(" | ");
+        bridge.log(`${label} (${items.length}+): ${line}`);
+      };
+      await report("Character", "class~Character");
+      await report("Pawn",      "class~Pawn");
+      await report("Stalker",   "class~Stalker");
     }
 
-    if (attempt >= 20) {
-      bridge.log.error("gave up waiting for player pawn after 20 attempts");
+    if (attempt >= 10) {
+      bridge.log.error("gave up waiting for player pawn after 10 attempts");
       return null;
     }
     await sleep(5000);
@@ -67,18 +59,28 @@ const init: ModInit = async (bridge) => {
   }
   bridge.log("reflection ready; waiting for " + WORLD_NAME);
 
-  // Don't touch the player until we're actually in-world — lookups in the
-  // main menu or during map transitions resolve to CDOs / anim BPs and
-  // crash the property walker. Poll for the world name first.
+  // Don't touch the player until we're actually in-world. Poll the UObject
+  // list for class='World' instances; one should be named WorldMap_WP when
+  // the gameplay level is loaded. Dump the full list if not — tells us
+  // what the world is actually called if our assumption is wrong.
   let worldTick = 0;
   while (true) {
-    const world = await bridge.game.getObjectByName(WORLD_NAME);
-    if ("found" in world && world.found) {
-      bridge.log(`world loaded: ${WORLD_NAME} (idx=${world.index})`);
+    const worlds = await bridge.game.listObjects({ className: "World", limit: 64 });
+    if ("unresolved" in worlds) {
+      bridge.log.error(`listObjects unresolved: ${worlds.reason}`);
+      await sleep(5000);
+      continue;
+    }
+    const match = worlds.items.find((w) => w.name === WORLD_NAME);
+    if (match) {
+      bridge.log(`world loaded: ${WORLD_NAME} (idx=${match.index})`);
       break;
     }
     worldTick++;
-    if (worldTick % 6 === 1) bridge.log(`still waiting for ${WORLD_NAME}...`);
+    if (worldTick === 1 || worldTick % 6 === 1) {
+      const list = worlds.items.map((w) => `${w.name}`).join(", ");
+      bridge.log(`waiting for ${WORLD_NAME}. current Worlds (${worlds.items.length}): [${list || "(none)"}]`);
+    }
     await sleep(5000);
   }
 
