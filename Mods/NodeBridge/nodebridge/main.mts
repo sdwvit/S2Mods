@@ -18,6 +18,19 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
 type Bridge = Awaited<Parameters<ModInit>[0]>;
 
+// Verified GSC UE 5.1 layout (Stalker 2). Confirmed via the JS probe in
+// session 2026-04-24 23:15. FField/FProperty are stock UE 5.1; only
+// UStruct has a +0x10 shift on its members.
+const GSC = {
+  uStructPropertyLink: 0x70,    // stock +0x60
+  uStructPropertiesSize: 0x58,  // stock +0x48
+  uStructSuperStruct: 0x40,     // stock +0x30 (assumed +0x10 same shift)
+  fFieldNamePrivate: 0x28,      // stock
+  fPropertyNextLink: 0x58,      // stock
+  fPropertyOffsetInternal: 0x4c,// stock
+  uObjectClassPtr: 0x10,        // stock UObjectBase
+} as const;
+
 function parseHex(hex: string): Uint8Array {
   const parts = hex.trim().split(/\s+/).filter(Boolean);
   const out = new Uint8Array(parts.length);
@@ -122,6 +135,82 @@ const EXPECTED_PAWN_PROPS = new Set([
   "Mesh", "CharacterMovement", "CapsuleComponent", "JumpKeyHoldTime",
   "JumpMaxCount", "JumpMaxHoldTime", "BaseRotationOffset",
 ]);
+
+// Find a property by name on a UClass using the verified GSC offsets.
+// Returns the property's offset_internal (byte offset within an instance)
+// or null if not found. Walks PropertyLink, which already includes
+// inherited properties — no need to walk SuperStruct manually.
+async function findPropertyOffset(
+  bridge: Bridge,
+  classPtr: number,
+  propName: string,
+  max = 512,
+): Promise<number | null> {
+  const head = await readU64At(bridge, classPtr + GSC.uStructPropertyLink);
+  if (!head) return null;
+  let cur = head;
+  const seen = new Set<number>();
+  while (cur && !seen.has(cur) && seen.size < max) {
+    seen.add(cur);
+    const r = await bridge.game.readMemory(cur, 0x80);
+    if (!("hex" in r)) return null;
+    const bytes = parseHex(r.hex);
+    if (bytes.length < 0x60) return null;
+    const comp = readU32LE(bytes, GSC.fFieldNamePrivate);
+    const num = readU32LE(bytes, GSC.fFieldNamePrivate + 4);
+    if (comp > 0x10_000_000 || num > 0x10_000_000) return null;
+    const name = await decodeFName(bridge, comp, num);
+    if (name === propName) return readU32LE(bytes, GSC.fPropertyOffsetInternal) | 0;
+    cur = readU64LE(bytes, GSC.fPropertyNextLink);
+  }
+  return null;
+}
+
+// Read 24 bytes (3×double) at addr → FVector3d.
+async function readVector3dAt(bridge: Bridge, addr: number): Promise<Vector3 | null> {
+  const r = await bridge.game.readMemory(addr, 24);
+  if (!("hex" in r)) return null;
+  const bytes = parseHex(r.hex);
+  const dv = new DataView(bytes.buffer, bytes.byteOffset, 24);
+  return { x: dv.getFloat64(0, true), y: dv.getFloat64(8, true), z: dv.getFloat64(16, true) };
+}
+
+// Resolve player location entirely in JS using the verified GSC offsets.
+// pawn → class.PropertyLink → find "RootComponent" (offset within pawn) →
+// pawnPtr + rootOff → USceneComponent → its class.PropertyLink →
+// find "RelativeLocation" → that addr → read 24 bytes.
+async function getPlayerLocationViaJS(bridge: Bridge, pawnIdx: number): Promise<{
+  home: Vector3;
+  pawnPtr: number;
+  rootOff: number;
+  rootPtr: number;
+  relLocOff: number;
+} | null> {
+  // Read pawn's UObject pointer + class pointer.
+  const pawnPtrR = await bridge.game.dumpObjectMemory(pawnIdx, 0, 24);
+  if (!("hex" in pawnPtrR)) return null;
+  const pawnPtr = pawnPtrR.objPtr;
+  const pawnBytes = parseHex(pawnPtrR.hex);
+  const pawnClassPtr = readU64LE(pawnBytes, GSC.uObjectClassPtr);
+
+  const rootOff = await findPropertyOffset(bridge, pawnClassPtr, "RootComponent");
+  if (rootOff == null) return null;
+  bridge.log(`RootComponent @ +0x${rootOff.toString(16)}`);
+
+  const rootPtr = await readU64At(bridge, pawnPtr + rootOff);
+  if (!rootPtr) return null;
+
+  // Read SceneComponent's class pointer, then find RelativeLocation.
+  const rootClassPtr = await readU64At(bridge, rootPtr + GSC.uObjectClassPtr);
+  if (!rootClassPtr) return null;
+  const relLocOff = await findPropertyOffset(bridge, rootClassPtr, "RelativeLocation");
+  if (relLocOff == null) return null;
+  bridge.log(`RelativeLocation @ +0x${relLocOff.toString(16)} (within RootComponent)`);
+
+  const home = await readVector3dAt(bridge, rootPtr + relLocOff);
+  if (!home) return null;
+  return { home, pawnPtr, rootOff, rootPtr, relLocOff };
+}
 
 function scoreNames(names: string[]): { score: number; matched: string[] } {
   const matched = names.filter((n) => EXPECTED_PAWN_PROPS.has(n));
@@ -310,57 +399,43 @@ const init: ModInit = async (bridge) => {
   if (!pawn) return;
   bridge.log(`pawn ${JSON.stringify(pawn)}`);
 
-  const home = await bridge.game.getPlayerLocation();
-  if ("unresolved" in home) {
-    bridge.log.error(
-      `getPlayerLocation unresolved: ${home.reason} (rootOff=${home.rootOffset} locOff=${home.locOffset})`,
-    );
+  // Sanity: FName{0,0} should always decode to "None".
+  const noneCheck = await bridge.game.fnameToString(0, 0);
+  bridge.log(`fnameToString self-test: ${JSON.stringify(noneCheck)}`);
 
-    // Self-test: FName{0,0} should always decode to "None".
-    const noneCheck = await bridge.game.fnameToString(0, 0);
-    bridge.log(`fnameToString self-test: ${JSON.stringify(noneCheck)}`);
-
-    // Read class_ptr from the pawn UObject (UObjectBase + 0x10).
-    const classPtr = await (async () => {
-      const r = await bridge.game.dumpObjectMemory(pawn.index, 0x10, 8);
-      if (!("hex" in r)) return null;
-      return readU64LE(parseHex(r.hex), 0);
-    })();
-    if (!classPtr) {
-      bridge.log.error("could not read class_ptr from pawn");
-      return;
+  // Resolve location entirely in JS — the C++ getPlayerLocation path is
+  // gated on a broken FProperty walker, but the JS walker uses the
+  // verified GSC offsets above.
+  const located = await getPlayerLocationViaJS(bridge, pawn.index);
+  if (!located) {
+    bridge.log.error("JS-path location resolution failed; running diagnostic probe");
+    const classPtrR = await bridge.game.dumpObjectMemory(pawn.index, GSC.uObjectClassPtr, 8);
+    if ("hex" in classPtrR) {
+      await probeUStructLayout(bridge, readU64LE(parseHex(classPtrR.hex), 0));
     }
-
-    await probeUStructLayout(bridge, classPtr);
     return;
   }
-  const origin: Vector3 = { x: home.x, y: home.y, z: home.z };
+
+  const { home, rootPtr, relLocOff } = located;
   bridge.log(
-    `home=(${origin.x.toFixed(1)}, ${origin.y.toFixed(1)}, ${origin.z.toFixed(1)}) rootOff=${home.rootOffset} locOff=${home.locOffset}`,
+    `home=(${home.x.toFixed(1)}, ${home.y.toFixed(1)}, ${home.z.toFixed(1)})  rootPtr=0x${rootPtr.toString(16)} relLocOff=+0x${relLocOff.toString(16)}`,
   );
 
-  let atHome = true;
+  // Read-only loop until we add a writeMemory primitive (Phase D). Logs
+  // current coords every 5s so we can confirm the read path stays valid
+  // as the player moves.
   let tick = 0;
   while (true) {
     await sleep(5000);
     tick++;
-    const destination = atHome ? TARGET : origin;
-    const result = await bridge.game.setPlayerLocation(destination);
-    if ("unresolved" in result) {
-      bridge.log.error(`setPlayerLocation unresolved: ${result.reason}`);
+    const here = await readVector3dAt(bridge, rootPtr + relLocOff);
+    if (!here) {
+      bridge.log.error(`tick ${tick} re-read faulted`);
       continue;
     }
-    if (!result.ok) {
-      bridge.log.error(`tick ${tick} tp failed: ${result.reason}`);
-      continue;
-    }
-    const verify = await bridge.game.getPlayerLocation();
-    const verifyStr =
-      "unresolved" in verify
-        ? verify.reason
-        : `(${verify.x.toFixed(1)}, ${verify.y.toFixed(1)}, ${verify.z.toFixed(1)})`;
-    bridge.log(`tick ${tick} tp -> (${destination.x}, ${destination.y}, ${destination.z}); read-back=${verifyStr}`);
-    atHome = !atHome;
+    const dx = here.x - home.x, dy = here.y - home.y, dz = here.z - home.z;
+    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    bridge.log(`tick ${tick} pos=(${here.x.toFixed(1)}, ${here.y.toFixed(1)}, ${here.z.toFixed(1)}) Δ=${dist.toFixed(1)}`);
   }
 };
 
