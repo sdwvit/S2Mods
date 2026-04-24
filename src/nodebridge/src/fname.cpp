@@ -237,11 +237,12 @@ std::string fname_to_string(const FName& name) {
   FNameToString_Fn fn = g_fname_to_string.load();
   if (!fn) return {};
   FString out{};
-  try {
-    fn(&name, &out);
-  } catch (...) {
-    return {};
-  }
+  // SEH-guarded: C++ try/catch DOES NOT catch structured exceptions
+  // (access violations inside the game's FName::ToString). Use the same
+  // raw __try wrapper we use in verify — returns 0 on fault.
+  int ok = nb_try_fname_tostring(reinterpret_cast<void*>(fn),
+                                 const_cast<FName*>(&name), &out);
+  if (!ok) return {};
   if (!out.data || out.num <= 0) return {};
   // num includes the trailing L'\0'; skip it.
   size_t len = static_cast<size_t>(out.num - 1);
