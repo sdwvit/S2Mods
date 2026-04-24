@@ -310,6 +310,68 @@ const S2 = {
   },
 };
 
+// Walk every property on a UClass (via PropertyLink) and return
+// {name, offset, raw 4 bytes as u32 + f32}. Used for diagnostics + as
+// the input to highlightProperties (which spotlights candidates by
+// name pattern).
+async function listAllProperties(
+  bridge: Bridge,
+  classPtr: number,
+  max = 256,
+): Promise<Array<{ name: string; off: number }>> {
+  const head = await readU64At(bridge, classPtr + GSC.uStructPropertyLink);
+  if (!head) return [];
+  const out: Array<{ name: string; off: number }> = [];
+  let cur = head;
+  const seen = new Set<number>();
+  while (cur && !seen.has(cur) && out.length < max) {
+    seen.add(cur);
+    const r = await bridge.game.readMemory(cur, 0x80);
+    if (!("hex" in r)) break;
+    const propBytes = parseHex(r.hex);
+    const comp = readU32LE(propBytes, GSC.fFieldNamePrivate);
+    const num = readU32LE(propBytes, GSC.fFieldNamePrivate + 4);
+    if (comp > 0x10_000_000 || num > 0x10_000_000) break;
+    const name = await decodeFName(bridge, comp, num);
+    const off = readU32LE(propBytes, GSC.fPropertyOffsetInternal) | 0;
+    out.push({ name, off });
+    cur = readU64LE(propBytes, GSC.fPropertyNextLink);
+  }
+  return out;
+}
+
+// Spotlight properties whose names match any of the given regex
+// patterns. Logs name + offset + current value (u32 + f32 + bool).
+// Use after listAllProperties / dumpAllProperties to surface specific
+// candidates from a 200-entry dump.
+async function highlightProperties(
+  bridge: Bridge,
+  uobjPtr: number,
+  props: Array<{ name: string; off: number }>,
+  patterns: RegExp[],
+  label: string,
+): Promise<void> {
+  const matches = props.filter((p) => patterns.some((re) => re.test(p.name)));
+  if (matches.length === 0) {
+    bridge.log(`${label}: no candidates`);
+    return;
+  }
+  bridge.log(`${label} (${matches.length} candidates):`);
+  for (const m of matches) {
+    const r = await bridge.game.readMemory(uobjPtr + m.off, 4);
+    if (!("hex" in r)) {
+      bridge.log(`    ${m.name.padEnd(36)} @ +0x${m.off.toString(16).padStart(4, "0")}  <fault>`);
+      continue;
+    }
+    const b = parseHex(r.hex);
+    const u = readU32LE(b, 0);
+    const f = new DataView(b.buffer, b.byteOffset, 4).getFloat32(0, true);
+    const fStr = Number.isFinite(f) ? f.toFixed(3) : "?";
+    const bool = b[0] !== 0 ? "true" : "false";
+    bridge.log(`    ${m.name.padEnd(36)} @ +0x${m.off.toString(16).padStart(4, "0")}  u32=${u} f32=${fStr} bool=${bool}`);
+  }
+}
+
 // Walk every property on a UClass (via PropertyLink) and log
 // {name, offset, raw 4 bytes as u32 + f32}. Useful for spotting which
 // property holds a value you care about (health = ~100, ammo = ~30,
@@ -635,11 +697,32 @@ const init: ModInit = async (bridge) => {
   // OTHER transform field if dual-write to ComponentToWorld doesn't
   // visually teleport).
   bridge.log(`---- pawn class properties (${pawn.className}) ----`);
+  const pawnProps = await listAllProperties(bridge, pawnClassPtr, 256);
   await dumpAllProperties(bridge, pawnPtr, pawnClassPtr, 256);
   bridge.log(`---- RootComponent class properties ----`);
   const rootClassPtr2 = await readU64At(bridge, located.rootPtr + GSC.uObjectClassPtr);
   if (rootClassPtr2) await dumpAllProperties(bridge, located.rootPtr, rootClassPtr2, 128);
   bridge.log(`-----------------------------------------`);
+
+  // Spotlight likely Health/Stamina/Ammo candidates so they don't get
+  // lost in the 200-entry pawn property dump. Pattern-matched against
+  // common UE conventions; tune if Stalker 2 uses a more specific
+  // naming (e.g. "BPHealth", "Hunger", "Radiation").
+  await highlightProperties(bridge, pawnPtr, pawnProps, [
+    /health/i, /^hp$/i, /vitality/i,
+  ], "[likely-health]");
+  await highlightProperties(bridge, pawnPtr, pawnProps, [
+    /stamina/i, /endurance/i, /fatigue/i,
+  ], "[likely-stamina]");
+  await highlightProperties(bridge, pawnPtr, pawnProps, [
+    /ammo/i, /bullet/i, /round/i,
+  ], "[likely-ammo]");
+  await highlightProperties(bridge, pawnPtr, pawnProps, [
+    /faction/i, /allegiance/i, /team/i,
+  ], "[likely-faction]");
+  await highlightProperties(bridge, pawnPtr, pawnProps, [
+    /kill/i, /death/i, /score/i,
+  ], "[likely-kills]");
 
   // Are RootComponent and CapsuleComponent the same pointer? In stock
   // ACharacter they are, so writing to the root's transform covers
