@@ -22,10 +22,30 @@ export interface Unresolved {
 export interface ObjectRef {
   /** Stable handle within a single game launch; UObject->InternalIndex. */
   index: number;
-  /** Class path; empty until FName resolution lands (v2.1). */
+  /** UE bit flags on the FUObjectItem slot. */
+  flags: number;
+  /** FName-decoded name of the object itself. */
+  name: string;
+  /** FName-decoded name of obj->ClassPrivate (the UClass's own name). */
+  className: string;
+  /** "Outer.Outer.Name" path, walking OuterPrivate up to depth 8. */
+  fullPath: string;
+}
+
+export interface ListObjectsResult {
+  total: number;
+  returned: number;
+  offset: number;
+  items: ObjectRef[];
+}
+
+export interface ListObjectsOptions {
+  offset?: number;
+  limit?: number;
+  /** Substring match against name or className. */
+  filter?: string;
+  /** Exact className equality. */
   className?: string;
-  /** Full path name (Package.Outer.Name); empty until FName resolution. */
-  fullPath?: string;
 }
 
 export interface Vector3 {
@@ -48,9 +68,9 @@ export interface GameApi {
 
   // --- Read ---
   getObjectCount(): Promise<{ count: number } | Unresolved>;
-  listObjects(opts?: { limit?: number; offset?: number; filter?: string }): Promise<ObjectRef[] | Unresolved>;
-  getObjectByIndex(index: number): Promise<ObjectRef | Unresolved>;
-  getObjectByName(name: string): Promise<ObjectRef | Unresolved>;
+  listObjects(opts?: ListObjectsOptions): Promise<ListObjectsResult | Unresolved>;
+  getObjectByIndex(index: number): Promise<ObjectRef | { found: false; index: number } | Unresolved>;
+  getObjectByName(name: string): Promise<ObjectRef | { found: false; name: string } | Unresolved>;
   getPlayerPawn(): Promise<ObjectRef | Unresolved>;
   getPlayerLocation(): Promise<Vector3 | Unresolved>;
   getProperty(target: number | string, prop: string): Promise<unknown | Unresolved>;
