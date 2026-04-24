@@ -12,18 +12,19 @@ import type {
   QuestNodePrototypeLaunchersItem,
 } from "s2cfgtojson";
 import type { DeeplyPartial } from "./consts.mts";
+import type { MetaContext } from "./meta-type.mts";
 
 export const getLaunchers = (
-  sids_names: (
+  sids_names: ((
     | DeeplyPartial<QuestNodePrototypeConnectionsItem>
     | DeeplyPartial<QuestNodePrototypeConnectionsItem>[]
-  )[],
+  ) & { Excluding?: boolean })[],
 ) => {
   const Launchers = new Struct() as QuestNodePrototypeLaunchers;
 
   sids_names.map((questNodePrototypeConnectionsItemOrItems) => {
     const connections = new Struct() as QuestNodePrototypeLaunchersItem;
-    connections.Excluding = false;
+    connections.Excluding = questNodePrototypeConnectionsItemOrItems.Excluding ?? false;
     connections.Connections = new Struct() as QuestNodePrototypeConnections;
     if (Array.isArray(questNodePrototypeConnectionsItemOrItems)) {
       questNodePrototypeConnectionsItemOrItems.forEach((item) => {
@@ -45,13 +46,17 @@ export const getLaunchers = (
 };
 
 export function getDependants(SID: string, contextArr: QuestNodePrototype[]) {
-  return contextArr
-    .filter((s) =>
-      s.Launchers?.entries?.().some(([, l]) =>
-        l.Connections.entries().some(([, c]) => c.SID === SID),
-      ),
-    )
-    .map((s) => s.SID);
+  return contextArr.filter((s) => {
+    let hasDependant = false;
+    s.Launchers?.forEach?.(([, l]) => {
+      l.Connections.forEach(([, c]) => {
+        if (c.SID === SID) {
+          hasDependant = true;
+        }
+      });
+    });
+    return hasDependant;
+  });
 }
 
 export function getDialogPrototypeConditions(
@@ -93,4 +98,71 @@ export function getConditions(
   }
   questNodePrototypeConditions.addNode(questNodePrototypeConditionsItem);
   return questNodePrototypeConditions;
+}
+
+const nextIndexByDependant = new Map<string, number>();
+
+export function rerouteQuestNode(
+  struct: QuestNodePrototype,
+  context: MetaContext<QuestNodePrototype>,
+  toReroute: Set<string>,
+  extraDependantsByParentSID: Record<string, string[]> = {},
+) {
+  if (!struct.Launchers) {
+    return;
+  }
+
+  const structFork = struct.fork();
+  structFork.Launchers = new Struct() as any;
+  const structs = [structFork];
+
+  const traversedReroutes = new Set<string>();
+  let dependants = new Set([struct.SID]);
+
+  while (dependants.intersection(toReroute).size) {
+    for (const dependantSID of dependants) {
+      if (toReroute.has(dependantSID)) {
+        traversedReroutes.add(dependantSID);
+      }
+      dependants.delete(dependantSID);
+      dependants = dependants.union(
+        new Set(getDependants(dependantSID, context.array).map((s) => s.SID)),
+      );
+    }
+  }
+
+  for (const sid of traversedReroutes) {
+    const extras = extraDependantsByParentSID[sid];
+    if (extras) {
+      dependants = dependants.union(new Set(extras));
+    }
+  }
+
+  for (const dependantSID of dependants) {
+    const dependant = context.structsById[dependantSID];
+    const dependantFork = dependant.fork();
+    dependantFork.Launchers = dependant.Launchers.fork();
+    let nextIndex = nextIndexByDependant.get(dependantSID) ?? dependant.Launchers.entries().length;
+    struct.Launchers.forEach?.(([, l]) => {
+      const launcher = l.fork();
+      launcher.Connections ||= l.Connections.filter(([, c]) => !toReroute.has(c.SID));
+      if (!launcher.Connections.entries().length) {
+        return;
+      }
+      dependant.Launchers.forEach(([k, l]) =>
+        l.Connections.forEach(([k2, c]) => {
+          if (c.SID === struct.SID) {
+            dependantFork.Launchers[k] ||= new Struct().fork() as any;
+            dependantFork.Launchers[k].Connections ||= new Struct().fork() as any;
+            dependantFork.Launchers[k].Connections[k2] = new Struct() as any;
+          }
+        }),
+      );
+      dependantFork.Launchers.addNode(launcher, nextIndex++);
+    });
+    nextIndexByDependant.set(dependantSID, nextIndex);
+    structs.push(dependantFork);
+  }
+
+  return structs;
 }
