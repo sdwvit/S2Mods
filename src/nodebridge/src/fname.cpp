@@ -22,22 +22,49 @@ namespace {
 //
 // All of these use the same post-processing: the E8 byte sits at
 // (match_addr + AOBSize - 1), and the CALL target = NextInstr + disp32.
+// Two kinds of patterns:
+//  - "callsite": pattern ends in the E8 of a CALL to FName::ToString; we
+//    read disp32 after the E8 and compute the target.
+//  - "entry": pattern is the function's own prologue; the match address IS
+//    the function. No disp arithmetic.
+//
+// Entry patterns are less precise but avoid the CALL-site question of
+// "which register was this in at THIS particular caller". Only downside:
+// the prologue must be unique enough not to match every function in the
+// module.
+enum class AobKind { Callsite, Entry };
 struct AobCandidate {
   const char* name;
   const char* pattern;
-  // Byte offset of the E8 inside the match (the CALL opcode).
+  AobKind kind;
+  // For Callsite: byte offset of the E8 inside the match.
   int call_offset;
+  // Trusted patterns get auto-accepted on hit. Untrusted ones are logged
+  // only — we'd rather miss FName resolution entirely than blindly call
+  // an unrelated function (which tends to crash the game).
+  bool trusted;
 };
 
 constexpr AobCandidate kFNameToStringCandidates[] = {
-    {"zero-RDI-0x20", "C3 33 C0 48 8D 54 24 20 48 8B CF 48 89 44 24 20 48 89 44 24 28 E8", 21},
-    {"zero-any-0x20", "C3 33 C0 48 8D 54 24 20 48 8B ?? 48 89 44 24 20 48 89 44 24 28 E8", 21},
-    {"zero-any-Rsp?", "C3 33 C0 48 8D 54 24 ?? 48 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", 21},
-    {"zero-R8-15",    "C3 33 C0 48 8D 54 24 ?? 49 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", 21},
-    // No-zero variant: caller already has FString pre-zeroed, so only the
-    // MOV RDX,[...]+MOV RCX,this+CALL remain. More matches but also more
-    // false positives — we log the resolved address for every hit.
-    {"no-zero-any",   "48 8D 54 24 ?? 48 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", 19},
+    // Callsite patterns: match a CALL whose target is FName::ToString. The
+    // zero-RAX + LEA RDX,[RSP+X] + MOV RCX,this + MOV [RSP+X],RAX × 2 + E8
+    // sequence is very specific — trusted.
+    {"cs.zero-RDI-0x20",  "C3 33 C0 48 8D 54 24 20 48 8B CF 48 89 44 24 20 48 89 44 24 28 E8", AobKind::Callsite, 21, true},
+    {"cs.zero-any-0x20",  "C3 33 C0 48 8D 54 24 20 48 8B ?? 48 89 44 24 20 48 89 44 24 28 E8", AobKind::Callsite, 21, true},
+    {"cs.zero-any-Rsp?",  "C3 33 C0 48 8D 54 24 ?? 48 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", AobKind::Callsite, 21, true},
+    {"cs.zero-R8-15",     "C3 33 C0 48 8D 54 24 ?? 49 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", AobKind::Callsite, 21, true},
+    // No-zero variant: a few more matches, some false positives — trust it
+    // only if nothing else hits.
+    {"cs.no-zero-any",    "48 8D 54 24 ?? 48 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", AobKind::Callsite, 19, false},
+
+    // Function-entry prologues with distinctive FName body. The 8B 41 04
+    // (read [RCX+4] = FName.Number) right after the prologue is basically a
+    // fingerprint for FName methods — trusted.
+    {"entry.save-rbx-rdi-read4",     "48 89 5C 24 ?? 57 48 83 EC ?? 8B 41 04",              AobKind::Entry, 0, true},
+    {"entry.save-rbx-rsi-rdi-read4", "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B 41 04", AobKind::Entry, 0, true},
+    // Generic prologues — too common. Log only; don't accept.
+    {"entry.push-rbp-rsi-rdi", "40 55 56 57 48 81 EC ?? ?? ?? ??",                        AobKind::Entry, 0, false},
+    {"entry.push-rbp-many",    "40 53 55 56 57 41 54 41 56 41 57 48 83 EC",               AobKind::Entry, 0, false},
 };
 
 // Typed fn ptr. MSVC x64 passes `this` in RCX, &out in RDX — plain function
@@ -76,14 +103,20 @@ bool resolve_fname_to_string() {
       nb::log::info("fname", "candidate '{}' no match", cand.name);
       continue;
     }
-    const uint8_t* call_instr = hit + cand.call_offset;
-    const uint8_t* next_instr = call_instr + 5;
-    int32_t disp = *reinterpret_cast<const int32_t*>(call_instr + 1);
-    const uint8_t* target = next_instr + disp;
-    nb::log::info("fname", "candidate '{}' hit={} → ToString={}",
-                  cand.name, static_cast<const void*>(hit),
+    const uint8_t* target = nullptr;
+    if (cand.kind == AobKind::Callsite) {
+      const uint8_t* call_instr = hit + cand.call_offset;
+      const uint8_t* next_instr = call_instr + 5;
+      int32_t disp = *reinterpret_cast<const int32_t*>(call_instr + 1);
+      target = next_instr + disp;
+    } else {
+      target = hit;  // entry prologue — match address IS the function
+    }
+    nb::log::info("fname", "candidate '{}' (trusted={}) hit={} → ToString={}",
+                  cand.name, cand.trusted ? "yes" : "no",
+                  static_cast<const void*>(hit),
                   static_cast<const void*>(target));
-    if (g_fname_to_string.load() == nullptr) {
+    if (cand.trusted && g_fname_to_string.load() == nullptr) {
       g_fname_to_string.store(reinterpret_cast<FNameToString_Fn>(const_cast<uint8_t*>(target)));
       nb::log::info("fname", "accepting '{}' as FName::ToString", cand.name);
     }
