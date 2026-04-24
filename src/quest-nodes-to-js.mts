@@ -146,7 +146,7 @@ export function resolveQuestNodesToJsInputPath(inputPath: string, cfgRoot = base
 
 export async function runQuestNodesToJsDebug(
   input = `
-/media/nvme/STALKER2ZoneKit/Stalker2/Content/GameLite/GameData/QuestNodePrototypes/E01_MQ01.cfg
+/media/nvme/STALKER2ZoneKit/Stalker2/Content/GameLite/GameData/QuestNodePrototypes/Garbage_L_Svora_Camp.cfg
  `,
 ) {
   await Promise.all(
