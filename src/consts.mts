@@ -842,24 +842,6 @@ export function guessAttachmentSlot(itemSID: string) {
   return getCorePrototype(itemSID, allDefaultAttachPrototypesRecord, (item) => item.Slot);
 }
 
-export const NPCRank: Record<Exclude<CoreFaction, "Mutant">, number> = {
-  Bandits: 10, // fallback (no clean armor-rarity aggregate extracted yet)
-  Scientists: 10, // data-informed
-  FreeStalkers: 10, // fallback (between Neutrals and Duty/Freedom)
-  Neutrals: 10,
-
-  Duty: 20, // data-informed
-  Militaries: 20, // data-informed
-  Freedom: 20, // data-informed
-  Mercenaries: 20, // data-informed
-  Noon: 20, // fallback
-
-  Corpus: 25, // fallback (assumed high-tier)
-  Spark: 25, // data-informed
-  Varta: 25, // data-informed outlier (armor rarity proxy was extremely high-end)
-
-  Monolith: 30, // data-informed
-};
 
 export type DefaultArtifact =
   | "CArtifactBouncyBall"
