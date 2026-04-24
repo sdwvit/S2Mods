@@ -81,6 +81,8 @@ export interface GameApi {
   dumpObjectMemory(target: number, offset: number, count?: number): Promise<{ target: number; offset: number; count: number; objPtr: number; hex: string } | { fault: true; target: number; offset: number } | { found: false } | Unresolved>;
   /** Read N bytes from any address. count capped at 4096. */
   readMemory(addr: number, count?: number): Promise<{ addr: number; count: number; hex: string } | { addr: number; fault: true } | { error: string } | Unresolved>;
+  /** Write hex bytes to any address (whitespace-separated or packed). Capped at 4096 bytes. */
+  writeMemory(addr: number, hex: string): Promise<{ addr: number; count: number } | { addr: number; fault: true } | { error: string } | Unresolved>;
   /** AOB scan over the main exe. Returns hit address or 0. */
   scanAOB(pattern: string): Promise<{ pattern: string; hit: number } | { error: string }>;
   /** Image base of Stalker2-Win64-Shipping.exe — useful for relative-offset math. */

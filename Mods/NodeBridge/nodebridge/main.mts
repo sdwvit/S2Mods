@@ -175,6 +175,20 @@ async function readVector3dAt(bridge: Bridge, addr: number): Promise<Vector3 | n
   return { x: dv.getFloat64(0, true), y: dv.getFloat64(8, true), z: dv.getFloat64(16, true) };
 }
 
+// Write 24 bytes (3×double) at addr from a Vector3.
+async function writeVector3dAt(bridge: Bridge, addr: number, v: Vector3): Promise<boolean> {
+  const buf = new ArrayBuffer(24);
+  const dv = new DataView(buf);
+  dv.setFloat64(0, v.x, true);
+  dv.setFloat64(8, v.y, true);
+  dv.setFloat64(16, v.z, true);
+  let hex = "";
+  const u8 = new Uint8Array(buf);
+  for (let i = 0; i < u8.length; i++) hex += u8[i].toString(16).padStart(2, "0");
+  const r = await bridge.game.writeMemory(addr, hex);
+  return "count" in r;
+}
+
 // Resolve player location entirely in JS using the verified GSC offsets.
 // pawn → class.PropertyLink → find "RootComponent" (offset within pawn) →
 // pawnPtr + rootOff → USceneComponent → its class.PropertyLink →
@@ -417,25 +431,32 @@ const init: ModInit = async (bridge) => {
   }
 
   const { home, rootPtr, relLocOff } = located;
+  const origin: Vector3 = { ...home };
+  const locAddr = rootPtr + relLocOff;
   bridge.log(
-    `home=(${home.x.toFixed(1)}, ${home.y.toFixed(1)}, ${home.z.toFixed(1)})  rootPtr=0x${rootPtr.toString(16)} relLocOff=+0x${relLocOff.toString(16)}`,
+    `home=(${home.x.toFixed(1)}, ${home.y.toFixed(1)}, ${home.z.toFixed(1)})  locAddr=0x${locAddr.toString(16)}`,
   );
 
-  // Read-only loop until we add a writeMemory primitive (Phase D). Logs
-  // current coords every 5s so we can confirm the read path stays valid
-  // as the player moves.
+  // Teleport loop: write RelativeLocation directly via writeMemory, ping
+  // back via readMemory each tick to confirm. UE updates physics on the
+  // next tick, so the read-back may briefly show old coords.
+  let atHome = true;
   let tick = 0;
   while (true) {
     await sleep(5000);
     tick++;
-    const here = await readVector3dAt(bridge, rootPtr + relLocOff);
-    if (!here) {
-      bridge.log.error(`tick ${tick} re-read faulted`);
+    const dest = atHome ? TARGET : origin;
+    const ok = await writeVector3dAt(bridge, locAddr, dest);
+    if (!ok) {
+      bridge.log.error(`tick ${tick} writeMemory faulted`);
       continue;
     }
-    const dx = here.x - home.x, dy = here.y - home.y, dz = here.z - home.z;
-    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    bridge.log(`tick ${tick} pos=(${here.x.toFixed(1)}, ${here.y.toFixed(1)}, ${here.z.toFixed(1)}) Δ=${dist.toFixed(1)}`);
+    const verify = await readVector3dAt(bridge, locAddr);
+    const verifyStr = verify
+      ? `(${verify.x.toFixed(1)}, ${verify.y.toFixed(1)}, ${verify.z.toFixed(1)})`
+      : "<fault>";
+    bridge.log(`tick ${tick} tp -> (${dest.x}, ${dest.y}, ${dest.z}); read-back=${verifyStr}`);
+    atHome = !atHome;
   }
 };
 
