@@ -61,12 +61,28 @@ constexpr AobCandidate kFNameToStringCandidates[] = {
     // only if nothing else hits.
     {"cs.no-zero-any",    "48 8D 54 24 ?? 48 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", AobKind::Callsite, 19, false},
 
-    // Function-entry prologues with distinctive FName body. The 8B 41 04
-    // (read [RCX+4] = FName.Number) right after the prologue is basically a
-    // fingerprint for FName methods — trusted.
-    {"entry.save-rbx-rdi-read4",     "48 89 5C 24 ?? 57 48 83 EC ?? 8B 41 04",              AobKind::Entry, 0, true},
-    {"entry.save-rbx-rsi-rdi-read4", "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B 41 04", AobKind::Entry, 0, true},
-    // Generic prologues — too common. Log only; don't accept.
+    // Generic "prologue + read [RCX+4]" — matches any FName-related method,
+    // not just ToString. Kept for diagnostic but no longer trusted after
+    // v0.2.10 showed both matched wrong functions.
+    {"entry.save-rbx-rdi-read4",     "48 89 5C 24 ?? 57 48 83 EC ?? 8B 41 04",              AobKind::Entry, 0, false},
+    {"entry.save-rbx-rsi-rdi-read4", "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 8B 41 04", AobKind::Entry, 0, false},
+
+    // Tighter ToString-specific fingerprints. Rationale: FName::ToString
+    // takes (this, &out_FString) so on MSVC x64 it routinely MOVs RDX (out)
+    // into RSI or RBX early to save it, plus MOVs RCX (this) into RBX,
+    // plus reads [RCX+4] (.number). Combining 2+ of these inside the
+    // function body is very unlikely outside FName-returning methods.
+    {"entry.tostring.rbx-rsi-read4",
+     "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B F2 48 8B D9 8B 4B 04", AobKind::Entry, 0, true},
+    {"entry.tostring.rdi-rsi-read4",
+     "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B F2 48 8B FB 8B 4B 04", AobKind::Entry, 0, true},
+    // Variant where the compiler reorders the save-this / save-out moves.
+    {"entry.tostring.saveboth-read4",
+     "48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8B D9 48 8B F2 8B 49 04", AobKind::Entry, 0, true},
+    // Simpler body: read .number directly, check vs 0 (NAME_NO_NUMBER_INTERNAL).
+    {"entry.tostring.cmp-num-zero",
+     "48 89 5C 24 ?? 57 48 83 EC ?? 48 8B DA 48 8B F9 8B 49 04 85 C9", AobKind::Entry, 0, true},
+    // Untrusted — way too common, diagnostic only.
     {"entry.push-rbp-rsi-rdi", "40 55 56 57 48 81 EC ?? ?? ?? ??",                        AobKind::Entry, 0, false},
     {"entry.push-rbp-many",    "40 53 55 56 57 41 54 41 56 41 57 48 83 EC",               AobKind::Entry, 0, false},
 };
