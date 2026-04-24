@@ -49,6 +49,7 @@ export function createBridge(rpc, modName) {
     dumpObjectMemory: (target, offset, count) =>
       call("game.dumpObjectMemory", { target, offset, count: count ?? 64 }),
     readMemory: (addr, count) => call("game.readMemory", { addr, count: count ?? 64 }),
+    writeMemory: (addr, hex) => call("game.writeMemory", { addr, hex }),
     scanAOB: (pattern) => call("game.scanAOB", { pattern }),
     mainExeBase: () => call("game.mainExeBase"),
     fnameToString: (comp, num) => call("game.fnameToString", { comp, num: num ?? 0 }),

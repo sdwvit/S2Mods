@@ -318,6 +318,37 @@ json game_read_memory(const json& params) {
   return {{"addr", addr}, {"count", count}, {"hex", hex}};
 }
 
+// Write raw bytes to any address. Symmetric with readMemory; lets the
+// JS-side walker drive teleports / property writes without a per-shape
+// C++ helper. Hex string accepts both whitespace-separated bytes
+// ("80 22 cd 50") and tightly packed ("8022cd50").
+json game_write_memory(const json& params) {
+  if (!nb::ue::is_ready()) return unresolved_reason("not ready");
+  uint64_t addr = params.value("addr", 0ULL);
+  std::string hex = params.value("hex", std::string{});
+  if (!addr || hex.empty()) return {{"error", "bad params"}};
+  std::vector<uint8_t> buf;
+  buf.reserve(hex.size() / 2);
+  uint8_t cur = 0;
+  bool half = false;
+  for (char c : hex) {
+    int v = -1;
+    if (c >= '0' && c <= '9') v = c - '0';
+    else if (c >= 'a' && c <= 'f') v = c - 'a' + 10;
+    else if (c >= 'A' && c <= 'F') v = c - 'A' + 10;
+    else continue;  // skip whitespace, separators
+    cur = (cur << 4) | static_cast<uint8_t>(v);
+    if (half) { buf.push_back(cur); cur = 0; }
+    half = !half;
+  }
+  if (half || buf.empty()) return {{"error", "odd nibbles in hex"}};
+  if (buf.size() > 4096) return {{"error", "payload too large"}};
+  if (!nb_try_dump(buf.data(), reinterpret_cast<void*>(addr), buf.size())) {
+    return {{"addr", addr}, {"fault", true}};
+  }
+  return {{"addr", addr}, {"count", buf.size()}};
+}
+
 json game_scan_aob(const json& params) {
   std::string pattern_str = params.value("pattern", "");
   auto pat = nb::aob::parse(pattern_str);
@@ -403,6 +434,7 @@ void install(nb::rpc::Router& router) {
   router.handle("game.dumpClassMemory", game_dump_class_memory);
   router.handle("game.dumpObjectMemory", game_dump_object_memory);
   router.handle("game.readMemory", game_read_memory);
+  router.handle("game.writeMemory", game_write_memory);
   router.handle("game.scanAOB", game_scan_aob);
   router.handle("game.mainExeBase", game_main_exe_base);
   router.handle("game.fnameToString", game_fname_to_string);
