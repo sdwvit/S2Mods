@@ -56,4 +56,12 @@ void write(Level level, std::string_view source, std::string_view msg) {
   g_stream.flush();
 }
 
+void banner() {
+  std::lock_guard lk(g_mutex);
+  if (!g_ready) return;
+  g_stream << "\n"
+           << "================================================================================\n";
+  g_stream.flush();
+}
+
 }  // namespace nb::log

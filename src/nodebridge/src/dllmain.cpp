@@ -114,6 +114,7 @@ BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID) {
       // dependency, etc.) — that's a very different failure than
       // "DLL loaded but bootstrap never fired".
       nb::log::init();
+      nb::log::banner();
       nb::log::info("dll", "NodeBridge attaching (pid={})", GetCurrentProcessId());
 
       // MUST happen before DllMain returns: Windows resolves our forwarders
