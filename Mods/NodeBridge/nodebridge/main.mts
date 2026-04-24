@@ -4,7 +4,7 @@
 // this file today just exercises the RO path.
 
 export default async function init(bridge) {
-  bridge.log("hello from node");
+  bridge.log("hello from node!");
   let tick = 0;
   setInterval(async () => {
     tick++;
