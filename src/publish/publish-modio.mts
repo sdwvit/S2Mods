@@ -168,7 +168,7 @@ async function publishToModIO() {
   const publishedAt = new Date();
   const publishNote = process.env.CHANGENOTE || meta.changenote || "Update";
   await Promise.allSettled([import("../pull-assets.mts"), import("../pull-staged.mts")]);
-  const [outputZip, modId] = await Promise.all([createModZip(await modFolderSteamStruct), Promise.resolve(getStoredModId() || createMod())]);
+  const [outputZip, modId] = await Promise.all([createModZip(await modFolderSteamStruct, undefined, `${modName}-modio`), Promise.resolve(getStoredModId() || createMod())]);
   await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
   rmSync(outputZip);
   logger.log(`mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-${meta.originalAuthor || process.env.STEAM_USER}`);

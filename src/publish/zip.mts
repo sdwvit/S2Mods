@@ -21,14 +21,14 @@ export async function writeWithZip(filePath: string, data: string): Promise<void
   await writeFile(filePath, zipped);
 }
 
-export async function createModZip(sourceDir?: string, dest?: string | false) {
+export async function createModZip(sourceDir?: string, dest?: string | false, zipName?: string) {
   if (!sourceDir) {
     sourceDir = await modFolderSteamStruct;
   }
   if (dest === undefined) {
     dest = path.join("Windows", await stagedFolderStruct);
   }
-  const outZipPath = path.join(projectRoot, `${modName}.zip`);
+  const outZipPath = path.join(projectRoot, `${zipName ?? modName}.zip`);
   logger.log(`Creating mod ZIP ${modName}…`);
 
   if (!fs.existsSync(sourceDir)) {
