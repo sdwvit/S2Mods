@@ -163,6 +163,19 @@ bool scan_fname_to_string_candidates() {
 bool verify_and_install_fname_to_string(const FName& sample) {
   if (g_fname_to_string.load()) return true;  // already installed
   for (const auto& r : g_pending_candidates) {
+    // Only verify trusted candidates against a real FName. Calling an
+    // untrusted (generic-prologue) function with a live pointer arg is
+    // the fastest way to crash the game — the wrong function would try
+    // to dereference the pointer assuming a different type.
+    if (!r.trusted) {
+      nb::log::info("fname", "skip untrusted '{}' (would be unsafe with live FName)",
+                    r.name);
+      continue;
+    }
+    // Pre-log: if the call faults, we'll see which candidate was active.
+    nb::log::info("fname", "about to verify trusted '{}' at {}", r.name,
+                  static_cast<const void*>(r.target));
+
     auto fn = reinterpret_cast<FNameToString_Fn>(const_cast<uint8_t*>(r.target));
     FString out{};
     int ok = nb_try_fname_tostring(reinterpret_cast<void*>(fn),
@@ -171,9 +184,8 @@ bool verify_and_install_fname_to_string(const FName& sample) {
                       out.data[0] >= L' ' && out.data[0] <= L'~';
     nb::log::info(
         "fname",
-        "verify '{}' ({}): ok={} num={} data={} first=U+{:04x}",
-        r.name, r.trusted ? "trusted" : "untrusted",
-        ok ? 1 : 0, out.num,
+        "verify '{}': ok={} num={} data={} first=U+{:04x}",
+        r.name, ok ? 1 : 0, out.num,
         static_cast<const void*>(out.data),
         out.data ? static_cast<uint32_t>(out.data[0]) : 0);
     if (looks_good) {
@@ -182,7 +194,8 @@ bool verify_and_install_fname_to_string(const FName& sample) {
       return true;
     }
   }
-  nb::log::warn("fname", "no candidate passed verification against sample FName");
+  nb::log::warn("fname", "no trusted candidate passed verification — "
+                         "FNamePool walker is next");
   return false;
 }
 
