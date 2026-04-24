@@ -71,11 +71,12 @@ export interface GameApi {
   listObjects(opts?: ListObjectsOptions): Promise<ListObjectsResult | Unresolved>;
   getObjectByIndex(index: number): Promise<ObjectRef | { found: false; index: number } | Unresolved>;
   getObjectByName(name: string): Promise<ObjectRef | { found: false; name: string } | Unresolved>;
-  getPlayerPawn(): Promise<ObjectRef | Unresolved>;
-  getPlayerLocation(): Promise<Vector3 | Unresolved>;
-  getProperty(target: number | string, prop: string): Promise<unknown | Unresolved>;
+  getPlayerPawn(): Promise<{ found: true; index: number; name: string; className: string; fullPath: string } | { found: false; reason: string } | Unresolved>;
+  getPlayerLocation(): Promise<Vector3 & { rootOffset: number; locOffset: number } | Unresolved>;
+  setPlayerLocation(value: Vector3): Promise<{ ok: boolean; reason?: string; rootOffset: number; locOffset: number; x: number; y: number; z: number } | Unresolved>;
+  getProperty(target: number | string, prop: string): Promise<{ ok: true; offset: number } | { ok: false; reason: string } | Unresolved>;
 
-  // --- Write (v3, all stubbed today) ---
+  // --- Write (v3, setProperty/callFunction stubbed today) ---
   setProperty(target: number | string, prop: string, value: unknown): Promise<boolean | Unresolved>;
   callFunction(target: number | string, func: string, args?: unknown[]): Promise<unknown | Unresolved>;
 }
