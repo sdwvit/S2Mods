@@ -189,6 +189,149 @@ async function writeVector3dAt(bridge: Bridge, addr: number, v: Vector3): Promis
   return "count" in r;
 }
 
+// Locate the Translation slot within an FTransform by matching a hint
+// vector against the 96-byte transform memory. UE5 LWC FTransform is
+// canonically alignas(16) with TQuat<double> (32B) + TVector<double>
+// (24B) + TVector<double> (24B), so Translation lives at +0x20 — but
+// rather than assume, we scan and verify against the live world
+// position. Returns the byte offset within the FTransform, or null
+// if no run of 3 consecutive doubles matches the hint.
+function locateTranslationOffset(ctwBytes: Uint8Array, hint: Vector3, tol = 1.0): number | null {
+  const dv = new DataView(ctwBytes.buffer, ctwBytes.byteOffset, ctwBytes.byteLength);
+  for (let off = 0; off + 24 <= ctwBytes.length; off += 8) {
+    const x = dv.getFloat64(off, true);
+    const y = dv.getFloat64(off + 8, true);
+    const z = dv.getFloat64(off + 16, true);
+    if (Math.abs(x - hint.x) < tol && Math.abs(y - hint.y) < tol && Math.abs(z - hint.z) < tol) {
+      return off;
+    }
+  }
+  return null;
+}
+
+// --- Property accessor API ----------------------------------------------
+// Grouped helpers for reading/writing UProperty fields by name. Designed
+// to be copy-pasted into other NodeBridge mods. Every method takes a
+// (bridge, uobjPtr, classPtr, propName) tuple — find the offset once,
+// remember it, then use the typed reader/writer.
+
+const S2 = {
+  // Read N bytes at uobjPtr + propOff and return as little-endian primitives.
+  async readU32(bridge: Bridge, uobjPtr: number, propOff: number): Promise<number | null> {
+    const r = await bridge.game.readMemory(uobjPtr + propOff, 4);
+    return "hex" in r ? readU32LE(parseHex(r.hex), 0) : null;
+  },
+  async readI32(bridge: Bridge, uobjPtr: number, propOff: number): Promise<number | null> {
+    const r = await bridge.game.readMemory(uobjPtr + propOff, 4);
+    return "hex" in r ? (readU32LE(parseHex(r.hex), 0) | 0) : null;
+  },
+  async readF32(bridge: Bridge, uobjPtr: number, propOff: number): Promise<number | null> {
+    const r = await bridge.game.readMemory(uobjPtr + propOff, 4);
+    if (!("hex" in r)) return null;
+    const b = parseHex(r.hex);
+    return new DataView(b.buffer, b.byteOffset, 4).getFloat32(0, true);
+  },
+  async readF64(bridge: Bridge, uobjPtr: number, propOff: number): Promise<number | null> {
+    const r = await bridge.game.readMemory(uobjPtr + propOff, 8);
+    if (!("hex" in r)) return null;
+    const b = parseHex(r.hex);
+    return new DataView(b.buffer, b.byteOffset, 8).getFloat64(0, true);
+  },
+  async readBool(bridge: Bridge, uobjPtr: number, propOff: number): Promise<boolean | null> {
+    const r = await bridge.game.readMemory(uobjPtr + propOff, 1);
+    if (!("hex" in r)) return null;
+    return parseHex(r.hex)[0] !== 0;
+  },
+  async readPtr(bridge: Bridge, uobjPtr: number, propOff: number): Promise<number | null> {
+    return readU64At(bridge, uobjPtr + propOff);
+  },
+  async readVector3(bridge: Bridge, uobjPtr: number, propOff: number): Promise<Vector3 | null> {
+    return readVector3dAt(bridge, uobjPtr + propOff);
+  },
+  async writeU32(bridge: Bridge, uobjPtr: number, propOff: number, v: number): Promise<boolean> {
+    const b = new ArrayBuffer(4);
+    new DataView(b).setUint32(0, v >>> 0, true);
+    let hex = "";
+    const u8 = new Uint8Array(b);
+    for (let i = 0; i < 4; i++) hex += u8[i].toString(16).padStart(2, "0");
+    const r = await bridge.game.writeMemory(uobjPtr + propOff, hex);
+    return "count" in r;
+  },
+  async writeF32(bridge: Bridge, uobjPtr: number, propOff: number, v: number): Promise<boolean> {
+    const b = new ArrayBuffer(4);
+    new DataView(b).setFloat32(0, v, true);
+    let hex = "";
+    const u8 = new Uint8Array(b);
+    for (let i = 0; i < 4; i++) hex += u8[i].toString(16).padStart(2, "0");
+    const r = await bridge.game.writeMemory(uobjPtr + propOff, hex);
+    return "count" in r;
+  },
+  async writeVector3(bridge: Bridge, uobjPtr: number, propOff: number, v: Vector3): Promise<boolean> {
+    return writeVector3dAt(bridge, uobjPtr + propOff, v);
+  },
+  // Convenience: find a property's offset on a UClass and return both
+  // offset + the absolute address inside an instance. Use to verify and
+  // probe before deciding what reader to use.
+  async resolve(
+    bridge: Bridge,
+    uobjPtr: number,
+    classPtr: number,
+    propName: string,
+  ): Promise<{ off: number; addr: number } | null> {
+    const off = await findPropertyOffset(bridge, classPtr, propName);
+    if (off == null) return null;
+    return { off, addr: uobjPtr + off };
+  },
+};
+
+// Walk every property on a UClass (via PropertyLink) and log
+// {name, offset, raw 4 bytes as u32 + f32}. Useful for spotting which
+// property holds a value you care about (health = ~100, ammo = ~30,
+// etc.) when you don't know the name.
+async function dumpAllProperties(
+  bridge: Bridge,
+  uobjPtr: number,
+  classPtr: number,
+  max = 256,
+): Promise<void> {
+  const head = await readU64At(bridge, classPtr + GSC.uStructPropertyLink);
+  if (!head) {
+    bridge.log("dumpAllProperties: no property chain");
+    return;
+  }
+  let cur = head;
+  const seen = new Set<number>();
+  let count = 0;
+  while (cur && !seen.has(cur) && count < max) {
+    seen.add(cur);
+    const r = await bridge.game.readMemory(cur, 0x80);
+    if (!("hex" in r)) break;
+    const propBytes = parseHex(r.hex);
+    const comp = readU32LE(propBytes, GSC.fFieldNamePrivate);
+    const num = readU32LE(propBytes, GSC.fFieldNamePrivate + 4);
+    if (comp > 0x10_000_000 || num > 0x10_000_000) break;
+    const name = await decodeFName(bridge, comp, num);
+    const off = readU32LE(propBytes, GSC.fPropertyOffsetInternal) | 0;
+
+    // Probe the first 4 bytes at uobjPtr + off as both u32 and f32 so
+    // numeric properties (health, stamina, count, etc.) show their
+    // current value.
+    const valR = await bridge.game.readMemory(uobjPtr + off, 4);
+    if ("hex" in valR) {
+      const vb = parseHex(valR.hex);
+      const u = readU32LE(vb, 0);
+      const f = new DataView(vb.buffer, vb.byteOffset, 4).getFloat32(0, true);
+      const fStr = Number.isFinite(f) ? f.toFixed(3) : "?";
+      bridge.log(`  prop[${String(count).padStart(3)}] ${name.padEnd(36)} @ +0x${off.toString(16).padStart(4, "0")}  u32=${u} f32=${fStr}`);
+    } else {
+      bridge.log(`  prop[${String(count).padStart(3)}] ${name.padEnd(36)} @ +0x${off.toString(16).padStart(4, "0")}  <fault>`);
+    }
+    count++;
+    cur = readU64LE(propBytes, GSC.fPropertyNextLink);
+  }
+  bridge.log(`dumpAllProperties: ${count} entries`);
+}
+
 // Resolve player location entirely in JS using the verified GSC offsets.
 // pawn → class.PropertyLink → find "RootComponent" (offset within pawn) →
 // pawnPtr + rootOff → USceneComponent → its class.PropertyLink →
@@ -198,10 +341,17 @@ async function writeVector3dAt(bridge: Bridge, addr: number, v: Vector3): Promis
 async function getPlayerLocationViaJS(bridge: Bridge, pawnIdx: number): Promise<{
   home: Vector3;
   pawnPtr: number;
+  pawnClassPtr: number;
   rootOff: number;
   rootPtr: number;
+  rootClassPtr: number;
   relLocOff: number;
   compToWorldOff: number;
+  /** Offset of the FVector Translation slot WITHIN the FTransform.
+   *  Auto-detected by matching against RelativeLocation; falls back to
+   *  +0x20 if the scan misses. Add this to (rootPtr + compToWorldOff)
+   *  to get the absolute address you write to teleport. */
+  ctwTranslationInner: number;
 } | null> {
   // Read pawn's UObject pointer + class pointer.
   const pawnPtrR = await bridge.game.dumpObjectMemory(pawnIdx, 0, 24);
@@ -231,10 +381,15 @@ async function getPlayerLocationViaJS(bridge: Bridge, pawnIdx: number): Promise<
   }
   bridge.log(`ComponentToWorld @ +0x${compToWorldOff.toString(16)} (within RootComponent)`);
 
-  // Dump the FTransform once so we know where Translation lives in this
-  // build. UE5 LWC FTransform is alignas(16) with TQuat<double>(32B),
-  // TVector<double>(24B), TVector<double>(24B) — Translation should land
-  // at +0x20 inside the transform.
+  const home = await readVector3dAt(bridge, rootPtr + relLocOff);
+  if (!home) return null;
+
+  // Dump the FTransform once for visibility, then auto-locate the
+  // Translation slot inside it by matching against RelativeLocation.
+  // UE5 LWC FTransform is canonically alignas(16) with TQuat<double>
+  // (32B) + TVector<double>(24B) + TVector<double>(24B), so Translation
+  // should land at +0x20 — but we verify rather than assume.
+  let ctwTranslationInner = 0x20;
   const ctwR = await bridge.game.readMemory(rootPtr + compToWorldOff, 96);
   if ("hex" in ctwR) {
     const ctwBytes = parseHex(ctwR.hex);
@@ -242,11 +397,19 @@ async function getPlayerLocationViaJS(bridge: Bridge, pawnIdx: number): Promise<
       const dv = new DataView(ctwBytes.buffer, ctwBytes.byteOffset + off, 8);
       bridge.log(`  ctw+0x${off.toString(16).padStart(2, "0")}: f64=${dv.getFloat64(0, true).toFixed(2)}  u64=0x${readU64LE(ctwBytes, off).toString(16)}`);
     }
+    const detected = locateTranslationOffset(ctwBytes, home);
+    if (detected != null) {
+      ctwTranslationInner = detected;
+      bridge.log(`Translation slot auto-detected at FTransform+0x${detected.toString(16)} (matches RelativeLocation)`);
+    } else {
+      bridge.log(`Translation slot NOT auto-detected (RelativeLocation absent in FTransform); falling back to +0x20`);
+    }
   }
 
-  const home = await readVector3dAt(bridge, rootPtr + relLocOff);
-  if (!home) return null;
-  return { home, pawnPtr, rootOff, rootPtr, relLocOff, compToWorldOff };
+  return {
+    home, pawnPtr, pawnClassPtr, rootOff, rootPtr, rootClassPtr,
+    relLocOff, compToWorldOff, ctwTranslationInner,
+  };
 }
 
 function scoreNames(names: string[]): { score: number; matched: string[] } {
@@ -427,17 +590,23 @@ const init: ModInit = async (bridge) => {
     return;
   }
 
-  const { home, rootPtr, relLocOff, compToWorldOff } = located;
+  const {
+    home, pawnPtr, pawnClassPtr, rootPtr, relLocOff, compToWorldOff,
+    ctwTranslationInner,
+  } = located;
   const origin: Vector3 = { ...home };
   const relLocAddr = rootPtr + relLocOff;
-  // FTransform Translation slot: TQuat<double> (32B) precedes it inside
-  // the FTransform. With alignas(16) padding, +0x20 is the canonical
-  // stock UE5 offset. The ctw+0xNN dump above lets us reverse this if
-  // the values look wrong.
-  const ctwTranslationAddr = rootPtr + compToWorldOff + 0x20;
+  const ctwTranslationAddr = rootPtr + compToWorldOff + ctwTranslationInner;
   bridge.log(
     `home=(${home.x.toFixed(1)}, ${home.y.toFixed(1)}, ${home.z.toFixed(1)})  relLoc=0x${relLocAddr.toString(16)} ctwTrans=0x${ctwTranslationAddr.toString(16)}`,
   );
+
+  // Diagnostic dump of every property on the pawn class — the menu
+  // future mods will pick from when they want Health, Stamina, Ammo,
+  // etc. Logged once at startup; doesn't affect the teleport loop.
+  bridge.log(`---- pawn class properties (BP_Stalker2Character_C) ----`);
+  await dumpAllProperties(bridge, pawnPtr, pawnClassPtr, 256);
+  bridge.log(`--------------------------------------------------------`);
 
   // Teleport loop: write BOTH RelativeLocation (the authored value) and
   // ComponentToWorld.Translation (the cached world transform — what UE
