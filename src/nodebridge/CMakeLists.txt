@@ -41,6 +41,8 @@ set(NB_SOURCES
   src/game_thread_queue.cpp
   src/logging.cpp
   src/paths.cpp
+  src/aob_scanner.cpp
+  src/ue_reflection.cpp
 )
 
 add_library(dwmapi SHARED ${NB_SOURCES})
