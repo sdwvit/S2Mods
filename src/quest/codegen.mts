@@ -1,6 +1,6 @@
 import { Struct } from "s2cfgtojson";
 import type { EConditionComparance } from "s2cfgtojson";
-import type { QuestNodePrototype, QuestNodePrototypeCondition, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeSequenceStart, QuestNodePrototypeShowFadeScreen, QuestNodePrototypeTechnical } from "s2cfgtojson";
+import type { QuestNodePrototype, QuestNodePrototypeCondition, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeSequenceStart, QuestNodePrototypeSetDialog, QuestNodePrototypeShowFadeScreen, QuestNodePrototypeTechnical } from "s2cfgtojson";
 import { EVENTS, EVENTS_INTERESTING_PROPS, EVENTS_INTERESTING_SIDS } from "./constants.mts";
 import { QuestIr, QuestIrNode } from "./ir.mts";
 
@@ -401,6 +401,24 @@ function questNodeToJavascript(
       const stageSid = String(struct.JournalQuestStageSID || "");
       const parts = [action, entity, stageSid || questSid].filter(Boolean);
       return `${subType}('${parts.join(" ")}');`;
+    }
+    case "EQuestNodeType::SetDialog": {
+      globalFunctions.set(subType, "");
+      const dialogStruct = structr as unknown as QuestNodePrototypeSetDialog;
+      const members = dialogStruct.DialogMembers;
+      const memberArgs: string[] = [];
+      if (members) {
+        for (const [, guid] of members.entries()) {
+          const g = String(guid);
+          if (g) {
+            questActors.add(g);
+            memberArgs.push(`questActors['${g}']`);
+          }
+        }
+      }
+      const chain = dialogStruct.DialogChainPrototypeSID || "";
+      if (chain) memberArgs.unshift(`'${chain}'`);
+      return `${subType}(${memberArgs.join(", ")});`;
     }
     default:
       globalFunctions.set(subType, "");
