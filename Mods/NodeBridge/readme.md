@@ -12,14 +12,28 @@ without leaving the game process.
 
 ### Author a mod
 
-Drop a `nodebridge/main.mjs` into any mod folder under `Mods/<YourMod>/`:
+Drop a `nodebridge/main.{ts,mts,cts,mjs,cjs,js}` into any mod folder under
+`Mods/<YourMod>/`. The loader probes those extensions in order; the first
+found wins. Node 25 (bundled) strips TypeScript types natively, so `.ts`
+and `.mts` files run without a bundler.
 
+JavaScript:
 ```js
 export default async function init(bridge) {
   bridge.log("hello from node");
-  // bridge.game.* is available but currently returns {unresolved: true}
-  // until the v2 engine-reflection layer lands.
 }
+```
+
+TypeScript (`main.mts`), with IDE completion via the shipped types:
+```ts
+import type { ModInit } from "../../../src/nodebridge/runtime/bridge.d.ts";
+
+const init: ModInit = async (bridge) => {
+  bridge.log("hello from typescript");
+  const { count } = (await bridge.game.getObjectCount()) as { count: number };
+  bridge.log(`UObject count: ${count}`);
+};
+export default init;
 ```
 
 Run `npm run inject-nodebridge` from that mod's folder to copy it into the
