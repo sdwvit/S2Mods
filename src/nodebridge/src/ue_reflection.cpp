@@ -60,6 +60,39 @@ bool plausible(const FUObjectArray* arr) {
   return true;
 }
 
+// When the assumed layout fails sanity, dump the raw region so we can
+// reverse-engineer the actual GSC S2 layout. Logs 64 bytes as hex + as
+// int32 slots, plus the pointer-sized slots at 0x00/0x08/0x10/0x18.
+void dump_region(const FUObjectArray* arr) {
+  if (!arr) return;
+  auto* p = reinterpret_cast<const uint8_t*>(arr);
+  auto* as_u32 = reinterpret_cast<const uint32_t*>(arr);
+  auto* as_u64 = reinterpret_cast<const uint64_t*>(arr);
+
+  // 4 rows × 16 bytes hex.
+  for (int row = 0; row < 4; ++row) {
+    int off = row * 16;
+    char buf[96];
+    snprintf(buf, sizeof(buf),
+             "+%02X: %02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x",
+             off,
+             p[off + 0], p[off + 1], p[off + 2], p[off + 3],
+             p[off + 4], p[off + 5], p[off + 6], p[off + 7],
+             p[off + 8], p[off + 9], p[off + 10], p[off + 11],
+             p[off + 12], p[off + 13], p[off + 14], p[off + 15]);
+    nb::log::info("ue.dump", "{}", buf);
+  }
+  // Same 64 bytes as 16 int32 slots — easier to spot counts.
+  for (int i = 0; i < 16; i += 4) {
+    nb::log::info("ue.dump",
+                  "i32 [{}..{}]: {} {} {} {}",
+                  i, i + 3, as_u32[i], as_u32[i + 1], as_u32[i + 2], as_u32[i + 3]);
+  }
+  // Candidate pointer slots.
+  nb::log::info("ue.dump", "ptr +0x00={:x} +0x08={:x} +0x10={:x} +0x18={:x} +0x20={:x}",
+                as_u64[0], as_u64[1], as_u64[2], as_u64[3], as_u64[4]);
+}
+
 }  // namespace
 
 bool initialize() {
@@ -67,6 +100,11 @@ bool initialize() {
   const FUObjectArray* arr = resolve_guobject_array();
   if (!plausible(arr)) {
     nb::log::error("ue", "GUObjectArray sanity check failed — layout mismatch or AOB bad?");
+    if (arr) {
+      nb::log::info("ue", "dumping 64 bytes at {} for layout reverse-engineering:",
+                    static_cast<const void*>(arr));
+      dump_region(arr);
+    }
     return false;
   }
   nb::log::info("ue", "GUObjectArray OK: num_elements={}, max_elements={}, num_chunks={}",
