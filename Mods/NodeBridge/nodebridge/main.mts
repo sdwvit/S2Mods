@@ -1,9 +1,35 @@
 // Smoke-test mod for NodeBridge.
 //
-// Tries to find the player pawn and teleport it. If no pawn is present
-// (e.g. in the main menu), falls back to a diagnostic dump so we can see
-// what classes exist in the current game state and confirm FName
-// resolution is producing real strings.
+// What it does on launch:
+//   1. Wait until reflection is live (UE has registered ≥1k UObjects)
+//   2. Wait for the player pawn (BP_Stalker2Character_C) to spawn —
+//      that's the canonical "in-game" signal; no need to also wait for
+//      a world by name.
+//   3. Resolve RootComponent + RelativeLocation + ComponentToWorld
+//      offsets via the JS-side property walker (uses the verified
+//      GSC UE 5.1 layout in the GSC constant block below).
+//   4. Auto-detect the Translation slot inside ComponentToWorld by
+//      matching against RelativeLocation.
+//   5. Dump every property on the pawn class — name, offset, current
+//      value as u32 + f32. Grep this for plausible Health / Stamina /
+//      Ammo candidates.
+//   6. Teleport loop: every 5s alternate between origin and TARGET,
+//      writing both RelativeLocation and ComponentToWorld.Translation.
+//
+// What's reusable for future mods:
+//   - GSC offsets (UStruct/FField/FProperty) — Stalker 2 GSC custom
+//     UE 5.1 fork.
+//   - findPropertyOffset(bridge, classPtr, "PropertyName") — lookup.
+//   - S2 namespace — copy-paste readU32/I32/F32/F64/Bool/Ptr/Vector3
+//     and writeU32/F32/Vector3 helpers.
+//   - dumpAllProperties — walk a UClass and log every member with a
+//     u32+f32 sample of its current value.
+//
+// Hot reload: bootstrap.mjs polls every 1s for changes to any
+// *.{ts,mts,cts,mjs,cjs,js,json} under this dir; on change, node.exe
+// exits cleanly and the C++ supervisor respawns it. Edit + save and
+// you'll see `[bootstrap] reload: NodeBridge/main.mts` in bridge.log
+// within ~1s, followed by a fresh boot.
 
 import type { ModInit, Vector3 } from "../../../src/nodebridge/runtime/bridge.d.ts";
 
@@ -601,23 +627,70 @@ const init: ModInit = async (bridge) => {
     `home=(${home.x.toFixed(1)}, ${home.y.toFixed(1)}, ${home.z.toFixed(1)})  relLoc=0x${relLocAddr.toString(16)} ctwTrans=0x${ctwTranslationAddr.toString(16)}`,
   );
 
-  // Diagnostic dump of every property on the pawn class — the menu
-  // future mods will pick from when they want Health, Stamina, Ammo,
-  // etc. Logged once at startup; doesn't affect the teleport loop.
-  bridge.log(`---- pawn class properties (BP_Stalker2Character_C) ----`);
+  // Diagnostic dumps — the menu future mods will pick from when they
+  // want Health, Stamina, Ammo, etc. Logged once at startup; doesn't
+  // affect the teleport loop. Pawn class first (BP-defined + inherited
+  // AActor/APawn/ACharacter properties), then RootComponent's class
+  // (USceneComponent / UCapsuleComponent — useful for finding any
+  // OTHER transform field if dual-write to ComponentToWorld doesn't
+  // visually teleport).
+  bridge.log(`---- pawn class properties (${pawn.className}) ----`);
   await dumpAllProperties(bridge, pawnPtr, pawnClassPtr, 256);
-  bridge.log(`--------------------------------------------------------`);
+  bridge.log(`---- RootComponent class properties ----`);
+  const rootClassPtr2 = await readU64At(bridge, located.rootPtr + GSC.uObjectClassPtr);
+  if (rootClassPtr2) await dumpAllProperties(bridge, located.rootPtr, rootClassPtr2, 128);
+  bridge.log(`-----------------------------------------`);
 
-  // Teleport loop: write BOTH RelativeLocation (the authored value) and
-  // ComponentToWorld.Translation (the cached world transform — what UE
-  // actually reads for rendering / physics queries). Without the
-  // second write the visual position never moves.
+  // Are RootComponent and CapsuleComponent the same pointer? In stock
+  // ACharacter they are, so writing to the root's transform covers
+  // physics. If they're different here we'd need to also write the
+  // capsule's transform — log so we know either way.
+  const capsuleOff = await findPropertyOffset(bridge, pawnClassPtr, "CapsuleComponent");
+  if (capsuleOff != null) {
+    const capsulePtr = await readU64At(bridge, pawnPtr + capsuleOff);
+    if (capsulePtr) {
+      const same = capsulePtr === located.rootPtr;
+      bridge.log(`CapsuleComponent ptr=0x${capsulePtr.toString(16)}  ${same ? "(same as RootComponent — single transform target)" : "(differs from RootComponent — physics may use capsule)"}`);
+    }
+  }
+
+  // Locate CharacterMovementComponent.Velocity so we can zero it on each
+  // teleport — otherwise the movement component re-integrates from old
+  // velocity in the next frame and "snaps back" the pawn. If anything
+  // along this chain is null we just skip the velocity-zero step; the
+  // dual position write may still work for stationary players.
+  let velocityAddr: number | null = null;
+  const charMovOff = await findPropertyOffset(bridge, pawnClassPtr, "CharacterMovement");
+  if (charMovOff != null) {
+    const cmPtr = await readU64At(bridge, pawnPtr + charMovOff);
+    if (cmPtr) {
+      const cmClassPtr = await readU64At(bridge, cmPtr + GSC.uObjectClassPtr);
+      if (cmClassPtr) {
+        const velOff = await findPropertyOffset(bridge, cmClassPtr, "Velocity");
+        if (velOff != null) {
+          velocityAddr = cmPtr + velOff;
+          bridge.log(`CharacterMovement.Velocity @ +0x${velOff.toString(16)} abs=0x${velocityAddr.toString(16)}`);
+        }
+      }
+    }
+  }
+  if (velocityAddr == null) {
+    bridge.log(`CharacterMovement.Velocity not resolved — pawn may snap back after tp`);
+  }
+
+  // Teleport loop: zero CharacterMovement.Velocity, then write BOTH
+  // RelativeLocation (the authored value) AND ComponentToWorld.Translation
+  // (the cached world transform — what UE actually reads for rendering
+  // and physics queries). Skipping either of the two writes leaves the
+  // pawn visually stuck where it was.
+  const ZERO: Vector3 = { x: 0, y: 0, z: 0 };
   let atHome = true;
   let tick = 0;
   while (true) {
     await sleep(5000);
     tick++;
     const dest = atHome ? TARGET : origin;
+    if (velocityAddr != null) await writeVector3dAt(bridge, velocityAddr, ZERO);
     const ok1 = await writeVector3dAt(bridge, relLocAddr, dest);
     const ok2 = await writeVector3dAt(bridge, ctwTranslationAddr, dest);
     if (!ok1 || !ok2) {
