@@ -1,12 +1,27 @@
 #include "bindings.h"
 
+#include <windows.h>
+
 #include <algorithm>
+#include <cstdio>
 
 #include "fname.h"
 #include "logging.h"
 #include "rpc.h"
 #include "ue_reflection.h"
 #include "uproperty.h"
+
+namespace {
+extern "C" int nb_try_dump(const void* src, void* dst, size_t n) {
+  __try {
+    for (size_t i = 0; i < n; ++i)
+      reinterpret_cast<uint8_t*>(dst)[i] = reinterpret_cast<const uint8_t*>(src)[i];
+    return 1;
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
+}
+}  // namespace
 
 namespace nb::bindings {
 
@@ -252,6 +267,32 @@ json game_list_properties(const json& params) {
   return {{"target", target}, {"count", entries.size()}, {"properties", arr}};
 }
 
+// Dump raw bytes at obj->class_ptr + offset. Lets us inspect UStruct
+// field layout when the property walker fails.
+json game_dump_class_memory(const json& params) {
+  if (!nb::ue::is_ready()) return unresolved_reason("not ready");
+  int32_t target = params.value("target", -1);
+  int32_t offset = params.value("offset", 0);
+  int32_t count = std::min(params.value("count", 64), 256);
+  const auto* item = nb::ue::get_item(target);
+  if (!item || !item->object) return {{"found", false}};
+  const void* class_ptr = item->object->class_ptr;
+  if (!class_ptr) return {{"found", false}, {"reason", "no class_ptr"}};
+  std::vector<uint8_t> buf(count);
+  if (!nb_try_dump(static_cast<const uint8_t*>(class_ptr) + offset, buf.data(), count)) {
+    return {{"target", target}, {"offset", offset}, {"fault", true}};
+  }
+  std::string hex;
+  hex.reserve(count * 3);
+  char b[4];
+  for (int i = 0; i < count; ++i) {
+    snprintf(b, sizeof(b), "%02x ", buf[i]);
+    hex += b;
+  }
+  return {{"target", target}, {"offset", offset}, {"count", count},
+          {"classPtr", reinterpret_cast<uint64_t>(class_ptr)}, {"hex", hex}};
+}
+
 json game_get_property(const json& params) {
   if (!nb::ue::is_ready()) return unresolved_reason("reflection not populated yet");
   if (!nb::ue::fname_resolver_ready()) return unresolved_reason("FName::ToString not resolved");
@@ -287,6 +328,7 @@ void install(nb::rpc::Router& router) {
   router.handle("game.setPlayerLocation", game_set_player_location);
   router.handle("game.getProperty", game_get_property);
   router.handle("game.listProperties", game_list_properties);
+  router.handle("game.dumpClassMemory", game_dump_class_memory);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
 

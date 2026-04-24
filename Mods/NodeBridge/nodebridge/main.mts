@@ -94,13 +94,26 @@ const init: ModInit = async (bridge) => {
   bridge.log("locating player pawn");
   const pawn = await waitForPlayer(bridge);
   if (!pawn) return;
-  bridge.log(`pawn idx=${pawn.index} class=${pawn.className} path=${pawn.fullPath}`);
+  bridge.log(`pawn ${JSON.stringify(pawn)}`);
 
   const home = await bridge.game.getPlayerLocation();
   if ("unresolved" in home) {
     bridge.log.error(
       `getPlayerLocation unresolved: ${home.reason} (rootOff=${home.rootOffset} locOff=${home.locOffset})`,
     );
+    // listProperties showed empty data — likely UStruct field offsets are
+    // off in this build. Dump raw bytes at the candidate offsets so we can
+    // see real pointer values vs the zeros our walker decoded.
+    bridge.log("dumping class memory to verify UStruct layout:");
+    for (const off of [0x18, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78, 0x80]) {
+      const dump = await bridge.game.dumpClassMemory(pawn.index, off, 16);
+      if ("hex" in dump) {
+        bridge.log(`  +0x${off.toString(16).padStart(2, "0")}: ${dump.hex}`);
+      } else if ("fault" in dump) {
+        bridge.log(`  +0x${off.toString(16).padStart(2, "0")}: <fault>`);
+        break;
+      }
+    }
     // Dump the pawn's properties so we see what's actually on the class.
     const props = await bridge.game.listProperties(pawn.index, 200);
     if ("properties" in props) {

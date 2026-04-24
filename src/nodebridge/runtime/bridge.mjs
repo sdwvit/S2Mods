@@ -44,6 +44,8 @@ export function createBridge(rpc, modName) {
     // Read — properties
     getProperty: (target, prop) => call("game.getProperty", { target, prop }),
     listProperties: (target, max) => call("game.listProperties", { target, max: max ?? 256 }),
+    dumpClassMemory: (target, offset, count) =>
+      call("game.dumpClassMemory", { target, offset, count: count ?? 64 }),
 
     // Write — UObject / UProperty / UFunction. Stubbed until v3; returns
     // { unresolved: true } today so JS authors can wire up code against the
