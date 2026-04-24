@@ -77,28 +77,69 @@ for (const modName of modList) {
 
 rpc.emit("bootstrap.ready", { loaded, node: process.version, pid: process.pid });
 
-// Hot reload: watch every loaded mod's tree and exit cleanly on JS change.
-// The DLL's node_host supervisor then respawns node.exe with fresh imports
-// (ESM's module cache can't be cleared for just one mod without a lot of
-// care — a full process restart is simpler and always works).
+// Hot reload: poll every loaded mod's tree for mtime changes and exit
+// cleanly when one fires. The DLL's node_host supervisor then respawns
+// node.exe with fresh imports (ESM's module cache can't be cleared for
+// just one mod without a lot of care — a full process restart is
+// simpler and always works).
+//
+// Why polling instead of fs.watch: under Wine/Proton, fs.watch maps to
+// ReadDirectoryChangesW, which doesn't reliably fire when the underlying
+// Linux host writes to the watched directory (as inject-nodebridge
+// does). A 1s mtime poll is immune to that — slightly less efficient
+// but always works.
 let reloading = false;
 const reloadTriggers = /\.(ts|mts|cts|mjs|cjs|js|json)$/;
-for (const modName of loaded) {
-  const watchDir = path.join(modsRoot, modName);
-  try {
-    fs.watch(watchDir, { recursive: true }, (_event, filename) => {
-      if (reloading || !filename || !reloadTriggers.test(filename)) return;
-      reloading = true;
-      rpc.emit("log", { level: "info", mod: "bootstrap", msg: `reload: ${modName}/${filename}` });
-      // Give the log a moment to flush over the pipe + the editor to finish
-      // whatever multi-part save it's doing (atomic-write patterns generate
-      // rename+create+delete bursts).
-      setTimeout(() => process.exit(0), 200);
-    });
-  } catch (err) {
-    rpc.emit("log", { level: "warn", mod: "bootstrap", msg: `watch ${modName} failed: ${err?.message || err}` });
+
+function snapshotMtimes(rootDir) {
+  const out = new Map();
+  const stack = [rootDir];
+  while (stack.length) {
+    const dir = stack.pop();
+    let entries;
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }); }
+    catch { continue; }
+    for (const e of entries) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) stack.push(p);
+      else if (e.isFile() && reloadTriggers.test(e.name)) {
+        try { out.set(p, fs.statSync(p).mtimeMs); } catch {}
+      }
+    }
   }
+  return out;
 }
+
+function findChange(prev, cur) {
+  for (const [p, mt] of cur) if (prev.get(p) !== mt) return p;
+  for (const [p] of prev) if (!cur.has(p)) return p;
+  return null;
+}
+
+const snapshots = new Map();
+for (const modName of loaded) {
+  snapshots.set(modName, snapshotMtimes(path.join(modsRoot, modName)));
+}
+
+setInterval(() => {
+  if (reloading) return;
+  for (const modName of loaded) {
+    const dir = path.join(modsRoot, modName);
+    const prev = snapshots.get(modName);
+    const cur = snapshotMtimes(dir);
+    const changed = findChange(prev, cur);
+    if (changed) {
+      reloading = true;
+      const rel = path.relative(dir, changed);
+      rpc.emit("log", { level: "info", mod: "bootstrap", msg: `reload: ${modName}/${rel}` });
+      // Give the log a moment to flush over the pipe + the editor to
+      // finish multi-part atomic-save bursts (rename+create+delete).
+      setTimeout(() => process.exit(0), 200);
+      return;
+    }
+    snapshots.set(modName, cur);
+  }
+}, 1000).unref();
 
 function discoverMods() {
   try {

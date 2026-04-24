@@ -91,8 +91,8 @@ async function walkPropertyChain(
     if (comp > 0x10_000_000 || num > 0x10_000_000) break;
     const name = await decodeFName(bridge, comp, num);
     out.push({ name, ptr: cur, bytes });
-    const next = readU64LE(bytes, nextOff);
-    cur = next;
+
+    cur = readU64LE(bytes, nextOff);
   }
   return out;
 }
@@ -192,13 +192,16 @@ async function writeVector3dAt(bridge: Bridge, addr: number, v: Vector3): Promis
 // Resolve player location entirely in JS using the verified GSC offsets.
 // pawn → class.PropertyLink → find "RootComponent" (offset within pawn) →
 // pawnPtr + rootOff → USceneComponent → its class.PropertyLink →
-// find "RelativeLocation" → that addr → read 24 bytes.
+// find "RelativeLocation" + "ComponentToWorld" (the cached FTransform  —
+// rendering/physics read this, not RelativeLocation, so a teleport
+// without updating it stays invisible).
 async function getPlayerLocationViaJS(bridge: Bridge, pawnIdx: number): Promise<{
   home: Vector3;
   pawnPtr: number;
   rootOff: number;
   rootPtr: number;
   relLocOff: number;
+  compToWorldOff: number;
 } | null> {
   // Read pawn's UObject pointer + class pointer.
   const pawnPtrR = await bridge.game.dumpObjectMemory(pawnIdx, 0, 24);
@@ -214,16 +217,36 @@ async function getPlayerLocationViaJS(bridge: Bridge, pawnIdx: number): Promise<
   const rootPtr = await readU64At(bridge, pawnPtr + rootOff);
   if (!rootPtr) return null;
 
-  // Read SceneComponent's class pointer, then find RelativeLocation.
+  // Read SceneComponent's class pointer, then find both transform fields.
   const rootClassPtr = await readU64At(bridge, rootPtr + GSC.uObjectClassPtr);
   if (!rootClassPtr) return null;
   const relLocOff = await findPropertyOffset(bridge, rootClassPtr, "RelativeLocation");
   if (relLocOff == null) return null;
   bridge.log(`RelativeLocation @ +0x${relLocOff.toString(16)} (within RootComponent)`);
 
+  const compToWorldOff = await findPropertyOffset(bridge, rootClassPtr, "ComponentToWorld");
+  if (compToWorldOff == null) {
+    bridge.log.error("ComponentToWorld property not found — teleport will be invisible");
+    return null;
+  }
+  bridge.log(`ComponentToWorld @ +0x${compToWorldOff.toString(16)} (within RootComponent)`);
+
+  // Dump the FTransform once so we know where Translation lives in this
+  // build. UE5 LWC FTransform is alignas(16) with TQuat<double>(32B),
+  // TVector<double>(24B), TVector<double>(24B) — Translation should land
+  // at +0x20 inside the transform.
+  const ctwR = await bridge.game.readMemory(rootPtr + compToWorldOff, 96);
+  if ("hex" in ctwR) {
+    const ctwBytes = parseHex(ctwR.hex);
+    for (let off = 0; off < 96; off += 8) {
+      const dv = new DataView(ctwBytes.buffer, ctwBytes.byteOffset + off, 8);
+      bridge.log(`  ctw+0x${off.toString(16).padStart(2, "0")}: f64=${dv.getFloat64(0, true).toFixed(2)}  u64=0x${readU64LE(ctwBytes, off).toString(16)}`);
+    }
+  }
+
   const home = await readVector3dAt(bridge, rootPtr + relLocOff);
   if (!home) return null;
-  return { home, pawnPtr, rootOff, rootPtr, relLocOff };
+  return { home, pawnPtr, rootOff, rootPtr, relLocOff, compToWorldOff };
 }
 
 function scoreNames(names: string[]): { score: number; matched: string[] } {
@@ -381,6 +404,18 @@ const init: ModInit = async (bridge) => {
     if (ready) break;
     await sleep(500);
   }
+  // The C++ poller declares ready when GUObjectArray's `objects` ptr is
+  // non-null — but UE may not have registered any UObjects yet
+  // (num_elements=0). Wait until the count looks plausible before
+  // querying for World, otherwise we'd loop on an empty array forever.
+  while (true) {
+    const r = await bridge.game.getObjectCount();
+    if ("count" in r && r.count > 1000) {
+      bridge.log(`object count = ${r.count}; reflection live`);
+      break;
+    }
+    await sleep(500);
+  }
   bridge.log("reflection ready; waiting for " + WORLD_NAME);
 
   // Don't touch the player until we're actually in-world. Poll the UObject
@@ -430,32 +465,39 @@ const init: ModInit = async (bridge) => {
     return;
   }
 
-  const { home, rootPtr, relLocOff } = located;
+  const { home, rootPtr, relLocOff, compToWorldOff } = located;
   const origin: Vector3 = { ...home };
-  const locAddr = rootPtr + relLocOff;
+  const relLocAddr = rootPtr + relLocOff;
+  // FTransform Translation slot: TQuat<double> (32B) precedes it inside
+  // the FTransform. With alignas(16) padding, +0x20 is the canonical
+  // stock UE5 offset. The ctw+0xNN dump above lets us reverse this if
+  // the values look wrong.
+  const ctwTranslationAddr = rootPtr + compToWorldOff + 0x20;
   bridge.log(
-    `home=(${home.x.toFixed(1)}, ${home.y.toFixed(1)}, ${home.z.toFixed(1)})  locAddr=0x${locAddr.toString(16)}`,
+    `home=(${home.x.toFixed(1)}, ${home.y.toFixed(1)}, ${home.z.toFixed(1)})  relLoc=0x${relLocAddr.toString(16)} ctwTrans=0x${ctwTranslationAddr.toString(16)}`,
   );
 
-  // Teleport loop: write RelativeLocation directly via writeMemory, ping
-  // back via readMemory each tick to confirm. UE updates physics on the
-  // next tick, so the read-back may briefly show old coords.
+  // Teleport loop: write BOTH RelativeLocation (the authored value) and
+  // ComponentToWorld.Translation (the cached world transform — what UE
+  // actually reads for rendering / physics queries). Without the
+  // second write the visual position never moves.
   let atHome = true;
   let tick = 0;
   while (true) {
     await sleep(5000);
     tick++;
     const dest = atHome ? TARGET : origin;
-    const ok = await writeVector3dAt(bridge, locAddr, dest);
-    if (!ok) {
-      bridge.log.error(`tick ${tick} writeMemory faulted`);
+    const ok1 = await writeVector3dAt(bridge, relLocAddr, dest);
+    const ok2 = await writeVector3dAt(bridge, ctwTranslationAddr, dest);
+    if (!ok1 || !ok2) {
+      bridge.log.error(`tick ${tick} writeMemory faulted (rel=${ok1} ctw=${ok2})`);
       continue;
     }
-    const verify = await readVector3dAt(bridge, locAddr);
-    const verifyStr = verify
-      ? `(${verify.x.toFixed(1)}, ${verify.y.toFixed(1)}, ${verify.z.toFixed(1)})`
-      : "<fault>";
-    bridge.log(`tick ${tick} tp -> (${dest.x}, ${dest.y}, ${dest.z}); read-back=${verifyStr}`);
+    const rel = await readVector3dAt(bridge, relLocAddr);
+    const ctw = await readVector3dAt(bridge, ctwTranslationAddr);
+    const fmt = (v: Vector3 | null) =>
+      v ? `(${v.x.toFixed(1)}, ${v.y.toFixed(1)}, ${v.z.toFixed(1)})` : "<fault>";
+    bridge.log(`tick ${tick} tp -> (${dest.x}, ${dest.y}, ${dest.z}); rel=${fmt(rel)} ctw=${fmt(ctw)}`);
     atHome = !atHome;
   }
 };
