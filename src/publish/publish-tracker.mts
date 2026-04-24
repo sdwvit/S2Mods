@@ -77,14 +77,22 @@ export function commitAndPushIfDirty(platform: PublishPlatform, publishedAt = ne
   const isoTimestamp = publishedAt.toISOString();
   runGit(`git add -A -- ${quoteForBash(modFolderPath)}`);
   runGit(`git commit -m "publish: ${modName} ${platform} ${isoTimestamp}"`);
-  runGit(resolvePushCommand());
+  if (process.env.PUBLISH_PUSH) {
+    runGit(resolvePushCommand());
+  } else {
+    logger.log("Skipping git push (set PUBLISH_PUSH=1 to enable).");
+  }
 }
 
 function createAndPushPublishTag(platform: PublishPlatform, publishedAt: Date) {
   const safeModName = modName.replace(/[^A-Za-z0-9._-]/g, "-");
   const tagName = `publish-${safeModName}-${platform}-${formatTagTimestamp(publishedAt)}`;
   runGit(`git tag -a "${tagName}" -m "publish ${platform} ${publishedAt.toISOString()}"`);
-  runGit(`git push origin "${tagName}"`);
+  if (process.env.PUBLISH_PUSH) {
+    runGit(`git push origin "${tagName}"`);
+  } else {
+    logger.log(`Skipping tag push for ${tagName} (set PUBLISH_PUSH=1 to enable).`);
+  }
   return tagName;
 }
 
