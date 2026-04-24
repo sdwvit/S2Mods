@@ -81,7 +81,7 @@ async function main(): Promise<void> {
 
 async function watch(): Promise<void> {
   const modDst = path.join(gameBridgeRoot, "mods", modName);
-  const triggers = /\.(mjs|js|cjs|json)$/;
+  const triggers = /\.(ts|mts|cts|mjs|cjs|js|json)$/;
   let pending: NodeJS.Timeout | null = null;
   const pendingPaths = new Set<string>();
 

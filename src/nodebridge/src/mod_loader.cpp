@@ -15,10 +15,18 @@ std::vector<std::string> enumerate() {
   std::error_code ec;
   if (!fs::exists(root, ec)) return result;
 
+  // Match the extensions bootstrap.mjs probes. First hit wins; this function
+  // only needs to decide "has an entry point" for the discovery log line —
+  // bootstrap.mjs picks the actual file.
+  static constexpr std::string_view kEntryNames[] = {
+      "main.ts", "main.mts", "main.cts", "main.mjs", "main.cjs", "main.js"};
   for (const auto& entry : fs::directory_iterator(root, ec)) {
     if (!entry.is_directory()) continue;
-    auto main = entry.path() / "main.mjs";
-    if (!fs::exists(main)) continue;
+    bool has_entry = false;
+    for (auto name : kEntryNames) {
+      if (fs::exists(entry.path() / std::string(name))) { has_entry = true; break; }
+    }
+    if (!has_entry) continue;
     result.push_back(entry.path().filename().string());
   }
   nb::log::info("mods", "discovered {} mod(s)", result.size());

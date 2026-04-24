@@ -43,10 +43,24 @@ rpc.handle("bootstrap.shutdown", async () => {
 
 rpc.handle("bootstrap.ping", async () => ({ pid: process.pid, node: process.version }));
 
+// Extensions tried in order — first one found wins. Node 25 supports native
+// type-stripping for .ts/.mts/.cts, so mod authors can write TypeScript and
+// import it directly (no bundler).
+const entryExtensions = ["main.ts", "main.mts", "main.cts", "main.mjs", "main.cjs", "main.js"];
+
 for (const modName of modList) {
-  const entry = path.join(modsRoot, modName, "main.mjs");
-  if (!fs.existsSync(entry)) {
-    rpc.emit("log", { level: "warn", mod: "bootstrap", msg: `skip ${modName}: missing ${entry}` });
+  const modDir = path.join(modsRoot, modName);
+  let entry = null;
+  for (const name of entryExtensions) {
+    const candidate = path.join(modDir, name);
+    if (fs.existsSync(candidate)) { entry = candidate; break; }
+  }
+  if (!entry) {
+    rpc.emit("log", {
+      level: "warn",
+      mod: "bootstrap",
+      msg: `skip ${modName}: no main.{ts,mts,cts,mjs,cjs,js} in ${modDir}`,
+    });
     continue;
   }
   try {
@@ -55,7 +69,7 @@ for (const modName of modList) {
     const init = typeof mod.default === "function" ? mod.default : typeof mod.init === "function" ? mod.init : null;
     if (init) await init(bridge);
     loaded.push(modName);
-    rpc.emit("log", { level: "info", mod: "bootstrap", msg: `loaded ${modName}` });
+    rpc.emit("log", { level: "info", mod: "bootstrap", msg: `loaded ${modName} (${path.basename(entry)})` });
   } catch (err) {
     rpc.emit("log", { level: "error", mod: "bootstrap", msg: `load ${modName} failed: ${err?.stack || err}` });
   }
@@ -68,7 +82,7 @@ rpc.emit("bootstrap.ready", { loaded, node: process.version, pid: process.pid })
 // (ESM's module cache can't be cleared for just one mod without a lot of
 // care — a full process restart is simpler and always works).
 let reloading = false;
-const reloadTriggers = /\.(mjs|js|cjs|json)$/;
+const reloadTriggers = /\.(ts|mts|cts|mjs|cjs|js|json)$/;
 for (const modName of loaded) {
   const watchDir = path.join(modsRoot, modName);
   try {
