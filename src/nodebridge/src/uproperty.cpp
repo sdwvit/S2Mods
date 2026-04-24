@@ -1,27 +1,46 @@
 #include "uproperty.h"
 
+#include <windows.h>
+
 #include <cstring>
 
 #include "fname.h"
 #include "logging.h"
 
-namespace nb::ue {
-
 namespace {
 
-const FProperty* property_link_head(const void* class_ptr) {
-  if (!class_ptr) return nullptr;
-  auto base = static_cast<const uint8_t*>(class_ptr);
-  return *reinterpret_cast<const FProperty* const*>(base + kUStructPropertyLinkOffset);
+// SEH-guarded read. Returns true on success, false if the address faulted.
+// We use this inside property walker loops where a corrupt chain pointer
+// would otherwise crash the game.
+extern "C" int nb_try_read_ptr_u(const void* ptr, void** out) {
+  __try {
+    *out = *reinterpret_cast<void* const*>(ptr);
+    return 1;
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
 }
-
-const void* super_struct(const void* class_ptr) {
-  if (!class_ptr) return nullptr;
-  auto base = static_cast<const uint8_t*>(class_ptr);
-  return *reinterpret_cast<void* const*>(base + kUStructSuperStructOffset);
+extern "C" int nb_try_read_fname_u(const void* ptr, uint32_t* comp, uint32_t* num) {
+  __try {
+    *comp = *reinterpret_cast<const uint32_t*>(ptr);
+    *num = *reinterpret_cast<const uint32_t*>(static_cast<const uint8_t*>(ptr) + 4);
+    return 1;
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
+}
+extern "C" int nb_try_read_i32_u(const void* ptr, int32_t* out) {
+  __try {
+    *out = *reinterpret_cast<const int32_t*>(ptr);
+    return 1;
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
 }
 
 }  // namespace
+
+namespace nb::ue {
 
 std::string name_at(const void* base, size_t offset) {
   if (!base) return {};
@@ -33,21 +52,47 @@ std::string name_at(const void* base, size_t offset) {
 std::optional<int32_t> find_property_offset(const UObjectBase* obj, std::string_view name) {
   if (!obj || !obj->class_ptr) return std::nullopt;
 
-  // UStruct.PropertyLink is UE-built so it already includes inherited
-  // properties at the start — one walk covers the whole class hierarchy.
-  // Fall back to iterating parent classes if we miss anyway (belt+braces).
+  // All reads inside the walker are SEH-guarded — a corrupt FProperty chain
+  // pointer (wrong class, wrong offsets, blueprint without a property list)
+  // would otherwise crash the game. On any read fault we abort the current
+  // class walk and move to the super-struct.
   const void* cls = obj->class_ptr;
   int parent_walks = 0;
   while (cls && parent_walks < 16) {
-    const FProperty* cur = property_link_head(cls);
+    // Read PropertyLink head from UStruct+0x60, guarded.
+    void* head_raw = nullptr;
+    if (!nb_try_read_ptr_u(static_cast<const uint8_t*>(cls) + kUStructPropertyLinkOffset, &head_raw)) {
+      nb::log::warn("uprop", "fault reading PropertyLink head; skipping class");
+      break;
+    }
+    const FProperty* cur = static_cast<const FProperty*>(head_raw);
     int seen = 0;
     while (cur && seen < 2048) {
-      std::string pn = fname_to_string(cur->hdr.name_private);
-      if (pn == name) return cur->offset_internal;
-      cur = cur->property_link_next;
+      uint32_t comp = 0, num = 0;
+      if (!nb_try_read_fname_u(&cur->hdr.name_private, &comp, &num)) {
+        nb::log::warn("uprop", "fault reading FProperty.Name; aborting class walk");
+        break;
+      }
+      FName fn{comp, num};
+      std::string pn = fname_to_string(fn);
+      if (pn == name) {
+        int32_t off = 0;
+        if (nb_try_read_i32_u(&cur->offset_internal, &off)) return off;
+        nb::log::warn("uprop", "fault reading offset_internal for '{}'", name);
+        break;
+      }
+      void* next_raw = nullptr;
+      if (!nb_try_read_ptr_u(&cur->property_link_next, &next_raw)) {
+        nb::log::warn("uprop", "fault reading property_link_next; aborting class walk");
+        break;
+      }
+      cur = static_cast<const FProperty*>(next_raw);
       ++seen;
     }
-    cls = super_struct(cls);
+    // Parent class walk — also guarded.
+    void* super_raw = nullptr;
+    if (!nb_try_read_ptr_u(static_cast<const uint8_t*>(cls) + kUStructSuperStructOffset, &super_raw)) break;
+    cls = super_raw;
     ++parent_walks;
   }
   return std::nullopt;

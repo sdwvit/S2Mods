@@ -50,10 +50,13 @@ struct AobCandidate {
 };
 
 constexpr AobCandidate kFNameToStringCandidates[] = {
-    // Lifted verbatim from patternsleuth (the AOB engine UE4SS uses) —
-    // /patternsleuth/src/resolvers/unreal/fname.rs. These match UE 5.1
-    // FName::ToString(FString&) and are field-tested across many UE5
-    // titles; most trustworthy of anything we have.
+    // Lifted verbatim from patternsleuth by trumank (the AOB engine that
+    // UE4SS itself uses for signature resolution):
+    //   https://github.com/trumank/patternsleuth/blob/master/patternsleuth/src/resolvers/unreal/fname.rs
+    // These patterns match UE 5.1 FName::ToString(FString&) and are
+    // field-tested across many UE5 titles — the most trustworthy AOBs we
+    // have. Full credit to trumank and the UE4SS maintainers for the
+    // reverse engineering work.
     //   ps.void-entry: PUSH RSI / PUSH RDI / SUB RSP,0x28 / MOV RSI,RDX /
     //                  MOV RDI,RCX / CMP [RCX+??],0 / JZ
     //   ps.void-cs:    MOV RCX,[RAX+??] / MOV [RSP+??],RCX / LEA RCX,[RSP+??] / CALL
