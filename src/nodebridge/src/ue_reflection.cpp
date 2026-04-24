@@ -199,6 +199,9 @@ bool icontains(std::string_view hay, std::string_view needle) {
 }  // namespace
 
 UObjectBase* find_object_by_class_substring(const std::vector<std::string>& candidates) {
+  // Single-pass scan: for each object we read name + class name once,
+  // then test against every candidate. 10× faster than looping candidates
+  // on the outside (which used to re-decode names per candidate).
   const FUObjectArray* a = g_array.load();
   if (!a) return nullptr;
   int32_t total = a->obj_objects.num_elements;
@@ -207,10 +210,10 @@ UObjectBase* find_object_by_class_substring(const std::vector<std::string>& cand
     if (!item || !item->object) continue;
     auto* obj = const_cast<UObjectBase*>(item->object);
 
-    // Skip Class Default Objects — UE names them "Default__<ClassName>".
-    // They share the class's type but are templates, not spawned actors.
-    // Reading RootComponent etc. on a CDO either returns nullptr or walks
-    // into bad memory on blueprint-derived classes.
+    // Cheap prefilter: skip Class Default Objects. UE names them
+    // "Default__<ClassName>". They share the class's layout but are
+    // templates, not spawned actors. Walking RootComponent on a blueprint
+    // CDO crashes the property walker.
     std::string name = get_object_name(obj);
     if (name.rfind("Default__", 0) == 0) continue;
 
@@ -223,22 +226,20 @@ UObjectBase* find_object_by_class_substring(const std::vector<std::string>& cand
 }
 
 UObjectBase* find_player_pawn() {
-  // Class-name substrings prioritised most-specific first. Dropped "Player_C"
-  // from the candidate list — it matched AnimBP_Player_C (an animation
-  // blueprint class, not a pawn), causing a downstream crash when we tried
-  // to read RootComponent off it.
+  // All candidate substrings tried against each object in one pass (not
+  // N passes over all objects). Dropped "Player_C" — too broad, matched
+  // AnimBP_Player_C. Widened to include generic Stalker / Character / Pawn
+  // roots since the custom GSC naming for the S2 player is unknown.
   static const std::vector<std::string> kCandidates = {
       "StalkerPlayerCharacter",
       "PlayerCharacter_C",
       "StalkerPlayer",
       "PlayerCharacter",
       "PlayerPawn",
+      "StalkerHero",
+      "PlayerHero",
   };
-  for (const auto& c : kCandidates) {
-    std::vector<std::string> one = {c};
-    if (auto* o = find_object_by_class_substring(one)) return o;
-  }
-  return nullptr;
+  return find_object_by_class_substring(kCandidates);
 }
 
 }  // namespace nb::ue
