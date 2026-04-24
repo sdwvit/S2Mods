@@ -80,8 +80,7 @@ DWORD WINAPI bootstrap_thread(LPVOID) {
     return 1;
   }
 
-  auto enabled = nb::mods::enumerate();
-  nb::mods::write_enabled_json(enabled);
+  nb::mods::enumerate();  // early log of discovered mods for diagnostics
 
   if (!rt->host.start(pipe_name)) {
     nb::log::error("dll", "node host start failed");

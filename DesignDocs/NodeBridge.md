@@ -76,42 +76,71 @@ We ship our own proxy DLL and revisit if/when v2 makes the tradeoff compelling.
 
 ## Stalker 2 specifics
 
-Sourced from UE4SS issue #1020 (user JotaEma88 on Nexus mod 560, 2025-09-25):
-for Stalker 2 shipping builds, UE4SS users found the following stable config:
+**UE version**: 5.1 (confirmed via a working community UE4SS build's
+`[EngineVersionOverride] MajorVersion=5, MinorVersion=1`).
 
+**Working community AOBs** (from a Stalker 2 UE4SS build distributed as
+"UE4SS updated-1910-1-8-1-1767217803", 2025-12-30, on a local-disk install;
+likely sourced from Nexus mod 560 / PRZ mod):
+
+`UE4SS_Signatures/GUObjectArray.lua`:
+```lua
+function Register()
+  return "48 8D 0D ? ? ? ? E8 ? ? ? ? E8 ? ? ? ? E8 ? ? ? ? C6 05 ? ? ? ? 01"
+end
+function OnMatchFound(MatchAddress)
+  local LeaInstr = MatchAddress
+  local NextInstr = LeaInstr + 0x7
+  local Offset = LeaInstr + 0x3
+  return NextInstr + DerefToInt32(Offset) - 0x10
+end
+```
+Decoded pattern: `lea rcx, [rip+disp32]` + three `call rel32` + `mov byte [addr], 01`. The LEA loads a pointer near GUObjectArray; subtracting 0x10 lands on the struct start. This is the only symbol that needed a custom signature; `FName_ToString`/`StaticConstructObject`/etc. use UE4SS's built-in AOBs.
+
+**Stable hook + setting block** (full-hooks variant from the working community build — differs from the Nexus 560 minimal subset; evidently newer S2 patches tolerate the full set):
 ```ini
+[General]
+bUseUObjectArrayCache = false   ; else startup crash
+SecondsToScanBeforeGivingUp = 30
+
+[EngineVersionOverride]
+MajorVersion = 5
+MinorVersion = 1
+
 [Hooks]
 HookProcessInternal = 1
 HookProcessLocalScriptFunction = 1
-HookInitGameState = 0
-HookLoadMap = 0
-HookCallFunctionByNameWithArguments = 0
-HookBeginPlay = 0
-HookLocalPlayerExec = 0
-HookAActorTick = 0
-HookEngineTick = 0
-HookGameViewportClientTick = 0
+HookInitGameState = 1
+HookLoadMap = 1
+HookCallFunctionByNameWithArguments = 1
+HookBeginPlay = 1
+HookEndPlay = 1
+HookLocalPlayerExec = 1
+HookAActorTick = 1
+HookEngineTick = 1
+HookGameViewportClientTick = 1
+HookUObjectProcessEvent = 1
+HookProcessConsoleExec = 1
+HookUStructLink = 1
 FExecVTableOffsetInLocalPlayer = 0x28
 ```
 
-This only matters for users running UE4SS alongside Stalker 2 — **not** for us,
-since we aren't a UE4SS consumer. Kept here so it's not lost if we reverse the
-decision later.
+For our v2 work, the plan is:
+1. Port the GUObjectArray AOB above into our own signature runner (start
+   simple — a JSON file + a C++ scanner, not a Lua interpreter).
+2. Use `FExecVTableOffsetInLocalPlayer = 0x28` verbatim when we eventually
+   implement console-exec hooking.
+3. Disable `bUseUObjectArrayCache`-equivalent behavior (or skip it entirely
+   for MVP — we don't need a cache yet).
+4. Defer hooks to the subset we actually need; unlike UE4SS we don't have
+   to support the full Lua mod API surface.
 
-Stalker 2 does **not** appear in UE4SS's upstream `assets/CustomGameConfigs/`
-(list current as of 2026-04-24). The canonical signature files
-(`GUObjectArray.lua` etc.) live on Nexus mod 560 / "PRZ mod". Not redistributable
-from this repo.
-
-UE4SS issue #1198 posts some UE-5.7.x AOBs from Ghidra-assisted RE. Potentially
-useful as a starting template when we get to v2, not as a drop-in:
-
+For cross-reference when Stalker 2 patches break the AOB above, UE4SS issue
+#1198 posts UE-5.7.x AOBs from Bladesong (different game, similar engine
+area):
 - `GUObjectArray`: `48 8B 05 ?? ?? ?? ?? 48 8B 0C C1 48 8D 04 D1`
 - `FName_Constructor`: `48 8B 05 ?? ?? ?? ?? 41 8B 07 F0 0F C1 47 04`
 - `FText_Constructor`: `48 8B ?? 48 85 ?? 0F 84 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B ?? 48 89 ??`
-
-These are for a different UE 5.7.x game (Bladesong); no guarantee they match
-Stalker 2. Included as a reference for the signature format we'd target.
 
 ## Build + ship pipeline
 

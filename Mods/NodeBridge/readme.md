@@ -26,6 +26,15 @@ Run `npm run inject-nodebridge` from that mod's folder to copy it into the
 game. Launch; logs appear at
 `<game>/Stalker2/Binaries/Win64/NodeBridge/logs/bridge.log`.
 
+### Hot reload
+
+While the game is running, `npm run inject-nodebridge:watch` from the mod
+folder watches the repo's `nodebridge/` tree and syncs any `.mjs/.js/.cjs/.json`
+change into the live game folder. `bootstrap.mjs` in turn watches the
+installed mod tree and exits on change; the DLL's supervisor respawns
+`node.exe`, picking up the new code. One save → a few hundred ms later →
+you see the reload in `bridge.log`.
+
 ### Proton / Wine: required launch option
 
 Wine's default DLL override for `dwmapi` is `builtin,native` — it loads its

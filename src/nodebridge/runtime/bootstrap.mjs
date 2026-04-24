@@ -34,7 +34,7 @@ try {
 }
 
 const loaded = [];
-const modList = readEnabled();
+const modList = discoverMods();
 
 rpc.handle("bootstrap.shutdown", async () => {
   rpc.close();
@@ -63,23 +63,37 @@ for (const modName of modList) {
 
 rpc.emit("bootstrap.ready", { loaded, node: process.version, pid: process.pid });
 
-function readEnabled() {
-  const f = path.join(modsRoot, "enabled.json");
-  if (!fs.existsSync(f)) {
-    try {
-      return fs
-        .readdirSync(modsRoot)
-        .filter((d) => fs.statSync(path.join(modsRoot, d)).isDirectory() && fs.existsSync(path.join(modsRoot, d, "main.mjs")));
-    } catch {
-      return [];
-    }
-  }
+// Hot reload: watch every loaded mod's tree and exit cleanly on JS change.
+// The DLL's node_host supervisor then respawns node.exe with fresh imports
+// (ESM's module cache can't be cleared for just one mod without a lot of
+// care — a full process restart is simpler and always works).
+let reloading = false;
+const reloadTriggers = /\.(mjs|js|cjs|json)$/;
+for (const modName of loaded) {
+  const watchDir = path.join(modsRoot, modName);
   try {
-    const parsed = JSON.parse(fs.readFileSync(f, "utf8"));
-    if (Array.isArray(parsed)) return parsed;
-    if (parsed && typeof parsed === "object") return Object.entries(parsed).filter(([, v]) => v).map(([k]) => k);
-  } catch {}
-  return [];
+    fs.watch(watchDir, { recursive: true }, (_event, filename) => {
+      if (reloading || !filename || !reloadTriggers.test(filename)) return;
+      reloading = true;
+      rpc.emit("log", { level: "info", mod: "bootstrap", msg: `reload: ${modName}/${filename}` });
+      // Give the log a moment to flush over the pipe + the editor to finish
+      // whatever multi-part save it's doing (atomic-write patterns generate
+      // rename+create+delete bursts).
+      setTimeout(() => process.exit(0), 200);
+    });
+  } catch (err) {
+    rpc.emit("log", { level: "warn", mod: "bootstrap", msg: `watch ${modName} failed: ${err?.message || err}` });
+  }
+}
+
+function discoverMods() {
+  try {
+    return fs
+      .readdirSync(modsRoot)
+      .filter((d) => fs.statSync(path.join(modsRoot, d)).isDirectory() && fs.existsSync(path.join(modsRoot, d, "main.mjs")));
+  } catch {
+    return [];
+  }
 }
 
 process.on("uncaughtException", (e) => {
