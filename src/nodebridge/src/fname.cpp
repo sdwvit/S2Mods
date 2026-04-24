@@ -13,17 +13,32 @@ namespace nb::ue {
 
 namespace {
 
-// UE4SS's default FName_ToString signature (from FName_ToString.lua.example
-// shipped with the downloaded S2 UE4SS build). A common MSVC x64 prologue:
-//   C3              RET                 (end of prior fn)
-//   33 C0           XOR EAX, EAX
-//   48 8D 54 24 20  LEA RDX, [RSP+0x20]  (out FString)
-//   48 8B CF        MOV RCX, RDI         (this FName*)
-//   48 89 44 24 20  MOV [RSP+0x20], RAX
-//   48 89 44 24 28  MOV [RSP+0x28], RAX
-//   E8 ?? ?? ?? ??  CALL FName::ToString(FString&)
-constexpr std::string_view kFNameToStringPattern =
-    "C3 33 C0 48 8D 54 24 20 48 8B CF 48 89 44 24 20 48 89 44 24 28 E8";
+// Multiple candidate AOBs for FName::ToString in UE 5.x games. The common
+// shape is a callsite just after a RET, where the caller zeros a stack
+// FString, loads `this` into RCX from wherever it lives (RDI / RBX / RSI /
+// R14 / R15), loads &FString into RDX from [RSP+X], and CALLs ToString.
+// We match whichever register holds `this` by accepting any 3rd byte on
+// the `48 8B ??` MOV (or `49 8B ??` for R8-R15).
+//
+// All of these use the same post-processing: the E8 byte sits at
+// (match_addr + AOBSize - 1), and the CALL target = NextInstr + disp32.
+struct AobCandidate {
+  const char* name;
+  const char* pattern;
+  // Byte offset of the E8 inside the match (the CALL opcode).
+  int call_offset;
+};
+
+constexpr AobCandidate kFNameToStringCandidates[] = {
+    {"zero-RDI-0x20", "C3 33 C0 48 8D 54 24 20 48 8B CF 48 89 44 24 20 48 89 44 24 28 E8", 21},
+    {"zero-any-0x20", "C3 33 C0 48 8D 54 24 20 48 8B ?? 48 89 44 24 20 48 89 44 24 28 E8", 21},
+    {"zero-any-Rsp?", "C3 33 C0 48 8D 54 24 ?? 48 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", 21},
+    {"zero-R8-15",    "C3 33 C0 48 8D 54 24 ?? 49 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", 21},
+    // No-zero variant: caller already has FString pre-zeroed, so only the
+    // MOV RDX,[...]+MOV RCX,this+CALL remain. More matches but also more
+    // false positives — we log the resolved address for every hit.
+    {"no-zero-any",   "48 8D 54 24 ?? 48 8B ?? 48 89 44 24 ?? 48 89 44 24 ?? E8", 19},
+};
 
 // Typed fn ptr. MSVC x64 passes `this` in RCX, &out in RDX — plain function
 // pointer works for a member fn at the ABI level.
@@ -50,26 +65,34 @@ bool resolve_fname_to_string() {
     return g_fname_to_string.load() != nullptr;
   }
 
-  auto pattern = nb::aob::parse(kFNameToStringPattern);
-  if (!pattern.valid()) {
-    nb::log::error("fname", "kFNameToStringPattern failed to parse");
+  for (const auto& cand : kFNameToStringCandidates) {
+    auto pattern = nb::aob::parse(cand.pattern);
+    if (!pattern.valid()) {
+      nb::log::error("fname", "pattern '{}' failed to parse", cand.name);
+      continue;
+    }
+    const uint8_t* hit = nb::aob::scan_main_exe(pattern);
+    if (!hit) {
+      nb::log::info("fname", "candidate '{}' no match", cand.name);
+      continue;
+    }
+    const uint8_t* call_instr = hit + cand.call_offset;
+    const uint8_t* next_instr = call_instr + 5;
+    int32_t disp = *reinterpret_cast<const int32_t*>(call_instr + 1);
+    const uint8_t* target = next_instr + disp;
+    nb::log::info("fname", "candidate '{}' hit={} → ToString={}",
+                  cand.name, static_cast<const void*>(hit),
+                  static_cast<const void*>(target));
+    if (g_fname_to_string.load() == nullptr) {
+      g_fname_to_string.store(reinterpret_cast<FNameToString_Fn>(const_cast<uint8_t*>(target)));
+      nb::log::info("fname", "accepting '{}' as FName::ToString", cand.name);
+    }
+  }
+
+  if (g_fname_to_string.load() == nullptr) {
+    nb::log::warn("fname", "all FName::ToString candidates missed; names will be empty");
     return false;
   }
-  const uint8_t* hit = nb::aob::scan_main_exe(pattern);
-  if (!hit) {
-    nb::log::warn("fname", "FName::ToString AOB not found in main exe");
-    return false;
-  }
-  nb::log::info("fname", "FName::ToString AOB hit at {}", static_cast<const void*>(hit));
-
-  // Post-processing mirrors UE4SS's Lua: the E8 byte is at offset (AOBSize-1) = 21.
-  const uint8_t* call_instr = hit + 21;  // points at E8
-  const uint8_t* next_instr = call_instr + 5;
-  int32_t disp = *reinterpret_cast<const int32_t*>(call_instr + 1);
-  const uint8_t* target = next_instr + disp;
-  nb::log::info("fname", "FName::ToString resolved at {}", static_cast<const void*>(target));
-
-  g_fname_to_string.store(reinterpret_cast<FNameToString_Fn>(const_cast<uint8_t*>(target)));
   return true;
 }
 
