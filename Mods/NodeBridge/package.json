@@ -1,6 +1,9 @@
 {
   "name": "@s2mods/nodebridge",
   "private": true,
+  "dependencies": {
+    "@nodebridge/runtime": "file:../../src/nodebridge/runtime"
+  },
   "scripts": {
     "prepare-configs": "S2_MOD=NodeBridge node ../../src/prepare-configs.mts",
     "update-readme": "S2_MOD=NodeBridge node ../../src/update-readme.mts",

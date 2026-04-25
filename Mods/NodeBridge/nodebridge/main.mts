@@ -14,18 +14,20 @@
 // Hot reload: edit + save and `[bootstrap] reload: NodeBridge/main.mts`
 // fires within ~1s, then a fresh boot runs this init again.
 
-// `Mods/NodeBridge/runtime` is a symlink to `src/nodebridge/runtime`,
-// so `../../runtime/...` resolves both at source-time (TypeScript
-// follows the symlink) and at game-runtime (where the deployed
-// structure is `<Win64>/NodeBridge/{mods,runtime}/`).
-import type { ModInit, Vector3 } from "../../runtime/bridge.d.ts";
+// Imports resolve via `node_modules/@nodebridge/runtime` — same package
+// name source-time and game-time, no path translation. At source-time
+// the package is a symlink in this mod's node_modules pointing back at
+// `src/nodebridge/runtime/`. At deploy-time inject-nodebridge sets up
+// the same symlink under the deployed mod folder pointing at the
+// shared `<Win64>/NodeBridge/runtime/`.
+import type { ModInit, Vector3 } from "@nodebridge/runtime/bridge.d.ts";
 import {
   waitForReflection,
   waitForPlayer,
   getPlayerSession,
   teleportPlayer,
   readPlayerLocation,
-} from "../../runtime/s2lib.mts";
+} from "@nodebridge/runtime/s2lib.mts";
 
 const TARGET: Vector3 = { x: 443283, y: 654576, z: -3000 };
 

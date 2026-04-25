@@ -75,6 +75,26 @@ async function main(): Promise<void> {
     // Per-mod JS payload. Folder presence = enabled; no registry file needed.
     const modDst = path.join(gameBridgeRoot, "mods", modName);
     changed += await copyTreeIfChanged(modNodeBridgePayload, modDst);
+    // Set up node_modules/@nodebridge/runtime as a symlink to the
+    // already-deployed runtime/, so the mod's main.mts (with the same
+    // import paths as in the source repo) resolves
+    // "@nodebridge/runtime/..." via Node ESM's standard node_modules
+    // walk-up. From <modDst>/node_modules/@nodebridge/runtime, four
+    // levels up lands at <gameBridgeRoot>; then `runtime` is a sibling
+    // of `mods`. So target is "../../../../runtime" relative to the
+    // symlink itself.
+    const linkDir = path.join(modDst, "node_modules", "@nodebridge");
+    const linkPath = path.join(linkDir, "runtime");
+    await fsp.mkdir(linkDir, { recursive: true });
+    try {
+      const existing = await fsp.lstat(linkPath).catch(() => null);
+      if (existing) await fsp.rm(linkPath, { recursive: true, force: true });
+      await fsp.symlink("../../../../runtime", linkPath, "dir");
+      changed++;
+      logger.log(`[inject-nodebridge] node_modules/@nodebridge/runtime → ../../../../runtime`);
+    } catch (err) {
+      logger.error(`[inject-nodebridge] failed to create runtime symlink:`, err);
+    }
     logger.log(`[inject-nodebridge] ${changed} file(s) updated; mod "${modName}" installed`);
   });
 }
