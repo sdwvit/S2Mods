@@ -56,7 +56,12 @@ bool plausible(const FUObjectArray* arr) {
   if (!arr) return false;
   int32_t n = arr->obj_objects.num_elements;
   int32_t max = arr->obj_objects.max_elements;
-  if (n < 0 || n > 10'000'000) return false;
+  // Require a real population — UE registers ~30k objects during
+  // engine init, so num_elements==0 means we caught the array
+  // post-allocation but pre-population. The poller will retry until
+  // we see real objects, and then the FName verify against obj[0]
+  // has something to verify against.
+  if (n < 1000 || n > 10'000'000) return false;
   if (max < 0 || max > 20'000'000) return false;
   if (n > max) return false;
   if (!arr->obj_objects.objects) return false;

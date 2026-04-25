@@ -328,12 +328,16 @@ export async function waitForReflection(bridge: Bridge): Promise<void> {
 
 /** Wait for the player pawn to spawn. Logs object-count progress every
  *  ~10s — count stable means the user is at the menu and hasn't loaded
- *  a save yet. Loops indefinitely (no timeout). */
+ *  a save yet. Loops indefinitely (no timeout). After 30s with high
+ *  object count and no pawn, dumps candidate Stalker/Character/Pawn
+ *  classes from listObjects (the C++ getPlayerPawn might be missing
+ *  the actual class — different cutscene character, mod variant, etc). */
 export async function waitForPlayer(
   bridge: Bridge,
 ): Promise<{ index: number; name: string; className: string; fullPath: string }> {
   let lastCount = 0;
   let stuckTicks = 0;
+  let scanned = false;
   for (let attempt = 0; ; attempt++) {
     const pawn = await bridge.game.getPlayerPawn();
     if ("found" in pawn && pawn.found) return pawn;
@@ -345,8 +349,72 @@ export async function waitForPlayer(
       const hint = stuckTicks >= 2 ? "  (count stable — load a save)" : "";
       bridge.log(`waiting for player pawn… objectCount=${count} (Δ${delta >= 0 ? "+" : ""}${delta})${hint}`);
       lastCount = count;
+      if (!scanned && count > 100_000) {
+        scanned = true;
+        await dumpPawnCandidates(bridge);
+      }
     }
     await sleep(2000);
+  }
+}
+
+/** When getPlayerPawn keeps missing, dump diagnostic info. First the
+ *  per-substring filter view (Stalker/Character/Pawn/Player) so we
+ *  see exactly what listObjects matched even if our META filter is
+ *  hiding something. Then an unfiltered dump grouped by className —
+ *  shows the most populous classes regardless of name pattern, which
+ *  surfaces e.g. a renamed player class we'd otherwise miss. */
+async function dumpPawnCandidates(bridge: Bridge): Promise<void> {
+  bridge.log("scanning for plausible pawn classes…");
+  const META = new Set([
+    "Class", "Package", "ScriptStruct", "Enum", "Function",
+    "StructProperty", "ObjectProperty", "BlueprintGeneratedClass",
+  ]);
+
+  for (const filter of ["Stalker", "Character", "Pawn", "Player"]) {
+    const list = await bridge.game.listObjects({ filter, limit: 4096 });
+    if (!("items" in list)) continue;
+    const total = list.items.length;
+    const noCdo = list.items.filter((it) => !it.name.startsWith("Default__"));
+    const real = noCdo.filter((it) => !META.has(it.className));
+    bridge.log(`  filter='${filter}' → ${total} total, ${noCdo.length} non-CDO, ${real.length} non-meta`);
+    if (real.length === 0 && noCdo.length > 0) {
+      // Show what META filter ate, so we can adjust if a real player
+      // class is being misclassified.
+      const byClass = new Map<string, number>();
+      for (const it of noCdo) byClass.set(it.className, (byClass.get(it.className) ?? 0) + 1);
+      const top = [...byClass.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+      bridge.log(`    (all matches are meta-typed; classNames: ${top.map(([c, n]) => `${c}×${n}`).join(", ")})`);
+      continue;
+    }
+    const byClass = new Map<string, { count: number; sample: string; idx: number }>();
+    for (const it of real) {
+      const cur = byClass.get(it.className);
+      if (cur) cur.count++;
+      else byClass.set(it.className, { count: 1, sample: it.name, idx: it.index });
+    }
+    for (const [cls, info] of [...byClass.entries()].sort((a, b) => b[1].count - a[1].count).slice(0, 15)) {
+      bridge.log(`    ${cls.padEnd(40)} × ${String(info.count).padStart(4)}  (e.g. [${info.idx}] '${info.sample}')`);
+    }
+  }
+
+  // Unfiltered top-classes view. Walk a chunk of GUObjectArray, group
+  // by className, log the most populous classes regardless of name.
+  // Useful when our hardcoded filter strings don't match anything.
+  bridge.log("  (unfiltered) top classes in first 4096 objects:");
+  const all = await bridge.game.listObjects({ limit: 4096 });
+  if ("items" in all) {
+    const byClass = new Map<string, { count: number; sample: string; idx: number }>();
+    for (const it of all.items) {
+      if (it.name.startsWith("Default__")) continue;
+      if (META.has(it.className)) continue;
+      const cur = byClass.get(it.className);
+      if (cur) cur.count++;
+      else byClass.set(it.className, { count: 1, sample: it.name, idx: it.index });
+    }
+    for (const [cls, info] of [...byClass.entries()].sort((a, b) => b[1].count - a[1].count).slice(0, 25)) {
+      bridge.log(`    ${cls.padEnd(40)} × ${String(info.count).padStart(4)}  (e.g. [${info.idx}] '${info.sample}')`);
+    }
   }
 }
 
