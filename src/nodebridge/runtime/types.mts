@@ -98,8 +98,8 @@ export interface GameApi {
     target: number,
     func: number,
     paramsHex?: string,
-    vtableIdx?: number,
-  ): Promise<{ ok: true; paramsHex: string; vtableIdx: number } | { ok: false; reason: string }>;
+    opts?: { fnAddr?: number; vtableIdx?: number },
+  ): Promise<{ ok: true; paramsHex: string; fnAddr: number } | { ok: false; reason: string }>;
 
   // --- Write (v3, setProperty/callFunction stubbed today) ---
   setProperty(target: number | string, prop: string, value: unknown): Promise<boolean | Unresolved>;

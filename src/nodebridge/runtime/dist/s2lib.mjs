@@ -332,7 +332,7 @@ export async function findUFunction(bridge, classPtr, funcName, maxClasses = 16,
  *  params / return values can be decoded. Looks up the target's
  *  UObject address, the UFunction address, then forwards to
  *  bridge.game.processEvent. */
-export async function callUFunction(bridge, targetIdx, funcName, paramsHex, vtableIdx) {
+export async function callUFunction(bridge, targetIdx, funcName, paramsHex, opts) {
     const objR = await bridge.game.dumpObjectMemory(targetIdx, 0, 8);
     if (!("hex" in objR))
         return { ok: false, reason: "target not found" };
@@ -343,7 +343,7 @@ export async function callUFunction(bridge, targetIdx, funcName, paramsHex, vtab
     const funcAddr = await findUFunction(bridge, classPtr, funcName);
     if (!funcAddr)
         return { ok: false, reason: `UFunction '${funcName}' not found on class chain` };
-    const r = await bridge.game.processEvent(targetAddr, funcAddr, paramsHex, vtableIdx);
+    const r = await bridge.game.processEvent(targetAddr, funcAddr, paramsHex, opts);
     if (r.ok)
         return { ok: true, paramsHex: r.paramsHex };
     return { ok: false, reason: r.reason ?? "processEvent failed" };

@@ -369,7 +369,7 @@ export async function callUFunction(
   targetIdx: number,
   funcName: string,
   paramsHex: string,
-  vtableIdx?: number,
+  opts?: { fnAddr?: number; vtableIdx?: number },
 ): Promise<{ ok: true; paramsHex: string } | { ok: false; reason: string }> {
   const objR = await bridge.game.dumpObjectMemory(targetIdx, 0, 8);
   if (!("hex" in objR)) return { ok: false, reason: "target not found" };
@@ -378,7 +378,7 @@ export async function callUFunction(
   if (!classPtr) return { ok: false, reason: "target has no class" };
   const funcAddr = await findUFunction(bridge, classPtr, funcName);
   if (!funcAddr) return { ok: false, reason: `UFunction '${funcName}' not found on class chain` };
-  const r: any = await bridge.game.processEvent(targetAddr, funcAddr, paramsHex, vtableIdx);
+  const r: any = await bridge.game.processEvent(targetAddr, funcAddr, paramsHex, opts);
   if (r.ok) return { ok: true, paramsHex: r.paramsHex as string };
   return { ok: false, reason: (r.reason as string) ?? "processEvent failed" };
 }

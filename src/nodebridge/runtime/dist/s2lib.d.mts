@@ -72,7 +72,10 @@ export declare function findUFunction(bridge: Bridge, classPtr: number, funcName
  *  params / return values can be decoded. Looks up the target's
  *  UObject address, the UFunction address, then forwards to
  *  bridge.game.processEvent. */
-export declare function callUFunction(bridge: Bridge, targetIdx: number, funcName: string, paramsHex: string, vtableIdx?: number): Promise<{
+export declare function callUFunction(bridge: Bridge, targetIdx: number, funcName: string, paramsHex: string, opts?: {
+    fnAddr?: number;
+    vtableIdx?: number;
+}): Promise<{
     ok: true;
     paramsHex: string;
 } | {
