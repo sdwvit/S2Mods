@@ -20,14 +20,14 @@
 // `src/nodebridge/runtime/`. At deploy-time inject-nodebridge sets up
 // the same symlink under the deployed mod folder pointing at the
 // shared `<Win64>/NodeBridge/runtime/`.
-import type { ModInit, Vector3 } from "@nodebridge/runtime/bridge.d.ts";
+import type { ModInit, Vector3 } from "@nodebridge/runtime";
 import {
   waitForReflection,
   waitForPlayer,
   getPlayerSession,
   teleportPlayer,
   readPlayerLocation,
-} from "@nodebridge/runtime/s2lib.mts";
+} from "@nodebridge/runtime";
 
 const TARGET: Vector3 = { x: 443283, y: 654576, z: -3000 };
 

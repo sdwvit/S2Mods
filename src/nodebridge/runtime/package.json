@@ -4,6 +4,16 @@
   "private": true,
   "description": "Stalker 2 / GSC UE 5.1 helpers and types for NodeBridge mods.",
   "type": "module",
-  "main": "./s2lib.mts",
-  "types": "./bridge.d.ts"
+  "main": "./dist/s2lib.mjs",
+  "types": "./dist/s2lib.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/s2lib.d.mts",
+      "default": "./dist/s2lib.mjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc"
+  }
 }

@@ -4,3 +4,7 @@ dist/
 *.ilk
 *.pdb
 *.obj
+
+# But DO commit the compiled TypeScript runtime — mods import from it.
+!runtime/dist/
+!runtime/dist/**
