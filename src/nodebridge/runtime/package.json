@@ -1,0 +1,9 @@
+{
+  "name": "@nodebridge/runtime",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Stalker 2 / GSC UE 5.1 helpers and types for NodeBridge mods.",
+  "type": "module",
+  "main": "./s2lib.mts",
+  "types": "./bridge.d.ts"
+}
