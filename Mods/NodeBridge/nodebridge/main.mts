@@ -14,10 +14,11 @@
 // Hot reload: edit + save and `[bootstrap] reload: NodeBridge/main.mts`
 // fires within ~1s, then a fresh boot runs this init again.
 
-// Type import path is source-relative (tsc only); the runtime import
-// uses the deployed-relative path so node.exe can find s2lib at
-// <gameRoot>/.../Win64/NodeBridge/runtime/s2lib.mts.
-import type { ModInit, Vector3 } from "../../../src/nodebridge/runtime/bridge.d.ts";
+// `Mods/NodeBridge/runtime` is a symlink to `src/nodebridge/runtime`,
+// so `../../runtime/...` resolves both at source-time (TypeScript
+// follows the symlink) and at game-runtime (where the deployed
+// structure is `<Win64>/NodeBridge/{mods,runtime}/`).
+import type { ModInit, Vector3 } from "../../runtime/bridge.d.ts";
 import {
   waitForReflection,
   waitForPlayer,
