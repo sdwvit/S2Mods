@@ -33,6 +33,11 @@ try {
   exitFatal(`pipe connect failed: ${err.message}`);
 }
 
+// Extensions tried in order — first one found wins. Node 25 supports native
+// type-stripping for .ts/.mts/.cts, so mod authors can write TypeScript and
+// import it directly (no bundler).
+const entryExtensions = ["main.ts", "main.mts", "main.cts", "main.mjs", "main.cjs", "main.js"];
+
 const loaded = [];
 const modList = discoverMods();
 
@@ -42,11 +47,6 @@ rpc.handle("bootstrap.shutdown", async () => {
 });
 
 rpc.handle("bootstrap.ping", async () => ({ pid: process.pid, node: process.version }));
-
-// Extensions tried in order — first one found wins. Node 25 supports native
-// type-stripping for .ts/.mts/.cts, so mod authors can write TypeScript and
-// import it directly (no bundler).
-const entryExtensions = ["main.ts", "main.mts", "main.cts", "main.mjs", "main.cjs", "main.js"];
 
 for (const modName of modList) {
   const modDir = path.join(modsRoot, modName);
@@ -67,9 +67,15 @@ for (const modName of modList) {
     const mod = await import(pathToFileURL(entry).href);
     const bridge = createBridge(rpc, modName);
     const init = typeof mod.default === "function" ? mod.default : typeof mod.init === "function" ? mod.init : null;
-    if (init) await init(bridge);
     loaded.push(modName);
     rpc.emit("log", { level: "info", mod: "bootstrap", msg: `loaded ${modName} (${path.basename(entry)})` });
+    // Run init concurrently — DON'T await. Mods often run forever (poll
+    // loops, watchers, teleport ticks), and awaiting their promise here
+    // would block the rest of bootstrap (notably the hot-reload poller
+    // setup below) until the mod returned, which it never does.
+    if (init) Promise.resolve(init(bridge)).catch((err) => {
+      rpc.emit("log", { level: "error", mod: "bootstrap", msg: `init ${modName} threw: ${err?.stack || err}` });
+    });
   } catch (err) {
     rpc.emit("log", { level: "error", mod: "bootstrap", msg: `load ${modName} failed: ${err?.stack || err}` });
   }
@@ -145,7 +151,14 @@ function discoverMods() {
   try {
     return fs
       .readdirSync(modsRoot)
-      .filter((d) => fs.statSync(path.join(modsRoot, d)).isDirectory() && fs.existsSync(path.join(modsRoot, d, "main.mjs")));
+      .filter((d) => {
+        const dir = path.join(modsRoot, d);
+        if (!fs.statSync(dir).isDirectory()) return false;
+        // Any of the entry extensions counts as a mod marker. Was
+        // hard-coded to main.mjs; that broke discovery on TypeScript-only
+        // mods (main.mts/main.ts) which Node 25 loads natively.
+        return entryExtensions.some((ext) => fs.existsSync(path.join(dir, ext)));
+      });
   } catch {
     return [];
   }
