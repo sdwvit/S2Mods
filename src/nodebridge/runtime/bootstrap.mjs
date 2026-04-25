@@ -83,27 +83,43 @@ for (const modName of modList) {
 
 rpc.emit("bootstrap.ready", { loaded, node: process.version, pid: process.pid });
 
-// Hot reload: watch every loaded mod's tree and exit cleanly on JS change.
-// The DLL's node_host supervisor then respawns node.exe with fresh imports
-// (ESM's module cache can't be cleared for just one mod without a lot of
-// care — a full process restart is simpler and always works).
+// Hot reload: watch every *discovered* mod's tree (not just successfully
+// loaded ones) plus the runtime/ tree. Watching only `loaded` mods
+// would lock us out of fixing a mod whose initial import failed — no
+// watcher would be set up, and we couldn't trigger a respawn without
+// fully restarting the game. Same for runtime/ edits (s2lib.mts etc).
 let reloading = false;
 const reloadTriggers = /\.(ts|mts|cts|mjs|cjs|js|json)$/;
-for (const modName of loaded) {
+const triggerReload = (label) => {
+  if (reloading) return;
+  reloading = true;
+  rpc.emit("log", { level: "info", mod: "bootstrap", msg: `reload: ${label}` });
+  // Give the log a moment to flush over the pipe + the editor to finish
+  // whatever multi-part save it's doing (atomic-write patterns generate
+  // rename+create+delete bursts).
+  setTimeout(() => process.exit(0), 200);
+};
+for (const modName of modList) {
   const watchDir = path.join(modsRoot, modName);
   try {
     fs.watch(watchDir, { recursive: true }, (_event, filename) => {
-      if (reloading || !filename || !reloadTriggers.test(filename)) return;
-      reloading = true;
-      rpc.emit("log", { level: "info", mod: "bootstrap", msg: `reload: ${modName}/${filename}` });
-      // Give the log a moment to flush over the pipe + the editor to finish
-      // whatever multi-part save it's doing (atomic-write patterns generate
-      // rename+create+delete bursts).
-      setTimeout(() => process.exit(0), 200);
+      if (!filename || !reloadTriggers.test(filename)) return;
+      triggerReload(`${modName}/${filename}`);
     });
   } catch (err) {
     rpc.emit("log", { level: "warn", mod: "bootstrap", msg: `watch ${modName} failed: ${err?.message || err}` });
   }
+}
+// Also watch runtime/ — sibling of mods/ — so edits to s2lib.mts /
+// bridge.mjs / bootstrap.mjs etc trigger a fresh node.exe respawn.
+const runtimeDir = path.resolve(modsRoot, "..", "runtime");
+try {
+  fs.watch(runtimeDir, { recursive: true }, (_event, filename) => {
+    if (!filename || !reloadTriggers.test(filename)) return;
+    triggerReload(`runtime/${filename}`);
+  });
+} catch (err) {
+  rpc.emit("log", { level: "warn", mod: "bootstrap", msg: `watch runtime failed: ${err?.message || err}` });
 }
 
 function discoverMods() {
