@@ -35,8 +35,12 @@ fs::path mods_dir() { return root() / L"mods"; }
 // avoids the previous behavior of every launch appending to one
 // ever-growing bridge.log. Resolved once on first call and cached
 // so the rest of the DLL keeps writing to the same file. Also
-// updates a `latest` symlink pointing at the new file so external
-// tailers can always tail the freshest session.
+// rewrites a `latest` hard-link pointing at the new log so external
+// tailers can `tail -F …/logs/latest` regardless of session.
+//
+// Symlinks-via-fs::create_symlink fail on Wine without admin (NTFS
+// reparse points). Hard links don't need the privilege. The file
+// can be deleted/recreated each launch to track the current log.
 fs::path log_file() {
   static std::wstring cached;
   if (cached.empty()) {
@@ -45,9 +49,13 @@ fs::path log_file() {
     auto logDir = root() / L"logs";
     std::error_code ec;
     fs::create_directories(logDir, ec);
-    auto latest = logDir / L"latest";
-    fs::remove(latest, ec);
-    fs::create_symlink(cached, latest, ec);  // ec ignored — best-effort
+    auto target = logDir / cached;
+    auto link = logDir / L"latest";
+    fs::remove(link, ec);
+    // Touch the target first so create_hard_link has something to
+    // link to, then bind `latest` to it.
+    std::ofstream(target).flush();
+    fs::create_hard_link(target, link, ec);
   }
   return root() / L"logs" / cached;
 }
