@@ -607,12 +607,15 @@ async function probeUStructLayout(bridge: Bridge, classPtr: number) {
 // single, reliable signal that "we're in-game" — no need to also poll
 // for a UWorld instance by name. Loops indefinitely; logs object-count
 // progress every ~10s so it's obvious when the engine is still loading
-// vs genuinely stuck.
+// vs genuinely stuck. After a stuck count we also dump candidate
+// Stalker*/Character* class names from listObjects, since the C++
+// `getPlayerPawn` substring matcher might be missing the actual class.
 async function waitForPlayer(
   bridge: Bridge,
 ): Promise<{ index: number; name: string; className: string; fullPath: string }> {
   let lastCount = 0;
   let stuckTicks = 0;
+  let scanned = false;
   for (let attempt = 0; ; attempt++) {
     const pawn = await bridge.game.getPlayerPawn();
     if ("found" in pawn && pawn.found) return pawn;
@@ -627,6 +630,36 @@ async function waitForPlayer(
       const hint = stuckTicks >= 2 ? "  (count stable — load a save)" : "";
       bridge.log(`waiting for player pawn… objectCount=${count} (Δ${delta >= 0 ? "+" : ""}${delta})${hint}`);
       lastCount = count;
+
+      // After 30s of high object count with no pawn, the C++ class
+      // substring matcher is probably missing the class name. Scan
+      // listObjects for plausible candidates and log them so we can
+      // widen the matcher.
+      if (!scanned && count > 100_000) {
+        scanned = true;
+        bridge.log("scanning for plausible pawn classes (Stalker/Character/Pawn)…");
+        for (const filter of ["Stalker", "Character", "Pawn", "Player"]) {
+          const list = await bridge.game.listObjects({ filter, limit: 4096 });
+          if (!("items" in list)) continue;
+          // Surface non-CDO instances + their classes. Group by className
+          // so we don't print 1000s of duplicates.
+          const META = new Set(["Class", "Package", "ScriptStruct", "Enum", "Function", "StructProperty", "ObjectProperty", "BlueprintGeneratedClass"]);
+          const real = list.items.filter(
+            (it) => !it.name.startsWith("Default__") && !META.has(it.className),
+          );
+          const byClass = new Map<string, { count: number; sample: string; idx: number }>();
+          for (const it of real) {
+            const cur = byClass.get(it.className);
+            if (cur) cur.count++;
+            else byClass.set(it.className, { count: 1, sample: it.name, idx: it.index });
+          }
+          if (byClass.size === 0) continue;
+          bridge.log(`  filter='${filter}' → ${real.length} non-CDO instances, ${byClass.size} distinct classes`);
+          for (const [cls, info] of [...byClass.entries()].sort((a, b) => b[1].count - a[1].count).slice(0, 15)) {
+            bridge.log(`    ${cls.padEnd(40)} × ${String(info.count).padStart(4)}  (e.g. [${info.idx}] '${info.sample}')`);
+          }
+        }
+      }
     }
     await sleep(2000);
   }
