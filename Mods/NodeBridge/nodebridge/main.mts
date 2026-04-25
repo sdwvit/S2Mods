@@ -33,7 +33,7 @@
 
 import type { ModInit, Vector3 } from "../../../src/nodebridge/runtime/bridge.d.ts";
 
-const TARGET: Vector3 = { x: 404533, y: 550669, z: 579 };
+const TARGET: Vector3 = { x: 443283, y: 654576, z: -3000 };
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -490,27 +490,15 @@ async function getPlayerLocationViaJS(bridge: Bridge, pawnIdx: number): Promise<
       bridge.log(`Translation slot @ +0x${ctwTranslationInner.toString(16)} inside FTransform → abs 0x${ctwTranslationAddr.toString(16)}`);
     }
   } else {
-    bridge.log(`ComponentToWorld not exposed via UProperty; scanning SceneComponent memory for an FTransform that contains RelativeLocation…`);
-    // Scan from RelativeLocation forwards (FTransform usually lives
-    // shortly after the relative-* triplet in UE's SceneComponent
-    // layout). Read 0x400 bytes; locateTranslationOffset returns the
-    // offset within whatever buffer we feed it.
-    const scanBase = rootPtr + relLocOff;
-    const scanR = await bridge.game.readMemory(scanBase, 0x400);
-    if ("hex" in scanR) {
-      const scanBytes = parseHex(scanR.hex);
-      // Skip the first 24 bytes (that's RelativeLocation itself) so we
-      // find a SECOND match further on — that's the cached transform.
-      const sub = scanBytes.subarray(24);
-      const offIntoSub = locateTranslationOffset(sub, home);
-      if (offIntoSub != null) {
-        ctwTranslationAddr = scanBase + 24 + offIntoSub;
-        const sceneOff = ctwTranslationAddr - rootPtr;
-        bridge.log(`Found cached Translation by memory scan at SceneComponent+0x${sceneOff.toString(16)} (abs 0x${ctwTranslationAddr.toString(16)})`);
-      } else {
-        bridge.log.error("memory scan after RelativeLocation didn't find a second matching Translation — teleport will be invisible");
-      }
-    }
+    // ComponentToWorld isn't a UProperty in the GSC fork. We've verified
+    // empirically that the cached FTransform.Translation lives at exactly
+    // RelativeLocation + 0x130 within USceneComponent memory. The earlier
+    // "scan for second RelativeLocation match" approach broke whenever
+    // the pawn was mid-air or the cached transform hadn't synced (e.g.
+    // right after a teleport that put the player out of bounds).
+    ctwTranslationAddr = rootPtr + relLocOff + 0x130;
+    const sceneOff = ctwTranslationAddr - rootPtr;
+    bridge.log(`Cached Translation at SceneComponent+0x${sceneOff.toString(16)} (relLocOff+0x130, verified GSC layout)`);
   }
 
   return {
@@ -811,34 +799,24 @@ const init: ModInit = async (bridge) => {
     bridge.log(`CharacterMovement.Velocity not resolved — pawn may snap back after tp`);
   }
 
-  // Teleport loop: zero CharacterMovement.Velocity, then write
-  // RelativeLocation and (if located) the cached FTransform Translation.
-  // Skipping the cached transform write leaves the pawn visually stuck
-  // where it was — UE renders from the cached world transform, not from
-  // RelativeLocation directly.
+  // One-shot teleport. Zero velocity so the movement component doesn't
+  // snap us back, then write RelativeLocation + cached FTransform
+  // Translation, read both back to verify, and stop.
   const ZERO: Vector3 = { x: 0, y: 0, z: 0 };
-  let atHome = true;
-  let tick = 0;
-  while (true) {
-    await sleep(5000);
-    tick++;
-    const dest = atHome ? TARGET : origin;
-    if (velocityAddr != null) await writeVector3dAt(bridge, velocityAddr, ZERO);
-    const ok1 = await writeVector3dAt(bridge, relLocAddr, dest);
-    const ok2 = ctwTranslationAddr != null
-      ? await writeVector3dAt(bridge, ctwTranslationAddr, dest)
-      : true;
-    if (!ok1 || !ok2) {
-      bridge.log.error(`tick ${tick} writeMemory faulted (rel=${ok1} ctw=${ok2})`);
-      continue;
-    }
-    const rel = await readVector3dAt(bridge, relLocAddr);
-    const ctw = ctwTranslationAddr != null ? await readVector3dAt(bridge, ctwTranslationAddr) : null;
-    const fmt = (v: Vector3 | null) =>
-      v ? `(${v.x.toFixed(1)}, ${v.y.toFixed(1)}, ${v.z.toFixed(1)})` : "<n/a>";
-    bridge.log(`tick ${tick} tp -> (${dest.x}, ${dest.y}, ${dest.z}); rel=${fmt(rel)} ctw=${fmt(ctw)}`);
-    atHome = !atHome;
+  if (velocityAddr != null) await writeVector3dAt(bridge, velocityAddr, ZERO);
+  const ok1 = await writeVector3dAt(bridge, relLocAddr, TARGET);
+  const ok2 = ctwTranslationAddr != null
+    ? await writeVector3dAt(bridge, ctwTranslationAddr, TARGET)
+    : true;
+  if (!ok1 || !ok2) {
+    bridge.log.error(`tp writeMemory faulted (rel=${ok1} ctw=${ok2})`);
+    return;
   }
+  const rel = await readVector3dAt(bridge, relLocAddr);
+  const ctw = ctwTranslationAddr != null ? await readVector3dAt(bridge, ctwTranslationAddr) : null;
+  const fmt = (v: Vector3 | null) =>
+    v ? `(${v.x.toFixed(1)}, ${v.y.toFixed(1)}, ${v.z.toFixed(1)})` : "<n/a>";
+  bridge.log(`tp once -> (${TARGET.x}, ${TARGET.y}, ${TARGET.z}); rel=${fmt(rel)} ctw=${fmt(ctw)}`);
 };
 
 export default init;
