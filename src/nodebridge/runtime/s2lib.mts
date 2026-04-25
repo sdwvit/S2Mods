@@ -26,7 +26,13 @@ export const GSC = {
   uStructPropertyLink: 0x70,    // stock +0x60
   uStructPropertiesSize: 0x58,  // stock +0x48
   uStructSuperStruct: 0x40,     // stock +0x30 (assumed +0x10 same shift)
+  /** UStruct.Children — UField* head of UFunction/UProperty linked list.
+   *  Walk via UField.Next at +0x28 to enumerate functions defined on a
+   *  class. Stock UE5 +0x38 → GSC +0x48 with the +0x10 UStruct shift. */
+  uStructChildren: 0x48,
   fFieldNamePrivate: 0x28,      // stock
+  /** UField.Next — same chain UFunctions and UProperties live on. */
+  uFieldNext: 0x28,
   fPropertyNextLink: 0x58,      // stock
   fPropertyOffsetInternal: 0x4c,// stock
   uObjectClassPtr: 0x10,        // stock UObjectBase
@@ -301,6 +307,81 @@ export const s2 = {
     return { off, addr: uobjPtr + off };
   },
 };
+
+// ---------------------------------------------------------------------------
+// UFunction lookup + invocation. Walks UStruct.Children (a UField*
+// chain) to find a UFunction by name, then invokes ProcessEvent via
+// the C++ primitive. Once you have callUFunction working you can call
+// any kismet helper from JS, including UI helpers like
+// KismetSystemLibrary::PrintString and UWidgetBlueprintLibrary::Create.
+
+/** Walk classPtr's Children chain looking for a UFunction with the
+ *  given name. Walks SuperStruct chain too (so e.g. APawn methods are
+ *  found on a derived BP class). Returns the UFunction's address
+ *  (UObject*) so the caller can pass it to processEvent. */
+export async function findUFunction(
+  bridge: Bridge,
+  classPtr: number,
+  funcName: string,
+  maxClasses = 16,
+  maxFields = 4096,
+): Promise<number | null> {
+  let cls = classPtr;
+  let parentWalks = 0;
+  while (cls && parentWalks < maxClasses) {
+    let field = await readU64At(bridge, cls + GSC.uStructChildren);
+    let fieldsSeen = 0;
+    const seen = new Set<number>();
+    while (field && !seen.has(field) && fieldsSeen < maxFields) {
+      seen.add(field);
+      // Read the FName at +0x18 (UObjectBase.NamePrivate). UFunction is
+      // a UObject, so NamePrivate lives at the standard UObject offset.
+      const nameR = await bridge.game.readMemory(field + 0x18, 8);
+      if (!("hex" in nameR)) break;
+      const nb = parseHex(nameR.hex);
+      const comp = readU32LE(nb, 0);
+      const num = readU32LE(nb, 4);
+      if (comp > 0x10_000_000) break;
+      const fieldName = await decodeFName(bridge, comp, num);
+      if (fieldName === funcName) return field;
+      // Advance via UField.Next (+0x28).
+      const nextField = await readU64At(bridge, field + GSC.uFieldNext);
+      field = nextField ?? 0;
+      fieldsSeen++;
+    }
+    // Try parent class.
+    const superStruct = await readU64At(bridge, cls + GSC.uStructSuperStruct);
+    if (!superStruct) break;
+    cls = superStruct;
+    parentWalks++;
+  }
+  return null;
+}
+
+/** Find a UFunction by name on `target`'s class hierarchy and call it.
+ *  paramsHex is the function's parameter struct as a hex string; the
+ *  caller knows the layout. Returns the post-call params buffer so out
+ *  params / return values can be decoded. Looks up the target's
+ *  UObject address, the UFunction address, then forwards to
+ *  bridge.game.processEvent. */
+export async function callUFunction(
+  bridge: Bridge,
+  targetIdx: number,
+  funcName: string,
+  paramsHex: string,
+  vtableIdx?: number,
+): Promise<{ ok: true; paramsHex: string } | { ok: false; reason: string }> {
+  const objR = await bridge.game.dumpObjectMemory(targetIdx, 0, 8);
+  if (!("hex" in objR)) return { ok: false, reason: "target not found" };
+  const targetAddr = objR.objPtr;
+  const classPtr = await readU64At(bridge, targetAddr + GSC.uObjectClassPtr);
+  if (!classPtr) return { ok: false, reason: "target has no class" };
+  const funcAddr = await findUFunction(bridge, classPtr, funcName);
+  if (!funcAddr) return { ok: false, reason: `UFunction '${funcName}' not found on class chain` };
+  const r: any = await bridge.game.processEvent(targetAddr, funcAddr, paramsHex, vtableIdx);
+  if (r.ok) return { ok: true, paramsHex: r.paramsHex as string };
+  return { ok: false, reason: (r.reason as string) ?? "processEvent failed" };
+}
 
 // ---------------------------------------------------------------------------
 // Player session helpers. These bind the mod-boot dance into single

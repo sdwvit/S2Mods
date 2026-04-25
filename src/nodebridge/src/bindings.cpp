@@ -129,6 +129,81 @@ json stub_call_function(const json&) {
   return unresolved_reason("callFunction needs UFunction + ProcessEvent (v3)");
 }
 
+// Hex parsing reused by processEvent; tolerates whitespace and packed forms.
+static std::vector<uint8_t> parse_hex_payload(std::string_view hex) {
+  std::vector<uint8_t> buf;
+  buf.reserve(hex.size() / 2);
+  uint8_t cur = 0;
+  bool half = false;
+  for (char c : hex) {
+    int v = -1;
+    if (c >= '0' && c <= '9') v = c - '0';
+    else if (c >= 'a' && c <= 'f') v = c - 'a' + 10;
+    else if (c >= 'A' && c <= 'F') v = c - 'A' + 10;
+    else continue;
+    cur = (cur << 4) | static_cast<uint8_t>(v);
+    if (half) { buf.push_back(cur); cur = 0; }
+    half = !half;
+  }
+  return buf;
+}
+
+// Invoke UObject::ProcessEvent via the target's vtable. The actual
+// vtable slot for ProcessEvent is build-specific (UE 5.1 stock is
+// usually 67, but we expose it as a parameter so JS can sweep if 67
+// crashes on a particular build).
+//
+// Caller passes:
+//   target     UObject*   (instance address — listObjects gives us this via dumpObjectMemory)
+//   func       UFunction* (UObject address from listObjects, walked from the class.Children chain in JS)
+//   paramsHex  hex bytes  (the params struct: caller knows the layout
+//                          from the UFunction's properties)
+//   vtableIdx  optional   (default 67)
+//
+// We allocate a stack/heap buffer for params, decode hex into it,
+// call ProcessEvent, then re-encode the buffer back as hex so the
+// caller sees any output params (return value, out-by-ref, etc).
+json game_process_event(const json& params) {
+  uint64_t target = params.value("target", 0ULL);
+  uint64_t func = params.value("func", 0ULL);
+  std::string hex = params.value("paramsHex", std::string{});
+  int32_t vtableIdx = params.value("vtableIdx", 67);
+  if (!target || !func) return {{"ok", false}, {"reason", "missing target or func"}};
+  if (vtableIdx < 0 || vtableIdx > 256) return {{"ok", false}, {"reason", "vtableIdx out of range"}};
+
+  std::vector<uint8_t> buf = parse_hex_payload(hex);
+  // Even no-args UFunctions have at least a return slot; allow zero
+  // bytes if caller really meant "no params".
+
+  using ProcessEventFn = void(*)(void*, void*, void*);
+  ProcessEventFn pe = nullptr;
+  __try {
+    auto** vtable = *reinterpret_cast<uintptr_t***>(target);
+    if (!vtable) return {{"ok", false}, {"reason", "target has no vtable"}};
+    pe = reinterpret_cast<ProcessEventFn>(vtable[vtableIdx]);
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return {{"ok", false}, {"reason", "vtable read faulted"}};
+  }
+  if (!pe) return {{"ok", false}, {"reason", "vtable[idx] is null"}};
+
+  __try {
+    pe(reinterpret_cast<void*>(target), reinterpret_cast<void*>(func),
+       buf.empty() ? nullptr : buf.data());
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return {{"ok", false}, {"reason", "ProcessEvent faulted — wrong vtableIdx? wrong params layout?"}};
+  }
+
+  // Re-encode params buffer (output args / return value live there).
+  std::string out;
+  out.reserve(buf.size() * 2);
+  char b[4];
+  for (uint8_t byte : buf) {
+    snprintf(b, sizeof(b), "%02x", byte);
+    out += b;
+  }
+  return {{"ok", true}, {"paramsHex", out}, {"vtableIdx", vtableIdx}};
+}
+
 // Look up the player pawn by class-name substring. Cached after first hit
 // so we don't re-scan GUObjectArray every call; the cached handle is
 // invalidated whenever its index slot changes (object destroyed + reused).
@@ -438,6 +513,7 @@ void install(nb::rpc::Router& router) {
   router.handle("game.scanAOB", game_scan_aob);
   router.handle("game.mainExeBase", game_main_exe_base);
   router.handle("game.fnameToString", game_fname_to_string);
+  router.handle("game.processEvent", game_process_event);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
 
