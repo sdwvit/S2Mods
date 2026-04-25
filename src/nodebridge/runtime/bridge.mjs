@@ -53,8 +53,14 @@ export function createBridge(rpc, modName) {
     scanAOB: (pattern) => call("game.scanAOB", { pattern }),
     mainExeBase: () => call("game.mainExeBase"),
     fnameToString: (comp, num) => call("game.fnameToString", { comp, num: num ?? 0 }),
-    processEvent: (target, func, paramsHex, vtableIdx) =>
-      call("game.processEvent", { target, func, paramsHex: paramsHex ?? "", vtableIdx: vtableIdx ?? 67 }),
+    processEvent: (target, func, paramsHex, opts) =>
+      call("game.processEvent", {
+        target,
+        func,
+        paramsHex: paramsHex ?? "",
+        ...(opts?.fnAddr ? { fnAddr: opts.fnAddr } : {}),
+        vtableIdx: opts?.vtableIdx ?? 67,
+      }),
 
     // Write — UObject / UProperty / UFunction. Stubbed until v3; returns
     // { unresolved: true } today so JS authors can wire up code against the

@@ -184,10 +184,13 @@ export interface GameApi {
      *  layout). On success the returned paramsHex contains the buffer
      *  post-call so out-by-ref and return-value slots are readable.
      *  vtableIdx defaults to 67 (UE 5.1 typical); override if a build differs. */
-    processEvent(target: number, func: number, paramsHex?: string, vtableIdx?: number): Promise<{
+    processEvent(target: number, func: number, paramsHex?: string, opts?: {
+        fnAddr?: number;
+        vtableIdx?: number;
+    }): Promise<{
         ok: true;
         paramsHex: string;
-        vtableIdx: number;
+        fnAddr: number;
     } | {
         ok: false;
         reason: string;

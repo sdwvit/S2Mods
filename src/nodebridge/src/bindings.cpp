@@ -176,13 +176,13 @@ extern "C" int nb_try_load_vtable_slot(uint64_t target, int32_t idx, uint64_t* o
     return 0;
   }
 }
-extern "C" int nb_try_invoke_pe(uint64_t fn, uint64_t target, uint64_t func, void* params) {
+extern "C" int nb_try_invoke_pe(uint64_t fn, uint64_t target, uint64_t func, void* params, unsigned long* out_excode) {
   using ProcessEventFn = void(*)(void*, void*, void*);
   __try {
     auto pe = reinterpret_cast<ProcessEventFn>(fn);
     pe(reinterpret_cast<void*>(target), reinterpret_cast<void*>(func), params);
     return 1;
-  } __except (EXCEPTION_EXECUTE_HANDLER) {
+  } __except (*out_excode = GetExceptionCode(), EXCEPTION_EXECUTE_HANDLER) {
     return 0;
   }
 }
@@ -191,19 +191,32 @@ json game_process_event(const json& params) {
   uint64_t target = params.value("target", 0ULL);
   uint64_t func = params.value("func", 0ULL);
   std::string hex = params.value("paramsHex", std::string{});
+  // If `fnAddr` is set, JS resolved ProcessEvent's absolute address
+  // itself (e.g. via scanAOB) and skips the vtable lookup. Otherwise
+  // we use vtableIdx (default 67 — UE 5.1 typical, but build-specific).
+  uint64_t fnAddrParam = params.value("fnAddr", 0ULL);
   int32_t vtableIdx = params.value("vtableIdx", 67);
   if (!target || !func) return {{"ok", false}, {"reason", "missing target or func"}};
-  if (vtableIdx < 0 || vtableIdx > 256) return {{"ok", false}, {"reason", "vtableIdx out of range"}};
 
   std::vector<uint8_t> buf = parse_hex_payload(hex);
   uint64_t fnAddr = 0;
-  if (!nb_try_load_vtable_slot(target, vtableIdx, &fnAddr)) {
-    return {{"ok", false}, {"reason", "vtable read faulted"}};
+  if (fnAddrParam) {
+    fnAddr = fnAddrParam;
+  } else {
+    if (vtableIdx < 0 || vtableIdx > 256) return {{"ok", false}, {"reason", "vtableIdx out of range"}};
+    if (!nb_try_load_vtable_slot(target, vtableIdx, &fnAddr)) {
+      return {{"ok", false}, {"reason", "vtable read faulted"}};
+    }
+    if (!fnAddr) return {{"ok", false}, {"reason", "vtable[idx] is null"}};
   }
-  if (!fnAddr) return {{"ok", false}, {"reason", "vtable[idx] is null"}};
 
-  if (!nb_try_invoke_pe(fnAddr, target, func, buf.empty() ? nullptr : buf.data())) {
-    return {{"ok", false}, {"reason", "ProcessEvent faulted — wrong vtableIdx? wrong params layout?"}};
+  unsigned long excode = 0;
+  if (!nb_try_invoke_pe(fnAddr, target, func, buf.empty() ? nullptr : buf.data(), &excode)) {
+    char rsn[160];
+    snprintf(rsn, sizeof(rsn),
+             "ProcessEvent faulted (exc=0x%08lx, fnAddr=0x%llx) — wrong vtableIdx/fnAddr or params layout",
+             excode, static_cast<unsigned long long>(fnAddr));
+    return {{"ok", false}, {"reason", std::string(rsn)}};
   }
 
   // Re-encode params buffer (output args / return value live there).
@@ -214,7 +227,7 @@ json game_process_event(const json& params) {
     snprintf(b, sizeof(b), "%02x", byte);
     out += b;
   }
-  return {{"ok", true}, {"paramsHex", out}, {"vtableIdx", vtableIdx}};
+  return {{"ok", true}, {"paramsHex", out}, {"fnAddr", fnAddr}};
 }
 
 // Look up the player pawn by class-name substring. Cached after first hit
