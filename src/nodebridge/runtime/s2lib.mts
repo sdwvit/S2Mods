@@ -11,7 +11,11 @@
 // mods at <gameRoot>/.../NodeBridge/mods/<modName>/main.mts import via
 // `import { ... } from "../../runtime/s2lib.mts"`.
 
-import type { Bridge, Vector3 } from "./bridge.d.ts";
+import type { Bridge, Vector3 } from "./types.mts";
+
+// Re-export types so mods can `import type { ModInit, Vector3, Bridge }
+// from "@nodebridge/runtime"` and not chase a separate sub-path.
+export type { Bridge, Vector3, ModInit, GameApi, ObjectRef, Unresolved } from "./types.mts";
 
 // ---------------------------------------------------------------------------
 // Verified GSC UE 5.1 layout offsets (Stalker 2). FField/FProperty are
