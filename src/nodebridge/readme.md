@@ -4,12 +4,27 @@ Windows proxy DLL that loads into the Stalker 2 process (takes the
 `dwmapi.dll` slot), spawns a bundled `node.exe` as a child, and routes
 RPC between the game and per-mod JS entry points over a named pipe.
 
-This directory holds the native side. The JS runtime, mod scaffolding,
-and install scripts live elsewhere in the repo:
+This directory holds the native DLL plus the Node-side runtime that
+mods import from. Other entry points live in the wider repo:
 - `src/pull-node-runtime.mts` — fetches portable Node for shipping
 - `src/pull-nodebridge.mts` — downloads tagged release DLL
 - `src/inject-nodebridge.mts` — hash-skipped copy into the live game folder
-- `Mods/NodeBridge/` — the smoke-test mod
+- `Mods/NodeBridge/` — the smoke-test mod (one-shot teleport)
+
+### Layout in this directory
+
+- `src/` — C++ DLL source.
+- `runtime/` — JS files shipped into `<game>/.../Win64/NodeBridge/runtime/`:
+  - `bootstrap.mjs` — supervisor entry. Discovers and loads mods,
+    sets up fs.watch on `mods/<each>` + `runtime/` for hot reload.
+  - `bridge.mjs` + `bridge.d.ts` — the `bridge` value passed to mod
+    `init`: log, RPC call/emit/handle, `bridge.game.*` API.
+  - `rpc.mjs` — length-prefixed JSON RPC over the named pipe.
+  - **`s2lib.mts`** — Stalker 2 specifics for mods: GSC offsets,
+    FProperty walker, FName decoder, vector helpers, `s2.readU32/F32/…`
+    accessors, `getPlayerSession` / `teleportPlayer`. Mods import
+    from `../../runtime/s2lib.mts`.
+- `dist/` — built DLL artifacts pulled by `npm run pull-nodebridge`.
 
 ## Architecture
 
@@ -37,11 +52,11 @@ doesn't support DLL-to-DLL).
 On Proton, ship-or-die requirement: `WINEDLLOVERRIDES="dwmapi=n,b"
 %command%`. Without it the system DLL wins and we never load.
 
-## Layout
+## DLL source layout (`src/`)
 
 - `CMakeLists.txt`, `CMakePresets.json` — MSVC / VS 2022 x64 release.
   FetchContents minhook v1.3.4 + nlohmann/json v3.11.3.
-- `src/` — DLL source (C++20).
+- C++20 sources:
   - `dllmain.cpp` — `DLL_PROCESS_ATTACH` → log banner, copy
     `dwmapi_orig`, `CreateThread` bootstrap. We tried `QueueUserAPC`
     (per UE4SS) but the UE main thread doesn't reliably hit alertable
@@ -89,20 +104,29 @@ Stubs (return `{unresolved: true}`):
   use the C++ FProperty walker; superseded by JS-side walking via
   primitives.
 
-## Architectural principle: DLL = primitives, logic = JS
+## Architectural principle: DLL = primitives, lib = JS
 
-When you reach for a new C++ binding, stop and ask whether
-`readMemory` + a JS helper covers it. The DLL CI loop is
-expensive — tag a release, wait on Windows GHA, pull, inject, restart
-the game — so every primitive added to `bindings.cpp` should be the
-*minimum* thunk over an engine call (one syscall, one decode, one
-read/write). Walkers, listers, finders, schedulers belong in mods.
+Three concentric layers; never put logic in the inner one if it can
+live in the outer:
 
-This is why `find_property_offset` and `list_properties` are deprecated
-in `uproperty.cpp` — both are reimplementable in TypeScript using
+1. **DLL** (`src/*.cpp`). Minimum thunks over engine calls. One
+   syscall, one decode, one read/write per binding. Adding a new
+   binding here costs a tag → CI → pull → inject → game restart cycle,
+   so the bar is high. Today: memory primitives, AOB, FName decoder,
+   GUObjectArray walk, player-pawn discovery.
+2. **Runtime lib** (`runtime/s2lib.mts`). Stable JS helpers built on
+   the primitives. GSC layout offsets, FProperty walker, vector
+   helpers, player-session helpers, teleport. Hot-reloadable — edit
+   and the supervisor respawns node.exe in ~1s. Anything that's
+   "Stalker 2-specific but not mod-specific" lives here.
+3. **Mods** (`Mods/<name>/nodebridge/main.mts`). Just the recipe —
+   what to do with the helpers. Should be tiny.
+
+Why `find_property_offset` / `list_properties` are deprecated in
+`uproperty.cpp`: both reimplemented in `s2lib.mts` using
 `dumpObjectMemory` (read class_ptr) + `readMemory` (walk
-PropertyLink) + `fnameToString` (decode each FField name). See
-`Mods/NodeBridge/nodebridge/main.mts` for the JS-side walker.
+PropertyLink) + `fnameToString` (decode FField name). Iterating the
+walker without a DLL rebuild has paid for itself many times over.
 
 ## Stalker 2 specifics
 
@@ -156,23 +180,6 @@ posts UE-5.7.x AOBs from Bladesong as a similar-engine fallback:
 - `FName_Constructor`: `48 8B 05 ?? ?? ?? ?? 41 8B 07 F0 0F C1 47 04`
 - `FText_Constructor`: `48 8B ?? 48 85 ?? 0F 84 ?? ?? ?? ?? E8 ?? ?? ?? ?? 48 8B ?? 48 89 ??`
 
-## Why no UE4SS dependency
-
-We tried. UE4SS at both `main` and tag `v3.0.1` declares submodules with
-SSH URLs `git@github.com:Re-UE4SS/UEPseudo.git` and
-`git@github.com:trumank/patternsleuth.git`. `Re-UE4SS/UEPseudo`
-returns 404 — the org appears renamed or moved — so UE4SS can't be
-built from source. The DEV release zip ships only runtime binaries +
-docs, no headers, no import lib, so a CppMod can't link against it
-without forking UEPseudo or stubbing `CppUserModBase` against an
-extracted ABI.
-
-Either workaround is ongoing maintenance burden. For our use — JS
-mods, no engine reflection requirement at MVP — we ship our own proxy
-DLL and borrow UE4SS's *patterns* (loader-lock-safe DllMain,
-per-symbol AOB scripts as data not code, `SecondsToScanBeforeGivingUp`
-+ `NumScanThreads` knobs) without taking the dep.
-
 ## Build
 
 Local Windows build:
@@ -211,23 +218,28 @@ gh run watch "$(gh run list --workflow=build-nodebridge.yml --limit 1 --json dat
 
 ## Known issues
 
-- **GSC UStruct layout drift**: `uproperty.{h,cpp}` assumes stock UE 5.1
-  field offsets (`PropertyLink` at +0x60, `FField.NamePrivate` at
-  +0x28). Stalker 2's GSC fork shifts some of these. The live
-  resolution is moving to a JS-side probe that sweeps candidate
-  offsets and scores against expected pawn-class names — see the
-  smoke test mod's `probeUStructLayout`. Once stable, the C++ walker
-  will be deleted.
-- `getProperty / setProperty / callFunction` C++ stubs depend on the
-  same broken walker. Replace via JS once the offsets are pinned.
+- `find_property_offset / list_properties / getProperty / setProperty
+  / callFunction / getPlayerLocation / setPlayerLocation` in C++ are
+  superseded by the JS lib. Kept in tree for now; safe to delete
+  whenever someone wants to do the cleanup pass.
+
+## Distribution
+
+**Steam Workshop and mod.io DO NOT work for NodeBridge mods.**
+Confirmed by a throwaway upload — the official channels only ingest
+`.pak` content, but NodeBridge needs a DLL at
+`Stalker2/Binaries/Win64/dwmapi.dll` plus a Node runtime tree at
+`Win64/NodeBridge/`. Neither installer puts files there.
+
+End-user distribution will need a separate install path (zipped
+release with an installer that copies into `Win64/`, or a similar
+out-of-band route). Don't ship NodeBridge mods through Workshop /
+mod.io expecting them to load.
 
 ## Open items
 
-- Steam Workshop / mod.io support for non-pak files. NodeBridge mods
-  need a separate install path; confirm with a throwaway upload
-  before shipping to end users.
-- A `writeMemory` primitive (symmetric with `readMemory`) so the JS
-  walker can drive teleports without a C++ helper.
+- A `writeMemory` primitive landed already; the lib uses it.
 - Signature framework — `bindings.cpp` has the GUObjectArray + FName
   AOBs hard-coded. Move to a JSON-per-symbol file once we add a
   second hook target.
+- End-user installer for the out-of-Workshop ship path.
