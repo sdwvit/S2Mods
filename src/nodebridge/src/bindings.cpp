@@ -163,6 +163,30 @@ static std::vector<uint8_t> parse_hex_payload(std::string_view hex) {
 // We allocate a stack/heap buffer for params, decode hex into it,
 // call ProcessEvent, then re-encode the buffer back as hex so the
 // caller sees any output params (return value, out-by-ref, etc).
+// SEH wrappers — MSVC forbids __try in functions that contain
+// C++ objects with destructors, so the actual fault-protected
+// loads/calls live in tiny no-RAII helpers.
+extern "C" int nb_try_load_vtable_slot(uint64_t target, int32_t idx, uint64_t* out_fn) {
+  __try {
+    uintptr_t** vtable = *reinterpret_cast<uintptr_t***>(target);
+    if (!vtable) return 0;
+    *out_fn = reinterpret_cast<uint64_t>(vtable[idx]);
+    return 1;
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
+}
+extern "C" int nb_try_invoke_pe(uint64_t fn, uint64_t target, uint64_t func, void* params) {
+  using ProcessEventFn = void(*)(void*, void*, void*);
+  __try {
+    auto pe = reinterpret_cast<ProcessEventFn>(fn);
+    pe(reinterpret_cast<void*>(target), reinterpret_cast<void*>(func), params);
+    return 1;
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
+}
+
 json game_process_event(const json& params) {
   uint64_t target = params.value("target", 0ULL);
   uint64_t func = params.value("func", 0ULL);
@@ -172,24 +196,13 @@ json game_process_event(const json& params) {
   if (vtableIdx < 0 || vtableIdx > 256) return {{"ok", false}, {"reason", "vtableIdx out of range"}};
 
   std::vector<uint8_t> buf = parse_hex_payload(hex);
-  // Even no-args UFunctions have at least a return slot; allow zero
-  // bytes if caller really meant "no params".
-
-  using ProcessEventFn = void(*)(void*, void*, void*);
-  ProcessEventFn pe = nullptr;
-  __try {
-    auto** vtable = *reinterpret_cast<uintptr_t***>(target);
-    if (!vtable) return {{"ok", false}, {"reason", "target has no vtable"}};
-    pe = reinterpret_cast<ProcessEventFn>(vtable[vtableIdx]);
-  } __except (EXCEPTION_EXECUTE_HANDLER) {
+  uint64_t fnAddr = 0;
+  if (!nb_try_load_vtable_slot(target, vtableIdx, &fnAddr)) {
     return {{"ok", false}, {"reason", "vtable read faulted"}};
   }
-  if (!pe) return {{"ok", false}, {"reason", "vtable[idx] is null"}};
+  if (!fnAddr) return {{"ok", false}, {"reason", "vtable[idx] is null"}};
 
-  __try {
-    pe(reinterpret_cast<void*>(target), reinterpret_cast<void*>(func),
-       buf.empty() ? nullptr : buf.data());
-  } __except (EXCEPTION_EXECUTE_HANDLER) {
+  if (!nb_try_invoke_pe(fnAddr, target, func, buf.empty() ? nullptr : buf.data())) {
     return {{"ok", false}, {"reason", "ProcessEvent faulted — wrong vtableIdx? wrong params layout?"}};
   }
 
