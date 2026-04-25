@@ -179,6 +179,19 @@ export interface GameApi {
         num: number;
         name: string;
     } | Unresolved>;
+    /** Invoke UObject::ProcessEvent on `target` for UFunction at `func`. paramsHex
+     *  is the raw bytes of the function's parameter struct (caller knows the
+     *  layout). On success the returned paramsHex contains the buffer
+     *  post-call so out-by-ref and return-value slots are readable.
+     *  vtableIdx defaults to 67 (UE 5.1 typical); override if a build differs. */
+    processEvent(target: number, func: number, paramsHex?: string, vtableIdx?: number): Promise<{
+        ok: true;
+        paramsHex: string;
+        vtableIdx: number;
+    } | {
+        ok: false;
+        reason: string;
+    }>;
     setProperty(target: number | string, prop: string, value: unknown): Promise<boolean | Unresolved>;
     callFunction(target: number | string, func: string, args?: unknown[]): Promise<unknown | Unresolved>;
 }

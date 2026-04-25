@@ -4,7 +4,13 @@ export declare const GSC: {
     readonly uStructPropertyLink: 112;
     readonly uStructPropertiesSize: 88;
     readonly uStructSuperStruct: 64;
+    /** UStruct.Children — UField* head of UFunction/UProperty linked list.
+     *  Walk via UField.Next at +0x28 to enumerate functions defined on a
+     *  class. Stock UE5 +0x38 → GSC +0x48 with the +0x10 UStruct shift. */
+    readonly uStructChildren: 72;
     readonly fFieldNamePrivate: 40;
+    /** UField.Next — same chain UFunctions and UProperties live on. */
+    readonly uFieldNext: 40;
     readonly fPropertyNextLink: 88;
     readonly fPropertyOffsetInternal: 76;
     readonly uObjectClassPtr: 16;
@@ -55,6 +61,24 @@ export declare const s2: {
         addr: number;
     } | null>;
 };
+/** Walk classPtr's Children chain looking for a UFunction with the
+ *  given name. Walks SuperStruct chain too (so e.g. APawn methods are
+ *  found on a derived BP class). Returns the UFunction's address
+ *  (UObject*) so the caller can pass it to processEvent. */
+export declare function findUFunction(bridge: Bridge, classPtr: number, funcName: string, maxClasses?: number, maxFields?: number): Promise<number | null>;
+/** Find a UFunction by name on `target`'s class hierarchy and call it.
+ *  paramsHex is the function's parameter struct as a hex string; the
+ *  caller knows the layout. Returns the post-call params buffer so out
+ *  params / return values can be decoded. Looks up the target's
+ *  UObject address, the UFunction address, then forwards to
+ *  bridge.game.processEvent. */
+export declare function callUFunction(bridge: Bridge, targetIdx: number, funcName: string, paramsHex: string, vtableIdx?: number): Promise<{
+    ok: true;
+    paramsHex: string;
+} | {
+    ok: false;
+    reason: string;
+}>;
 /** Wait until the C++ reflection layer reports a populated GUObjectArray. */
 export declare function waitForReflection(bridge: Bridge): Promise<void>;
 /** Wait for the player pawn to spawn. Logs object-count progress every
