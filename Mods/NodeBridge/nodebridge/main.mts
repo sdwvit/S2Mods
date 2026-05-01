@@ -6,7 +6,7 @@ import { waitForReflection, parseHex, readU32LE, readU64LE } from "@nodebridge/r
 
 const FNAME_CTOR_RVA = 0xd26be8; // patternsleuth offline scan 2026-05-01
 
-// New weather variants to append (values 10–19, then Count/MAX at 20).
+// New weather variants to append after the original 12 entries (values 12–21).
 const NEW_WEATHERS = [
   "EWeather::HeavyRain",
   "EWeather::Blizzard",
@@ -60,39 +60,32 @@ const init: ModInit = async (bridge) => {
   const enumBase = hdrDump.objPtr;
   bridge.log(`Names TArray: ptr=0x${oldPtr.toString(16)} num=${oldNum} enumBase=0x${enumBase.toString(16)}`);
 
-  // 4. Read existing entries (keep real ones 0–9, drop old Count/MAX).
-  const KEEP = 10;
+  // 4. Keep all 12 original entries (real weathers 0–9 + Count=10 + MAX=11).
+  //    New entries are appended after them with values 12–21, so the game's
+  //    own "for i < EWeather::Count (==10)" loops never touch them.
+  const KEEP = oldNum; // 12
+  const VALUE_OFFSET = 12; // new weather values start here, clear of Count/MAX
   const existingBytes = await bridge.game.readMemory(oldPtr, KEEP * 16);
   if (!("hex" in existingBytes)) { bridge.log.error("read existing entries failed"); return; }
 
   // 5. Register new FNames and build new entries buffer.
-  const totalEntries = KEEP + NEW_WEATHERS.length + 2; // +2 for Count and MAX
+  const totalEntries = KEEP + NEW_WEATHERS.length;
   const alloc = await bridge.game.virtualAlloc(totalEntries * 16);
   if (!("addr" in alloc)) { bridge.log.error("virtualAlloc failed"); return; }
   bridge.log(`new buffer @ 0x${alloc.addr.toString(16)}`);
 
-  // Write existing 10 entries.
+  // Write all original entries verbatim.
   await bridge.game.writeMemory(alloc.addr, existingBytes.hex);
 
-  // Append new 10 entries.
+  // Append new 10 entries with values 12–21.
   let writeAddr = alloc.addr + KEEP * 16;
   for (let i = 0; i < NEW_WEATHERS.length; i++) {
     const fn = await bridge.game.fnameFromString(NEW_WEATHERS[i]);
     if (!("comp" in fn)) { bridge.log.error(`fnameFromString failed: ${NEW_WEATHERS[i]}`); return; }
-    const value = KEEP + i;
+    const value = VALUE_OFFSET + i;
     const entryHex = `${toLE32(fn.comp)} ${toLE32(fn.num)} ${toLE64(value)}`;
     await bridge.game.writeMemory(writeAddr, entryHex);
     bridge.log(`  [${value}] "${NEW_WEATHERS[i]}" comp=${fn.comp}`);
-    writeAddr += 16;
-  }
-
-  // Append new Count (value=20) and EWeather_MAX (value=20).
-  const newTotal = KEEP + NEW_WEATHERS.length;
-  for (const label of ["EWeather::Count", "EWeather::EWeather_MAX"]) {
-    const fn = await bridge.game.fnameFromString(label);
-    if (!("comp" in fn)) { bridge.log.error(`fnameFromString failed: ${label}`); return; }
-    const entryHex = `${toLE32(fn.comp)} ${toLE32(fn.num)} ${toLE64(newTotal)}`;
-    await bridge.game.writeMemory(writeAddr, entryHex);
     writeAddr += 16;
   }
 
