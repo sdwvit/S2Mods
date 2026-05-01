@@ -83,6 +83,15 @@ export interface GameApi {
   readMemory(addr: number, count?: number): Promise<{ addr: number; count: number; hex: string } | { addr: number; fault: true } | { error: string } | Unresolved>;
   /** Write hex bytes to any address (whitespace-separated or packed). Capped at 4096 bytes. */
   writeMemory(addr: number, hex: string): Promise<{ addr: number; count: number } | { addr: number; fault: true } | { error: string } | Unresolved>;
+  /** Allocate `size` bytes of process-private memory (MEM_COMMIT|MEM_RESERVE).
+   *  `protect` is a Windows PAGE_* constant; defaults to PAGE_READWRITE (0x04).
+   *  Common values: 0x04 RW, 0x40 RWX, 0x20 RX, 0x02 R.
+   *  Returned `addr` is directly usable as a pointer from any other primitive. */
+  virtualAlloc(size: number, opts?: { protect?: number }): Promise<{ addr: number; size: number; protect: number } | { error: string; lastError?: number }>;
+  /** Release memory previously returned by virtualAlloc. */
+  virtualFree(addr: number): Promise<{ ok: true; addr: number } | { ok: false; lastError: number } | { error: string }>;
+  /** Change page protection on a previously allocated region. */
+  virtualProtect(addr: number, size: number, protect: number): Promise<{ ok: true; addr: number; size: number; protect: number; oldProtect: number } | { ok: false; lastError: number } | { error: string }>;
   /** AOB scan over the main exe. Returns hit address or 0. */
   scanAOB(pattern: string): Promise<{ pattern: string; hit: number } | { error: string }>;
   /** Image base of Stalker2-Win64-Shipping.exe — useful for relative-offset math. */

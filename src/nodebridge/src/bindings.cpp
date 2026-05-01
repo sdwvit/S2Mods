@@ -450,6 +450,47 @@ json game_write_memory(const json& params) {
   return {{"addr", addr}, {"count", buf.size()}};
 }
 
+// Allocate process-private memory for JS-side scratch buffers (e.g. growing
+// a UEnum's Names TArray, holding param structs across processEvent calls).
+// Lives in the game process so any pointer we hand back is directly usable
+// from C++ without copies.
+//
+// `size`     bytes (rounded up to page granularity by the kernel)
+// `protect`  PAGE_* constant; default PAGE_READWRITE = 0x04
+//            common values: 0x04 RW, 0x40 RWX, 0x20 RX, 0x02 R
+json game_virtual_alloc(const json& params) {
+  uint64_t size = params.value("size", 0ULL);
+  uint32_t protect = params.value("protect", static_cast<uint32_t>(PAGE_READWRITE));
+  if (!size) return {{"error", "bad params: size required"}};
+  void* p = VirtualAlloc(nullptr, static_cast<SIZE_T>(size),
+                         MEM_COMMIT | MEM_RESERVE, protect);
+  if (!p) return {{"error", "VirtualAlloc failed"}, {"lastError", static_cast<uint32_t>(GetLastError())}};
+  return {{"addr", reinterpret_cast<uint64_t>(p)}, {"size", size}, {"protect", protect}};
+}
+
+json game_virtual_free(const json& params) {
+  uint64_t addr = params.value("addr", 0ULL);
+  if (!addr) return {{"error", "bad params: addr required"}};
+  if (!VirtualFree(reinterpret_cast<void*>(addr), 0, MEM_RELEASE)) {
+    return {{"ok", false}, {"lastError", static_cast<uint32_t>(GetLastError())}};
+  }
+  return {{"ok", true}, {"addr", addr}};
+}
+
+json game_virtual_protect(const json& params) {
+  uint64_t addr = params.value("addr", 0ULL);
+  uint64_t size = params.value("size", 0ULL);
+  uint32_t protect = params.value("protect", static_cast<uint32_t>(PAGE_READWRITE));
+  if (!addr || !size) return {{"error", "bad params: addr+size required"}};
+  DWORD old = 0;
+  if (!VirtualProtect(reinterpret_cast<void*>(addr), static_cast<SIZE_T>(size),
+                      protect, &old)) {
+    return {{"ok", false}, {"lastError", static_cast<uint32_t>(GetLastError())}};
+  }
+  return {{"ok", true}, {"addr", addr}, {"size", size},
+          {"protect", protect}, {"oldProtect", static_cast<uint32_t>(old)}};
+}
+
 json game_scan_aob(const json& params) {
   std::string pattern_str = params.value("pattern", "");
   auto pat = nb::aob::parse(pattern_str);
@@ -536,6 +577,9 @@ void install(nb::rpc::Router& router) {
   router.handle("game.dumpObjectMemory", game_dump_object_memory);
   router.handle("game.readMemory", game_read_memory);
   router.handle("game.writeMemory", game_write_memory);
+  router.handle("game.virtualAlloc", game_virtual_alloc);
+  router.handle("game.virtualFree", game_virtual_free);
+  router.handle("game.virtualProtect", game_virtual_protect);
   router.handle("game.scanAOB", game_scan_aob);
   router.handle("game.mainExeBase", game_main_exe_base);
   router.handle("game.fnameToString", game_fname_to_string);

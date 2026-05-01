@@ -17,4 +17,5 @@
     "publish-modio": "S2_MOD=NodeBridge node ../../src/publish/publish-modio.mts",
     "zip-for-xbox": "S2_MOD=NodeBridge node ../../src/publish/zip-for-xbox.mts"
   }
+
 }
