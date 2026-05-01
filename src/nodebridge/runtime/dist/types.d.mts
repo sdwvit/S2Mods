@@ -224,6 +224,14 @@ export interface GameApi {
     } | {
         error: string;
     } | Unresolved>;
+    /** Bypass AOB: install FName::FName at a caller-supplied address (e.g. mainExeBase + RVA).
+     *  Call before fnameFromString when AOB scan misses. */
+    installFnameCtorAddr(addr: number): Promise<{
+        ok: true;
+        addr: number;
+    } | {
+        error: string;
+    }>;
     /** Invoke UObject::ProcessEvent on `target` for UFunction at `func`. paramsHex
      *  is the raw bytes of the function's parameter struct (caller knows the
      *  layout). On success the returned paramsHex contains the buffer

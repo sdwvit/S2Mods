@@ -1,19 +1,3 @@
-// EWeather UEnum scanner.
-//
-// Goal: locate the UEnum object EWeather in memory, find its
-// `Names` TArray (TArray<TPair<FName, int64>>), and dump every
-// entry. Lays the groundwork for extending the enum with new
-// values (donor-swap or virtualAlloc-grown buffer).
-//
-// UE 5.1 layout reminder:
-//   UEnum : UField : UObject
-//   key field is `TArray<TPair<FName, int64>> Names` somewhere
-//   inside the UEnum body. TArray on Win64 = { void* data; i32 num; i32 max }.
-//   Each pair = 8B FName (comp:u32, num:u32) + 8B int64 = 16B.
-// We don't know the exact `Names` offset for this build, so we
-// scan candidate offsets and look for {ptr, num=9, max=9} (9 known
-// EWeather options).
-
 import type { ModInit } from "@nodebridge/runtime";
 import {
   waitForReflection,
@@ -22,96 +6,113 @@ import {
   readU64LE,
 } from "@nodebridge/runtime";
 
-const KNOWN_COUNT = 9;
+// UE appends EnumName_MAX, so actual count = 10 for 9-variant EWeather.
+const NUM_MIN = 9;
+const NUM_MAX = 20;
 const SCAN_START = 0x28;
-const SCAN_END = 0x80;
+const SCAN_END = 0xC0;
+
+// patternsleuth offline scan against Stalker2-Win64-Shipping.exe (2026-05-01)
+const KNOWN_FNAME_CTOR_RVA = 0xd26be8;
+const KNOWN_FNAME_TOSTRING_RVA = 0xb73bc4;
 
 const init: ModInit = async (bridge) => {
   bridge.log("---------------------------------------");
   bridge.log("EWeather scanner");
   await waitForReflection(bridge);
 
-  // 1. Locate the UEnum object. listObjects matches by name substring.
-  const list = await bridge.game.listObjects({ filter: "EWeather", limit: 64 });
-  if (!("items" in list)) {
-    bridge.log.error("listObjects failed");
-    return;
+  // Validate FName function addresses against known RVAs.
+  const { base } = await bridge.game.mainExeBase();
+  const expectedCtor = base + KNOWN_FNAME_CTOR_RVA;
+  const expectedToString = base + KNOWN_FNAME_TOSTRING_RVA;
+  bridge.log(`imageBase=0x${base.toString(16)}`);
+
+  const aobCtor = await bridge.game.scanAOB(
+    "EB 07 48 8D 15 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 B8 01 00 00 00 E8"
+  );
+  if ("hit" in aobCtor && aobCtor.hit) {
+    const callInstr = aobCtor.hit + 23;
+    const relBytes = await bridge.game.readMemory(callInstr + 1, 4);
+    if ("hex" in relBytes) {
+      const rel = parseHex(relBytes.hex);
+      const disp = (rel[0] | (rel[1] << 8) | (rel[2] << 16) | (rel[3] << 24)) | 0;
+      const resolved = callInstr + 5 + disp;
+      const match = resolved === expectedCtor;
+      bridge.log(`FNameCtor  AOB→0x${resolved.toString(16)}  expected=0x${expectedCtor.toString(16)}  ${match ? "✓ MATCH" : "✗ MISMATCH"}`);
+    }
+  } else {
+    bridge.log.warn(`FNameCtor AOB: no hit — installing via known RVA 0x${expectedCtor.toString(16)}`);
+    await bridge.game.installFnameCtorAddr(expectedCtor);
   }
+
+  const fnameTest = await bridge.game.fnameFromString("NodeBridgeAOBTest");
+  if ("comp" in fnameTest) {
+    bridge.log(`fnameFromString OK  comp=${fnameTest.comp}`);
+  } else {
+    bridge.log.warn(`fnameFromString: ${"error" in fnameTest ? fnameTest.error : "unresolved"}`);
+  }
+  bridge.log("---------------------------------------");
+
+  const list = await bridge.game.listObjects({ filter: "Weather", limit: 64 });
+  if (!("items" in list)) { bridge.log.error("listObjects failed"); return; }
   const enums = list.items.filter((it) => it.className === "Enum");
-  bridge.log(`hits: ${list.items.length}, of which Enum: ${enums.length}`);
-  for (const it of list.items) {
-    bridge.log(`  [${it.index}] ${it.className.padEnd(16)} ${it.name}`);
-  }
-  if (enums.length === 0) {
-    bridge.log.error("no UEnum named 'EWeather' — bail");
-    return;
-  }
+  bridge.log(`hits: ${list.items.length}, Enum: ${enums.length}`);
 
   for (const en of enums) {
     bridge.log(`---- scanning UEnum [${en.index}] ${en.name} ----`);
 
-    // 2. Dump enough bytes to cover the Names TArray slot.
     const dump = await bridge.game.dumpObjectMemory(en.index, 0, SCAN_END + 0x10);
-    if (!("hex" in dump)) {
-      bridge.log.error(`could not dump UEnum body (target=${en.index})`);
-      continue;
-    }
-    const enumPtr = dump.objPtr;
+    if (!("hex" in dump)) { bridge.log.error(`dump failed target=${en.index}`); continue; }
     const body = parseHex(dump.hex);
-    bridge.log(`  UEnum @ 0x${enumPtr.toString(16)}, dumped ${body.length} bytes`);
+    bridge.log(`  UEnum @ 0x${dump.objPtr.toString(16)}, ${body.length} bytes`);
 
-    // 3. Walk candidate offsets for a TArray<{16B}> of length 9.
+    // Print raw hex for manual inspection (16 bytes per row)
+    for (let row = 0; row < body.length; row += 16) {
+      const slice = body.slice(row, row + 16);
+      const hex = Array.from(slice).map(b => b.toString(16).padStart(2,'0')).join(' ');
+      bridge.log(`  +0x${row.toString(16).padStart(3,'0')}: ${hex}`);
+    }
+
     type Cand = { off: number; ptr: number; num: number; max: number };
     const candidates: Cand[] = [];
     for (let off = SCAN_START; off + 16 <= body.length; off += 8) {
       const ptr = readU64LE(body, off);
       const num = readU32LE(body, off + 8);
       const max = readU32LE(body, off + 12);
-      const ptrPlausible = ptr > 0x10000000 && ptr < 0x800000000000;
-      const sizesPlausible = num === KNOWN_COUNT && max >= num && max <= num + 64;
-      if (ptrPlausible && sizesPlausible) {
-        candidates.push({ off, ptr, num, max });
-      }
+      const ptrOk = ptr > 0x10000000 && ptr < 0x800000000000;
+      const sizeOk = num >= NUM_MIN && num <= NUM_MAX && max >= num && max <= num + 128;
+      if (ptrOk && sizeOk) candidates.push({ off, ptr, num, max });
     }
-    bridge.log(`  TArray candidates (num==${KNOWN_COUNT}): ${candidates.length}`);
+    bridge.log(`  TArray candidates (num ${NUM_MIN}-${NUM_MAX}): ${candidates.length}`);
     for (const c of candidates) {
-      bridge.log(`    @+0x${c.off.toString(16).padStart(2, "0")} -> ptr=0x${c.ptr.toString(16)} num=${c.num} max=${c.max}`);
+      bridge.log(`    @+0x${c.off.toString(16)} ptr=0x${c.ptr.toString(16)} num=${c.num} max=${c.max}`);
     }
 
-    // 4. For each candidate, read the entries and try decoding FNames.
     for (const c of candidates) {
       bridge.log(`  -- entries at +0x${c.off.toString(16)} --`);
-      const bytesNeeded = c.num * 16;
-      const r = await bridge.game.readMemory(c.ptr, bytesNeeded);
-      if (!("hex" in r)) {
-        bridge.log(`    fault reading 0x${c.ptr.toString(16)}+${bytesNeeded}`);
-        continue;
-      }
+      const r = await bridge.game.readMemory(c.ptr, c.num * 16);
+      if (!("hex" in r)) { bridge.log(`    fault`); continue; }
       const entries = parseHex(r.hex);
-      let allDecoded = true;
+      let ok = true;
       for (let i = 0; i < c.num; i++) {
         const base = i * 16;
-        const comp = readU32LE(entries, base + 0);
+        const comp = readU32LE(entries, base);
         const numF = readU32LE(entries, base + 4);
-        // int64 value at base+8; safe-int range — JS number is fine here.
         const valLo = readU32LE(entries, base + 8);
         const valHi = readU32LE(entries, base + 12);
         const value = valHi === 0 ? valLo : valHi * 0x100000000 + valLo;
         const dec = await bridge.game.fnameToString(comp, numF);
         const name = "name" in dec ? dec.name : "<fault>";
-        if (!("name" in dec) || !name) allDecoded = false;
-        bridge.log(`    [${i}] comp=${comp} num=${numF} value=${value}  "${name}"`);
+        if (!("name" in dec)) ok = false;
+        bridge.log(`    [${i}] ${value}  "${name}"  (comp=${comp} num=${numF})`);
       }
-      if (allDecoded) {
-        bridge.log(`  ✓ Names array CONFIRMED at UEnum+0x${c.off.toString(16)}`);
-        bridge.log(`    data ptr   = 0x${c.ptr.toString(16)}`);
-        bridge.log(`    num/max    = ${c.num}/${c.max}`);
-        bridge.log(`    headroom   = ${c.max - c.num} entries (${(c.max - c.num) * 16} bytes)`);
-        bridge.log(`    TArray hdr = UEnum+0x${c.off.toString(16)} .. +0x${(c.off + 0x10).toString(16)}`);
+      if (ok) {
+        bridge.log(`  CONFIRMED Names @ UEnum+0x${c.off.toString(16)}`);
+        bridge.log(`    ptr=${c.ptr.toString(16)} num=${c.num} max=${c.max} headroom=${c.max - c.num}`);
       }
     }
   }
-  bridge.log("---- end EWeather scanner ----");
+  bridge.log("---- end scanner ----");
 };
 
 export default init;

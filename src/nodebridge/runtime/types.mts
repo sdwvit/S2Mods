@@ -101,6 +101,9 @@ export interface GameApi {
   /** Register a UTF-8 string in the FName pool via FName::FName(wchar_t*, FNAME_Add).
    *  AOB-resolves the constructor on first call. */
   fnameFromString(str: string): Promise<{ comp: number; num: number } | { error: string } | Unresolved>;
+  /** Bypass AOB: install FName::FName at a caller-supplied address (e.g. mainExeBase + RVA).
+   *  Call before fnameFromString when AOB scan misses. */
+  installFnameCtorAddr(addr: number): Promise<{ ok: true; addr: number } | { error: string }>;
   /** Invoke UObject::ProcessEvent on `target` for UFunction at `func`. paramsHex
    *  is the raw bytes of the function's parameter struct (caller knows the
    *  layout). On success the returned paramsHex contains the buffer

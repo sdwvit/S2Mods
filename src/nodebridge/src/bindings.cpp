@@ -515,6 +515,15 @@ json game_fname_to_string(const json& params) {
   return {{"comp", comp}, {"num", num}, {"name", nb::ue::fname_to_string(fn)}};
 }
 
+// Install a caller-supplied FName::FName address (e.g. mainExeBase + known RVA).
+// Use when AOB scan misses but the address is known from an offline tool.
+json game_install_fname_ctor_addr(const json& params) {
+  uint64_t addr = params.value("addr", 0ULL);
+  if (!addr) return {{"error", "addr required"}};
+  nb::ue::install_fname_ctor_at(addr);
+  return {{"ok", true}, {"addr", addr}};
+}
+
 // Register a UTF-8 string in the FName pool and return its (comp, num).
 // Resolves FName::FName constructor via AOB on first call.
 json game_fname_from_string(const json& params) {
@@ -599,6 +608,7 @@ void install(nb::rpc::Router& router) {
   router.handle("game.mainExeBase", game_main_exe_base);
   router.handle("game.fnameToString", game_fname_to_string);
   router.handle("game.fnameFromString", game_fname_from_string);
+  router.handle("game.installFnameCtorAddr", game_install_fname_ctor_addr);
   router.handle("game.processEvent", game_process_event);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
