@@ -35,24 +35,26 @@ Each entry = 16 B: `comp:u32 | numF:u32 | value:i64`
 
 All `numF` = 0.
 
-### New entries (values 10–19)
+### New entries (values 12–21)
+
+Original 12 entries (0–9 weathers + Count=10 + MAX=11) are preserved verbatim so
+the game's own `for i < EWeather::Count (==10)` loops never reach the new variants.
+New entries are appended at array positions 12–21 with values 12–21.
 
 | idx | value | FName string              |
 |-----|-------|---------------------------|
-| 10  |  10   | EWeather::HeavyRain       |
-| 11  |  11   | EWeather::Blizzard        |
-| 12  |  12   | EWeather::Sandstorm       |
-| 13  |  13   | EWeather::Hail            |
-| 14  |  14   | EWeather::Overcast        |
-| 15  |  15   | EWeather::Mist            |
-| 16  |  16   | EWeather::Drizzle         |
-| 17  |  17   | EWeather::Windy           |
-| 18  |  18   | EWeather::Freezing        |
-| 19  |  19   | EWeather::Toxic           |
-| 20  |  20   | EWeather::Count           |
-| 21  |  20   | EWeather::EWeather_MAX    |
+| 12  |  12   | EWeather::HeavyRain       |
+| 13  |  13   | EWeather::Blizzard        |
+| 14  |  14   | EWeather::Sandstorm       |
+| 15  |  15   | EWeather::Hail            |
+| 16  |  16   | EWeather::Overcast        |
+| 17  |  17   | EWeather::Mist            |
+| 18  |  18   | EWeather::Drizzle         |
+| 19  |  19   | EWeather::Windy           |
+| 20  |  20   | EWeather::Freezing        |
+| 21  |  21   | EWeather::Toxic           |
 
-Extension: virtualAlloc(22*16), copy entries 0–9, append above, patch TArray header at enumBase+0x40.
+Extension: virtualAlloc(22*16), copy all 12 original entries, append above, patch TArray header at enumBase+0x40.
 
 ## FName functions  (verified by patternsleuth offline scan, 2026-05-01)
 
