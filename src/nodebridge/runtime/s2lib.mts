@@ -47,9 +47,22 @@ export const GSC = {
 // Hex / number helpers
 
 export function parseHex(hex: string): Uint8Array {
-  const parts = hex.trim().split(/\s+/).filter(Boolean);
-  const out = new Uint8Array(parts.length);
-  for (let i = 0; i < parts.length; i++) out[i] = parseInt(parts[i], 16);
+  // Accept both whitespace-separated ("ab cd ef") and tightly packed
+  // ("abcdef") forms. C++ readMemory emits whitespace-separated;
+  // game.processEvent emits packed; writeMemory accepts either.
+  const cleaned = hex.replace(/[^0-9a-fA-F]/g, "");
+  if (cleaned.length % 2 !== 0) {
+    // Fall back to original space-aware split (lets a malformed input
+    // still try to parse byte-by-byte).
+    const parts = hex.trim().split(/\s+/).filter(Boolean);
+    const out = new Uint8Array(parts.length);
+    for (let i = 0; i < parts.length; i++) out[i] = parseInt(parts[i], 16);
+    return out;
+  }
+  const out = new Uint8Array(cleaned.length / 2);
+  for (let i = 0; i < out.length; i++) {
+    out[i] = parseInt(cleaned.substring(i * 2, i * 2 + 2), 16);
+  }
   return out;
 }
 

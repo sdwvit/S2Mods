@@ -1,148 +1,117 @@
-// NodeBridge smoke test mod.
+// EWeather UEnum scanner.
 //
-// All the heavy lifting (memory primitives, FProperty walker, GSC
-// offsets, player session, teleport, UFunction lookup) lives in
-// src/nodebridge/runtime/s2lib.mts. This file is just the
-// mod-specific recipe.
+// Goal: locate the UEnum object EWeather in memory, find its
+// `Names` TArray (TArray<TPair<FName, int64>>), and dump every
+// entry. Lays the groundwork for extending the enum with new
+// values (donor-swap or virtualAlloc-grown buffer).
 //
-// Hot reload: edit + save and `[bootstrap] reload: NodeBridge/main.mts`
-// fires within ~1s, then a fresh boot runs this init again.
+// UE 5.1 layout reminder:
+//   UEnum : UField : UObject
+//   key field is `TArray<TPair<FName, int64>> Names` somewhere
+//   inside the UEnum body. TArray on Win64 = { void* data; i32 num; i32 max }.
+//   Each pair = 8B FName (comp:u32, num:u32) + 8B int64 = 16B.
+// We don't know the exact `Names` offset for this build, so we
+// scan candidate offsets and look for {ptr, num=9, max=9} (9 known
+// EWeather options).
 
-import type { ModInit, Vector3 } from "@nodebridge/runtime";
+import type { ModInit } from "@nodebridge/runtime";
 import {
   waitForReflection,
-  waitForPlayer,
-  getPlayerSession,
-  teleportPlayer,
-  readPlayerLocation,
-  GSC,
   parseHex,
+  readU32LE,
   readU64LE,
-  readU64At,
-  findUFunction,
-  callUFunction,
 } from "@nodebridge/runtime";
 
-const TARGET: Vector3 = { x: 443283, y: 654576, z: -3000 };
+const KNOWN_COUNT = 9;
+const SCAN_START = 0x28;
+const SCAN_END = 0x80;
 
 const init: ModInit = async (bridge) => {
   bridge.log("---------------------------------------");
-  bridge.log("mod boot");
-
+  bridge.log("EWeather scanner");
   await waitForReflection(bridge);
-  bridge.log("waiting for player pawn (load a save if you're at the menu)");
-  const pawn = await waitForPlayer(bridge);
-  bridge.log(`pawn ${JSON.stringify(pawn)}`);
 
-  const session = await getPlayerSession(bridge, pawn);
-  if (!session) {
-    bridge.log.error("player session resolution failed");
+  // 1. Locate the UEnum object. listObjects matches by name substring.
+  const list = await bridge.game.listObjects({ filter: "EWeather", limit: 64 });
+  if (!("items" in list)) {
+    bridge.log.error("listObjects failed");
+    return;
+  }
+  const enums = list.items.filter((it) => it.className === "Enum");
+  bridge.log(`hits: ${list.items.length}, of which Enum: ${enums.length}`);
+  for (const it of list.items) {
+    bridge.log(`  [${it.index}] ${it.className.padEnd(16)} ${it.name}`);
+  }
+  if (enums.length === 0) {
+    bridge.log.error("no UEnum named 'EWeather' — bail");
     return;
   }
 
-  // One-shot teleport (still confirms read/write primitives work).
-  await teleportPlayer(bridge, session, TARGET);
-  const { rel, ctw } = await readPlayerLocation(bridge, session);
-  const fmt = (v: Vector3 | null) =>
-    v ? `(${v.x.toFixed(1)}, ${v.y.toFixed(1)}, ${v.z.toFixed(1)})` : "<n/a>";
-  bridge.log(`tp once -> (${TARGET.x}, ${TARGET.y}, ${TARGET.z}); rel=${fmt(rel)} ctw=${fmt(ctw)}`);
+  for (const en of enums) {
+    bridge.log(`---- scanning UEnum [${en.index}] ${en.name} ----`);
 
-  // -------- ProcessEvent infrastructure probe ---------
-  // Goal: confirm the new bridge.game.processEvent primitive can call a
-  // UFunction without crashing the game. We pick K2_GetActorLocation —
-  // a kismet wrapper on AActor with NO inputs, returns FVector(24
-  // bytes). Params buffer is 24 zero bytes; if the call works, those
-  // 24 bytes come back as the actor's location.
-  bridge.log("---- processEvent probe ----");
-  const pawnObjR = await bridge.game.dumpObjectMemory(pawn.index, 0, 8);
-  if (!("hex" in pawnObjR)) {
-    bridge.log.error("could not read pawn UObject");
-    return;
-  }
-  const pawnPtr = pawnObjR.objPtr;
-  const pawnClassPtr = await readU64At(bridge, pawnPtr + GSC.uObjectClassPtr);
-  if (!pawnClassPtr) {
-    bridge.log.error("no pawn class");
-    return;
-  }
-
-  const fnAddr = await findUFunction(bridge, pawnClassPtr, "K2_GetActorLocation");
-  if (!fnAddr) {
-    bridge.log.error("K2_GetActorLocation UFunction not found on pawn class chain");
-    bridge.log("---- end processEvent probe ----");
-    return;
-  }
-  bridge.log(`K2_GetActorLocation UFunction @ 0x${fnAddr.toString(16)}`);
-
-  // Verify the resolved address really is K2_GetActorLocation +
-  // read PropertiesSize (UFunction inherits UStruct → +0x58 in GSC).
-  const fnNameR = await bridge.game.readMemory(fnAddr + 0x18, 8);
-  let nameDecoded = "?";
-  if ("hex" in fnNameR) {
-    const nb = parseHex(fnNameR.hex);
-    const dv = new DataView(nb.buffer, nb.byteOffset, nb.byteLength);
-    const comp = dv.getUint32(0, true);
-    const num = dv.getUint32(4, true);
-    const decoded = await bridge.game.fnameToString(comp, num);
-    nameDecoded = "name" in decoded ? decoded.name : "?";
-  }
-  const sizeR = await bridge.game.readMemory(fnAddr + GSC.uStructPropertiesSize, 4);
-  let propSize = -1;
-  if ("hex" in sizeR) {
-    const sb = parseHex(sizeR.hex);
-    propSize = new DataView(sb.buffer, sb.byteOffset, 4).getUint32(0, true);
-  }
-  bridge.log(`  func name="${nameDecoded}" PropertiesSize=${propSize}`);
-  if (propSize <= 0 || propSize > 4096) {
-    bridge.log.error("PropertiesSize looks bad — aborting");
-    return;
-  }
-
-  // Diagnostic dump — hex dump of UFunction at fnAddr (first 0x100 bytes).
-  // Look for the UE5 layout: vtable / NamePrivate / class / outer at std
-  // UObject offsets, then UStruct fields, then UFunction-specific
-  // (ParmsSize, Func ptr).
-  const ufnDump = await bridge.game.readMemory(fnAddr, 0x100);
-  if ("hex" in ufnDump) {
-    const fb = parseHex(ufnDump.hex);
-    bridge.log(`UFunction memory dump (first 0x100 bytes):`);
-    for (let off = 0; off < fb.length; off += 16) {
-      const row = [];
-      for (let j = 0; j < 16 && off + j < fb.length; j++) {
-        row.push(fb[off + j].toString(16).padStart(2, "0"));
-      }
-      const ascii: string[] = [];
-      for (let j = 0; j < 16 && off + j < fb.length; j++) {
-        const b = fb[off + j];
-        ascii.push(b >= 32 && b < 127 ? String.fromCharCode(b) : ".");
-      }
-      bridge.log(`  fn+0x${off.toString(16).padStart(2, "0")}  ${row.join(" ")}  ${ascii.join("")}`);
+    // 2. Dump enough bytes to cover the Names TArray slot.
+    const dump = await bridge.game.dumpObjectMemory(en.index, 0, SCAN_END + 0x10);
+    if (!("hex" in dump)) {
+      bridge.log.error(`could not dump UEnum body (target=${en.index})`);
+      continue;
     }
-  }
+    const enumPtr = dump.objPtr;
+    const body = parseHex(dump.hex);
+    bridge.log(`  UEnum @ 0x${enumPtr.toString(16)}, dumped ${body.length} bytes`);
 
-  // Read vtable[67] at the pawn — log the function pointer + first
-  // 16 bytes of the function so we can see if it looks like a real
-  // function prologue (push regs, mov rbp,rsp, etc).
-  const vtR = await bridge.game.readMemory(pawnPtr, 8);
-  if ("hex" in vtR) {
-    const vtPtr = readU64LE(parseHex(vtR.hex), 0);
-    bridge.log(`pawn vtable @ 0x${vtPtr.toString(16)}`);
-    const slotR = await bridge.game.readMemory(vtPtr + 67 * 8, 8);
-    if ("hex" in slotR) {
-      const fnPtr = readU64LE(parseHex(slotR.hex), 0);
-      bridge.log(`vtable[67] = 0x${fnPtr.toString(16)}`);
-      const codeR = await bridge.game.readMemory(fnPtr, 16);
-      if ("hex" in codeR) {
-        bridge.log(`vtable[67] code: ${codeR.hex.slice(0, 48)}`);
+    // 3. Walk candidate offsets for a TArray<{16B}> of length 9.
+    type Cand = { off: number; ptr: number; num: number; max: number };
+    const candidates: Cand[] = [];
+    for (let off = SCAN_START; off + 16 <= body.length; off += 8) {
+      const ptr = readU64LE(body, off);
+      const num = readU32LE(body, off + 8);
+      const max = readU32LE(body, off + 12);
+      const ptrPlausible = ptr > 0x10000000 && ptr < 0x800000000000;
+      const sizesPlausible = num === KNOWN_COUNT && max >= num && max <= num + 64;
+      if (ptrPlausible && sizesPlausible) {
+        candidates.push({ off, ptr, num, max });
+      }
+    }
+    bridge.log(`  TArray candidates (num==${KNOWN_COUNT}): ${candidates.length}`);
+    for (const c of candidates) {
+      bridge.log(`    @+0x${c.off.toString(16).padStart(2, "0")} -> ptr=0x${c.ptr.toString(16)} num=${c.num} max=${c.max}`);
+    }
+
+    // 4. For each candidate, read the entries and try decoding FNames.
+    for (const c of candidates) {
+      bridge.log(`  -- entries at +0x${c.off.toString(16)} --`);
+      const bytesNeeded = c.num * 16;
+      const r = await bridge.game.readMemory(c.ptr, bytesNeeded);
+      if (!("hex" in r)) {
+        bridge.log(`    fault reading 0x${c.ptr.toString(16)}+${bytesNeeded}`);
+        continue;
+      }
+      const entries = parseHex(r.hex);
+      let allDecoded = true;
+      for (let i = 0; i < c.num; i++) {
+        const base = i * 16;
+        const comp = readU32LE(entries, base + 0);
+        const numF = readU32LE(entries, base + 4);
+        // int64 value at base+8; safe-int range — JS number is fine here.
+        const valLo = readU32LE(entries, base + 8);
+        const valHi = readU32LE(entries, base + 12);
+        const value = valHi === 0 ? valLo : valHi * 0x100000000 + valLo;
+        const dec = await bridge.game.fnameToString(comp, numF);
+        const name = "name" in dec ? dec.name : "<fault>";
+        if (!("name" in dec) || !name) allDecoded = false;
+        bridge.log(`    [${i}] comp=${comp} num=${numF} value=${value}  "${name}"`);
+      }
+      if (allDecoded) {
+        bridge.log(`  ✓ Names array CONFIRMED at UEnum+0x${c.off.toString(16)}`);
+        bridge.log(`    data ptr   = 0x${c.ptr.toString(16)}`);
+        bridge.log(`    num/max    = ${c.num}/${c.max}`);
+        bridge.log(`    headroom   = ${c.max - c.num} entries (${(c.max - c.num) * 16} bytes)`);
+        bridge.log(`    TArray hdr = UEnum+0x${c.off.toString(16)} .. +0x${(c.off + 0x10).toString(16)}`);
       }
     }
   }
-
-  // Still try the call so we see the fault for context.
-  const paramsHex = "00".repeat(propSize);
-  const r = await bridge.game.processEvent(pawnPtr, fnAddr, paramsHex, 67);
-  bridge.log(`ProcessEvent result: ${JSON.stringify(r)}`);
-  bridge.log("---- end processEvent probe ----");
+  bridge.log("---- end EWeather scanner ----");
 };
 
 export default init;
