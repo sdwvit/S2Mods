@@ -287,6 +287,11 @@ bool scan_and_install_fname_ctor() {
 
 bool fname_ctor_ready() { return g_fname_ctor.load() != nullptr; }
 
+void install_fname_ctor_at(uint64_t addr) {
+  g_fname_ctor.store(reinterpret_cast<FNameCtor_Fn>(addr));
+  nb::log::info("fname", "FNameCtor: installed at supplied addr=0x{:x}", addr);
+}
+
 FName fname_from_string(const std::string& utf8) {
   FNameCtor_Fn fn = g_fname_ctor.load();
   if (!fn) return {0, 0};

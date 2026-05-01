@@ -35,6 +35,9 @@ bool fname_resolver_ready();
 // call multiple times; installs on first successful hit.
 bool scan_and_install_fname_ctor();
 
+// Bypass AOB: install a caller-supplied address directly (e.g. mainExeBase+RVA).
+void install_fname_ctor_at(uint64_t addr);
+
 // Is FName::FName constructor resolved and callable?
 bool fname_ctor_ready();
 

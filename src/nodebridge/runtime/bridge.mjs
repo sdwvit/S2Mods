@@ -50,9 +50,14 @@ export function createBridge(rpc, modName) {
       call("game.dumpObjectMemory", { target, offset, count: count ?? 64 }),
     readMemory: (addr, count) => call("game.readMemory", { addr, count: count ?? 64 }),
     writeMemory: (addr, hex) => call("game.writeMemory", { addr, hex }),
+    virtualAlloc: (size, opts) => call("game.virtualAlloc", { size, protect: opts?.protect ?? 4 }),
+    virtualFree: (addr) => call("game.virtualFree", { addr }),
+    virtualProtect: (addr, size, protect) => call("game.virtualProtect", { addr, size, protect }),
     scanAOB: (pattern) => call("game.scanAOB", { pattern }),
     mainExeBase: () => call("game.mainExeBase"),
     fnameToString: (comp, num) => call("game.fnameToString", { comp, num: num ?? 0 }),
+    fnameFromString: (str) => call("game.fnameFromString", { str }),
+    installFnameCtorAddr: (addr) => call("game.installFnameCtorAddr", { addr }),
     processEvent: (target, func, paramsHex, opts) =>
       call("game.processEvent", {
         target,
