@@ -233,6 +233,72 @@ bool resolve_fname_to_string() { return scan_fname_to_string_candidates(); }
 
 bool fname_resolver_ready() { return g_fname_to_string.load() != nullptr; }
 
+// ---------------------------------------------------------------------------
+// FName::FName(const wchar_t*, EFindName) constructor
+// ---------------------------------------------------------------------------
+// patternsleuth primary pattern (PE image):
+//   EB 07                      ; JMP +7 (skip the LEA below)
+//   48 8D 15 ?? ?? ?? ??       ; LEA RDX, [RIP+disp]  (jumped-over)
+//   ?? x10                     ; code between jump target and MOV R8D
+//   41 B8 01 00 00 00          ; MOV R8D, 1  (FNAME_Add)
+//   E8 | ?? ?? ?? ??           ; CALL FName::FName  ← capture
+// call_offset = 23 (E8 is at byte 23 from pattern start)
+constexpr const char* kFNameCtorPattern =
+    "EB 07 48 8D 15 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 B8 01 00 00 00 E8";
+constexpr int kFNameCtorCallOffset = 23;
+
+using FNameCtor_Fn = void (*)(FName*, const wchar_t*, int32_t);
+std::atomic<FNameCtor_Fn> g_fname_ctor{nullptr};
+
+extern "C" {
+static int nb_try_fname_ctor(void* fn_raw, void* out_raw, const wchar_t* wstr, int32_t find_type) {
+  auto fn = reinterpret_cast<void (*)(void*, const wchar_t*, int32_t)>(fn_raw);
+  __try {
+    fn(out_raw, wstr, find_type);
+    return 1;
+  } __except (EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
+}
+}
+
+bool scan_and_install_fname_ctor() {
+  if (g_fname_ctor.load()) return true;
+  auto pat = nb::aob::parse(kFNameCtorPattern);
+  if (!pat.valid()) { nb::log::error("fname", "FNameCtor pattern failed to parse"); return false; }
+  const uint8_t* hit = nb::aob::scan_main_exe(pat);
+  if (!hit) { nb::log::warn("fname", "FNameCtor: primary pattern no match"); return false; }
+  const uint8_t* call_instr = hit + kFNameCtorCallOffset;
+  int32_t disp = *reinterpret_cast<const int32_t*>(call_instr + 1);
+  const uint8_t* fn_addr = call_instr + 5 + disp;
+  nb::log::info("fname", "FNameCtor: hit={} fn={}", static_cast<const void*>(hit), static_cast<const void*>(fn_addr));
+  // Verify: construct a test string and check we get a non-zero comp back.
+  FName test{0, 0};
+  const wchar_t* test_str = L"NodeBridgeCtorTest";
+  int ok = nb_try_fname_ctor(const_cast<uint8_t*>(fn_addr), &test, test_str, 1);
+  if (!ok || test.comparison_index == 0) {
+    nb::log::warn("fname", "FNameCtor: verify failed (ok={} comp={})", ok, test.comparison_index);
+    return false;
+  }
+  nb::log::info("fname", "FNameCtor: verified comp={} num={}", test.comparison_index, test.number);
+  g_fname_ctor.store(reinterpret_cast<FNameCtor_Fn>(const_cast<uint8_t*>(fn_addr)));
+  return true;
+}
+
+bool fname_ctor_ready() { return g_fname_ctor.load() != nullptr; }
+
+FName fname_from_string(const std::string& utf8) {
+  FNameCtor_Fn fn = g_fname_ctor.load();
+  if (!fn) return {0, 0};
+  std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conv;
+  std::wstring wstr;
+  try { wstr = conv.from_bytes(utf8); } catch (...) { return {0, 0}; }
+  if (wstr.empty()) return {0, 0};
+  FName out{0, 0};
+  int ok = nb_try_fname_ctor(reinterpret_cast<void*>(fn), &out, wstr.c_str(), 1 /* FNAME_Add */);
+  return ok ? out : FName{0, 0};
+}
+
 std::string fname_to_string(const FName& name) {
   FNameToString_Fn fn = g_fname_to_string.load();
   if (!fn) return {};

@@ -98,6 +98,9 @@ export interface GameApi {
   mainExeBase(): Promise<{ base: number }>;
   /** Decode an FName (comparison_index, number) to a UTF-8 string via FName::ToString. */
   fnameToString(comp: number, num?: number): Promise<{ comp: number; num: number; name: string } | Unresolved>;
+  /** Register a UTF-8 string in the FName pool via FName::FName(wchar_t*, FNAME_Add).
+   *  AOB-resolves the constructor on first call. */
+  fnameFromString(str: string): Promise<{ comp: number; num: number } | { error: string } | Unresolved>;
   /** Invoke UObject::ProcessEvent on `target` for UFunction at `func`. paramsHex
    *  is the raw bytes of the function's parameter struct (caller knows the
    *  layout). On success the returned paramsHex contains the buffer

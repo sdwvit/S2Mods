@@ -515,6 +515,21 @@ json game_fname_to_string(const json& params) {
   return {{"comp", comp}, {"num", num}, {"name", nb::ue::fname_to_string(fn)}};
 }
 
+// Register a UTF-8 string in the FName pool and return its (comp, num).
+// Resolves FName::FName constructor via AOB on first call.
+json game_fname_from_string(const json& params) {
+  std::string str = params.value("str", std::string{});
+  if (str.empty()) return {{"error", "str is required"}};
+  if (!nb::ue::fname_ctor_ready()) {
+    if (!nb::ue::scan_and_install_fname_ctor())
+      return unresolved_reason("FName::FName constructor not resolved");
+  }
+  nb::ue::FName fn = nb::ue::fname_from_string(str);
+  if (fn.comparison_index == 0 && fn.number == 0)
+    return {{"error", "FName registration failed (comp=0)"}};
+  return {{"comp", fn.comparison_index}, {"num", fn.number}};
+}
+
 // Read raw bytes from obj + offset (instance memory, not class memory).
 json game_dump_object_memory(const json& params) {
   if (!nb::ue::is_ready()) return unresolved_reason("not ready");
@@ -583,6 +598,7 @@ void install(nb::rpc::Router& router) {
   router.handle("game.scanAOB", game_scan_aob);
   router.handle("game.mainExeBase", game_main_exe_base);
   router.handle("game.fnameToString", game_fname_to_string);
+  router.handle("game.fnameFromString", game_fname_from_string);
   router.handle("game.processEvent", game_process_event);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);

@@ -31,6 +31,16 @@ bool resolve_fname_to_string();
 // Is FName::ToString resolved and callable?
 bool fname_resolver_ready();
 
+// Scan and resolve FName::FName(const wchar_t*, EFindName). Lazy — safe to
+// call multiple times; installs on first successful hit.
+bool scan_and_install_fname_ctor();
+
+// Is FName::FName constructor resolved and callable?
+bool fname_ctor_ready();
+
+// Register a string in the FName pool (FNAME_Add). Returns {0,0} on failure.
+FName fname_from_string(const std::string& utf8);
+
 // Decode an FName to a plain UTF-8 string. Safe to call from any thread
 // that won't be blocked by UE's internal locking. Returns "" on failure.
 //
