@@ -1,5 +1,5 @@
 import { Struct } from "s2cfgtojson";
-import type { StructTransformer } from "./meta-type.mts";
+import type { MetaContext, StructTransformer } from "./meta-type.mts";
 import path from "node:path";
 import fs from "node:fs";
 import { baseCfgDir, modFolderRaw, modName, rawCfgEnclosingFolder } from "./base-paths.mts";
@@ -25,7 +25,9 @@ export function getCfgFileProcessor<T extends Struct>(transformer: StructTransfo
     const pathToSave = path.parse(filePath.slice(baseCfgDir.length + 1));
 
     const array = await getOrUpdateFromL1Cache<T>(filePath, transformer);
-    const structsById: Record<string, T> = Object.fromEntries(array.map((s) => [s.__internal__.rawName, s as T]));
+    const structsById: Record<string, T> = Object.fromEntries(
+      array.map((s) => [s.__internal__.rawName, s as T]),
+    );
     const extraStructs: T[] = [];
 
     const promises: Promise<OneT>[] = [];
@@ -41,10 +43,23 @@ export function getCfgFileProcessor<T extends Struct>(transformer: StructTransfo
         deepMerge(MergedStructs[key], s.clone());
       }
       promises.push(
-        Promise.resolve(transformer(s as T, { index, fileIndex, array, filePath, structsById, extraStructs })).then((ps) => {
+        Promise.resolve(
+          transformer(
+            s as T,
+            {
+              index,
+              fileIndex,
+              array,
+              filePath,
+              fileName: pathToSave.base,
+              structsById,
+              extraStructs,
+            } as MetaContext<T>,
+          ),
+        )/*.then((ps) => {
           s.__internal__.refurl = "../" + pathToSave.base;
           return ps;
-        }),
+        }) removing as i don't understand the need, no tranformer mutates the s struct.*/,
       );
     }
 
@@ -68,7 +83,9 @@ export function getCfgFileProcessor<T extends Struct>(transformer: StructTransfo
       if (!(await exists(cfgEnclosingFolder))) await mkdir(cfgEnclosingFolder, { recursive: true });
       const resultingFilename = path.join(
         cfgEnclosingFolder,
-        pathToSave.base === "CoreVariables.cfg" ? `${pathToSave.name}.cfg_patch_${modName}` : `${pathToSave.name}_patch_${modName}.cfg`,
+        pathToSave.base === "CoreVariables.cfg"
+          ? `${pathToSave.name}.cfg_patch_${modName}`
+          : `${pathToSave.name}_patch_${modName}.cfg`,
       );
       await writeFile(resultingFilename, processedStructs.map((s) => s.toString()).join("\n\n"));
     }
