@@ -6,6 +6,7 @@ export type MetaContext<T> = {
   array: T[];
   extraStructs: T[];
   filePath: string;
+  fileName: string;
   structsById: Record<string, T>;
 };
 export type StructTransformer<T> = ((
