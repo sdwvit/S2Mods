@@ -3,7 +3,7 @@ import type { MetaType } from "../../src/meta-type.mts";
 import { transformItemGenerators } from "./transformItemGenerators.mts";
 
 export const meta: MetaType<ItemGeneratorPrototype> = {
-  description: `Adds a tiny chance for detectors and artifacts to drop from NPC corpses. Drops are tiered by NPC rank:
+  description: `Each NPC corpse has a 1% chance to drop a detector and a separate 1% chance to drop an artifact. Drops are tiered by NPC rank:
     [h2][/h2]
     [list]
     [*] Newbie NPCs: Echo detector + cheapest artifacts
@@ -12,16 +12,17 @@ export const meta: MetaType<ItemGeneratorPrototype> = {
     [*] Master NPCs: up to Veles detector + all artifacts
     [/list]
     [h2][/h2]
-    Detector drop chances:[h2][/h2]
+    When a detector drops, it's chosen by weight — Echo is most common, rarer detectors are progressively less likely:
+    [h2][/h2]
     [list]
-    [*] Echo: 1/1,000
-    [*] Gilka: 1/10,000
-    [*] Bear: 1/1,000,000
-    [*] Veles: 1/100,000,000
+    [*] Echo: weight 1 (~90% of detector drops)
+    [*] Gilka: weight 0.1 (~9%)
+    [*] Bear: weight 0.01 (~0.9%)
+    [*] Veles: weight 0.001 (~0.09%)
     [/list]
     [h2][/h2]
-    Artifacts also have a tiny chance to drop, scaling logarithmically by their cost (cheaper artifacts drop more often).
+    Artifacts are also weighted by cost tier — cheaper artifacts drop more often than expensive ones.
   `,
-  changenote: "Tier-based drops: newbies drop only low-tier items, masters can drop everything",
+  changenote: "Increased drop trigger chance from 0.1% to 1%; reworked item selection to use weighted pools (Echo most common, rarer detectors/pricier artifacts less likely)",
   structTransformers: [transformItemGenerators],
 };
