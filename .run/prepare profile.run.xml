@@ -1,5 +1,8 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="prepare profile" type="NodeJSConfigurationType" path-to-js-file="prepare-configs.mts" typescript-loader="bundled" working-dir="$PROJECT_DIR$/src">
+    <envs>
+      <env name="S2_MOD" value="HeadlessArmors" />
+    </envs>
     <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
       <browser name="35837b5c-3dc9-4c9f-8f33-503d7e702d71" with-js-debugger="true" />
     </EXTENSION>

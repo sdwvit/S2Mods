@@ -122,21 +122,6 @@ export const allDefaultItemGeneratorsRecord = getRecord([
   ...allDefaultQuestItemGeneratorPrototypes,
 ]);
 
-export const helmetRanksBySID: Record<string, ERank> = {
-  Light_Bandit_Helmet: ALL_RANK,
-  Light_Duty_Helmet: ALL_RANK,
-  Light_Mercenaries_Helmet: ALL_RANK,
-  Light_Military_Helmet: ALL_RANK,
-  Light_Neutral_Helmet: ALL_RANK,
-
-  Heavy_Duty_Helmet: EXPERIENCED_MASTER_RANK,
-  Heavy_Military_Helmet: EXPERIENCED_MASTER_RANK,
-  Heavy_Varta_Helmet: EXPERIENCED_MASTER_RANK,
-
-  Heavy_Svoboda_Helmet: VETERAN_MASTER_RANK,
-  Battle_Military_Helmet: VETERAN_MASTER_RANK,
-};
-
 export const armorRanksBySID: Record<string, ERank> = {
   // ALL_RANK
   SkinJacket_Bandit_Armor: ALL_RANK,
@@ -185,22 +170,22 @@ export const armorRanksBySID: Record<string, ERank> = {
   Exoskeleton_Svoboda_Armor: MASTER_RANK,
   Exoskeleton_Mercenaries_Armor: MASTER_RANK,
   Exoskeleton_Neutral_Armor: MASTER_RANK,
+
+  Light_Bandit_Helmet: ALL_RANK,
+  Light_Duty_Helmet: ALL_RANK,
+  Light_Mercenaries_Helmet: ALL_RANK,
+  Light_Military_Helmet: ALL_RANK,
+  Light_Neutral_Helmet: ALL_RANK,
+
+  Heavy_Duty_Helmet: EXPERIENCED_MASTER_RANK,
+  Heavy_Military_Helmet: EXPERIENCED_MASTER_RANK,
+  Heavy_Varta_Helmet: EXPERIENCED_MASTER_RANK,
+
+  Heavy_Svoboda_Helmet: VETERAN_MASTER_RANK,
+  Battle_Military_Helmet: VETERAN_MASTER_RANK,
 };
 
-export const helmetFactionsBySID: Record<string, CoreFaction> = {
-  Light_Bandit_Helmet: "Bandits",
-  Light_Duty_Helmet: "Duty",
-  Light_Mercenaries_Helmet: "Mercenaries",
-  Light_Military_Helmet: "Militaries",
-  Light_Neutral_Helmet: "Neutrals",
-  Heavy_Duty_Helmet: "Duty",
-  Heavy_Military_Helmet: "Militaries",
-  Heavy_Varta_Helmet: "Varta",
-  Heavy_Svoboda_Helmet: "Freedom",
-  Battle_Military_Helmet: "Militaries",
-};
-
-export const armorFactionsBySID: Record<string, CoreFaction> = {
+export const FactionsByArmorSID: Record<string, CoreFaction> = {
   SkinJacket_Bandit_Armor: "Bandits",
   Battle_Monolith_Armor: "Monolith",
   Battle_Varta_Armor: "Varta",
@@ -241,6 +226,17 @@ export const armorFactionsBySID: Record<string, CoreFaction> = {
   Exoskeleton_Svoboda_Armor: "Freedom",
   Exoskeleton_Mercenaries_Armor: "Mercenaries",
   Exoskeleton_Neutral_Armor: "Neutrals",
+
+  Light_Bandit_Helmet: "Bandits",
+  Light_Duty_Helmet: "Duty",
+  Light_Mercenaries_Helmet: "Mercenaries",
+  Light_Military_Helmet: "Militaries",
+  Light_Neutral_Helmet: "Neutrals",
+  Heavy_Duty_Helmet: "Duty",
+  Heavy_Military_Helmet: "Militaries",
+  Heavy_Varta_Helmet: "Varta",
+  Heavy_Svoboda_Helmet: "Freedom",
+  Battle_Military_Helmet: "Militaries",
 };
 
 export const allDefaultDroppableAttachments = new Set(
@@ -841,7 +837,6 @@ export function getCorePrototype<T extends Struct>(
 export function guessAttachmentSlot(itemSID: string) {
   return getCorePrototype(itemSID, allDefaultAttachPrototypesRecord, (item) => item.Slot);
 }
-
 
 export type DefaultArtifact =
   | "CArtifactBouncyBall"

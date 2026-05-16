@@ -28,12 +28,41 @@ async function tryAcquireLock(label: string) {
 
 async function waitForLock(label: string) {
   let cycle = 0;
-  while (!(await tryAcquireLock(label))) {
-    logger.log(`[sdk-lock] waiting for SDK/game mutation lock before ${label} (rm -rf ${SDK_MUTATION_LOCK_DIR} to release)`);
-    await sleep(SDK_MUTATION_WAIT_MS);
-    cycle++;
-    if (cycle * SDK_MUTATION_WAIT_MS > 5 * 60 * 1000) {
-      await releaseLock();
+  let yPressed = false;
+
+  const onData = (chunk: Buffer) => {
+    if (chunk.toString().trim().toLowerCase() === "y") {
+      yPressed = true;
+    }
+  };
+
+  const tty = process.stdin.isTTY;
+  if (tty) {
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.on("data", onData);
+  }
+
+  try {
+    while (!(await tryAcquireLock(label))) {
+      logger.log(
+        `[sdk-lock] waiting for SDK/game mutation lock before ${label}` +
+          (tty ? " (press Y to force-release)" : ` (rm -rf ${SDK_MUTATION_LOCK_DIR} to release)`)
+      );
+      await sleep(SDK_MUTATION_WAIT_MS);
+      cycle++;
+      if (yPressed || cycle * SDK_MUTATION_WAIT_MS > 5 * 60 * 1000) {
+        logger.log(`[sdk-lock] force-releasing lock before ${label}`);
+        await releaseLock();
+        yPressed = false;
+        cycle = 0;
+      }
+    }
+  } finally {
+    if (tty) {
+      process.stdin.removeListener("data", onData);
+      process.stdin.setRawMode(false);
+      process.stdin.pause();
     }
   }
 }
