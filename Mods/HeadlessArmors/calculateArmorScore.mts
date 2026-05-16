@@ -1,9 +1,12 @@
 import { allDefaultArmorPrototypesRecord } from "../../src/consts.mts";
 import type { ArmorPrototype } from "s2cfgtojson";
-import { precision } from "../../src/precision.mts";
 
-const maxDurability = Math.max(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 0));
-const minDurability = Math.min(...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 10000));
+const maxDurability = Math.max(
+  ...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 0),
+);
+const minDurability = Math.min(
+  ...Object.values(allDefaultArmorPrototypesRecord).map((a) => a.BaseDurability ?? 10000),
+);
 
 function calculateArmorScore(armor: ArmorPrototype): number {
   const e = armor;
@@ -16,12 +19,22 @@ function calculateArmorScore(armor: ArmorPrototype): number {
     Strike: 5,
     Fall: 100,
   };
-  const protectionScales = { Burn: 5, Shock: 7, ChemicalBurn: 5, Radiation: 10, PSY: 10, Strike: 63, Fall: 1 };
+  const protectionScales = {
+    Burn: 5,
+    Shock: 7,
+    ChemicalBurn: 5,
+    Radiation: 10,
+    PSY: 10,
+    Strike: 63,
+    Fall: 1,
+  };
   const protectionScore = Object.keys(protectionScales).reduce((sum, key) => {
-    const normalized = (protectionScales[key] * (e.Protection?.[key] ?? 0)) / protectionNormalization[key];
+    const normalized =
+      (protectionScales[key] * (e.Protection?.[key] ?? 0)) / protectionNormalization[key];
     return sum + normalized / 100;
   }, 0);
-  const durabilityScore = ((e.BaseDurability || minDurability) - minDurability) / (maxDurability - minDurability);
+  const durabilityScore =
+    ((e.BaseDurability || minDurability) - minDurability) / (maxDurability - minDurability);
   const weightScore = Math.atan(10e10) - Math.atan(((e.Weight ?? 0) + 4.31) / 6.73);
   const blockHeadScore = e.bBlockHead ? 1 : 0;
   const speedScore = e.IncreaseSpeedCoef ?? 0;
@@ -30,10 +43,17 @@ function calculateArmorScore(armor: ArmorPrototype): number {
     ((e.ArtifactSlots ?? 0) +
       Object.values(e.UpgradePrototypeSIDs || {})
         .filter((u) => typeof u === "string")
-        .filter((u) => u.toLowerCase().includes("container") || u.toLowerCase().includes("_artifact")).length) /
+        .filter(
+          (u) => u.toLowerCase().includes("container") || u.toLowerCase().includes("_artifact"),
+        ).length) /
     10;
   const preventLimping =
-    e.bPreventFromLimping && !Object.values(e.UpgradePrototypeSIDs || {}).find((u) => typeof u === "string" && u.includes("AddRunEffect")) ? 0 : 1;
+    e.bPreventFromLimping &&
+    !Object.values(e.UpgradePrototypeSIDs || {}).find(
+      (u) => typeof u === "string" && u.includes("AddRunEffect"),
+    )
+      ? 0
+      : 1;
 
   let costScore = Math.atan(10e10) - Math.atan((e.Cost + 27025) / 42000);
   if (e.SID.includes("NVG_")) {
@@ -65,22 +85,24 @@ function calculateArmorScore(armor: ArmorPrototype): number {
   return score / 100;
 }
 
-const maxDropDurability = 0.5; // 50%
-// 0.1% to 5%
-const minDropChance = 0.001;
-export const maxDropChance = 0.05;
-const lowestPossibleScore = calculateArmorScore(allDefaultArmorPrototypesRecord.SkinJacket_Bandit_Armor);
-const highestPossibleScore = calculateArmorScore(allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor);
+// 0.001% for diamond exo this % for bandit skin jacket
+export const maxDropChance = 0.15;
+const lowestPossibleScore = calculateArmorScore(
+  allDefaultArmorPrototypesRecord.SkinJacket_Bandit_Armor,
+);
+const highestPossibleScore = calculateArmorScore(
+  allDefaultArmorPrototypesRecord.BattleExoskeleton_Varta_Armor,
+);
 
-export function getDropChance(prototype: ArmorPrototype, minChance = minDropChance, maxChance = maxDropChance) {
-  const score = (calculateArmorScore(prototype) - lowestPossibleScore) / (highestPossibleScore - lowestPossibleScore); // 1 means good, 0 means bad armor
+export function getDropChance(prototype: ArmorPrototype, maxChance = maxDropChance) {
+  const score =
+    (calculateArmorScore(prototype) - lowestPossibleScore) /
+    (highestPossibleScore - lowestPossibleScore); // 1 means good, 0 means bad armor
   const normalScore = getNormalDistribution(score);
-  const normalScaled = (normalScore - getNormalDistribution(1)) / (getNormalDistribution(0) - getNormalDistribution(1));
-  return Math.max(minChance, precision(maxChance * normalScaled, 1e4));
-}
-
-export function getMaxDurability(prototype: ArmorPrototype) {
-  return getDropChance(prototype, 0, maxDropDurability);
+  const normalScaled =
+    (normalScore - getNormalDistribution(1)) /
+    (getNormalDistribution(0) - getNormalDistribution(1));
+  return maxChance * normalScaled;
 }
 
 function getNormalDistribution(score: number, omegaSq = 0.5) {
