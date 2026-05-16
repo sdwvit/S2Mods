@@ -8,9 +8,7 @@ import {
 } from "../../src/consts.mts";
 import { precision } from "../../src/precision.mts";
 
-const BASE_COST = 12000;
-const BASE_ARTIFACT_CHANCE = 0.001;
-const SUB_GEN_CHANCE = 0.001;
+const SUB_GEN_CHANCE = 0.01;
 
 const RANKS = ["Newbie", "Experienced", "Veteran", "Master"] as const;
 type Rank = (typeof RANKS)[number];
@@ -23,11 +21,19 @@ const RANK_ERANKS: Record<Rank, ERank> = {
 };
 
 const detectors = [
-  { sid: "Echo", chance: Math.min(1, 0.01 / SUB_GEN_CHANCE) },
-  { sid: "Gilka", chance: Math.min(1, 0.0001 / SUB_GEN_CHANCE) },
-  { sid: "Bear", chance: Math.min(1, 0.000001 / SUB_GEN_CHANCE) },
-  { sid: "Veles", chance: Math.min(1, 0.00000001 / SUB_GEN_CHANCE) },
+  { sid: "Echo", chance: 1 },
+  { sid: "Gilka", chance: 0.1 },
+  { sid: "Bear", chance: 0.01 },
+  { sid: "Veles", chance: 0.001 },
 ];
+
+const artRanks = {
+  12000: 1,
+  20000: 0.1,
+  36000: 0.01,
+  70000: 0.001,
+  80000: 0.0001,
+};
 
 const artifactDrops = allDefaultArtifactPrototypes
   .filter((a) => {
@@ -46,13 +52,13 @@ const artifactDrops = allDefaultArtifactPrototypes
   .map((a) => ({
     sid: a.SID,
     cost: a.Cost,
-    chance: precision(
-      Math.min(
-        1,
-        BASE_ARTIFACT_CHANCE / Math.pow(10, Math.log2(a.Cost / BASE_COST)) / SUB_GEN_CHANCE,
-      ),
-      1e6,
-    ),
+    chance: ((n) => {
+      for (const rank in artRanks) {
+        if (n <= Number(rank)) {
+          return artRanks[rank];
+        }
+      }
+    })(a.Cost),
   }));
 
 const quarterSize = Math.ceil(artifactDrops.length / 4);
@@ -74,18 +80,17 @@ function buildDetectorSubGen(rank: Rank): ItemGeneratorPrototype {
   for (let i = 0; i <= idx; i++) {
     possibleItems[i] = new Struct({
       ItemPrototypeSID: detectors[i].sid,
-      Chance: detectors[i].chance,
-      Weight: 1,
-      MinCount: 1,
+      Weight: detectors[i].chance,
     });
   }
   return new Struct({
     __internal__: { isRoot: true, rawName: sid },
     SID: sid,
     ItemGenerator: new Struct({
-      RareDetectorDrop: new Struct({
-        Category: "EItemGenerationCategory::Detector" satisfies EItemGenerationCategory,
+      0: new Struct({
+        Category: "EItemGenerationCategory::Junk" satisfies EItemGenerationCategory,
         PossibleItems: new Struct(possibleItems),
+        bAllowSameCategoryGeneration: true,
       }),
     }),
   }) as ItemGeneratorPrototype;
@@ -95,25 +100,23 @@ function buildArtifactSubGen(rank: Rank): ItemGeneratorPrototype {
   const idx = rankIndex(rank);
   const sid = `RareNPCDrops_Artifacts_${rank}_SubItemGenerator`;
   const arts = artifactQuarters[idx];
-  const possibleItems: Record<string, unknown> = {};
+  const possibleItems = new Struct();
   for (let i = 0; i < arts.length; i++) {
-    possibleItems[i] = new Struct({
+    possibleItems.addNode({
       ItemPrototypeSID: arts[i].sid,
-      Chance: arts[i].chance,
-      Weight: 1,
-      MinCount: 1,
-      MaxCount: 1,
+      Weight: arts[i].chance,
     });
   }
   return new Struct({
     __internal__: { isRoot: true, rawName: sid },
     SID: sid,
-    ItemGenerator: new Struct({
-      RareArtifactDrop: new Struct({
-        Category: "EItemGenerationCategory::Artifact" satisfies EItemGenerationCategory,
-        PossibleItems: new Struct(possibleItems),
-      }),
-    }),
+    ItemGenerator: {
+      0: {
+        Category: "EItemGenerationCategory::Junk" satisfies EItemGenerationCategory,
+        PossibleItems: possibleItems,
+        bAllowSameCategoryGeneration: true,
+      },
+    },
   }) as ItemGeneratorPrototype;
 }
 
@@ -145,7 +148,6 @@ export const transformItemGenerators: StructTransformer<ItemGeneratorPrototype> 
 
   fork.ItemGenerator = new Struct() as ItemGeneratorPrototype["ItemGenerator"];
   fork.ItemGenerator.__internal__.bpatch = true;
-
   for (const rank of RANKS) {
     const detectorSubGenSID = `RareNPCDrops_Detectors_${rank}_SubItemGenerator`;
     const artifactSubGenSID = `RareNPCDrops_Artifacts_${rank}_SubItemGenerator`;
