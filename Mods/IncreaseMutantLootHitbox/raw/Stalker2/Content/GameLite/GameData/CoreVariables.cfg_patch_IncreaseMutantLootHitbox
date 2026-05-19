@@ -1,0 +1,49 @@
+DefaultConfig : struct.begin {bpatch}
+   MutantLootContainerInteractRange = 240
+   MutantLootInteractHeightMin = 0
+   MutantLootInteractHeightMax = 180
+   MutantLootParams : struct.begin {bpatch}
+      [0] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [1] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [2] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [3] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [4] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [5] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [6] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [7] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [8] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [9] : struct.begin {bpatch}
+         CutRadiusModifier = 15
+      struct.end
+      [10] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [11] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [12] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
+      [13] : struct.begin {bpatch}
+         CutRadiusModifier = 15
+      struct.end
+   struct.end
+struct.end
