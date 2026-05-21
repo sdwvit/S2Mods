@@ -42,7 +42,7 @@ export function buildQuestGraphData(
       id: node.jsSid,
       sid: node.sid,
       nodeType,
-      label: node.jsSid,
+      label: formatNodeLabel(node.jsSid),
       subtitle: getNodeSubtitle(node.raw),
       isStart: Boolean((node.raw as QuestNodePrototype & { LaunchOnQuestStart?: boolean }).LaunchOnQuestStart),
       isTerminal: nodeType === "End" || node.launches.length === 0,
@@ -97,6 +97,12 @@ function firstDefinedString(values: unknown[]) {
 
 function truncate(value: string, maxLength: number) {
   return value.length > maxLength ? `${value.slice(0, maxLength - 3)}...` : value;
+}
+
+function formatNodeLabel(value: string) {
+  return value
+    .replaceAll("_", "_\u200b")
+    .replace(/([a-z0-9])([A-Z])/g, "$1\u200b$2");
 }
 
 function getNodeDetails(struct: QuestNodePrototype) {
