@@ -1,0 +1,4866 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>E02_MQ01.cfg quest graph</title>
+  <style>
+    :root {
+      --bg: #f4efe4;
+      --panel: rgba(255, 250, 240, 0.94);
+      --panel-border: rgba(62, 44, 28, 0.18);
+      --ink: #24170f;
+      --muted: #6d5a49;
+      --accent: #b85c19;
+      --accent-2: #d9a441;
+      --edge: #9b8b7d;
+      --node: #d7c2a3;
+      --event: #d86c2f;
+      --terminal: #5e8a4a;
+      --start: #a52619;
+      --shadow: 0 18px 42px rgba(36, 23, 15, 0.14);
+      --node-fill: #d7c2a3;
+      --node-border: #5f4634;
+      --node-text: #24170f;
+      --event-fill: #d86c2f;
+      --start-fill: #a52619;
+      --terminal-border: #3f642f;
+      --edge-line: #9b8b7d;
+      --edge-text: #5d4d40;
+      --edge-text-bg: rgba(255, 250, 240, 0.82);
+      --highlight: #b85c19;
+      --card-bg: rgba(255, 255, 255, 0.55);
+      --control-bg: rgba(255, 255, 255, 0.78);
+      --control-bg-hover: rgba(255, 255, 255, 0.94);
+      --control-border: rgba(62, 44, 28, 0.22);
+      --toolbar-button-bg: rgba(255, 250, 240, 0.9);
+      --detail-bg: rgba(255, 255, 255, 0.56);
+      --detail-border: rgba(62, 44, 28, 0.08);
+      --section-divider: rgba(62, 44, 28, 0.1);
+      --swatch-border: rgba(36, 23, 15, 0.15);
+      --error: #8d1717;
+    }
+
+    body.dark {
+      --bg: #151313;
+      --panel: rgba(28, 25, 23, 0.94);
+      --panel-border: rgba(214, 195, 168, 0.16);
+      --ink: #f2e7d3;
+      --muted: #c3b299;
+      --accent: #e08a3a;
+      --accent-2: #d2b36e;
+      --edge: #8f7c67;
+      --node: #4e4337;
+      --event: #b7472b;
+      --terminal: #6f9860;
+      --start: #c94732;
+      --shadow: 0 24px 48px rgba(0, 0, 0, 0.34);
+      --node-fill: #4e4337;
+      --node-border: #bfa88d;
+      --node-text: #f6ead8;
+      --event-fill: #b7472b;
+      --start-fill: #c94732;
+      --terminal-border: #8fbb7a;
+      --edge-line: #7e6c59;
+      --edge-text: #d6c4ab;
+      --edge-text-bg: rgba(28, 25, 23, 0.84);
+      --highlight: #f0a24f;
+      --card-bg: rgba(49, 42, 37, 0.66);
+      --control-bg: rgba(42, 36, 32, 0.88);
+      --control-bg-hover: rgba(56, 48, 43, 0.96);
+      --control-border: rgba(214, 195, 168, 0.18);
+      --toolbar-button-bg: rgba(38, 33, 29, 0.94);
+      --detail-bg: rgba(47, 40, 35, 0.72);
+      --detail-border: rgba(214, 195, 168, 0.1);
+      --section-divider: rgba(214, 195, 168, 0.12);
+      --swatch-border: rgba(242, 231, 211, 0.18);
+      --error: #ff8d78;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(217, 164, 65, 0.35), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(184, 92, 25, 0.28), transparent 24%),
+        linear-gradient(135deg, #efe3c9 0%, #f8f2e6 46%, #e6d7b8 100%);
+    }
+
+    body.dark {
+      background:
+        radial-gradient(circle at top left, rgba(224, 138, 58, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(183, 71, 43, 0.16), transparent 24%),
+        linear-gradient(135deg, #181513 0%, #211c18 46%, #120f0d 100%);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      height: 100%;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .section {
+      padding: 18px 18px 0;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+    h1 {
+      font-family: "IBM Plex Serif", Georgia, serif;
+      font-size: 1.35rem;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .meta, .hint {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .meta {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .hint-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      display: grid;
+      gap: 6px;
+    }
+
+    .keycap {
+      color: var(--ink);
+      background: var(--control-bg);
+      border: 1px solid var(--control-border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 0.86em;
+      font-weight: 600;
+      box-shadow: inset 0 -1px 0 var(--panel-border);
+      white-space: nowrap;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .stat {
+      border: 1px solid var(--panel-border);
+      border-radius: 14px;
+      padding: 12px;
+      background: var(--card-bg);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.1rem;
+      margin-top: 2px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    input, select, button {
+      width: 100%;
+      border: 1px solid var(--control-border);
+      border-radius: 12px;
+      background: var(--control-bg);
+      color: var(--ink);
+      padding: 11px 12px;
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: var(--control-bg-hover);
+    }
+
+    button:disabled {
+      cursor: default;
+      opacity: 0.45;
+      background: var(--card-bg);
+      color: var(--muted);
+      border-color: var(--panel-border);
+      transform: none;
+      box-shadow: none;
+    }
+
+    button:disabled:hover {
+      background: var(--card-bg);
+      transform: none;
+    }
+
+    .legend {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--section-divider);
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .swatch {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid var(--swatch-border);
+    }
+
+    .details {
+      min-height: 0;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .detail-card {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .detail-row {
+      display: grid;
+      gap: 3px;
+      padding: 9px 10px;
+      border-radius: 12px;
+      background: var(--detail-bg);
+      border: 1px solid var(--detail-border);
+    }
+
+    .detail-row strong {
+      font-size: 0.83rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .canvas {
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    #cy {
+      width: 100%;
+      height: 100%;
+    }
+
+    .toolbar {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+
+    .toolbar button {
+      width: auto;
+      min-width: 110px;
+      background: var(--toolbar-button-bg);
+    }
+
+    .error {
+      padding: 18px;
+      color: var(--error);
+      font-weight: 600;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(420px, 1fr);
+      }
+      .sidebar {
+        max-height: 48vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="panel sidebar">
+      <div class="section">
+        <h1 id="graphTitle">E02_MQ01.cfg</h1>
+        <p class="meta" id="graphSource">GameLite/GameData/QuestNodePrototypes/E02_MQ01.cfg</p>
+        <div class="stats">
+          <div class="stat">Nodes<strong id="nodeCount">150</strong></div>
+          <div class="stat">Edges<strong id="edgeCount">171</strong></div>
+        </div>
+        <div class="controls">
+          <button id="openCfgButton" type="button">Open CFG</button>
+          <input id="openCfgInput" type="file" accept=".cfg,text/plain" hidden>
+          <input id="search" type="search" placeholder="Search SID or JS name">
+          <select id="nodeTypeFilter">
+            <option value="">All node types</option>
+          </select>
+          <button id="fitButton" type="button">Fit graph</button>
+          <button id="resetButton" type="button">Clear selection</button>
+        </div>
+        <div class="legend">
+          <div class="legend-row"><span class="swatch" style="background: var(--node)"></span>Regular node</div>
+          <div class="legend-row"><span class="swatch" style="background: var(--event)"></span>Event / trigger node</div>
+          <div class="legend-row"><span class="swatch" style="background: var(--start)"></span>Launch on quest start</div>
+          <div class="legend-row"><span class="swatch" style="background: var(--terminal)"></span>Terminal / no outgoing edges</div>
+        </div>
+      </div>
+      <div class="details" id="details">
+        <div id="detailsContent">
+          <p class="hint">Select a node to inspect its fields and connected edges.</p>
+        </div>
+        <ul class="hint-list">
+          <li><span class="keycap">Ctrl</span>/<span class="keycap">Shift</span> + drag: box-select nodes</li>
+          <li>Drag: move one node</li>
+          <li><span class="keycap">Alt</span> + drag: move highlighted nodes</li>
+          <li><span class="keycap">Undo</span>/<span class="keycap">Redo</span> buttons or <span class="keycap">Ctrl/Cmd+Z</span>, <span class="keycap">Ctrl/Cmd+Shift+Z</span>, <span class="keycap">Ctrl/Cmd+Y</span>: history</li>
+        </ul>
+      </div>
+    </aside>
+    <main class="panel canvas">
+      <div class="toolbar">
+        <button id="themeButton" type="button">Dark mode</button>
+        <button id="undoButton" type="button" disabled>Undo</button>
+        <button id="redoButton" type="button" disabled>Redo</button>
+        <button id="layoutButton" type="button">Relayout</button>
+      </div>
+      <div id="cy"></div>
+    </main>
+  </div>
+  <script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+  <script>
+    const initialGraph = {
+  "title": "E02_MQ01.cfg",
+  "sourceFilePath": "GameLite/GameData/QuestNodePrototypes/E02_MQ01.cfg",
+  "nodeCount": 150,
+  "edgeCount": 171,
+  "nodes": [
+    {
+      "id": "E02_MQ01_Start",
+      "sid": "E02_MQ01_Start",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Start",
+      "subtitle": "Technical",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Start",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier",
+      "sid": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier",
+      "nodeType": "SetItemGenerator",
+      "label": "E02_​MQ01_​Set​Item​Generator_​BP_​Dead​Body_​Varta​Soldier",
+      "subtitle": "SetItemGenerator",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier",
+        "NodeType": "SetItemGenerator",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "F3CE00294B527A7C033CD2A7B1DB1477"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier2",
+      "sid": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier2",
+      "nodeType": "SetItemGenerator",
+      "label": "E02_​MQ01_​Set​Item​Generator_​BP_​Dead​Body_​Varta​Soldier2",
+      "subtitle": "SetItemGenerator",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier2",
+        "NodeType": "SetItemGenerator",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "3BBF8CB34A8921B400EB8EB36FE31E09"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier3",
+      "sid": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier3",
+      "nodeType": "SetItemGenerator",
+      "label": "E02_​MQ01_​Set​Item​Generator_​BP_​Dead​Body_​Varta​Soldier3",
+      "subtitle": "SetItemGenerator",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier3",
+        "NodeType": "SetItemGenerator",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "318A06984EBCB69894DEF0BC3FB24972"
+      }
+    },
+    {
+      "id": "E02_MQ01_Spawn_DeadVartaSoldier3",
+      "sid": "E02_MQ01_Spawn_DeadVartaSoldier3",
+      "nodeType": "Spawn",
+      "label": "E02_​MQ01_​Spawn_​Dead​Varta​Soldier3",
+      "subtitle": "Spawn",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_Spawn_DeadVartaSoldier3",
+        "NodeType": "Spawn",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "318A06984EBCB69894DEF0BC3FB24972"
+      }
+    },
+    {
+      "id": "E02_MQ01_Spawn_DeadVartaSoldier1",
+      "sid": "E02_MQ01_Spawn_DeadVartaSoldier1",
+      "nodeType": "Spawn",
+      "label": "E02_​MQ01_​Spawn_​Dead​Varta​Soldier1",
+      "subtitle": "Spawn",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_Spawn_DeadVartaSoldier1",
+        "NodeType": "Spawn",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "F3CE00294B527A7C033CD2A7B1DB1477"
+      }
+    },
+    {
+      "id": "E02_MQ01_Spawn_DeadVartaSoldier2",
+      "sid": "E02_MQ01_Spawn_DeadVartaSoldier2",
+      "nodeType": "Spawn",
+      "label": "E02_​MQ01_​Spawn_​Dead​Varta​Soldier2",
+      "subtitle": "Spawn",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_Spawn_DeadVartaSoldier2",
+        "NodeType": "Spawn",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "3BBF8CB34A8921B400EB8EB36FE31E09"
+      }
+    },
+    {
+      "id": "E02_MQ01_EscapeAnomalyFiled_Finish",
+      "sid": "E02_MQ01_EscapeAnomalyFiled_Finish",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Escape​Anomaly​Filed_​Finish",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_EscapeAnomalyFiled_Finish",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_EscapeAnomalyFiled_Start",
+      "sid": "E02_MQ01_EscapeAnomalyFiled_Start",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Escape​Anomaly​Filed_​Start",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_EscapeAnomalyFiled_Start",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_TalkToStalker_Start",
+      "sid": "E02_MQ01_TalkToStalker_Start",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Talk​To​Stalker_​Start",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_TalkToStalker_Start",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent",
+      "sid": "E02_MQ01_OnTickEvent",
+      "nodeType": "OnTickEvent",
+      "label": "E02_​MQ01_​On​Tick​Event",
+      "subtitle": "OnTickEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnTickEvent",
+        "NodeType": "OnTickEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_Zalesye2",
+      "sid": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_Zalesye2",
+      "nodeType": "OnJournalQuestEvent",
+      "label": "E02_​MQ01_​On​Journal​Quest​Event_​E02_​MQ01_​Zalesye2",
+      "subtitle": "OnJournalQuestEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_Zalesye2",
+        "NodeType": "OnJournalQuestEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_E02_MQ01_Fin",
+      "sid": "E02_MQ01_Technical_E02_MQ01_Fin",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​E02_​MQ01_​Fin",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_E02_MQ01_Fin",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_End",
+      "sid": "E02_MQ01_End",
+      "nodeType": "End",
+      "label": "E02_​MQ01_​End",
+      "subtitle": "End",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_End",
+        "NodeType": "End",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Quest_Finish",
+      "sid": "E02_MQ01_Quest_Finish",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Quest_​Finish",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Quest_Finish",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_TalkToStalker_Finish",
+      "sid": "E02_MQ01_TalkToStalker_Finish",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Talk​To​Stalker_​Finish",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_TalkToStalker_Finish",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Comment_RichterHelloGeneral",
+      "sid": "E02_MQ01_Comment_RichterHelloGeneral",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Comment_​Richter​Hello​General",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Comment_RichterHelloGeneral",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1",
+      "sid": "E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1",
+      "nodeType": "Trigger",
+      "label": "E02_​MQ01_​Trigger_​Player​Exit​Anomaly​Field​East_​1",
+      "subtitle": "Trigger",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1",
+        "NodeType": "Trigger",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "id": "E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1",
+      "sid": "E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1",
+      "nodeType": "Trigger",
+      "label": "E02_​MQ01_​Trigger_​Player​Exit​Anomaly​Field​West_​1",
+      "subtitle": "Trigger",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1",
+        "NodeType": "Trigger",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "id": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2",
+      "sid": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical​Escape​Anomally​Field​East_​2",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1",
+      "sid": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical​Escape​Anomally​Field​West_​1",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_MoveRihterToPlayerWest_1",
+      "sid": "E02_MQ01_MoveRihterToPlayerWest_1",
+      "nodeType": "SetAIBehavior",
+      "label": "E02_​MQ01_​Move​Rihter​To​Player​West_​1",
+      "subtitle": "SetAIBehavior",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_MoveRihterToPlayerWest_1",
+        "NodeType": "SetAIBehavior",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_MoveRihterToPlayerEast_3",
+      "sid": "E02_MQ01_MoveRihterToPlayerEast_3",
+      "nodeType": "SetAIBehavior",
+      "label": "E02_​MQ01_​Move​Rihter​To​Player​East_​3",
+      "subtitle": "SetAIBehavior",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_MoveRihterToPlayerEast_3",
+        "NodeType": "SetAIBehavior",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "sid": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​Rihter​After​Anomally​Field",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun",
+      "sid": "E02_MQ01_Technical_TheRun",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​The​Run",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_TheRun",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun_Pin_1",
+      "sid": "E02_MQ01_Technical_TheRun_Pin_1",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Technical_​The​Run_​Pin_​1",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_TheRun_Pin_1",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_TheHutSequence",
+      "sid": "E02_MQ01_Technical_TheHutSequence",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​The​Hut​Sequence",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_TheHutSequence",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_OnTriggerEnterEvent_RihterInTheHut_2",
+      "sid": "E02_MQ01_OnTriggerEnterEvent_RihterInTheHut_2",
+      "nodeType": "Trigger",
+      "label": "E02_​MQ01_​On​Trigger​Enter​Event_​Rihter​In​The​Hut_​2",
+      "subtitle": "Trigger",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnTriggerEnterEvent_RihterInTheHut_2",
+        "NodeType": "Trigger",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_Comment_RihterAboutKosoy_3iter",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_Comment_RihterAboutKosoy_3iter",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​Comment_​Rihter​About​Kosoy_​3iter",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_Comment_RihterAboutKosoy_3iter",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "sid": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​Rihter​Exposition​In​The​Hut_​3iter",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExamineBody_gen",
+      "sid": "E02_MQ01_SetDialog_RihterExamineBody_gen",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​Rihter​Examine​Body_​gen",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_RihterExamineBody_gen",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExamineBody_gen_Pin_0",
+      "sid": "E02_MQ01_SetDialog_RihterExamineBody_gen_Pin_0",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Set​Dialog_​Rihter​Examine​Body_​gen_​Pin_​0",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_RihterExamineBody_gen_Pin_0",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Quest_Start",
+      "sid": "E02_MQ01_Quest_Start",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Quest_​Start",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Quest_Start",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_InvitationToBarInZalesie",
+      "sid": "E02_MQ01_SetDialog_InvitationToBarInZalesie",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​Invitation​To​Bar​In​Zalesie",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_InvitationToBarInZalesie",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_InvitationToBarInZalesie_Pin_0",
+      "sid": "E02_MQ01_SetDialog_InvitationToBarInZalesie_Pin_0",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Set​Dialog_​Invitation​To​Bar​In​Zalesie_​Pin_​0",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_InvitationToBarInZalesie_Pin_0",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_ZalessieTaskActive",
+      "sid": "E02_MQ01_Technical_ZalessieTaskActive",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​Zalessie​Task​Active",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_ZalessieTaskActive",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Start",
+      "sid": "E02_MQ01_Zalesie_Start",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Zalesie_​Start",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Zalesie_Start",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Finish",
+      "sid": "E02_MQ01_Zalesie_Finish",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Zalesie_​Finish",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_Zalesie_Finish",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Finish_Pin_0",
+      "sid": "E02_MQ01_Zalesie_Finish_Pin_0",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Zalesie_​Finish_​Pin_​0",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Zalesie_Finish_Pin_0",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetAIBehavior_RihterStay_2",
+      "sid": "E02_MQ01_SetAIBehavior_RihterStay_2",
+      "nodeType": "SetAIBehavior",
+      "label": "E02_​MQ01_​Set​AIBehavior_​Rihter​Stay_​2",
+      "subtitle": "SetAIBehavior",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetAIBehavior_RihterStay_2",
+        "NodeType": "SetAIBehavior",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_MQ01_TeleportCharacter_Player_2",
+      "sid": "E02_MQ01_MQ01_TeleportCharacter_Player_2",
+      "nodeType": "TeleportCharacter",
+      "label": "E02_​MQ01_​MQ01_​Teleport​Character_​Player_​2",
+      "subtitle": "TeleportCharacter",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_MQ01_TeleportCharacter_Player_2",
+        "NodeType": "TeleportCharacter",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetTime_14pm",
+      "sid": "E02_MQ01_SetTime_14pm",
+      "nodeType": "SetTime",
+      "label": "E02_​MQ01_​Set​Time_​14pm",
+      "subtitle": "SetTime",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetTime_14pm",
+        "NodeType": "SetTime",
+        "QuestSID": "E02_MQ01",
+        "InGameHours": 14
+      }
+    },
+    {
+      "id": "E02_MQ01_AddNote_ScanerArchive",
+      "sid": "E02_MQ01_AddNote_ScanerArchive",
+      "nodeType": "AddNote",
+      "label": "E02_​MQ01_​Add​Note_​Scaner​Archive",
+      "subtitle": "AddNote",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_AddNote_ScanerArchive",
+        "NodeType": "AddNote",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_Comment_RihterInTheHut_4iter",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_Comment_RihterInTheHut_4iter",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​Comment_​Rihter​In​The​Hut_​4iter",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_Comment_RihterInTheHut_4iter",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_AnomallyField",
+      "sid": "E02_MQ01_Technical_AnomallyField",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​Anomally​Field",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_AnomallyField",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ToggleNPCHidden_RihterHide_4",
+      "sid": "E02_MQ01_ToggleNPCHidden_RihterHide_4",
+      "nodeType": "ToggleNPCHidden",
+      "label": "E02_​MQ01_​Toggle​NPCHidden_​Rihter​Hide_​4",
+      "subtitle": "ToggleNPCHidden",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ToggleNPCHidden_RihterHide_4",
+        "NodeType": "ToggleNPCHidden",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_ToggleNPCHidden_RihterHide_4_Pin_0",
+      "sid": "E02_MQ01_ToggleNPCHidden_RihterHide_4_Pin_0",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Toggle​NPCHidden_​Rihter​Hide_​4_​Pin_​0",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_ToggleNPCHidden_RihterHide_4_Pin_0",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Start2_3",
+      "sid": "E02_MQ01_Zalesie_Start2_3",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Zalesie_​Start2_​3",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Zalesie_Start2_3",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_EndPreparation",
+      "sid": "E02_MQ01_Technical_EndPreparation",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​End​Preparation",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_EndPreparation",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Fin_3",
+      "sid": "E02_MQ01_Zalesie_Fin_3",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Zalesie_​Fin_​3",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_Zalesie_Fin_3",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Fin_3_Pin_0",
+      "sid": "E02_MQ01_Zalesie_Fin_3_Pin_0",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Zalesie_​Fin_​3_​Pin_​0",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Zalesie_Fin_3_Pin_0",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Fin_3_Pin_2",
+      "sid": "E02_MQ01_Zalesie_Fin_3_Pin_2",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Zalesie_​Fin_​3_​Pin_​2",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Zalesie_Fin_3_Pin_2",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetJournal_TalkToStalker_Cancel",
+      "sid": "E02_MQ01_SetJournal_TalkToStalker_Cancel",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Set​Journal_​Talk​To​Stalker_​Cancel",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetJournal_TalkToStalker_Cancel",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetJournal_TalkToStalker_Cancel_Pin_0",
+      "sid": "E02_MQ01_SetJournal_TalkToStalker_Cancel_Pin_0",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Set​Journal_​Talk​To​Stalker_​Cancel_​Pin_​0",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetJournal_TalkToStalker_Cancel_Pin_0",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Start",
+      "sid": "E02_MQ01_FollowStalker_Start",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Follow​Stalker_​Start",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_FollowStalker_Start",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Cancel_1",
+      "sid": "E02_MQ01_FollowStalker_Cancel_1",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Follow​Stalker_​Cancel_​1",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_FollowStalker_Cancel_1",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Finish",
+      "sid": "E02_MQ01_FollowStalker_Finish",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Follow​Stalker_​Finish",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_FollowStalker_Finish",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Finish_Pin_0",
+      "sid": "E02_MQ01_FollowStalker_Finish_Pin_0",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Follow​Stalker_​Finish_​Pin_​0",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_FollowStalker_Finish_Pin_0",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_TalkToStalker_Cancel",
+      "sid": "E02_MQ01_TalkToStalker_Cancel",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Talk​To​Stalker_​Cancel",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_TalkToStalker_Cancel",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​Comment_​Rihter_​on_​Player_​notes",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_BridgeEvent",
+      "sid": "E02_MQ01_BridgeEvent",
+      "nodeType": "BridgeEvent",
+      "label": "E02_​MQ01_​Bridge​Event",
+      "subtitle": "BridgeEvent: E02_MQ01_Technical_FirstZalesieInfo",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_BridgeEvent",
+        "NodeType": "BridgeEvent",
+        "QuestSID": "E02_MQ01",
+        "LinkedNodePrototypeSID": "E02_MQ01_Technical_FirstZalesieInfo",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Cancel",
+      "sid": "E02_MQ01_FollowStalker_Cancel",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Follow​Stalker_​Cancel",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_FollowStalker_Cancel",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Cancel_Pin_0",
+      "sid": "E02_MQ01_FollowStalker_Cancel_Pin_0",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Follow​Stalker_​Cancel_​Pin_​0",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_FollowStalker_Cancel_Pin_0",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_FirstZalesieInfo",
+      "sid": "E02_MQ01_Technical_FirstZalesieInfo",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​First​Zalesie​Info",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_FirstZalesieInfo",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ItemAdd_Medkitx2",
+      "sid": "E02_MQ01_ItemAdd_Medkitx2",
+      "nodeType": "ItemAdd",
+      "label": "E02_​MQ01_​Item​Add_​Medkitx2",
+      "subtitle": "ItemAdd: Medkit",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ItemAdd_Medkitx2",
+        "NodeType": "ItemAdd",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "ItemSID": "Medkit",
+        "ItemsCount": 4
+      }
+    },
+    {
+      "id": "E02_MQ01_SetAIBehavior_RihterToHut",
+      "sid": "E02_MQ01_SetAIBehavior_RihterToHut",
+      "nodeType": "SetAIBehavior",
+      "label": "E02_​MQ01_​Set​AIBehavior_​Rihter​To​Hut",
+      "subtitle": "SetAIBehavior",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetAIBehavior_RihterToHut",
+        "NodeType": "SetAIBehavior",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_ToggleNPCHidden_UnHideRichter",
+      "sid": "E02_MQ01_ToggleNPCHidden_UnHideRichter",
+      "nodeType": "ToggleNPCHidden",
+      "label": "E02_​MQ01_​Toggle​NPCHidden_​Un​Hide​Richter",
+      "subtitle": "ToggleNPCHidden",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ToggleNPCHidden_UnHideRichter",
+        "NodeType": "ToggleNPCHidden",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_Container_Awakening_Cutscene",
+      "sid": "E02_MQ01_Container_Awakening_Cutscene",
+      "nodeType": "Container",
+      "label": "E02_​MQ01_​Container_​Awakening_​Cutscene",
+      "subtitle": "Container",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Container_Awakening_Cutscene",
+        "NodeType": "Container",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetCharacterParam_Player_Food",
+      "sid": "E02_MQ01_SetCharacterParam_Player_Food",
+      "nodeType": "SetCharacterParam",
+      "label": "E02_​MQ01_​Set​Character​Param_​Player_​Food",
+      "subtitle": "SetCharacterParam",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_SetCharacterParam_Player_Food",
+        "NodeType": "SetCharacterParam",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetCharacterParam_Player_HP",
+      "sid": "E02_MQ01_SetCharacterParam_Player_HP",
+      "nodeType": "SetCharacterParam",
+      "label": "E02_​MQ01_​Set​Character​Param_​Player_​HP",
+      "subtitle": "SetCharacterParam",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetCharacterParam_Player_HP",
+        "NodeType": "SetCharacterParam",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "id": "E02_MQ01_If_FollowActive",
+      "sid": "E02_MQ01_If_FollowActive",
+      "nodeType": "If",
+      "label": "E02_​MQ01_​If_​Follow​Active",
+      "subtitle": "If",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_If_FollowActive",
+        "NodeType": "If",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_If_TalkActive",
+      "sid": "E02_MQ01_If_TalkActive",
+      "nodeType": "If",
+      "label": "E02_​MQ01_​If_​Talk​Active",
+      "subtitle": "If",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_If_TalkActive",
+        "NodeType": "If",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_TeleportCharacter_Richter",
+      "sid": "E02_MQ01_TeleportCharacter_Richter",
+      "nodeType": "TeleportCharacter",
+      "label": "E02_​MQ01_​Teleport​Character_​Richter",
+      "subtitle": "TeleportCharacter",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_TeleportCharacter_Richter",
+        "NodeType": "TeleportCharacter",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_2sec_delay",
+      "sid": "E02_MQ01_2sec_delay",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​2sec_​delay",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_2sec_delay",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter",
+      "sid": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter",
+      "nodeType": "DisableNPCInteraction",
+      "label": "E02_​MQ01_​Disable​NPCInteraction_​BP_​NPC_​Richter",
+      "subtitle": "DisableNPCInteraction",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter",
+        "NodeType": "DisableNPCInteraction",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_Pin_2",
+      "sid": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_Pin_2",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Disable​NPCInteraction_​BP_​NPC_​Richter_​Pin_​2",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_Pin_2",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetAIBehavior_BP_NPC_Richter",
+      "sid": "E02_MQ01_SetAIBehavior_BP_NPC_Richter",
+      "nodeType": "SetAIBehavior",
+      "label": "E02_​MQ01_​Set​AIBehavior_​BP_​NPC_​Richter",
+      "subtitle": "SetAIBehavior",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetAIBehavior_BP_NPC_Richter",
+        "NodeType": "SetAIBehavior",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_EscapeAnomalyFiled",
+      "sid": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_EscapeAnomalyFiled",
+      "nodeType": "OnJournalQuestEvent",
+      "label": "E02_​MQ01_​On​Journal​Quest​Event_​E02_​MQ01_​Escape​Anomaly​Filed",
+      "subtitle": "OnJournalQuestEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_EscapeAnomalyFiled",
+        "NodeType": "OnJournalQuestEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn",
+      "sid": "E02_MQ01_Technical_DeadWardensSpawn",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​Dead​Wardens​Spawn",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_DeadWardensSpawn",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn_Pin_0",
+      "sid": "E02_MQ01_Technical_DeadWardensSpawn_Pin_0",
+      "nodeType": "Condition",
+      "label": "E02_​MQ01_​Technical_​Dead​Wardens​Spawn_​Pin_​0",
+      "subtitle": "Condition",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_DeadWardensSpawn_Pin_0",
+        "NodeType": "Condition",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ConsoleCommand",
+      "sid": "E02_MQ01_ConsoleCommand",
+      "nodeType": "ConsoleCommand",
+      "label": "E02_​MQ01_​Console​Command",
+      "subtitle": "ConsoleCommand",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ConsoleCommand",
+        "NodeType": "ConsoleCommand",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ActivateRestrictor",
+      "sid": "E02_MQ01_ActivateRestrictor",
+      "nodeType": "ActivateRestrictor",
+      "label": "E02_​MQ01_​Activate​Restrictor",
+      "subtitle": "ActivateRestrictor",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ActivateRestrictor",
+        "NodeType": "ActivateRestrictor",
+        "QuestSID": "E02_MQ01",
+        "VolumeGuid": "1D34EC92402DF833D3D51FB2D22517CA"
+      }
+    },
+    {
+      "id": "E02_MQ01_ItemAdd_A918D",
+      "sid": "E02_MQ01_ItemAdd_A918D",
+      "nodeType": "ItemAdd",
+      "label": "E02_​MQ01_​Item​Add_​A918​D",
+      "subtitle": "ItemAdd: A918D",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ItemAdd_A918D",
+        "NodeType": "ItemAdd",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "ItemSID": "A918D",
+        "ItemsCount": 30
+      }
+    },
+    {
+      "id": "E02_MQ01_ItemAdd_Bandage",
+      "sid": "E02_MQ01_ItemAdd_Bandage",
+      "nodeType": "ItemAdd",
+      "label": "E02_​MQ01_​Item​Add_​Bandage",
+      "subtitle": "ItemAdd: Bandage",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ItemAdd_Bandage",
+        "NodeType": "ItemAdd",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "ItemSID": "Bandage",
+        "ItemsCount": 1
+      }
+    },
+    {
+      "id": "E02_MQ01_ItemAdd_Energetic",
+      "sid": "E02_MQ01_ItemAdd_Energetic",
+      "nodeType": "ItemAdd",
+      "label": "E02_​MQ01_​Item​Add_​Energetic",
+      "subtitle": "ItemAdd: Energetic",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ItemAdd_Energetic",
+        "NodeType": "ItemAdd",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "ItemSID": "Energetic",
+        "ItemsCount": 1
+      }
+    },
+    {
+      "id": "E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_gates_Receiver_Set_Object_2",
+      "sid": "E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_gates.Receiver_Set_Object_2",
+      "nodeType": "SendSignal",
+      "label": "E02_​MQ01_​Send​Signal_​1_​9_​E01_​MQ01_​BP_​Dynamic​Object_​gates_​Receiver_​Set_​Object_​2",
+      "subtitle": "SendSignal: 053D010348DAF9E02C6C30AC94A9A0BC",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_gates.Receiver_Set_Object_2",
+        "NodeType": "SendSignal",
+        "QuestSID": "E02_MQ01",
+        "SignalReceiverGuid": "053D010348DAF9E02C6C30AC94A9A0BC"
+      }
+    },
+    {
+      "id": "E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_garage_door_Receiver_Set_Object_2",
+      "sid": "E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_garage_door.Receiver_Set_Object_2",
+      "nodeType": "SendSignal",
+      "label": "E02_​MQ01_​Send​Signal_​1_​9_​E01_​MQ01_​BP_​Dynamic​Object_​garage_​door_​Receiver_​Set_​Object_​2",
+      "subtitle": "SendSignal: 58FB97D04F5CE5CDEC024897DF24083E",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_garage_door.Receiver_Set_Object_2",
+        "NodeType": "SendSignal",
+        "QuestSID": "E02_MQ01",
+        "SignalReceiverGuid": "58FB97D04F5CE5CDEC024897DF24083E"
+      }
+    },
+    {
+      "id": "E02_MQ01_Audio",
+      "sid": "E02_MQ01_Audio",
+      "nodeType": "Container",
+      "label": "E02_​MQ01_​Audio",
+      "subtitle": "Container",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_Audio",
+        "NodeType": "Container",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_VFX",
+      "sid": "E02_MQ01_VFX",
+      "nodeType": "Container",
+      "label": "E02_​MQ01_​VFX",
+      "subtitle": "Container",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_VFX",
+        "NodeType": "Container",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetWeather",
+      "sid": "E02_MQ01_SetWeather",
+      "nodeType": "SetWeather",
+      "label": "E02_​MQ01_​Set​Weather",
+      "subtitle": "SetWeather",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetWeather",
+        "NodeType": "SetWeather",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ShowMarker__Unknown_Za",
+      "sid": "E02_MQ01_ShowMarker__Unknown_Za",
+      "nodeType": "ShowMarker",
+      "label": "E02_​MQ01_​Show​Marker_​_​Unknown_​Za",
+      "subtitle": "ShowMarker",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ShowMarker__Unknown_Za",
+        "NodeType": "ShowMarker",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ShowMarker__Unknown_PostOffice",
+      "sid": "E02_MQ01_ShowMarker__Unknown_PostOffice",
+      "nodeType": "ShowMarker",
+      "label": "E02_​MQ01_​Show​Marker_​_​Unknown_​Post​Office",
+      "subtitle": "ShowMarker",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ShowMarker__Unknown_PostOffice",
+        "NodeType": "ShowMarker",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SaveGame_2",
+      "sid": "E02_MQ01_SaveGame_2",
+      "nodeType": "SaveGame",
+      "label": "E02_​MQ01_​Save​Game_​2",
+      "subtitle": "SaveGame",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SaveGame_2",
+        "NodeType": "SaveGame",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SaveGame",
+      "sid": "E02_MQ01_SaveGame",
+      "nodeType": "SaveGame",
+      "label": "E02_​MQ01_​Save​Game",
+      "subtitle": "SaveGame",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SaveGame",
+        "NodeType": "SaveGame",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SaveGame_1",
+      "sid": "E02_MQ01_SaveGame_1",
+      "nodeType": "SaveGame",
+      "label": "E02_​MQ01_​Save​Game_​1",
+      "subtitle": "SaveGame",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SaveGame_1",
+        "NodeType": "SaveGame",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ShowLoadingScreen",
+      "sid": "E02_MQ01_ShowLoadingScreen",
+      "nodeType": "ShowLoadingScreen",
+      "label": "E02_​MQ01_​Show​Loading​Screen",
+      "subtitle": "ShowLoadingScreen",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ShowLoadingScreen",
+        "NodeType": "ShowLoadingScreen",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ToggleLairActivity_Flesh",
+      "sid": "E02_MQ01_ToggleLairActivity_Flesh",
+      "nodeType": "ToggleLairActivity",
+      "label": "E02_​MQ01_​Toggle​Lair​Activity_​Flesh",
+      "subtitle": "ToggleLairActivity",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ToggleLairActivity_Flesh",
+        "NodeType": "ToggleLairActivity",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "DC7BC0254FFDFF5B9D02069E9F7EE919"
+      }
+    },
+    {
+      "id": "E02_MQ01_ToggleLairActivity_BlindDog",
+      "sid": "E02_MQ01_ToggleLairActivity_BlindDog",
+      "nodeType": "ToggleLairActivity",
+      "label": "E02_​MQ01_​Toggle​Lair​Activity_​Blind​Dog",
+      "subtitle": "ToggleLairActivity",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ToggleLairActivity_BlindDog",
+        "NodeType": "ToggleLairActivity",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "174301794E4193B676D05D872DD4B6D2"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_ActivateLairs",
+      "sid": "E02_MQ01_Technical_ActivateLairs",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​Activate​Lairs",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_ActivateLairs",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetGlobalVariable_Bolt_Action_Blocked",
+      "sid": "E02_MQ01_SetGlobalVariable_Bolt_Action_Blocked",
+      "nodeType": "SetGlobalVariable",
+      "label": "E02_​MQ01_​Set​Global​Variable_​Bolt_​Action_​Blocked",
+      "subtitle": "SetGlobalVariable",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetGlobalVariable_Bolt_Action_Blocked",
+        "NodeType": "SetGlobalVariable",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ALifeDirectorZoneSwitch_BP_ALifeGroupZonePlaceHolder_Prologue",
+      "sid": "E02_MQ01_ALifeDirectorZoneSwitch_BP_ALifeGroupZonePlaceHolder_Prologue",
+      "nodeType": "ALifeDirectorZoneSwitch",
+      "label": "E02_​MQ01_​ALife​Director​Zone​Switch_​BP_​ALife​Group​Zone​Place​Holder_​Prologue",
+      "subtitle": "ALifeDirectorZoneSwitch",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ALifeDirectorZoneSwitch_BP_ALifeGroupZonePlaceHolder_Prologue",
+        "NodeType": "ALifeDirectorZoneSwitch",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "C099748E45C74A18562BF8BC74ABB516"
+      }
+    },
+    {
+      "id": "E02_MQ01_If",
+      "sid": "E02_MQ01_If",
+      "nodeType": "If",
+      "label": "E02_​MQ01_​If",
+      "subtitle": "If",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_If",
+        "NodeType": "If",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_RichterReation",
+      "sid": "E02_MQ01_Technical_RichterReation",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​Richter​Reation",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_RichterReation",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_Talk",
+      "sid": "E02_MQ01_Technical_Talk",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​Talk",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_Talk",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Trigger_Player",
+      "sid": "E02_MQ01_Trigger_Player",
+      "nodeType": "Trigger",
+      "label": "E02_​MQ01_​Trigger_​Player",
+      "subtitle": "Trigger",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Trigger_Player",
+        "NodeType": "Trigger",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetItemGenerator_Player",
+      "sid": "E02_MQ01_SetItemGenerator_Player",
+      "nodeType": "SetItemGenerator",
+      "label": "E02_​MQ01_​Set​Item​Generator_​Player",
+      "subtitle": "SetItemGenerator",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetItemGenerator_Player",
+        "NodeType": "SetItemGenerator",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_1sec",
+      "sid": "E02_MQ01_Technical_1sec",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​1sec",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_1sec",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_1",
+      "sid": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_1",
+      "nodeType": "DisableNPCInteraction",
+      "label": "E02_​MQ01_​Disable​NPCInteraction_​BP_​NPC_​Richter_​1",
+      "subtitle": "DisableNPCInteraction",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_1",
+        "NodeType": "DisableNPCInteraction",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical",
+      "sid": "E02_MQ01_Technical",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_Technical",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_1",
+      "sid": "E02_MQ01_Technical_1",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​1",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_1",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_EquipItemInHands",
+      "sid": "E02_MQ01_EquipItemInHands",
+      "nodeType": "EquipItemInHands",
+      "label": "E02_​MQ01_​Equip​Item​In​Hands",
+      "subtitle": "EquipItemInHands",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_EquipItemInHands",
+        "NodeType": "EquipItemInHands",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "id": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier1",
+      "sid": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier1",
+      "nodeType": "DisableNPCInteraction",
+      "label": "E02_​MQ01_​Disable​NPCInteraction_​BP_​Dead​Body​Varta​Soldier1",
+      "subtitle": "DisableNPCInteraction",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier1",
+        "NodeType": "DisableNPCInteraction",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "F3CE00294B527A7C033CD2A7B1DB1477"
+      }
+    },
+    {
+      "id": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier2",
+      "sid": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier2",
+      "nodeType": "DisableNPCInteraction",
+      "label": "E02_​MQ01_​Disable​NPCInteraction_​BP_​Dead​Body​Varta​Soldier2",
+      "subtitle": "DisableNPCInteraction",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier2",
+        "NodeType": "DisableNPCInteraction",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "3BBF8CB34A8921B400EB8EB36FE31E09"
+      }
+    },
+    {
+      "id": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier3",
+      "sid": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier3",
+      "nodeType": "DisableNPCInteraction",
+      "label": "E02_​MQ01_​Disable​NPCInteraction_​BP_​Dead​Body​Varta​Soldier3",
+      "subtitle": "DisableNPCInteraction",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier3",
+        "NodeType": "DisableNPCInteraction",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "318A06984EBCB69894DEF0BC3FB24972"
+      }
+    },
+    {
+      "id": "E02_MQ01_SendSignal_BP_DynamicObject_Decal_Receiver_Set_Object_2",
+      "sid": "E02_MQ01_SendSignal_BP_DynamicObject_Decal.Receiver_Set_Object_2",
+      "nodeType": "SendSignal",
+      "label": "E02_​MQ01_​Send​Signal_​BP_​Dynamic​Object_​Decal_​Receiver_​Set_​Object_​2",
+      "subtitle": "SendSignal: 5C4E2F834BFD76335D9A09956BD8928F",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SendSignal_BP_DynamicObject_Decal.Receiver_Set_Object_2",
+        "NodeType": "SendSignal",
+        "QuestSID": "E02_MQ01",
+        "SignalReceiverGuid": "5C4E2F834BFD76335D9A09956BD8928F"
+      }
+    },
+    {
+      "id": "E02_MQ01_SendSignal_BP_DynamicObject_Decal2_Receiver_Set_Object_2",
+      "sid": "E02_MQ01_SendSignal_BP_DynamicObject_Decal2.Receiver_Set_Object_2",
+      "nodeType": "SendSignal",
+      "label": "E02_​MQ01_​Send​Signal_​BP_​Dynamic​Object_​Decal2_​Receiver_​Set_​Object_​2",
+      "subtitle": "SendSignal: A9627AB34C6C3633B10E88AD53E98F7B",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SendSignal_BP_DynamicObject_Decal2.Receiver_Set_Object_2",
+        "NodeType": "SendSignal",
+        "QuestSID": "E02_MQ01",
+        "SignalReceiverGuid": "A9627AB34C6C3633B10E88AD53E98F7B"
+      }
+    },
+    {
+      "id": "E02_MQ01_SendSignal_BP_DynamicObject_Decal3_Receiver_Set_Object_2",
+      "sid": "E02_MQ01_SendSignal_BP_DynamicObject_Decal3.Receiver_Set_Object_2",
+      "nodeType": "SendSignal",
+      "label": "E02_​MQ01_​Send​Signal_​BP_​Dynamic​Object_​Decal3_​Receiver_​Set_​Object_​2",
+      "subtitle": "SendSignal: E574F2B240791D08B2C2B4801F4E7C52",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SendSignal_BP_DynamicObject_Decal3.Receiver_Set_Object_2",
+        "NodeType": "SendSignal",
+        "QuestSID": "E02_MQ01",
+        "SignalReceiverGuid": "E574F2B240791D08B2C2B4801F4E7C52"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_2",
+      "sid": "E02_MQ01_Technical_2",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​2",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_2",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_BridgeEvent_1",
+      "sid": "E02_MQ01_BridgeEvent_1",
+      "nodeType": "BridgeEvent",
+      "label": "E02_​MQ01_​Bridge​Event_​1",
+      "subtitle": "BridgeEvent",
+      "isStart": true,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_BridgeEvent_1",
+        "NodeType": "BridgeEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_1",
+      "sid": "E02_MQ01_OnTickEvent_1",
+      "nodeType": "OnTickEvent",
+      "label": "E02_​MQ01_​On​Tick​Event_​1",
+      "subtitle": "OnTickEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnTickEvent_1",
+        "NodeType": "OnTickEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_2",
+      "sid": "E02_MQ01_OnTickEvent_2",
+      "nodeType": "OnTickEvent",
+      "label": "E02_​MQ01_​On​Tick​Event_​2",
+      "subtitle": "OnTickEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnTickEvent_2",
+        "NodeType": "OnTickEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_AchievementUnlock_HelloZone",
+      "sid": "E02_MQ01_AchievementUnlock_HelloZone",
+      "nodeType": "AchievementUnlock",
+      "label": "E02_​MQ01_​Achievement​Unlock_​Hello​Zone",
+      "subtitle": "AchievementUnlock",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_AchievementUnlock_HelloZone",
+        "NodeType": "AchievementUnlock",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetAIBehavior_RihterStay",
+      "sid": "E02_MQ01_SetAIBehavior_RihterStay",
+      "nodeType": "SetAIBehavior",
+      "label": "E02_​MQ01_​Set​AIBehavior_​Rihter​Stay",
+      "subtitle": "SetAIBehavior",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetAIBehavior_RihterStay",
+        "NodeType": "SetAIBehavior",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "FD5233FF46A0D9AA22DA4585A3E5C9FB"
+      }
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_3",
+      "sid": "E02_MQ01_OnTickEvent_3",
+      "nodeType": "OnTickEvent",
+      "label": "E02_​MQ01_​On​Tick​Event_​3",
+      "subtitle": "OnTickEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnTickEvent_3",
+        "NodeType": "OnTickEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_SetCharacterParam_PlayerRadiation0",
+      "sid": "E02_MQ01_SetCharacterParam_PlayerRadiation0",
+      "nodeType": "SetCharacterParam",
+      "label": "E02_​MQ01_​Set​Character​Param_​Player​Radiation0",
+      "subtitle": "SetCharacterParam",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetCharacterParam_PlayerRadiation0",
+        "NodeType": "SetCharacterParam",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      }
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_4",
+      "sid": "E02_MQ01_OnTickEvent_4",
+      "nodeType": "OnTickEvent",
+      "label": "E02_​MQ01_​On​Tick​Event_​4",
+      "subtitle": "OnTickEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnTickEvent_4",
+        "NodeType": "OnTickEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_SendSignal_BP_Topaz_Fake_ReceiverTurnOffTopaz",
+      "sid": "E02_MQ01_SendSignal_BP_Topaz_Fake.ReceiverTurnOffTopaz",
+      "nodeType": "SendSignal",
+      "label": "E02_​MQ01_​Send​Signal_​BP_​Topaz_​Fake_​Receiver​Turn​Off​Topaz",
+      "subtitle": "SendSignal: 3248B2DD476C261BF1EA9FA4DBF7F61D",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SendSignal_BP_Topaz_Fake.ReceiverTurnOffTopaz",
+        "NodeType": "SendSignal",
+        "QuestSID": "E02_MQ01",
+        "SignalReceiverGuid": "3248B2DD476C261BF1EA9FA4DBF7F61D"
+      }
+    },
+    {
+      "id": "E02_MQ01_BridgeEvent_2",
+      "sid": "E02_MQ01_BridgeEvent_2",
+      "nodeType": "BridgeEvent",
+      "label": "E02_​MQ01_​Bridge​Event_​2",
+      "subtitle": "BridgeEvent: E02_MQ01_Technical_TheRun",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_BridgeEvent_2",
+        "NodeType": "BridgeEvent",
+        "QuestSID": "E02_MQ01",
+        "LinkedNodePrototypeSID": "E02_MQ01_Technical_TheRun",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_PlaySound_SFX_E02_MQ01_PM_Shot",
+      "sid": "E02_MQ01_PlaySound_SFX_E02_MQ01_PM_Shot",
+      "nodeType": "PlaySound",
+      "label": "E02_​MQ01_​Play​Sound_​SFX_​E02_​MQ01_​PM_​Shot",
+      "subtitle": "PlaySound",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_PlaySound_SFX_E02_MQ01_PM_Shot",
+        "NodeType": "PlaySound",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SendSignal_BP_Vartablood_Receiver_Set_Object_2",
+      "sid": "E02_MQ01_SendSignal_BP_Vartablood.Receiver_Set_Object_2",
+      "nodeType": "SendSignal",
+      "label": "E02_​MQ01_​Send​Signal_​BP_​Vartablood_​Receiver_​Set_​Object_​2",
+      "subtitle": "SendSignal: 5C4E2F834BFD76335D9A09956BD8928F",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SendSignal_BP_Vartablood.Receiver_Set_Object_2",
+        "NodeType": "SendSignal",
+        "QuestSID": "E02_MQ01",
+        "SignalReceiverGuid": "5C4E2F834BFD76335D9A09956BD8928F"
+      }
+    },
+    {
+      "id": "E02_MQ01_SendSignal_BP_Dogblooddecal_Receiver_Set_Object_2",
+      "sid": "E02_MQ01_SendSignal_BP_Dogblooddecal.Receiver_Set_Object_2",
+      "nodeType": "SendSignal",
+      "label": "E02_​MQ01_​Send​Signal_​BP_​Dogblooddecal_​Receiver_​Set_​Object_​2",
+      "subtitle": "SendSignal: 96659C0842B3C68E4367F6A8CCDC29C8",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SendSignal_BP_Dogblooddecal.Receiver_Set_Object_2",
+        "NodeType": "SendSignal",
+        "QuestSID": "E02_MQ01",
+        "SignalReceiverGuid": "96659C0842B3C68E4367F6A8CCDC29C8"
+      }
+    },
+    {
+      "id": "E02_MQ01_If_have_armor",
+      "sid": "E02_MQ01_If_have_armor",
+      "nodeType": "If",
+      "label": "E02_​MQ01_​If_​have_​armor",
+      "subtitle": "If",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_If_have_armor",
+        "NodeType": "If",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_ItemRemove_Jemmy_Neutral_Armor",
+      "sid": "E02_MQ01_ItemRemove_Jemmy_Neutral_Armor",
+      "nodeType": "ItemRemove",
+      "label": "E02_​MQ01_​Item​Remove_​Jemmy_​Neutral_​Armor",
+      "subtitle": "ItemRemove: Jemmy_Neutral_Armor",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_ItemRemove_Jemmy_Neutral_Armor",
+        "NodeType": "ItemRemove",
+        "QuestSID": "E02_MQ01",
+        "TargetQuestGuid": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "ItemSID": "Jemmy_Neutral_Armor",
+        "ItemsCount": 1
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_delay",
+      "sid": "E02_MQ01_Technical_delay",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​delay",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_delay",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+      "sid": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+      "nodeType": "OnJournalQuestEvent",
+      "label": "E02_​MQ01_​On​Journal​Quest​Event_​E02_​MQ01",
+      "subtitle": "OnJournalQuestEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+        "NodeType": "OnJournalQuestEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatComment",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatComment",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​rihter_​0_​Defeat​Comment",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatComment",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_BusyTopic",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_BusyTopic",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​rihter_​0_​Busy​Topic",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_BusyTopic",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_ByeTopic",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_ByeTopic",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​rihter_​0_​Bye​Topic",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_ByeTopic",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_HelloTopic",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_HelloTopic",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​rihter_​0_​Hello​Topic",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_HelloTopic",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_InfoTopic_1",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_InfoTopic_1",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​rihter_​0_​Info​Topic_​1",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_InfoTopic_1",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatTopic",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatTopic",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​rihter_​0_​Defeat​Topic",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatTopic",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_ResumeComment",
+      "sid": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_ResumeComment",
+      "nodeType": "SetDialog",
+      "label": "E02_​MQ01_​Set​Dialog_​E02_​MQ01_​rihter_​0_​Resume​Comment",
+      "subtitle": "SetDialog",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_ResumeComment",
+        "NodeType": "SetDialog",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_SendSignal_BP_Dogbloodbody_Receiver_Set_Object_2",
+      "sid": "E02_MQ01_SendSignal_BP_Dogbloodbody.Receiver_Set_Object_2",
+      "nodeType": "SendSignal",
+      "label": "E02_​MQ01_​Send​Signal_​BP_​Dogbloodbody_​Receiver_​Set_​Object_​2",
+      "subtitle": "SendSignal: 690D437A4BFD648069130DB329534B44",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_SendSignal_BP_Dogbloodbody.Receiver_Set_Object_2",
+        "NodeType": "SendSignal",
+        "QuestSID": "E02_MQ01",
+        "SignalReceiverGuid": "690D437A4BFD648069130DB329534B44"
+      }
+    },
+    {
+      "id": "E02_MQ01_Technical_DogsParts",
+      "sid": "E02_MQ01_Technical_DogsParts",
+      "nodeType": "Technical",
+      "label": "E02_​MQ01_​Technical_​Dogs​Parts",
+      "subtitle": "Technical",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Technical_DogsParts",
+        "NodeType": "Technical",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_AddNote_E02_MQ01_GermanAudiolog",
+      "sid": "E02_MQ01_AddNote_E02_MQ01_GermanAudiolog",
+      "nodeType": "AddNote",
+      "label": "E02_​MQ01_​Add​Note_​E02_​MQ01_​German​Audiolog",
+      "subtitle": "AddNote",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_AddNote_E02_MQ01_GermanAudiolog",
+        "NodeType": "AddNote",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_5",
+      "sid": "E02_MQ01_OnTickEvent_5",
+      "nodeType": "OnTickEvent",
+      "label": "E02_​MQ01_​On​Tick​Event_​5",
+      "subtitle": "OnTickEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnTickEvent_5",
+        "NodeType": "OnTickEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_6",
+      "sid": "E02_MQ01_OnTickEvent_6",
+      "nodeType": "OnTickEvent",
+      "label": "E02_​MQ01_​On​Tick​Event_​6",
+      "subtitle": "OnTickEvent",
+      "isStart": true,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_OnTickEvent_6",
+        "NodeType": "OnTickEvent",
+        "QuestSID": "E02_MQ01",
+        "LaunchOnQuestStart": true
+      }
+    },
+    {
+      "id": "E02_MQ01_End_1",
+      "sid": "E02_MQ01_End_1",
+      "nodeType": "End",
+      "label": "E02_​MQ01_​End_​1",
+      "subtitle": "End",
+      "isStart": false,
+      "isTerminal": true,
+      "details": {
+        "SID": "E02_MQ01_End_1",
+        "NodeType": "End",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Quest_Finish_1",
+      "sid": "E02_MQ01_Quest_Finish_1",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Quest_​Finish_​1",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Quest_Finish_1",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Fin",
+      "sid": "E02_MQ01_Zalesie_Fin",
+      "nodeType": "SetJournal",
+      "label": "E02_​MQ01_​Zalesie_​Fin",
+      "subtitle": "SetJournal",
+      "isStart": false,
+      "isTerminal": false,
+      "details": {
+        "SID": "E02_MQ01_Zalesie_Fin",
+        "NodeType": "SetJournal",
+        "QuestSID": "E02_MQ01"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "E02_MQ01_Start__E02_MQ01_Technical_AnomallyField__0",
+      "source": "E02_MQ01_Start",
+      "target": "E02_MQ01_Technical_AnomallyField",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Start__E02_MQ01_ToggleNPCHidden_UnHideRichter__1",
+      "source": "E02_MQ01_Start",
+      "target": "E02_MQ01_ToggleNPCHidden_UnHideRichter",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Start__E02_MQ01_ActivateRestrictor__2",
+      "source": "E02_MQ01_Start",
+      "target": "E02_MQ01_ActivateRestrictor",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Start__E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_gates_Receiver_Set_Object_2__3",
+      "source": "E02_MQ01_Start",
+      "target": "E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_gates_Receiver_Set_Object_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Start__E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_garage_door_Receiver_Set_Object_2__4",
+      "source": "E02_MQ01_Start",
+      "target": "E02_MQ01_SendSignal_1_9_E01_MQ01_BP_DynamicObject_garage_door_Receiver_Set_Object_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Start__E02_MQ01_Audio__5",
+      "source": "E02_MQ01_Start",
+      "target": "E02_MQ01_Audio",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Start__E02_MQ01_VFX__6",
+      "source": "E02_MQ01_Start",
+      "target": "E02_MQ01_VFX",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Start__E02_MQ01_SetWeather__7",
+      "source": "E02_MQ01_Start",
+      "target": "E02_MQ01_SetWeather",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Start__E02_MQ01_Technical_ActivateLairs__8",
+      "source": "E02_MQ01_Start",
+      "target": "E02_MQ01_Technical_ActivateLairs",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent__E02_MQ01_Technical_DeadWardensSpawn__0",
+      "source": "E02_MQ01_OnTickEvent",
+      "target": "E02_MQ01_Technical_DeadWardensSpawn",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent__E02_MQ01_Technical_DeadWardensSpawn_Pin_0__1",
+      "source": "E02_MQ01_OnTickEvent",
+      "target": "E02_MQ01_Technical_DeadWardensSpawn_Pin_0",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_Zalesye2__E02_MQ01_Technical_E02_MQ01_Fin__0",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_Zalesye2",
+      "target": "E02_MQ01_Technical_E02_MQ01_Fin",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_E02_MQ01_Fin__E02_MQ01_Quest_Finish__0",
+      "source": "E02_MQ01_Technical_E02_MQ01_Fin",
+      "target": "E02_MQ01_Quest_Finish",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Quest_Finish__E02_MQ01_End__0",
+      "source": "E02_MQ01_Quest_Finish",
+      "target": "E02_MQ01_End",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_TalkToStalker_Finish__E02_MQ01_SetJournal_TalkToStalker_Cancel__0",
+      "source": "E02_MQ01_TalkToStalker_Finish",
+      "target": "E02_MQ01_SetJournal_TalkToStalker_Cancel",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Comment_RichterHelloGeneral__E02_MQ01_TalkToStalker_Start__0",
+      "source": "E02_MQ01_Comment_RichterHelloGeneral",
+      "target": "E02_MQ01_TalkToStalker_Start",
+      "label": "E02_MQ01_Comment_RihterHello_3it_1_37135",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Comment_RichterHelloGeneral__E02_MQ01_SetDialog_RihterAfterAnomallyField__1",
+      "source": "E02_MQ01_Comment_RichterHelloGeneral",
+      "target": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "label": "E02_MQ01_Comment_RihterHello_3it_1_37135",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Comment_RichterHelloGeneral__E02_MQ01_Technical_TheRun__2",
+      "source": "E02_MQ01_Comment_RichterHelloGeneral",
+      "target": "E02_MQ01_Technical_TheRun",
+      "label": "E02_MQ01_Comment_RihterHello_3it_1_37135",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Comment_RichterHelloGeneral__E02_MQ01_Technical_TheRun_Pin_1__3",
+      "source": "E02_MQ01_Comment_RichterHelloGeneral",
+      "target": "E02_MQ01_Technical_TheRun_Pin_1",
+      "label": "E02_MQ01_Comment_RihterHello_3it_1_37135",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Comment_RichterHelloGeneral__E02_MQ01_SetJournal_TalkToStalker_Cancel__4",
+      "source": "E02_MQ01_Comment_RichterHelloGeneral",
+      "target": "E02_MQ01_SetJournal_TalkToStalker_Cancel",
+      "label": "E02_MQ01_Comment_RihterHello_3it_1_37135",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Comment_RichterHelloGeneral__E02_MQ01_SetJournal_TalkToStalker_Cancel_Pin_0__5",
+      "source": "E02_MQ01_Comment_RichterHelloGeneral",
+      "target": "E02_MQ01_SetJournal_TalkToStalker_Cancel_Pin_0",
+      "label": "E02_MQ01_Comment_RihterHello_3it_1_37135",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1__E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1__0",
+      "source": "E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1",
+      "target": "E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1__E02_MQ01_TechnicalEscapeAnomallyFieldEast_2__1",
+      "source": "E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1",
+      "target": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1__E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1__0",
+      "source": "E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1",
+      "target": "E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1__E02_MQ01_TechnicalEscapeAnomallyFieldWest_1__1",
+      "source": "E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1",
+      "target": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2__E02_MQ01_EscapeAnomalyFiled_Finish__0",
+      "source": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2",
+      "target": "E02_MQ01_EscapeAnomalyFiled_Finish",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2__E02_MQ01_Comment_RichterHelloGeneral__1",
+      "source": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2",
+      "target": "E02_MQ01_Comment_RichterHelloGeneral",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2__E02_MQ01_MoveRihterToPlayerEast_3__2",
+      "source": "E02_MQ01_TechnicalEscapeAnomallyFieldEast_2",
+      "target": "E02_MQ01_MoveRihterToPlayerEast_3",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1__E02_MQ01_EscapeAnomalyFiled_Finish__0",
+      "source": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1",
+      "target": "E02_MQ01_EscapeAnomalyFiled_Finish",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1__E02_MQ01_Comment_RichterHelloGeneral__1",
+      "source": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1",
+      "target": "E02_MQ01_Comment_RichterHelloGeneral",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1__E02_MQ01_MoveRihterToPlayerWest_1__2",
+      "source": "E02_MQ01_TechnicalEscapeAnomallyFieldWest_1",
+      "target": "E02_MQ01_MoveRihterToPlayerWest_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField__E02_MQ01_TalkToStalker_Finish__0",
+      "source": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "target": "E02_MQ01_TalkToStalker_Finish",
+      "label": "E02_MQ01_Dialog_RihterAfterAnomallyField_skih_evasive_37163",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField__E02_MQ01_TalkToStalker_Finish__1",
+      "source": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "target": "E02_MQ01_TalkToStalker_Finish",
+      "label": "E02_MQ01_Dialog_RihterAfterAnomallyField_skif_rude_37162",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField__E02_MQ01_TalkToStalker_Finish__2",
+      "source": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "target": "E02_MQ01_TalkToStalker_Finish",
+      "label": "E02_MQ01_Dialog_RihterAfterAnomallyField_skif_honest_37164",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField__E02_MQ01_Technical_TheRun__3",
+      "source": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "target": "E02_MQ01_Technical_TheRun",
+      "label": "E02_MQ01_Dialog_RihterAfterAnomallyField_skih_evasive_37163",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField__E02_MQ01_Technical_TheRun__4",
+      "source": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "target": "E02_MQ01_Technical_TheRun",
+      "label": "E02_MQ01_Dialog_RihterAfterAnomallyField_skif_rude_37162",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField__E02_MQ01_Technical_TheRun__5",
+      "source": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "target": "E02_MQ01_Technical_TheRun",
+      "label": "E02_MQ01_Dialog_RihterAfterAnomallyField_skif_honest_37164",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField__E02_MQ01_Technical_FirstZalesieInfo__6",
+      "source": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "target": "E02_MQ01_Technical_FirstZalesieInfo",
+      "label": "E02_MQ01_Dialog_RihterAfterAnomallyField_skih_evasive_37163",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField__E02_MQ01_Technical_FirstZalesieInfo__7",
+      "source": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "target": "E02_MQ01_Technical_FirstZalesieInfo",
+      "label": "E02_MQ01_Dialog_RihterAfterAnomallyField_skif_rude_37162",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterAfterAnomallyField__E02_MQ01_Technical_FirstZalesieInfo__8",
+      "source": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "target": "E02_MQ01_Technical_FirstZalesieInfo",
+      "label": "E02_MQ01_Dialog_RihterAfterAnomallyField_skif_honest_37164",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun__E02_MQ01_SetDialog_RihterAfterAnomallyField__0",
+      "source": "E02_MQ01_Technical_TheRun",
+      "target": "E02_MQ01_SetDialog_RihterAfterAnomallyField",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun__E02_MQ01_FollowStalker_Start__1",
+      "source": "E02_MQ01_Technical_TheRun",
+      "target": "E02_MQ01_FollowStalker_Start",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun__E02_MQ01_SaveGame__2",
+      "source": "E02_MQ01_Technical_TheRun",
+      "target": "E02_MQ01_SaveGame",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun__E02_MQ01_Technical_1sec__3",
+      "source": "E02_MQ01_Technical_TheRun",
+      "target": "E02_MQ01_Technical_1sec",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun__E02_MQ01_Technical__4",
+      "source": "E02_MQ01_Technical_TheRun",
+      "target": "E02_MQ01_Technical",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun__E02_MQ01_Technical_1__5",
+      "source": "E02_MQ01_Technical_TheRun",
+      "target": "E02_MQ01_Technical_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun__E02_MQ01_Technical_2__6",
+      "source": "E02_MQ01_Technical_TheRun",
+      "target": "E02_MQ01_Technical_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun__E02_MQ01_BridgeEvent_2__7",
+      "source": "E02_MQ01_Technical_TheRun",
+      "target": "E02_MQ01_BridgeEvent_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheRun_Pin_1__E02_MQ01_Technical_TheRun__0",
+      "source": "E02_MQ01_Technical_TheRun_Pin_1",
+      "target": "E02_MQ01_Technical_TheRun",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheHutSequence__E02_MQ01_FollowStalker_Finish__0",
+      "source": "E02_MQ01_Technical_TheHutSequence",
+      "target": "E02_MQ01_FollowStalker_Finish",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheHutSequence__E02_MQ01_FollowStalker_Finish_Pin_0__1",
+      "source": "E02_MQ01_Technical_TheHutSequence",
+      "target": "E02_MQ01_FollowStalker_Finish_Pin_0",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheHutSequence__E02_MQ01_FollowStalker_Cancel__2",
+      "source": "E02_MQ01_Technical_TheHutSequence",
+      "target": "E02_MQ01_FollowStalker_Cancel",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_TheHutSequence__E02_MQ01_FollowStalker_Cancel_Pin_0__3",
+      "source": "E02_MQ01_Technical_TheHutSequence",
+      "target": "E02_MQ01_FollowStalker_Cancel_Pin_0",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTriggerEnterEvent_RihterInTheHut_2__E02_MQ01_Technical_TheHutSequence__0",
+      "source": "E02_MQ01_OnTriggerEnterEvent_RihterInTheHut_2",
+      "target": "E02_MQ01_Technical_TheHutSequence",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTriggerEnterEvent_RihterInTheHut_2__E02_MQ01_SetDialog_E02_MQ01_Comment_RihterInTheHut_4iter__1",
+      "source": "E02_MQ01_OnTriggerEnterEvent_RihterInTheHut_2",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_Comment_RihterInTheHut_4iter",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter__E02_MQ01_ItemAdd_Medkitx2__0",
+      "source": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "target": "E02_MQ01_ItemAdd_Medkitx2",
+      "label": "E02_MQ01_Dialog_RihterExpositionInTheHut_3it_skif_why_R_helhing_37174",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter__E02_MQ01_ItemAdd_A918D__1",
+      "source": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "target": "E02_MQ01_ItemAdd_A918D",
+      "label": "E02_MQ01_Dialog_RihterExpositionInTheHut_3it_skif_why_R_helhing_37174",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter__E02_MQ01_ItemAdd_Bandage__2",
+      "source": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "target": "E02_MQ01_ItemAdd_Bandage",
+      "label": "E02_MQ01_Dialog_RihterExpositionInTheHut_3it_skif_why_R_helhing_37174",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter__E02_MQ01_ItemAdd_Energetic__3",
+      "source": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "target": "E02_MQ01_ItemAdd_Energetic",
+      "label": "E02_MQ01_Dialog_RihterExpositionInTheHut_3it_skif_why_R_helhing_37174",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter__E02_MQ01_ShowMarker__Unknown_PostOffice__4",
+      "source": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "target": "E02_MQ01_ShowMarker__Unknown_PostOffice",
+      "label": "E02_MQ01_Dialog_RihterExpositionInTheHut_3it_skif_why_R_helhing_37174",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter__E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_1__5",
+      "source": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "target": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_1",
+      "label": "E02_MQ01_Dialog_RihterExpositionInTheHut_3it_skif_why_R_helhing_37174",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter__E02_MQ01_SetAIBehavior_RihterStay__6",
+      "source": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "target": "E02_MQ01_SetAIBehavior_RihterStay",
+      "label": "E02_MQ01_Dialog_RihterExpositionInTheHut_3it_skif_why_R_helhing_37174",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExamineBody_gen__E02_MQ01_If__0",
+      "source": "E02_MQ01_SetDialog_RihterExamineBody_gen",
+      "target": "E02_MQ01_If",
+      "label": "E02_MQ01_Comment_RihterExamineBody_3it_1_42463",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_RihterExamineBody_gen_Pin_0__E02_MQ01_SetDialog_RihterExamineBody_gen__0",
+      "source": "E02_MQ01_SetDialog_RihterExamineBody_gen_Pin_0",
+      "target": "E02_MQ01_SetDialog_RihterExamineBody_gen",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Quest_Start__E02_MQ01_EscapeAnomalyFiled_Start__0",
+      "source": "E02_MQ01_Quest_Start",
+      "target": "E02_MQ01_EscapeAnomalyFiled_Start",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_InvitationToBarInZalesie__E02_MQ01_Technical_ZalessieTaskActive__0",
+      "source": "E02_MQ01_SetDialog_InvitationToBarInZalesie",
+      "target": "E02_MQ01_Technical_ZalessieTaskActive",
+      "label": "E02_MQ01_Comment_Batya_Message_batya_message_42694",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_InvitationToBarInZalesie__E02_MQ01_ShowMarker__Unknown_Za__1",
+      "source": "E02_MQ01_SetDialog_InvitationToBarInZalesie",
+      "target": "E02_MQ01_ShowMarker__Unknown_Za",
+      "label": "E02_MQ01_Comment_Batya_Message_batya_message_42694",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_InvitationToBarInZalesie__E02_MQ01_ALifeDirectorZoneSwitch_BP_ALifeGroupZonePlaceHolder_Prologue__2",
+      "source": "E02_MQ01_SetDialog_InvitationToBarInZalesie",
+      "target": "E02_MQ01_ALifeDirectorZoneSwitch_BP_ALifeGroupZonePlaceHolder_Prologue",
+      "label": "E02_MQ01_Comment_Batya_Message_batya_message_42694",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_InvitationToBarInZalesie_Pin_0__E02_MQ01_SetDialog_InvitationToBarInZalesie__0",
+      "source": "E02_MQ01_SetDialog_InvitationToBarInZalesie_Pin_0",
+      "target": "E02_MQ01_SetDialog_InvitationToBarInZalesie",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_ZalessieTaskActive__E02_MQ01_Zalesie_Start__0",
+      "source": "E02_MQ01_Technical_ZalessieTaskActive",
+      "target": "E02_MQ01_Zalesie_Start",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_ZalessieTaskActive__E02_MQ01_If_FollowActive__1",
+      "source": "E02_MQ01_Technical_ZalessieTaskActive",
+      "target": "E02_MQ01_If_FollowActive",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_ZalessieTaskActive__E02_MQ01_If_TalkActive__2",
+      "source": "E02_MQ01_Technical_ZalessieTaskActive",
+      "target": "E02_MQ01_If_TalkActive",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_ZalessieTaskActive__E02_MQ01_SaveGame_1__3",
+      "source": "E02_MQ01_Technical_ZalessieTaskActive",
+      "target": "E02_MQ01_SaveGame_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Start__E02_MQ01_Zalesie_Finish__0",
+      "source": "E02_MQ01_Zalesie_Start",
+      "target": "E02_MQ01_Zalesie_Finish",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Start__E02_MQ01_Zalesie_Finish_Pin_0__1",
+      "source": "E02_MQ01_Zalesie_Start",
+      "target": "E02_MQ01_Zalesie_Finish_Pin_0",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Finish_Pin_0__E02_MQ01_Zalesie_Finish__0",
+      "source": "E02_MQ01_Zalesie_Finish_Pin_0",
+      "target": "E02_MQ01_Zalesie_Finish",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetTime_14pm__E02_MQ01_SetCharacterParam_Player_Food__0",
+      "source": "E02_MQ01_SetTime_14pm",
+      "target": "E02_MQ01_SetCharacterParam_Player_Food",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_AnomallyField__E02_MQ01_MQ01_TeleportCharacter_Player_2__0",
+      "source": "E02_MQ01_Technical_AnomallyField",
+      "target": "E02_MQ01_MQ01_TeleportCharacter_Player_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_AnomallyField__E02_MQ01_SetTime_14pm__1",
+      "source": "E02_MQ01_Technical_AnomallyField",
+      "target": "E02_MQ01_SetTime_14pm",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_AnomallyField__E02_MQ01_AddNote_ScanerArchive__2",
+      "source": "E02_MQ01_Technical_AnomallyField",
+      "target": "E02_MQ01_AddNote_ScanerArchive",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_AnomallyField__E02_MQ01_Container_Awakening_Cutscene__3",
+      "source": "E02_MQ01_Technical_AnomallyField",
+      "target": "E02_MQ01_Container_Awakening_Cutscene",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_AnomallyField__E02_MQ01_ConsoleCommand__4",
+      "source": "E02_MQ01_Technical_AnomallyField",
+      "target": "E02_MQ01_ConsoleCommand",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_AnomallyField__E02_MQ01_SetGlobalVariable_Bolt_Action_Blocked__5",
+      "source": "E02_MQ01_Technical_AnomallyField",
+      "target": "E02_MQ01_SetGlobalVariable_Bolt_Action_Blocked",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_AnomallyField__E02_MQ01_If_have_armor__6",
+      "source": "E02_MQ01_Technical_AnomallyField",
+      "target": "E02_MQ01_If_have_armor",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_AnomallyField__E02_MQ01_AddNote_E02_MQ01_GermanAudiolog__7",
+      "source": "E02_MQ01_Technical_AnomallyField",
+      "target": "E02_MQ01_AddNote_E02_MQ01_GermanAudiolog",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_ToggleNPCHidden_RihterHide_4_Pin_0__E02_MQ01_ToggleNPCHidden_RihterHide_4__0",
+      "source": "E02_MQ01_ToggleNPCHidden_RihterHide_4_Pin_0",
+      "target": "E02_MQ01_ToggleNPCHidden_RihterHide_4",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Start2_3__E02_MQ01_Zalesie_Fin_3__0",
+      "source": "E02_MQ01_Zalesie_Start2_3",
+      "target": "E02_MQ01_Zalesie_Fin_3",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Start2_3__E02_MQ01_Zalesie_Fin_3_Pin_0__1",
+      "source": "E02_MQ01_Zalesie_Start2_3",
+      "target": "E02_MQ01_Zalesie_Fin_3_Pin_0",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_EndPreparation__E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1__0",
+      "source": "E02_MQ01_Technical_EndPreparation",
+      "target": "E02_MQ01_Trigger_PlayerExitAnomalyFieldEast_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_EndPreparation__E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1__1",
+      "source": "E02_MQ01_Technical_EndPreparation",
+      "target": "E02_MQ01_Trigger_PlayerExitAnomalyFieldWest_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_EndPreparation__E02_MQ01_Quest_Start__2",
+      "source": "E02_MQ01_Technical_EndPreparation",
+      "target": "E02_MQ01_Quest_Start",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_EndPreparation__E02_MQ01_TeleportCharacter_Richter__3",
+      "source": "E02_MQ01_Technical_EndPreparation",
+      "target": "E02_MQ01_TeleportCharacter_Richter",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_EndPreparation__E02_MQ01_EquipItemInHands__4",
+      "source": "E02_MQ01_Technical_EndPreparation",
+      "target": "E02_MQ01_EquipItemInHands",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Fin_3_Pin_0__E02_MQ01_Zalesie_Fin_3__0",
+      "source": "E02_MQ01_Zalesie_Fin_3_Pin_0",
+      "target": "E02_MQ01_Zalesie_Fin_3",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Fin_3_Pin_2__E02_MQ01_Zalesie_Fin_3__0",
+      "source": "E02_MQ01_Zalesie_Fin_3_Pin_2",
+      "target": "E02_MQ01_Zalesie_Fin_3",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetJournal_TalkToStalker_Cancel_Pin_0__E02_MQ01_SetJournal_TalkToStalker_Cancel__0",
+      "source": "E02_MQ01_SetJournal_TalkToStalker_Cancel_Pin_0",
+      "target": "E02_MQ01_SetJournal_TalkToStalker_Cancel",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Finish__E02_MQ01_FollowStalker_Cancel__0",
+      "source": "E02_MQ01_FollowStalker_Finish",
+      "target": "E02_MQ01_FollowStalker_Cancel",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Finish_Pin_0__E02_MQ01_FollowStalker_Finish__0",
+      "source": "E02_MQ01_FollowStalker_Finish_Pin_0",
+      "target": "E02_MQ01_FollowStalker_Finish",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes__E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter__0",
+      "source": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes",
+      "target": "E02_MQ01_SetDialog_RihterExpositionInTheHut_3iter",
+      "label": "E02_MQ01_Comment_Rihter_on_Player_notes_1_43492",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes__E02_MQ01_Zalesie_Start2_3__1",
+      "source": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes",
+      "target": "E02_MQ01_Zalesie_Start2_3",
+      "label": "E02_MQ01_Comment_Rihter_on_Player_notes_1_43492",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes__E02_MQ01_DisableNPCInteraction_BP_NPC_Richter__2",
+      "source": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes",
+      "target": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter",
+      "label": "E02_MQ01_Comment_Rihter_on_Player_notes_1_43492",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_BridgeEvent__E02_MQ01_Zalesie_Start2_3__0",
+      "source": "E02_MQ01_BridgeEvent",
+      "target": "E02_MQ01_Zalesie_Start2_3",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Cancel__E02_MQ01_FollowStalker_Finish__0",
+      "source": "E02_MQ01_FollowStalker_Cancel",
+      "target": "E02_MQ01_FollowStalker_Finish",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_FollowStalker_Cancel_Pin_0__E02_MQ01_FollowStalker_Cancel__0",
+      "source": "E02_MQ01_FollowStalker_Cancel_Pin_0",
+      "target": "E02_MQ01_FollowStalker_Cancel",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_FirstZalesieInfo__E02_MQ01_BridgeEvent__0",
+      "source": "E02_MQ01_Technical_FirstZalesieInfo",
+      "target": "E02_MQ01_BridgeEvent",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Container_Awakening_Cutscene__E02_MQ01_Technical_EndPreparation__0",
+      "source": "E02_MQ01_Container_Awakening_Cutscene",
+      "target": "E02_MQ01_Technical_EndPreparation",
+      "label": "C_E02_MQ01_ToughAwakening_Cutscene_End",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Container_Awakening_Cutscene__E02_MQ01_SaveGame_2__1",
+      "source": "E02_MQ01_Container_Awakening_Cutscene",
+      "target": "E02_MQ01_SaveGame_2",
+      "label": "C_E02_MQ01_ToughAwakening_Cutscene_End",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Container_Awakening_Cutscene__E02_MQ01_SendSignal_BP_Dogblooddecal_Receiver_Set_Object_2__2",
+      "source": "E02_MQ01_Container_Awakening_Cutscene",
+      "target": "E02_MQ01_SendSignal_BP_Dogblooddecal_Receiver_Set_Object_2",
+      "label": "C_E02_MQ01_ToughAwakening_Cutscene_End",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Container_Awakening_Cutscene__E02_MQ01_SendSignal_BP_Dogbloodbody_Receiver_Set_Object_2__3",
+      "source": "E02_MQ01_Container_Awakening_Cutscene",
+      "target": "E02_MQ01_SendSignal_BP_Dogbloodbody_Receiver_Set_Object_2",
+      "label": "C_E02_MQ01_ToughAwakening_Cutscene_End",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_SetCharacterParam_Player_Food__E02_MQ01_SetCharacterParam_Player_HP__0",
+      "source": "E02_MQ01_SetCharacterParam_Player_Food",
+      "target": "E02_MQ01_SetCharacterParam_Player_HP",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_If_FollowActive__E02_MQ01_FollowStalker_Cancel_1__0",
+      "source": "E02_MQ01_If_FollowActive",
+      "target": "E02_MQ01_FollowStalker_Cancel_1",
+      "label": "True",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_If_FollowActive__E02_MQ01_FollowStalker_Cancel_1__1",
+      "source": "E02_MQ01_If_FollowActive",
+      "target": "E02_MQ01_FollowStalker_Cancel_1",
+      "label": "False",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_If_TalkActive__E02_MQ01_TalkToStalker_Cancel__0",
+      "source": "E02_MQ01_If_TalkActive",
+      "target": "E02_MQ01_TalkToStalker_Cancel",
+      "label": "True",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_If_TalkActive__E02_MQ01_TalkToStalker_Cancel__1",
+      "source": "E02_MQ01_If_TalkActive",
+      "target": "E02_MQ01_TalkToStalker_Cancel",
+      "label": "False",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_2sec_delay__E02_MQ01_SetDialog_RihterExamineBody_gen__0",
+      "source": "E02_MQ01_2sec_delay",
+      "target": "E02_MQ01_SetDialog_RihterExamineBody_gen",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_2sec_delay__E02_MQ01_SetDialog_RihterExamineBody_gen_Pin_0__1",
+      "source": "E02_MQ01_2sec_delay",
+      "target": "E02_MQ01_SetDialog_RihterExamineBody_gen_Pin_0",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_2sec_delay__E02_MQ01_ToggleNPCHidden_RihterHide_4__2",
+      "source": "E02_MQ01_2sec_delay",
+      "target": "E02_MQ01_ToggleNPCHidden_RihterHide_4",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_2sec_delay__E02_MQ01_ToggleNPCHidden_RihterHide_4_Pin_0__3",
+      "source": "E02_MQ01_2sec_delay",
+      "target": "E02_MQ01_ToggleNPCHidden_RihterHide_4_Pin_0",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_2sec_delay__E02_MQ01_SetAIBehavior_BP_NPC_Richter__4",
+      "source": "E02_MQ01_2sec_delay",
+      "target": "E02_MQ01_SetAIBehavior_BP_NPC_Richter",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_Pin_2__E02_MQ01_DisableNPCInteraction_BP_NPC_Richter__0",
+      "source": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_Pin_2",
+      "target": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_EscapeAnomalyFiled__E02_MQ01_SetDialog_InvitationToBarInZalesie__0",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_EscapeAnomalyFiled",
+      "target": "E02_MQ01_SetDialog_InvitationToBarInZalesie",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_EscapeAnomalyFiled__E02_MQ01_SetDialog_InvitationToBarInZalesie_Pin_0__1",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01_EscapeAnomalyFiled",
+      "target": "E02_MQ01_SetDialog_InvitationToBarInZalesie_Pin_0",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn__E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier__0",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn",
+      "target": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn__E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier2__1",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn",
+      "target": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn__E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier3__2",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn",
+      "target": "E02_MQ01_SetItemGenerator_BP_DeadBody_VartaSoldier3",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn__E02_MQ01_Spawn_DeadVartaSoldier3__3",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn",
+      "target": "E02_MQ01_Spawn_DeadVartaSoldier3",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn__E02_MQ01_Spawn_DeadVartaSoldier1__4",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn",
+      "target": "E02_MQ01_Spawn_DeadVartaSoldier1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn__E02_MQ01_Spawn_DeadVartaSoldier2__5",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn",
+      "target": "E02_MQ01_Spawn_DeadVartaSoldier2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn__E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier1__6",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn",
+      "target": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn__E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier2__7",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn",
+      "target": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn__E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier3__8",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn",
+      "target": "E02_MQ01_DisableNPCInteraction_BP_DeadBodyVartaSoldier3",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DeadWardensSpawn_Pin_0__E02_MQ01_Technical_DeadWardensSpawn__0",
+      "source": "E02_MQ01_Technical_DeadWardensSpawn_Pin_0",
+      "target": "E02_MQ01_Technical_DeadWardensSpawn",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_ActivateLairs__E02_MQ01_ToggleLairActivity_Flesh__0",
+      "source": "E02_MQ01_Technical_ActivateLairs",
+      "target": "E02_MQ01_ToggleLairActivity_Flesh",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_ActivateLairs__E02_MQ01_ToggleLairActivity_BlindDog__1",
+      "source": "E02_MQ01_Technical_ActivateLairs",
+      "target": "E02_MQ01_ToggleLairActivity_BlindDog",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_If__E02_MQ01_Technical_RichterReation__0",
+      "source": "E02_MQ01_If",
+      "target": "E02_MQ01_Technical_RichterReation",
+      "label": "True",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_If__E02_MQ01_Trigger_Player__1",
+      "source": "E02_MQ01_If",
+      "target": "E02_MQ01_Trigger_Player",
+      "label": "False",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_RichterReation__E02_MQ01_SetAIBehavior_RihterStay_2__0",
+      "source": "E02_MQ01_Technical_RichterReation",
+      "target": "E02_MQ01_SetAIBehavior_RihterStay_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_RichterReation__E02_MQ01_Technical_Talk__1",
+      "source": "E02_MQ01_Technical_RichterReation",
+      "target": "E02_MQ01_Technical_Talk",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_Talk__E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes__0",
+      "source": "E02_MQ01_Technical_Talk",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_Comment_Rihter_on_Player_notes",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Trigger_Player__E02_MQ01_Technical_RichterReation__0",
+      "source": "E02_MQ01_Trigger_Player",
+      "target": "E02_MQ01_Technical_RichterReation",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_1sec__E02_MQ01_SetDialog_E02_MQ01_Comment_RihterAboutKosoy_3iter__0",
+      "source": "E02_MQ01_Technical_1sec",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_Comment_RihterAboutKosoy_3iter",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_1__E02_MQ01_2sec_delay__0",
+      "source": "E02_MQ01_Technical_1",
+      "target": "E02_MQ01_2sec_delay",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_1__E02_MQ01_DisableNPCInteraction_BP_NPC_Richter__1",
+      "source": "E02_MQ01_Technical_1",
+      "target": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_2__E02_MQ01_SendSignal_BP_DynamicObject_Decal_Receiver_Set_Object_2__0",
+      "source": "E02_MQ01_Technical_2",
+      "target": "E02_MQ01_SendSignal_BP_DynamicObject_Decal_Receiver_Set_Object_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_2__E02_MQ01_SendSignal_BP_DynamicObject_Decal2_Receiver_Set_Object_2__1",
+      "source": "E02_MQ01_Technical_2",
+      "target": "E02_MQ01_SendSignal_BP_DynamicObject_Decal2_Receiver_Set_Object_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_2__E02_MQ01_SendSignal_BP_DynamicObject_Decal3_Receiver_Set_Object_2__2",
+      "source": "E02_MQ01_Technical_2",
+      "target": "E02_MQ01_SendSignal_BP_DynamicObject_Decal3_Receiver_Set_Object_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_1__E02_MQ01_ConsoleCommand__0",
+      "source": "E02_MQ01_OnTickEvent_1",
+      "target": "E02_MQ01_ConsoleCommand",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_2__E02_MQ01_AchievementUnlock_HelloZone__0",
+      "source": "E02_MQ01_OnTickEvent_2",
+      "target": "E02_MQ01_AchievementUnlock_HelloZone",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_3__E02_MQ01_SetCharacterParam_PlayerRadiation0__0",
+      "source": "E02_MQ01_OnTickEvent_3",
+      "target": "E02_MQ01_SetCharacterParam_PlayerRadiation0",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_4__E02_MQ01_SendSignal_BP_Topaz_Fake_ReceiverTurnOffTopaz__0",
+      "source": "E02_MQ01_OnTickEvent_4",
+      "target": "E02_MQ01_SendSignal_BP_Topaz_Fake_ReceiverTurnOffTopaz",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_4__E02_MQ01_SendSignal_BP_Vartablood_Receiver_Set_Object_2__1",
+      "source": "E02_MQ01_OnTickEvent_4",
+      "target": "E02_MQ01_SendSignal_BP_Vartablood_Receiver_Set_Object_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_BridgeEvent_2__E02_MQ01_PlaySound_SFX_E02_MQ01_PM_Shot__0",
+      "source": "E02_MQ01_BridgeEvent_2",
+      "target": "E02_MQ01_PlaySound_SFX_E02_MQ01_PM_Shot",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_If_have_armor__E02_MQ01_SetItemGenerator_Player__0",
+      "source": "E02_MQ01_If_have_armor",
+      "target": "E02_MQ01_SetItemGenerator_Player",
+      "label": "True",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_If_have_armor__E02_MQ01_SetItemGenerator_Player__1",
+      "source": "E02_MQ01_If_have_armor",
+      "target": "E02_MQ01_SetItemGenerator_Player",
+      "label": "False",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_If_have_armor__E02_MQ01_Technical_delay__2",
+      "source": "E02_MQ01_If_have_armor",
+      "target": "E02_MQ01_Technical_delay",
+      "label": "False",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_delay__E02_MQ01_ItemRemove_Jemmy_Neutral_Armor__0",
+      "source": "E02_MQ01_Technical_delay",
+      "target": "E02_MQ01_ItemRemove_Jemmy_Neutral_Armor",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01__E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatComment__0",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatComment",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01__E02_MQ01_SetDialog_E02_MQ01_rihter_0_BusyTopic__1",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_BusyTopic",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01__E02_MQ01_SetDialog_E02_MQ01_rihter_0_ByeTopic__2",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_ByeTopic",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01__E02_MQ01_SetDialog_E02_MQ01_rihter_0_HelloTopic__3",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_HelloTopic",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01__E02_MQ01_SetDialog_E02_MQ01_rihter_0_InfoTopic_1__4",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_InfoTopic_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01__E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatTopic__5",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_DefeatTopic",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnJournalQuestEvent_E02_MQ01__E02_MQ01_SetDialog_E02_MQ01_rihter_0_ResumeComment__6",
+      "source": "E02_MQ01_OnJournalQuestEvent_E02_MQ01",
+      "target": "E02_MQ01_SetDialog_E02_MQ01_rihter_0_ResumeComment",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DogsParts__E02_MQ01_SendSignal_BP_Dogblooddecal_Receiver_Set_Object_2__0",
+      "source": "E02_MQ01_Technical_DogsParts",
+      "target": "E02_MQ01_SendSignal_BP_Dogblooddecal_Receiver_Set_Object_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Technical_DogsParts__E02_MQ01_SendSignal_BP_Dogbloodbody_Receiver_Set_Object_2__1",
+      "source": "E02_MQ01_Technical_DogsParts",
+      "target": "E02_MQ01_SendSignal_BP_Dogbloodbody_Receiver_Set_Object_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_5__E02_MQ01_DisableNPCInteraction_BP_NPC_Richter__0",
+      "source": "E02_MQ01_OnTickEvent_5",
+      "target": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_5__E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_Pin_2__1",
+      "source": "E02_MQ01_OnTickEvent_5",
+      "target": "E02_MQ01_DisableNPCInteraction_BP_NPC_Richter_Pin_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_6__E02_MQ01_Zalesie_Fin_3__0",
+      "source": "E02_MQ01_OnTickEvent_6",
+      "target": "E02_MQ01_Zalesie_Fin_3",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_OnTickEvent_6__E02_MQ01_Zalesie_Fin_3_Pin_2__1",
+      "source": "E02_MQ01_OnTickEvent_6",
+      "target": "E02_MQ01_Zalesie_Fin_3_Pin_2",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Quest_Finish_1__E02_MQ01_End_1__0",
+      "source": "E02_MQ01_Quest_Finish_1",
+      "target": "E02_MQ01_End_1",
+      "label": "",
+      "kind": "launch"
+    },
+    {
+      "id": "E02_MQ01_Zalesie_Fin__E02_MQ01_Quest_Finish_1__0",
+      "source": "E02_MQ01_Zalesie_Fin",
+      "target": "E02_MQ01_Quest_Finish_1",
+      "label": "",
+      "kind": "launch"
+    }
+  ]
+};
+    let graph = cloneGraph(initialGraph);
+    let currentGraphIdentity = createGraphIdentityFromGraph(graph);
+    const detailsEl = document.getElementById('detailsContent');
+    const titleEl = document.getElementById('graphTitle');
+    const sourceEl = document.getElementById('graphSource');
+    const nodeCountEl = document.getElementById('nodeCount');
+    const edgeCountEl = document.getElementById('edgeCount');
+    const openCfgButton = document.getElementById('openCfgButton');
+    const openCfgInput = document.getElementById('openCfgInput');
+    const searchEl = document.getElementById('search');
+    const nodeTypeFilterEl = document.getElementById('nodeTypeFilter');
+    const fitButton = document.getElementById('fitButton');
+    const resetButton = document.getElementById('resetButton');
+    const layoutButton = document.getElementById('layoutButton');
+    const undoButton = document.getElementById('undoButton');
+    const redoButton = document.getElementById('redoButton');
+    const themeButton = document.getElementById('themeButton');
+    const themeStorageKey = 'quest-graph-theme';
+    const layoutStoragePrefix = 'quest-graph-layout:v2:';
+    const sharedNodePositionsStorageKey = 'quest-graph-node-positions:v1';
+    const maxUndoStates = 30;
+    let saveLayoutTimer = null;
+    let restoredViewport = null;
+    let activeDragGroup = null;
+    let isAltPressed = false;
+    let previousFilteredNodeIds = [];
+    const undoStack = [];
+    const redoStack = [];
+
+    if (!window.cytoscape) {
+      detailsEl.innerHTML = '<div class="error">Failed to load Cytoscape.js from CDN.</div>';
+      throw new Error('Cytoscape.js failed to load');
+    }
+
+    const cy = cytoscape({
+      container: document.getElementById('cy'),
+      elements: buildCyElements(graph),
+      wheelSensitivity: 0.22,
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'background-color': 'data(nodeFill)',
+            'border-width': 2,
+            'border-color': 'data(nodeBorder)',
+            'label': 'data(label)',
+            'font-size': 11,
+            'font-family': 'IBM Plex Sans, Segoe UI, sans-serif',
+            'color': 'data(nodeText)',
+            'text-wrap': 'wrap',
+            'text-max-width': 148,
+            'text-valign': 'center',
+            'text-halign': 'center',
+            'line-height': 1.05,
+            'padding': '8px 6px',
+            'shape': 'round-rectangle',
+            'width': 164,
+            'height': 'label',
+            'min-height': 54,
+          },
+        },
+        {
+          selector: 'node.is-event',
+          style: {
+            'background-color': 'data(eventFill)',
+            'color': 'data(inverseText)',
+          },
+        },
+        {
+          selector: 'node.is-start',
+          style: {
+            'background-color': 'data(startFill)',
+            'color': 'data(inverseText)',
+          },
+        },
+        {
+          selector: 'node.is-terminal',
+          style: {
+            'border-color': 'data(terminalBorder)',
+            'border-style': 'dashed',
+          },
+        },
+        {
+          selector: 'edge',
+          style: {
+            'curve-style': 'bezier',
+            'target-arrow-shape': 'triangle',
+            'target-arrow-color': 'data(edgeLine)',
+            'line-color': 'data(edgeLine)',
+            'width': 2,
+            'label': 'data(showLabel)',
+            'font-size': 9,
+            'text-background-color': 'data(edgeTextBg)',
+            'text-background-opacity': 1,
+            'text-background-padding': 2,
+            'text-rotation': 'autorotate',
+            'color': 'data(edgeText)',
+          },
+        },
+        {
+          selector: '.faded',
+          style: {
+            'opacity': 0.14,
+          },
+        },
+        {
+          selector: '.highlighted',
+          style: {
+            'opacity': 1,
+            'border-width': 4,
+            'line-color': 'data(highlight)',
+            'target-arrow-color': 'data(highlight)',
+          },
+        },
+      ],
+    });
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Alt') {
+        isAltPressed = true;
+      }
+    });
+    window.addEventListener('keyup', (event) => {
+      if (event.key === 'Alt') {
+        isAltPressed = false;
+      }
+    });
+    window.addEventListener('blur', () => {
+      isAltPressed = false;
+    });
+    window.addEventListener('keydown', (event) => {
+      const isPrimaryModifier = event.ctrlKey || event.metaKey;
+      if (!isPrimaryModifier) {
+        return;
+      }
+      const key = event.key.toLowerCase();
+      if (key === 'z' && event.shiftKey) {
+        event.preventDefault();
+        redoGraphState();
+        return;
+      }
+      if (key === 'z') {
+        event.preventDefault();
+        undoGraphState();
+        return;
+      }
+      if (key === 'y') {
+        event.preventDefault();
+        redoGraphState();
+      }
+    });
+
+    initializeTheme();
+    updateGraphSummary();
+    populateNodeTypeFilter();
+
+    cy.on('tap', 'node', (event) => {
+      const node = event.target;
+      renderDetails(node);
+      highlightNeighborhood(node);
+    });
+    cy.on('grab', 'node', (event) => {
+      pushUndoState();
+      beginGroupDrag(event.target);
+    });
+    cy.on('drag', 'node', (event) => updateGroupDrag(event.target));
+    cy.on('dragfree', 'node', () => {
+      finishGroupDrag();
+      scheduleSaveLayout();
+    });
+    cy.on('zoom pan', () => scheduleSaveLayout());
+    cy.on('tap', (event) => {
+      if (event.target === cy) {
+        clearSelection();
+      }
+    });
+
+    searchEl.addEventListener('input', applyFilters);
+    nodeTypeFilterEl.addEventListener('change', applyFilters);
+    openCfgButton.addEventListener('click', () => openCfgInput.click());
+    openCfgInput.addEventListener('change', async (event) => {
+      const input = event.target;
+      const file = input.files && input.files[0];
+      if (!file) {
+        return;
+      }
+      try {
+        const text = await file.text();
+        const nextGraph = parseQuestCfgTextToGraph(text, file.name || 'Uploaded.cfg');
+        loadGraph(nextGraph, createGraphIdentityFromCfgText(text, file.name || nextGraph.title));
+      } catch (error) {
+        const message = error && error.message ? error.message : String(error);
+        detailsEl.innerHTML = '<div class="error">Failed to open CFG: ' + escapeHtml(message) + '</div>';
+      } finally {
+        input.value = '';
+      }
+    });
+    fitButton.addEventListener('click', () => {
+      cy.fit(cy.nodes(':visible'), 80);
+      scheduleSaveLayout();
+    });
+    resetButton.addEventListener('click', clearSelection);
+    layoutButton.addEventListener('click', () => {
+      pushUndoState();
+      runActiveLayout();
+    });
+    undoButton.addEventListener('click', undoGraphState);
+    redoButton.addEventListener('click', redoGraphState);
+    themeButton.addEventListener('click', toggleTheme);
+
+    applyFilters();
+    cy.ready(() => {
+      initializeGraphView();
+    });
+
+    function getLayout() {
+      if (graph.nodeCount > 120) {
+        return {
+          name: 'cose',
+          animate: false,
+          padding: 120,
+          nodeDimensionsIncludeLabels: true,
+          componentSpacing: 220,
+          nodeOverlap: 40,
+          nodeRepulsion: 320000,
+          idealEdgeLength: 240,
+          edgeElasticity: 120,
+          nestingFactor: 0.9,
+          gravity: 28,
+          numIter: 2200,
+          initialTemp: 180,
+          coolingFactor: 0.92,
+          minTemp: 1,
+        };
+      }
+      return {
+        name: 'breadthfirst',
+        directed: true,
+        avoidOverlap: true,
+        nodeDimensionsIncludeLabels: true,
+        padding: 120,
+        spacingFactor: 2.8,
+        animate: false,
+      };
+    }
+
+    function applyFilters() {
+      const search = searchEl.value.trim().toLowerCase();
+      const nodeType = nodeTypeFilterEl.value;
+      const visibleNodeIds = [];
+      cy.batch(() => {
+        cy.elements().removeClass('faded');
+        cy.nodes().forEach((node) => {
+          const matchesSearch =
+            !search ||
+            node.data('id').toLowerCase().includes(search) ||
+            node.data('sid').toLowerCase().includes(search) ||
+            String(node.data('subtitle') || '').toLowerCase().includes(search);
+          const matchesType = !nodeType || node.data('nodeType') === nodeType;
+          const visible = matchesSearch && matchesType;
+          if (visible) {
+            visibleNodeIds.push(node.id());
+          }
+          node.style('display', visible ? 'element' : 'none');
+        });
+        cy.edges().forEach((edge) => {
+          const visible = edge.source().style('display') !== 'none' && edge.target().style('display') !== 'none';
+          edge.style('display', visible ? 'element' : 'none');
+        });
+      });
+      if (hasFilteredSelectionChanged(visibleNodeIds)) {
+        clearSelection();
+      }
+      previousFilteredNodeIds = visibleNodeIds.sort();
+    }
+
+    function hasFilteredSelectionChanged(visibleNodeIds) {
+      if (visibleNodeIds.length !== previousFilteredNodeIds.length) {
+        return true;
+      }
+      const sortedIds = [...visibleNodeIds].sort();
+      return sortedIds.some((id, index) => id !== previousFilteredNodeIds[index]);
+    }
+
+    function clearSelection() {
+      cy.elements().removeClass('faded highlighted');
+      detailsEl.innerHTML = '<p class="hint">Select a node to inspect its fields and connected edges.</p>';
+    }
+
+    function highlightNeighborhood(node) {
+      cy.elements().addClass('faded').removeClass('highlighted');
+      const neighborhood = node.closedNeighborhood().union(node.incomers()).union(node.outgoers());
+      neighborhood.removeClass('faded').addClass('highlighted');
+    }
+
+    function renderDetails(node) {
+      const details = node.data('details') || {};
+      const incomers = node.incomers('node').map((n) => n.data('id')).sort();
+      const outgoers = node.outgoers('node').map((n) => n.data('id')).sort();
+      const rows = Object.entries(details)
+        .map(([key, value]) => '<div class="detail-row"><strong>' + escapeHtml(key) + '</strong><span>' + escapeHtml(String(value)) + '</span></div>')
+        .join('');
+      detailsEl.innerHTML =
+        '<div class="detail-card">' +
+        '<h2>' + escapeHtml(node.data('id')) + '</h2>' +
+        '<p class="meta">' + escapeHtml(node.data('sid')) + '</p>' +
+        '<p>' + escapeHtml(node.data('subtitle') || node.data('nodeType')) + '</p>' +
+        '<div class="detail-grid">' + rows + '</div>' +
+        '<div class="detail-row"><strong>Incoming</strong><span>' + escapeHtml(incomers.join(', ') || 'None') + '</span></div>' +
+        '<div class="detail-row"><strong>Outgoing</strong><span>' + escapeHtml(outgoers.join(', ') || 'None') + '</span></div>' +
+        '</div>';
+    }
+
+    function focusInitialView() {
+      const startNodes = cy.nodes('.is-start:visible');
+      if (startNodes.length > 0) {
+        cy.fit(startNodes.union(startNodes.outgoers('node')), 120);
+        return;
+      }
+      const visibleNodes = cy.nodes(':visible');
+      if (visibleNodes.length > 0 && visibleNodes.length <= 40) {
+        cy.fit(visibleNodes, 80);
+        return;
+      }
+      const firstNode = visibleNodes[0];
+      if (firstNode) {
+        cy.center(firstNode);
+        cy.zoom(1);
+      }
+    }
+
+    function initializeGraphView() {
+      if (restoreSavedLayout()) {
+        restoreSavedViewport() || focusInitialView();
+        return;
+      }
+      const restoredCount = restoreSharedNodePositions();
+      if (restoredCount === graph.nodeCount && graph.nodeCount > 0) {
+        focusInitialView();
+        scheduleSaveLayout();
+        return;
+      }
+      runActiveLayout(() => {
+        if (restoreSharedNodePositions()) {
+          scheduleSaveLayout();
+        }
+      });
+    }
+
+    function runActiveLayout(onDone) {
+      const visibleNodes = cy.nodes(':visible');
+      if (visibleNodes.length === 0) {
+        if (typeof onDone === 'function') {
+          onDone();
+        }
+        return;
+      }
+      const layout = cy.elements(':visible').layout(getLayout());
+      layout.once('layoutstop', () => {
+        packVisibleComponents();
+        if (typeof onDone === 'function') {
+          onDone();
+        }
+        restoreSavedViewport() || focusInitialView();
+        scheduleSaveLayout();
+      });
+      layout.run();
+    }
+
+    function beginGroupDrag(node) {
+      if (!isAltPressed) {
+        activeDragGroup = null;
+        return;
+      }
+      const highlightedNodes = cy.nodes('.highlighted').filter((highlighted) => highlighted.isNode());
+      if (!node.hasClass('highlighted') || highlightedNodes.length <= 1) {
+        activeDragGroup = null;
+        return;
+      }
+      activeDragGroup = {
+        anchorId: node.id(),
+        lastAnchorPosition: { ...node.position() },
+        members: highlightedNodes.filter((highlighted) => highlighted.id() !== node.id()),
+      };
+    }
+
+    function updateGroupDrag(node) {
+      if (!activeDragGroup || activeDragGroup.anchorId !== node.id()) {
+        return;
+      }
+      const currentPosition = node.position();
+      const deltaX = currentPosition.x - activeDragGroup.lastAnchorPosition.x;
+      const deltaY = currentPosition.y - activeDragGroup.lastAnchorPosition.y;
+      if (!deltaX && !deltaY) {
+        return;
+      }
+      cy.batch(() => {
+        activeDragGroup.members.positions((member) => {
+          const position = member.position();
+          return {
+            x: position.x + deltaX,
+            y: position.y + deltaY,
+          };
+        });
+      });
+      activeDragGroup.lastAnchorPosition = { ...currentPosition };
+    }
+
+    function finishGroupDrag() {
+      activeDragGroup = null;
+    }
+
+    function loadGraph(nextGraph, nextIdentity) {
+      graph = cloneGraph(nextGraph);
+      currentGraphIdentity = nextIdentity;
+      restoredViewport = null;
+      previousFilteredNodeIds = [];
+      activeDragGroup = null;
+      searchEl.value = '';
+      nodeTypeFilterEl.value = '';
+      clearSelection();
+      clearHistory();
+      cy.batch(() => {
+        cy.elements().remove();
+        cy.add(buildCyElements(graph));
+      });
+      applyThemeToGraph(document.body.classList.contains('dark') ? 'dark' : 'light');
+      updateGraphSummary();
+      populateNodeTypeFilter();
+      applyFilters();
+      initializeGraphView();
+    }
+
+    function restoreSavedLayout() {
+      try {
+        const raw = localStorage.getItem(getCurrentLayoutStorageKey());
+        if (!raw) {
+          return false;
+        }
+        const saved = JSON.parse(raw);
+        const positions = saved && typeof saved === 'object' ? saved.positions : null;
+        restoredViewport = getValidViewport(saved && typeof saved === 'object' ? saved.viewport : null);
+        if (!positions || typeof positions !== 'object') {
+          return false;
+        }
+        let restoredCount = 0;
+        cy.batch(() => {
+          cy.nodes().forEach((node) => {
+            const position = positions[node.id()];
+            if (!position || typeof position.x !== 'number' || typeof position.y !== 'number') {
+              return;
+            }
+            node.position(position);
+            restoredCount++;
+          });
+        });
+        return restoredCount > 0;
+      } catch {
+        return false;
+      }
+    }
+
+    function restoreSharedNodePositions() {
+      try {
+        const raw = localStorage.getItem(sharedNodePositionsStorageKey);
+        if (!raw) {
+          return 0;
+        }
+        const saved = JSON.parse(raw);
+        if (!saved || typeof saved !== 'object') {
+          return 0;
+        }
+        let restoredCount = 0;
+        cy.batch(() => {
+          cy.nodes().forEach((node) => {
+            const position = saved[getNodePositionKey(node.data())];
+            if (!position || typeof position.x !== 'number' || typeof position.y !== 'number') {
+              return;
+            }
+            node.position(position);
+            restoredCount++;
+          });
+        });
+        return restoredCount;
+      } catch {
+        return 0;
+      }
+    }
+
+    function restoreSavedViewport() {
+      if (!restoredViewport) {
+        return false;
+      }
+      cy.zoom(restoredViewport.zoom);
+      cy.pan(restoredViewport.pan);
+      restoredViewport = null;
+      return true;
+    }
+
+    function pushUndoState() {
+      const state = captureGraphState();
+      const lastState = undoStack[undoStack.length - 1];
+      if (lastState && areGraphStatesEqual(lastState, state)) {
+        return;
+      }
+      undoStack.push(state);
+      if (undoStack.length > maxUndoStates) {
+        undoStack.shift();
+      }
+      redoStack.length = 0;
+      updateHistoryButtons();
+    }
+
+    function undoGraphState() {
+      const state = undoStack.pop();
+      if (!state) {
+        updateHistoryButtons();
+        return;
+      }
+      redoStack.push(captureGraphState());
+      applyGraphState(state);
+      scheduleSaveLayout();
+      updateHistoryButtons();
+    }
+
+    function redoGraphState() {
+      const state = redoStack.pop();
+      if (!state) {
+        updateHistoryButtons();
+        return;
+      }
+      undoStack.push(captureGraphState());
+      applyGraphState(state);
+      scheduleSaveLayout();
+      updateHistoryButtons();
+    }
+
+    function updateHistoryButtons() {
+      undoButton.disabled = undoStack.length === 0;
+      redoButton.disabled = redoStack.length === 0;
+    }
+
+    function clearHistory() {
+      undoStack.length = 0;
+      redoStack.length = 0;
+      updateHistoryButtons();
+    }
+
+    function captureGraphState() {
+      return {
+        positions: Object.fromEntries(
+          cy.nodes().map((node) => [
+            node.id(),
+            {
+              x: Number(node.position('x').toFixed(2)),
+              y: Number(node.position('y').toFixed(2)),
+            },
+          ]),
+        ),
+        viewport: {
+          zoom: Number(cy.zoom().toFixed(4)),
+          pan: {
+            x: Number(cy.pan('x').toFixed(2)),
+            y: Number(cy.pan('y').toFixed(2)),
+          },
+        },
+      };
+    }
+
+    function applyGraphState(state) {
+      cy.batch(() => {
+        cy.nodes().forEach((node) => {
+          const position = state.positions[node.id()];
+          if (position) {
+            node.position(position);
+          }
+        });
+      });
+      cy.zoom(state.viewport.zoom);
+      cy.pan(state.viewport.pan);
+    }
+
+    function areGraphStatesEqual(a, b) {
+      return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+    function scheduleSaveLayout() {
+      if (saveLayoutTimer) {
+        clearTimeout(saveLayoutTimer);
+      }
+      saveLayoutTimer = setTimeout(() => {
+        saveLayoutTimer = null;
+        saveCurrentLayout();
+      }, 250);
+    }
+
+    function saveCurrentLayout() {
+      const state = captureGraphState();
+      persistSharedNodePositions(state.positions);
+      localStorage.setItem(
+        getCurrentLayoutStorageKey(),
+        JSON.stringify({
+          version: 2,
+          sourceFilePath: graph.sourceFilePath,
+          graphKey: currentGraphIdentity.key,
+          positions: state.positions,
+          viewport: state.viewport,
+        }),
+      );
+    }
+
+    function persistSharedNodePositions(positions) {
+      try {
+        const raw = localStorage.getItem(sharedNodePositionsStorageKey);
+        const saved = raw ? JSON.parse(raw) : {};
+        if (!saved || typeof saved !== 'object') {
+          return;
+        }
+        graph.nodes.forEach((node) => {
+          const position = positions[node.id];
+          if (!position) {
+            return;
+          }
+          saved[getNodePositionKey(node)] = position;
+        });
+        localStorage.setItem(sharedNodePositionsStorageKey, JSON.stringify(saved));
+      } catch {
+        // Ignore localStorage failures.
+      }
+    }
+
+    function getCurrentLayoutStorageKey() {
+      return layoutStoragePrefix + currentGraphIdentity.key;
+    }
+
+    function getNodePositionKey(nodeLike) {
+      return String(nodeLike.sid || nodeLike.id || '');
+    }
+
+    function getValidViewport(viewport) {
+      if (!viewport || typeof viewport !== 'object') {
+        return null;
+      }
+      const zoom = viewport.zoom;
+      const pan = viewport.pan;
+      if (
+        typeof zoom !== 'number' ||
+        !Number.isFinite(zoom) ||
+        !pan ||
+        typeof pan.x !== 'number' ||
+        typeof pan.y !== 'number' ||
+        !Number.isFinite(pan.x) ||
+        !Number.isFinite(pan.y)
+      ) {
+        return null;
+      }
+      return {
+        zoom,
+        pan: { x: pan.x, y: pan.y },
+      };
+    }
+
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem(themeStorageKey);
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+      applyTheme(theme);
+    }
+
+    function toggleTheme() {
+      const nextTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
+      applyTheme(nextTheme);
+      localStorage.setItem(themeStorageKey, nextTheme);
+    }
+
+    function applyTheme(theme) {
+      document.body.classList.toggle('dark', theme === 'dark');
+      themeButton.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
+      applyThemeToGraph(theme);
+    }
+
+    function applyThemeToGraph(theme) {
+      const css = getComputedStyle(document.body);
+      const palette = {
+        nodeFill: css.getPropertyValue('--node-fill').trim(),
+        nodeBorder: css.getPropertyValue('--node-border').trim(),
+        nodeText: css.getPropertyValue('--node-text').trim(),
+        eventFill: css.getPropertyValue('--event-fill').trim(),
+        startFill: css.getPropertyValue('--start-fill').trim(),
+        terminalBorder: css.getPropertyValue('--terminal-border').trim(),
+        edgeLine: css.getPropertyValue('--edge-line').trim(),
+        edgeText: css.getPropertyValue('--edge-text').trim(),
+        edgeTextBg: css.getPropertyValue('--edge-text-bg').trim(),
+        highlight: css.getPropertyValue('--highlight').trim(),
+        inverseText: '#fffaf0',
+      };
+      cy.batch(() => {
+        cy.nodes().forEach((node) => {
+          node.data({
+            nodeFill: palette.nodeFill,
+            nodeBorder: palette.nodeBorder,
+            nodeText: palette.nodeText,
+            eventFill: palette.eventFill,
+            startFill: palette.startFill,
+            terminalBorder: palette.terminalBorder,
+            inverseText: palette.inverseText,
+          });
+        });
+        cy.edges().forEach((edge) => {
+          edge.data({
+            edgeLine: palette.edgeLine,
+            edgeText: palette.edgeText,
+            edgeTextBg: palette.edgeTextBg,
+            highlight: palette.highlight,
+          });
+        });
+      });
+      cy.style().update();
+    }
+
+    function updateGraphSummary() {
+      titleEl.textContent = graph.title;
+      sourceEl.textContent = graph.sourceFilePath;
+      nodeCountEl.textContent = String(graph.nodeCount);
+      edgeCountEl.textContent = String(graph.edgeCount);
+    }
+
+    function populateNodeTypeFilter() {
+      nodeTypeFilterEl.innerHTML = '<option value="">All node types</option>';
+      const nodeTypeSet = new Set(graph.nodes.map((node) => node.nodeType).filter(Boolean));
+      [...nodeTypeSet].sort().forEach((nodeType) => {
+        const option = document.createElement('option');
+        option.value = nodeType;
+        option.textContent = nodeType;
+        nodeTypeFilterEl.appendChild(option);
+      });
+    }
+
+    function buildCyElements(currentGraph) {
+      return [
+        ...currentGraph.nodes.map((node) => ({
+          group: 'nodes',
+          data: {
+            id: node.id,
+            sid: node.sid,
+            label: node.label,
+            subtitle: node.subtitle,
+            nodeType: node.nodeType,
+            isStart: node.isStart,
+            isTerminal: node.isTerminal,
+            details: node.details,
+          },
+          classes: [
+            node.isStart ? 'is-start' : '',
+            node.isTerminal ? 'is-terminal' : '',
+            /Event$/.test(node.nodeType) ? 'is-event' : '',
+          ].filter(Boolean).join(' '),
+        })),
+        ...currentGraph.edges.map((edge) => ({
+          group: 'edges',
+          data: {
+            id: edge.id,
+            source: edge.source,
+            target: edge.target,
+            label: edge.label,
+            showLabel: currentGraph.edgeCount <= 120 ? edge.label : '',
+            kind: edge.kind,
+          },
+        })),
+      ];
+    }
+
+    function cloneGraph(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function createGraphIdentityFromGraph(currentGraph) {
+      const fingerprint = hashString(JSON.stringify({
+        title: currentGraph.title,
+        sourceFilePath: currentGraph.sourceFilePath,
+        nodes: currentGraph.nodes.map((node) => node.sid),
+        edges: currentGraph.edges.map((edge) => [edge.source, edge.target, edge.label]),
+      }));
+      return { key: 'graph:' + fingerprint };
+    }
+
+    function createGraphIdentityFromCfgText(text, fileName) {
+      return { key: 'cfg:' + hashString((fileName || '') + '\n' + normalizeNewlines(text)) };
+    }
+
+    function hashString(value) {
+      let hash = 2166136261;
+      for (let i = 0; i < value.length; i++) {
+        hash ^= value.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(16);
+    }
+
+    function normalizeNewlines(value) {
+      return String(value).replaceAll('\r\n', '\n').replaceAll('\r', '\n');
+    }
+
+    function parseQuestCfgTextToGraph(text, sourceLabel) {
+      const structs = parseCfgStructs(text);
+      if (!structs.length) {
+        throw new Error('No top-level quest node structs found.');
+      }
+      return buildGraphFromStructs(structs, sourceLabel);
+    }
+
+    function parseCfgStructs(text) {
+      const root = [];
+      const stack = [];
+      const lines = normalizeNewlines(text).split('\n');
+      for (const rawLine of lines) {
+        const line = stripLineComment(rawLine).trim();
+        if (!line) {
+          continue;
+        }
+        const structMatch = line.match(/^(.+?)\s*:\s*struct\.begin\b/i);
+        if (structMatch) {
+          const name = structMatch[1].trim();
+          const node = { __name: name };
+          if (stack.length === 0) {
+            root.push(node);
+          } else {
+            stack[stack.length - 1][name] = node;
+          }
+          stack.push(node);
+          continue;
+        }
+        if (/^struct\.end\b/i.test(line)) {
+          stack.pop();
+          continue;
+        }
+        const fieldMatch = line.match(/^([A-Za-z0-9_]+)\s*=\s*(.*)$/);
+        if (fieldMatch && stack.length > 0) {
+          stack[stack.length - 1][fieldMatch[1]] = parseCfgScalar(fieldMatch[2]);
+        }
+      }
+      return root;
+    }
+
+    function stripLineComment(line) {
+      const commentIndex = line.indexOf('//');
+      return commentIndex >= 0 ? line.slice(0, commentIndex) : line;
+    }
+
+    function parseCfgScalar(rawValue) {
+      const value = String(rawValue).trim();
+      if (!value) {
+        return '';
+      }
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith('\'') && value.endsWith('\''))) {
+        return value.slice(1, -1);
+      }
+      if (/^(true|false)$/i.test(value)) {
+        return value.toLowerCase() === 'true';
+      }
+      if (/^-?\d+(\.\d+)?$/.test(value)) {
+        return Number(value);
+      }
+      return value;
+    }
+
+    function buildGraphFromStructs(structs, sourceLabel) {
+      const jsNameBySid = new Map();
+      const usedNames = new Set();
+      const nodes = structs.map((raw) => {
+        const sid = String(raw.SID || raw.__name || '');
+        const jsSid = getOrCreateJsSid(sid, jsNameBySid, usedNames);
+        return { raw, sid, jsSid, launches: [] };
+      });
+      const nodeBySid = new Map(nodes.map((node) => [node.sid, node]));
+      nodes.forEach((node) => {
+        forEachStructChild(node.raw.Launchers, (launcher) => {
+          forEachStructChild(launcher.Connections, (connection) => {
+            const launcherNode = nodeBySid.get(String(connection.SID || ''));
+            if (launcherNode) {
+              launcherNode.launches.push({
+                SID: node.sid,
+                Name: String(connection.Name || ''),
+              });
+            }
+          });
+        });
+      });
+      nodes.forEach((node) => {
+        if (getNodeSubType(node.raw.NodeType) !== 'BridgeEvent') {
+          return;
+        }
+        const linkedNode = nodeBySid.get(String(node.raw.LinkedNodePrototypeSID || ''));
+        if (linkedNode) {
+          linkedNode.launches.push({ SID: node.sid, Name: '' });
+        }
+      });
+      const graphNodes = nodes.map((node) => {
+        const nodeType = getNodeSubType(node.raw.NodeType);
+        return {
+          id: node.jsSid,
+          sid: node.sid,
+          nodeType,
+          label: formatNodeLabel(node.jsSid),
+          subtitle: getNodeSubtitle(node.raw),
+          isStart: Boolean(node.raw.LaunchOnQuestStart),
+          isTerminal: nodeType === 'End' || node.launches.length === 0,
+          details: getNodeDetails(node.raw),
+        };
+      });
+      const graphEdges = nodes.flatMap((node) =>
+        node.launches.map((edge, index) => ({
+          id: node.jsSid + '__' + (jsNameBySid.get(edge.SID) || edge.SID) + '__' + index,
+          source: node.jsSid,
+          target: jsNameBySid.get(edge.SID) || edge.SID,
+          label: edge.Name || '',
+          kind: 'launch',
+        })),
+      );
+      return {
+        title: sourceLabel,
+        sourceFilePath: sourceLabel,
+        nodeCount: graphNodes.length,
+        edgeCount: graphEdges.length,
+        nodes: graphNodes,
+        edges: graphEdges,
+      };
+    }
+
+    function getOrCreateJsSid(rawSid, sidToJs, usedNames) {
+      const existing = sidToJs.get(rawSid);
+      if (existing) {
+        return existing;
+      }
+      const base = toJsIdentifier(rawSid);
+      let candidate = base;
+      let suffix = 1;
+      while (usedNames.has(candidate)) {
+        candidate = base + '_' + suffix++;
+      }
+      usedNames.add(candidate);
+      sidToJs.set(rawSid, candidate);
+      return candidate;
+    }
+
+    function toJsIdentifier(raw) {
+      const cleaned = String(raw || '').replace(/[^A-Za-z0-9_$]/g, '_');
+      return /^[A-Za-z_$]/.test(cleaned) ? cleaned : '_' + cleaned;
+    }
+
+    function getNodeSubType(nodeType) {
+      return String(nodeType || '').split('::').pop() || 'Unknown';
+    }
+
+    function getNodeSubtitle(struct) {
+      const nodeType = getNodeSubType(struct.NodeType);
+      const maybeText = firstDefinedString([
+        struct.ScreenText,
+        struct.ItemSID,
+        struct.ItemPrototypeSID,
+        struct.SignalReceiverGuid,
+        struct.LinkedNodePrototypeSID,
+      ]);
+      return maybeText ? nodeType + ': ' + truncate(maybeText, 48) : nodeType;
+    }
+
+    function firstDefinedString(values) {
+      for (const value of values) {
+        if (typeof value === 'string' && value.trim()) {
+          return value.trim();
+        }
+      }
+      return '';
+    }
+
+    function truncate(value, maxLength) {
+      return value.length > maxLength ? value.slice(0, maxLength - 3) + '...' : value;
+    }
+
+    function formatNodeLabel(value) {
+      return String(value).replaceAll('_', '_\u200b').replace(/([a-z0-9])([A-Z])/g, '$1\u200b$2');
+    }
+
+    function getNodeDetails(struct) {
+      const details = {
+        SID: struct.SID,
+        NodeType: getNodeSubType(struct.NodeType),
+      };
+      const detailKeys = [
+        'Comment',
+        'QuestSID',
+        'TargetQuestGuid',
+        'LinkedNodePrototypeSID',
+        'SignalReceiverGuid',
+        'SignalSenderGuid',
+        'ItemSID',
+        'ItemPrototypeSID',
+        'ItemsCount',
+        'InGameHours',
+        'VolumeGuid',
+        'SequenceName',
+        'ScreenText',
+        'FadeTime',
+        'LaunchOnQuestStart',
+      ];
+      for (const key of detailKeys) {
+        const value = struct[key];
+        if (value === undefined || value === null || value === '') {
+          continue;
+        }
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+          details[key] = value;
+          continue;
+        }
+        details[key] = summarizeValue(value);
+      }
+      return details;
+    }
+
+    function summarizeValue(value) {
+      if (Array.isArray(value)) {
+        return value.length + ' items';
+      }
+      if (value && typeof value === 'object') {
+        return Object.keys(value).filter((key) => !key.startsWith('__')).length + ' entries';
+      }
+      return String(value);
+    }
+
+    function forEachStructChild(value, callback) {
+      if (!value || typeof value !== 'object') {
+        return;
+      }
+      Object.entries(value).forEach(([key, child]) => {
+        if (key.startsWith('__') || !child || typeof child !== 'object') {
+          return;
+        }
+        callback(child, key);
+      });
+    }
+
+    function packVisibleComponents() {
+      const visibleElements = cy.elements(':visible');
+      const components = visibleElements.components()
+        .map((component) => {
+          const nodes = component.nodes();
+          const box = nodes.boundingBox();
+          return {
+            nodes,
+            box,
+            width: Math.max(1, box.w),
+            height: Math.max(1, box.h),
+          };
+        })
+        .filter((component) => component.nodes.length > 0)
+        .sort((a, b) => {
+          const aIsChain = isChainLikeComponent(a);
+          const bIsChain = isChainLikeComponent(b);
+          if (aIsChain !== bIsChain) {
+            return aIsChain ? 1 : -1;
+          }
+          return b.height * b.width - a.height * a.width;
+        });
+      if (components.length <= 1) {
+        return;
+      }
+      const horizontalGap = 110;
+      const verticalGap = 120;
+      const targetRowWidth = Math.max(1800, Math.sqrt(components.reduce((sum, component) => sum + component.width * component.height, 0)) * 1.8);
+      let cursorX = 0;
+      let cursorY = 0;
+      let rowHeight = 0;
+      cy.batch(() => {
+        for (const component of components) {
+          if (cursorX > 0 && cursorX + component.width > targetRowWidth) {
+            cursorX = 0;
+            cursorY += rowHeight + verticalGap;
+            rowHeight = 0;
+          }
+          const targetX = cursorX - component.box.x1;
+          const targetY = cursorY - component.box.y1;
+          component.nodes.positions((node) => {
+            const position = node.position();
+            return {
+              x: position.x + targetX,
+              y: position.y + targetY,
+            };
+          });
+          cursorX += component.width + horizontalGap;
+          rowHeight = Math.max(rowHeight, component.height);
+        }
+      });
+    }
+
+    function isChainLikeComponent(component) {
+      return component.nodes.length <= 18 && component.width > component.height * 2.4;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+  </script>
+</body>
+</html>
