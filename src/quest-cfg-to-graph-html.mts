@@ -724,15 +724,15 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     }
 
     function beginGroupDrag(node) {
-      const selectedNodes = cy.nodes(':selected').filter((selected) => selected.isNode());
-      if (!node.selected() || selectedNodes.length <= 1) {
+      const highlightedNodes = cy.nodes('.highlighted').filter((highlighted) => highlighted.isNode());
+      if (!node.hasClass('highlighted') || highlightedNodes.length <= 1) {
         activeDragGroup = null;
         return;
       }
       activeDragGroup = {
         anchorId: node.id(),
         lastAnchorPosition: { ...node.position() },
-        members: selectedNodes.filter((selected) => selected.id() !== node.id()),
+        members: highlightedNodes.filter((highlighted) => highlighted.id() !== node.id()),
       };
     }
 
