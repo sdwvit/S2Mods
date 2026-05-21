@@ -3,16 +3,13 @@ import dotEnv from "dotenv";
 import type { MetaContext, MetaType } from "../../src/meta-type.mts";
 import {
   type ArmorPrototype,
-  type EItemGenerationCategory,
   type ERank,
   type ItemGeneratorPrototype,
-  type ItemGeneratorPrototypeItemGenerator,
   type ItemGeneratorPrototypeItemGeneratorItem,
   type ItemGeneratorPrototypePossibleItems,
   type ItemGeneratorPrototypePossibleItemsItem,
   type QuestNodePrototype,
   type QuestNodePrototypeSetItemGenerator,
-  Refs,
   type SpawnActorPrototype,
   Struct,
 } from "s2cfgtojson";
@@ -21,7 +18,6 @@ import {
   ALL_RANKS_ARR,
   allDefaultArmorPrototypesRecord,
   allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
-  allDefaultItemGeneratorsRecord,
   allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID,
   FactionsByArmorSID,
   armorRanksBySID,
@@ -36,7 +32,7 @@ import { deepMerge } from "../../src/deep-merge.mts";
 import { getDropChance, maxDropChance } from "./calculateArmorScore.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
-
+const finishedTransformers = new Set<string>();
 export const meta: MetaType<
   ArmorPrototype | ItemGeneratorPrototype | QuestNodePrototype | SpawnActorPrototype
 > = {
@@ -93,6 +89,9 @@ export const meta: MetaType<
     transformSkifItemGeneratorQuestNodes,
     transformSpawnActors,
   ],
+  onTransformerFinish: (transformer) => {
+    finishedTransformers.add(transformer.name);
+  },
 };
 
 let addArmorsRunOnce = false;
@@ -562,6 +561,7 @@ export async function transformItemGenerators(struct: ItemGeneratorPrototype, { 
   if (fork.ItemGenerator.entries().length) {
     extraStructs.push(fork);
   }
+  transformItemGenerators.extraStructs.push(...extraStructs);
   return extraStructs;
 }
 
@@ -591,7 +591,7 @@ function resetCss(struct: ItemGeneratorPrototype, fork: ItemGeneratorPrototype) 
     }
   });
 }
-
+transformItemGenerators.extraStructs = [] as Struct[];
 transformItemGenerators.files = [
   "/DynamicItemGenerator.cfg",
   "/QuestItemGeneratorPrototypes.cfg",
@@ -622,114 +622,22 @@ function sanitizeSID(raw: string) {
   return raw.replace(/[^A-Za-z0-9_]/g, "_").replace(/(GeneralNPC_|_ItemGenerator)/g, "");
 }
 
-function getNewHeadlessGeneratorSIDs() {
-  return [
-    "GeneralNPC_Neutral_CloseCombat_ItemGenerator",
-    "GeneralNPC_Neutral_Recon_ItemGenerator",
-    "GeneralNPC_Neutral_Sniper_ItemGenerator",
-    "GeneralNPC_Neutral_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Bandit_CloseCombat_ItemGenerator",
-    "GeneralNPC_Bandit_Recon_ItemGenerator",
-    "GeneralNPC_Bandit_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Bandit_Heavy_ItemGenerator",
-    "GeneralNPC_Mercenaries_CloseCombat_ItemGenerator",
-    "GeneralNPC_Mercenaries_Recon_ItemGenerator",
-    "GeneralNPC_Mercenaries_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Mercenaries_Sniper_ItemGenerator",
-    "GeneralNPC_Scientists_Recon_ItemGenerator",
-    "GeneralNPC_Scientists_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Militaries_CloseCombat_ItemGenerator",
-    "GeneralNPC_Militaries_Recon_ItemGenerator",
-    "GeneralNPC_Militaries_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Militaries_Sniper_ItemGenerator",
-    "GeneralNPC_Militaries_Heavy_ItemGenerator",
-    "GeneralNPC_Monolith_CloseCombat_ItemGenerator",
-    "GeneralNPC_Monolith_Recon_ItemGenerator",
-    "GeneralNPC_Monolith_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Monolith_Sniper_ItemGenerator",
-    "GeneralNPC_Duty_CloseCombat_ItemGenerator",
-    "GeneralNPC_Duty_Recon_ItemGenerator",
-    "GeneralNPC_Duty_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Duty_Sniper_ItemGenerator",
-    "GeneralNPC_Duty_Heavy_ItemGenerator",
-    "GeneralNPC_Freedom_CloseCombat_ItemGenerator",
-    "GeneralNPC_Freedom_Recon_ItemGenerator",
-    "GeneralNPC_Freedom_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Freedom_Sniper_ItemGenerator",
-    "GeneralNPC_Varta_CloseCombat_ItemGenerator",
-    "GeneralNPC_Varta_Recon_ItemGenerator",
-    "GeneralNPC_Varta_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Varta_Sniper_ItemGenerator",
-    "GeneralNPC_Varta_Heavy_ItemGenerator",
-    "GeneralNPC_Noon_CloseCombat_ItemGenerator",
-    "GeneralNPC_Noon_Recon_ItemGenerator",
-    "GeneralNPC_Noon_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Noon_Sniper_ItemGenerator",
-    "GeneralNPC_Spark_CloseCombat_ItemGenerator",
-    "GeneralNPC_Spark_Recon_ItemGenerator",
-    "GeneralNPC_Spark_Stormtrooper_ItemGenerator",
-    "GeneralNPC_Spark_Sniper_ItemGenerator",
-    "Duga_Sniper_ItemGenerator",
-    "GeneralNPC_SIRCAA_Scientist_Recon_ItemGenerator",
-    "GeneralNPC_MALACHITE_Scientist_Recon_ItemGenerator",
-    "GeneralZombie_Duty_CloseCombat_ItemGenerator",
-    "GeneralZombie_Duty_Recon_ItemGenerator",
-    "GeneralZombie_Duty_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Duty_Sniper_ItemGenerator",
-    "GeneralZombie_Duty_Heavy_ItemGenerator",
-    "GeneralZombie_Freedom_CloseCombat_ItemGenerator",
-    "GeneralZombie_Freedom_Recon_ItemGenerator",
-    "GeneralZombie_Freedom_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Freedom_Sniper_ItemGenerator",
-    "GeneralZombie_Monolith_CloseCombat_ItemGenerator",
-    "GeneralZombie_Monolith_Recon_ItemGenerator",
-    "GeneralZombie_Monolith_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Monolith_Sniper_ItemGenerator",
-    "GeneralZombie_Mercenaries_CloseCombat_ItemGenerator",
-    "GeneralZombie_Mercenaries_Recon_ItemGenerator",
-    "GeneralZombie_Mercenaries_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Mercenaries_Sniper_ItemGenerator",
-    "GeneralZombie_Militaries_CloseCombat_ItemGenerator",
-    "GeneralZombie_Militaries_Recon_ItemGenerator",
-    "GeneralZombie_Militaries_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Militaries_Sniper_ItemGenerator",
-    "GeneralZombie_Militaries_Heavy_ItemGenerator",
-    "GeneralZombie_Bandit_CloseCombat_ItemGenerator",
-    "GeneralZombie_Bandit_Recon_ItemGenerator",
-    "GeneralZombie_Bandit_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Bandit_Heavy_ItemGenerator",
-    "GeneralZombie_Scientists_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Neutral_CloseCombat_ItemGenerator",
-    "GeneralZombie_Neutral_Recon_ItemGenerator",
-    "GeneralZombie_Neutral_Sniper_ItemGenerator",
-    "GeneralZombie_Neutral_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Noon_CloseCombat_ItemGenerator",
-    "GeneralZombie_Noon_Recon_ItemGenerator",
-    "GeneralZombie_Noon_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Noon_Sniper_ItemGenerator",
-    "GeneralZombie_Varta_CloseCombat_ItemGenerator",
-    "GeneralZombie_Varta_Recon_ItemGenerator",
-    "GeneralZombie_Varta_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Varta_Sniper_ItemGenerator",
-    "GeneralZombie_Varta_Heavy_ItemGenerator",
-    "GeneralZombie_Spark_CloseCombat_ItemGenerator",
-    "GeneralZombie_Spark_Recon_ItemGenerator",
-    "GeneralZombie_Spark_Stormtrooper_ItemGenerator",
-    "GeneralZombie_Spark_Sniper_ItemGenerator",
-  ];
+async function getNewHeadlessGeneratorSIDs() {
+  await waitFor(() => finishedTransformers.has(transformItemGenerators.name));
+  return transformItemGenerators.extraStructs.map((e) => e.__internal__.rawName);
 }
 
 /**
  * Adds debug quest nodes that apply only NEW HeadlessArmors item generators to Skif.
  * Use with console: XStartQuestNodeBySID <GeneratedNodeSID>
  */
-export function transformSkifItemGeneratorQuestNodes(s) {
+export async function transformSkifItemGeneratorQuestNodes(s) {
   if (addQuestOnce) {
     return;
   }
   addQuestOnce = true;
 
-  const sids = getNewHeadlessGeneratorSIDs();
+  const sids = await getNewHeadlessGeneratorSIDs();
   return sids.map((itemGeneratorSID) => {
     const nodeSID = `Skif_${sanitizeSID(itemGeneratorSID)}`;
     const node = new Struct() as QuestNodePrototypeSetItemGenerator;

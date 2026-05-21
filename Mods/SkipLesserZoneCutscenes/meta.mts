@@ -1,12 +1,6 @@
-import { Struct } from "s2cfgtojson";
-import type { DialogPrototype, QuestNodePrototype, QuestNodePrototypeContainer } from "s2cfgtojson";
-import type { MetaContext, MetaType, StructTransformer } from "../../src/meta-type.mts";
+import type { DialogPrototype, QuestNodePrototype } from "s2cfgtojson";
+import type { MetaType, StructTransformer } from "../../src/meta-type.mts";
 import { rerouteQuestNode } from "../../src/struct-utils.mts";
-// import "../../GameLite/GameData/QuestNodePrototypes/E01_MQ01.cfg.js";
-// import "../../GameLite/GameData/QuestNodePrototypes/E02_MQ01.cfg.js";
-// import "../../GameLite/GameData/QuestNodePrototypes/E02_MQ03.cfg.js";
-// import "../../GameLite/GameData/QuestNodePrototypes/E02_MQ03_C05.cfg.js";
-// import "../../GameLite/GameData/DialogPrototypes/E02_MQ03_Dialog_Warlock_in_Bar_after_CS.cfg";
 
 // todo, skips intro, but still forces player into bunker, as the point 1 scan is not ready, and tower is not fallen.
 const toReroute = new Set([
@@ -14,7 +8,6 @@ const toReroute = new Set([
   "E01_MQ01_Cutscene_Intro",
 
   "E01_MQ01_SetItemGenerator_Player_Empty",
-
 
   "E01_MQ01_Cutscene_Napadenie",
   "E01_MQ01_Start_PlaceScanner", // 1st point
@@ -72,4 +65,3 @@ Use this mod for frequent resets.[h1][/h1]
     "Fix duplicate launcher index conflict for shared dependants; support extraDependantsByParentSID for event listeners",
   structTransformers: [structTransformer],
 };
-
