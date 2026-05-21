@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { renderQuestJsGlobalFunctionStub, resolveQuestNodesToJsInputPath } from "./quest/js-gen-utils.mts";
+import {
+  isRecentQuestNodesJsDebugOutput,
+  renderQuestJsGlobalFunctionStub,
+  resolveQuestNodesToJsInputPath,
+  shouldSkipRecentQuestNodesJsDebugRegeneration,
+} from "./quest/js-gen-utils.mts";
 
 describe("renderQuestJsGlobalFunctionStub", () => {
   it("renders inventory-aware ItemAdd stub", () => {
     const out = renderQuestJsGlobalFunctionStub("ItemAdd", "");
     expect(out).toContain("const ItemAdd = (...args) =>");
-    expect(out).toContain("\n  const [itemSid, count = 1, actor = 'Skif'] = args;\n");
+    expect(out).toContain("\n  const [actor, itemSid, count = 1] = args;\n");
     expect(out).toContain("__questAddItem(itemSid, count, actor)");
     expect(out).toContain("__questLogStub(`ItemAdd(${__questFmtArgs(args)})`);");
     expect(out.endsWith("};")).toBe(true);
@@ -14,7 +19,7 @@ describe("renderQuestJsGlobalFunctionStub", () => {
   it("renders inventory-aware ItemRemove stub", () => {
     const out = renderQuestJsGlobalFunctionStub("ItemRemove", "");
     expect(out).toContain("const ItemRemove = (...args) =>");
-    expect(out).toContain("\n  const [itemSid, count = 1, actor = 'Skif'] = args;\n");
+    expect(out).toContain("\n  const [actor, itemSid, count = 1] = args;\n");
     expect(out).toContain("__questRemoveItem(itemSid, count, actor)");
     expect(out).toContain("__questLogStub(`ItemRemove(${__questFmtArgs(args)})`);");
     expect(out.endsWith("};")).toBe(true);
@@ -97,5 +102,19 @@ describe("resolveQuestNodesToJsInputPath", () => {
     const out = resolveQuestNodesToJsInputPath("GameData\\QuestNodePrototypes\\Arch_L.cfg", cfgRoot);
     expect(out.contextFilePath).toBe("/QuestNodePrototypes/Arch_L.cfg");
     expect(out.sourceFilePath).toBe("/sdk/Stalker2/Content/GameLite/GameData/QuestNodePrototypes/Arch_L.cfg");
+  });
+});
+
+describe("quest nodes js debug regeneration guard", () => {
+  it("skips recent outputs by default", () => {
+    expect(shouldSkipRecentQuestNodesJsDebugRegeneration()).toBe(true);
+  });
+
+  it("can be disabled with env value 0", () => {
+    expect(shouldSkipRecentQuestNodesJsDebugRegeneration("0")).toBe(false);
+  });
+
+  it("does not treat missing output as recent", async () => {
+    expect(await isRecentQuestNodesJsDebugOutput("/definitely/missing/file.js")).toBe(false);
   });
 });

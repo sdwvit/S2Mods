@@ -1,8 +1,17 @@
 import { Struct } from "s2cfgtojson";
 import type { EConditionComparance } from "s2cfgtojson";
-import type { QuestNodePrototype, QuestNodePrototypeCondition, QuestNodePrototypeConditionsItemItem, QuestNodePrototypeSequenceStart, QuestNodePrototypeSetDialog, QuestNodePrototypeShowFadeScreen, QuestNodePrototypeTechnical } from "s2cfgtojson";
+import type {
+  QuestNodePrototype,
+  QuestNodePrototypeCondition,
+  QuestNodePrototypeConditionsItemItem,
+  QuestNodePrototypeSequenceStart,
+  QuestNodePrototypeSetDialog,
+  QuestNodePrototypeShowFadeScreen,
+  QuestNodePrototypeTechnical,
+} from "s2cfgtojson";
 import { EVENTS, EVENTS_INTERESTING_PROPS, EVENTS_INTERESTING_SIDS } from "./constants.mts";
 import { QuestIr, QuestIrNode } from "./ir.mts";
+import { QuestNodePrototypeConditionsItem } from "s2cfgtojson/types";
 
 export function buildQuestScriptParts(ir: QuestIr) {
   const globalVars = new Set<string>();
@@ -101,7 +110,10 @@ function questNodeToJavascript(
       })
       .filter((k) => k)});`;
 
-  const renderSubTypeWithProps = <T extends QuestNodePrototype>(subType: string, propKeys: (keyof T & string)[]) => {
+  const renderSubTypeWithProps = <T extends QuestNodePrototype>(
+    subType: string,
+    propKeys: (keyof T & string)[],
+  ) => {
     const pairs = propKeys
       .filter((k) => Object.hasOwn(struct, k))
       .map((k) => {
@@ -136,7 +148,10 @@ function questNodeToJavascript(
       return processConditionNode(struct, globalVars, globalFunctions, questActors, getNodeSid);
     case "EQuestNodeType::Despawn":
       questActors.add(struct.TargetQuestGuid);
-      globalFunctions.set("despawn", "(actor) => { delete spawnedActors[actor]; __questLogStub(`despawn(${actor})`); }; ");
+      globalFunctions.set(
+        "despawn",
+        "(actor) => { delete spawnedActors[actor]; __questLogStub(`despawn(${actor})`); }; ",
+      );
       return `despawn(questActors['${struct.TargetQuestGuid}']);`;
     case "EQuestNodeType::End":
       return "";
@@ -243,10 +258,14 @@ function questNodeToJavascript(
       globalFunctions.set(subType, "");
       const seqs = (structr as unknown as QuestNodePrototypeSequenceStart).LocalizedSequences;
       if (seqs) {
-        const names = [...new Set(seqs.entries().map(([_k, v]: [string, string]) => {
-          const cleaned = String(v).replace(/'/g, "");
-          return cleaned.split(".").pop() || cleaned.split("/").pop() || cleaned;
-        }))].filter(Boolean);
+        const names = [
+          ...new Set(
+            seqs.entries().map(([_k, v]: [string, string]) => {
+              const cleaned = String(v).replace(/'/g, "");
+              return cleaned.split(".").pop() || cleaned.split("/").pop() || cleaned;
+            }),
+          ),
+        ].filter(Boolean);
         if (names.length) return `${subType}(${names.map((n) => `'${n}'`).join(", ")});`;
       }
       return `${subType}();`;
@@ -259,13 +278,28 @@ function questNodeToJavascript(
       const base = renderSubType(subType);
       const params = struct.Params;
       if (params) {
-        const compact = Array.from(params.entries()).map(([_k, v]: [string, any]) => {
-          const param = String(v.ModifiedCharacterParam || "").split("::").pop() || "?";
-          const mode = String(v.ChangeValueMode || "").split("::").pop() || "Set";
-          const val = v.ChangeValue ?? 0;
-          const op = mode === "Set" ? "=" : mode === "Add" ? "+=" : mode === "Subtract" ? "-=" : `${mode} `;
-          return `${param} ${op} ${val}`;
-        }).join(", ");
+        const compact = Array.from(params.entries())
+          .map(([_k, v]: [string, any]) => {
+            const param =
+              String(v.ModifiedCharacterParam || "")
+                .split("::")
+                .pop() || "?";
+            const mode =
+              String(v.ChangeValueMode || "")
+                .split("::")
+                .pop() || "Set";
+            const val = v.ChangeValue ?? 0;
+            const op =
+              mode === "Set"
+                ? "="
+                : mode === "Add"
+                  ? "+="
+                  : mode === "Subtract"
+                    ? "-="
+                    : `${mode} `;
+            return `${param} ${op} ${val}`;
+          })
+          .join(", ");
         return base.replace(");", `, '${compact}');`);
       }
       return base;
@@ -314,7 +348,11 @@ function questNodeToJavascript(
       return renderSubType(subType);
     case "EQuestNodeType::ShowFadeScreen":
       globalFunctions.set(subType, "");
-      return renderSubTypeWithProps<QuestNodePrototypeShowFadeScreen>(subType, ["FadeTime", "ScreenText", "ImagePath"]);
+      return renderSubTypeWithProps<QuestNodePrototypeShowFadeScreen>(subType, [
+        "FadeTime",
+        "ScreenText",
+        "ImagePath",
+      ]);
     case "EQuestNodeType::ShowLoadingScreen":
       globalFunctions.set(subType, "");
       return renderSubType(subType);
@@ -344,7 +382,9 @@ function questNodeToJavascript(
     case "EQuestNodeType::ToggleNPCHidden": {
       globalFunctions.set(subType, "");
       const base = renderSubType(subType);
-      const hideType = String((structr as any).HideViewType || "").split("::").pop();
+      const hideType = String((structr as any).HideViewType || "")
+        .split("::")
+        .pop();
       return hideType ? base.replace(");", `, '${hideType}');`) : base;
     }
     case "EQuestNodeType::TrackJournal":
@@ -354,13 +394,19 @@ function questNodeToJavascript(
       globalFunctions.set(subType, "");
       return renderSubType(subType);
     case "EQuestNodeType::Trigger": {
-      const eventType = String((structr as any).EventType || "").split("::").pop() || "OnTrigger";
+      const eventType =
+        String((structr as any).EventType || "")
+          .split("::")
+          .pop() || "OnTrigger";
       globalFunctions.set(eventType, "");
       const triggerGuid = String((structr as any).TriggerQuestGuid || "");
       if (triggerGuid) questActors.add(triggerGuid);
       const target = struct.TargetQuestGuid;
       if (target) questActors.add(String(target));
-      const args = [target ? `questActors['${target}']` : "", triggerGuid ? `questActors['${triggerGuid}']` : ""].filter(Boolean);
+      const args = [
+        target ? `questActors['${target}']` : "",
+        triggerGuid ? `questActors['${triggerGuid}']` : "",
+      ].filter(Boolean);
       return `${eventType}(${args.join(", ")});`;
     }
     case "EQuestNodeType::DisableNPCBark":
@@ -395,8 +441,14 @@ function questNodeToJavascript(
       return renderSubType(subType);
     case "EQuestNodeType::SetJournal": {
       globalFunctions.set(subType, "");
-      const entity = String(struct.JournalEntity || "").split("::").pop() || "";
-      const action = String(struct.JournalAction || "").split("::").pop() || "";
+      const entity =
+        String(struct.JournalEntity || "")
+          .split("::")
+          .pop() || "";
+      const action =
+        String(struct.JournalAction || "")
+          .split("::")
+          .pop() || "";
       const questSid = String(struct.JournalQuestSID || "");
       const stageSid = String(struct.JournalQuestStageSID || "");
       const parts = [action, entity, stageSid || questSid].filter(Boolean);
@@ -434,470 +486,506 @@ function processConditionNode(
   getNodeSid: (sid: string) => string,
 ) {
   const struct = structT as QuestNodePrototypeCondition;
-  const andOr = struct.Conditions.ConditionCheckType === "EConditionCheckType::Or" ? " || " : " && ";
+  const andOr =
+    struct.Conditions.ConditionCheckType === "EConditionCheckType::Or" ? " || " : " && ";
   const conditionSubType = struct.NodeType.split("::").pop();
-  const conditionExpr = `${struct.Conditions.entries()
-    .filter(([k]) => k !== "ConditionCheckType")
-    .map(([_k, cond]) => {
-      if (typeof cond === "string") {
-        return "";
-      }
-      const groupExpr = cond
-        .entries()
-        .map(([_k, cR]) => {
-          if (typeof cR !== "object") {
+
+  const conditionExpr = struct.Conditions.entries
+    ? `${struct.Conditions.entries()
+        .filter(([k]) => k !== "ConditionCheckType")
+        .map(([_k, cond]) => {
+          if (typeof cond === "string") {
             return "";
           }
-          const c = cR as QuestNodePrototypeConditionsItemItem;
-          const questConditionSubType = c.ConditionType.split("::").pop();
-          switch (c.ConditionType) {
-            case "EQuestConditionType::Weather": {
-              const f = "getWeather";
-              const weather = c.Weather?.split("::").pop() || "";
-              const comp = getConditionComparance(c.ConditionComparance);
-              globalFunctions.set(f, "() => 'Unknown';");
-              return `${f}() ${comp} '${weather}'`;
-            }
-            case "EQuestConditionType::Random": {
-              const f = "getRandomValue";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const val = typeof c.NumericValue === "number" ? c.NumericValue : 0;
-              globalFunctions.set(f, "() => Math.random();");
-              return `${f}() ${comp} ${val}`;
-            }
-            case "EQuestConditionType::Trigger": {
-              const f = `wasTriggered`;
-              const param1 = c.ReactType.split("::").pop();
-              const param2 = c.RequiredSquadMembers.split("::").pop();
-              const target = c.TargetCharacter;
-              const trigger = c.Trigger;
-              const comp = getConditionComparance(c.ConditionComparance);
-              globalFunctions.set(f, "(s) => true");
-              questActors.add(target);
-              questActors.add(trigger);
-              return renderBooleanComparison(`${f}(questActors['${trigger}'], questActors['${target}'], '${param1}', '${param2}')`, comp);
-            }
-            case "EQuestConditionType::Emission": {
-              const f = `isEmissionHappening`;
-              const target = c.EmissionPrototypeSID;
-              const comp = getConditionComparance(c.ConditionComparance);
-              globalFunctions.set(f, "(s) => false");
-              if (target) {
-                questActors.add(target);
-              }
-              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""})`, comp);
-            }
-            case "EQuestConditionType::Money": {
-              const f = "getMoney";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.Money?.VariableValue ?? c.VariableValue ?? c.NumericValue ?? 0;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::Rank": {
-              const f = "getRank";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const rank = c.Rank?.split("::").pop() || "";
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 'Novice';");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} '${rank}'`;
-            }
-            case "EQuestConditionType::JournalState": {
-              const f = `get${questConditionSubType}`;
-              const st = c.JournalState.split("::").pop();
-              const sid = c.JournalQuestSID;
-              const comp = getConditionComparance(c.ConditionComparance);
 
-              globalFunctions.set(f, "(s) => true");
-              globalVars.add(sid);
-              return `${f}(${sid}) ${comp} '${st}'`;
+          const processCond = (
+            cR: QuestNodePrototypeConditionsItem | QuestNodePrototypeConditionsItemItem,
+          ) => {
+            if (typeof cR !== "object") {
+              return "";
             }
-            case "EQuestConditionType::NodeState": {
-              const f = `get${questConditionSubType}`;
-              const st = c.NodeState.split("::").pop();
-              const sid = getNodeSid(c.TargetNode);
-              const comp = getConditionComparance(c.ConditionComparance);
-
-              globalFunctions.set(f, "(s) => true");
-              return `${f}(${sid}) ${comp} '${st}'`;
-            }
-            case "EQuestConditionType::Bleeding": {
-              const f = "getBleeding";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.NumericValue ?? 0;
-              if (target) {
+            const c = cR as QuestNodePrototypeConditionsItemItem;
+            const questConditionSubType = c.ConditionType.split("::").pop();
+            switch (c.ConditionType) {
+              case "EQuestConditionType::Weather": {
+                const f = "getWeather";
+                const weather = c.Weather?.split("::").pop() || "";
+                const comp = getConditionComparance(c.ConditionComparance);
+                globalFunctions.set(f, "() => 'Unknown';");
+                return `${f}() ${comp} '${weather}'`;
+              }
+              case "EQuestConditionType::Random": {
+                const f = "getRandomValue";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const val = typeof c.NumericValue === "number" ? c.NumericValue : 0;
+                globalFunctions.set(f, "() => Math.random();");
+                return `${f}() ${comp} ${val}`;
+              }
+              case "EQuestConditionType::Trigger": {
+                const f = `wasTriggered`;
+                const param1 = c.ReactType.split("::").pop();
+                const param2 = c.RequiredSquadMembers.split("::").pop();
+                const target = c.TargetCharacter;
+                const trigger = c.Trigger;
+                const comp = getConditionComparance(c.ConditionComparance);
+                globalFunctions.set(f, "(s) => true");
                 questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::HP": {
-              const f = "getHP";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.NumericValue ?? 0;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::HPPercent": {
-              const f = "getHPPercent";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.NumericValue ?? 0;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::HungerPoints": {
-              const f = "getHungerPoints";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.NumericValue ?? 0;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::InventoryWeight": {
-              const f = "getInventoryWeight";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.NumericValue ?? 0;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::Radiation": {
-              const f = "getRadiation";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.NumericValue ?? 0;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::AITarget": {
-              const f = "getAITarget";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const targetNpc = c.TargetNPC;
-              const target = c.AITarget;
-              if (targetNpc) {
-                questActors.add(targetNpc);
-              }
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 'None';");
-              return `${f}(${targetNpc ? `questActors['${targetNpc}']` : ""}) ${comp} ${target ? `questActors['${target}']` : "None"}`;
-            }
-            case "EQuestConditionType::ArmorState": {
-              const f = "getArmorState";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.NumericValue ?? 0;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}, ${!!c.WithHeadArmor}, ${!!c.WithBodyArmor}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::Awareness": {
-              const f = "getAwareness";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const level = c.ThreatAwareness?.split("::").pop() || "";
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 'Idle';");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} '${level}'`;
-            }
-            case "EQuestConditionType::Bridge": {
-              const linkedNodeSid = getNodeSid(c.LinkedNodePrototypeSID);
-              const completedPins = c.CompletedNodeLauncherNames.entries()
-                .map(([_k, v]) => JSON.stringify(v))
-                .join(", ");
-              return renderBooleanComparison(
-                `hasQuestNodeExecuted(${linkedNodeSid}, [${completedPins}])`,
-                getConditionComparance(c.ConditionComparance),
-              );
-            }
-            case "EQuestConditionType::ContextualAction": {
-              const f = "hasContextualAction";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const targetNpc = c.TargetNPC;
-              const placeholder = c.TargetContextualActionPlaceholder;
-              if (targetNpc) {
-                questActors.add(targetNpc);
-              }
-              if (placeholder) {
-                questActors.add(placeholder);
-              }
-              globalFunctions.set(f, "() => true;");
-              return renderBooleanComparison(
-                `${f}(${targetNpc ? `questActors['${targetNpc}']` : ""}${placeholder ? `, questActors['${placeholder}']` : ""})`,
-                comp,
-              );
-            }
-            case "EQuestConditionType::CorpseCarry": {
-              const f = "isCarryingCorpse";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const corpse = c.TargetCorpsePlaceholder;
-              const anyBody = !!c.AnyBody;
-              if (target) {
-                questActors.add(target);
-              }
-              if (corpse) {
-                questActors.add(corpse);
-              }
-              globalFunctions.set(f, "() => false;");
-              return renderBooleanComparison(
-                `${f}(${target ? `questActors['${target}']` : ""}${corpse ? `, questActors['${corpse}']` : ""}, ${anyBody})`,
-                comp,
-              );
-            }
-            case "EQuestConditionType::DistanceToNPC": {
-              const f = `get${questConditionSubType}`;
-              const val = c.NumericValue;
-              const sid1 = c.TargetCharacter;
-              const sid2 = c.TargetNPC;
-              const comp = getConditionComparance(c.ConditionComparance);
-              questActors.add(sid1);
-              questActors.add(sid2);
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(questActors['${sid1}'], questActors['${sid2}']) ${comp} '${val}'`;
-            }
-            case "EQuestConditionType::DistanceToPoint": {
-              const f = `get${questConditionSubType}`;
-              const st = c.NumericValue;
-              const point = getConditionPoint(c);
-              const sid = point ? getCoordsStr(point.X, point.Y, point.Z) : "";
-              const comp = getConditionComparance(c.ConditionComparance);
-
-              globalFunctions.set(f, "() => 0;");
-              return `${f}('${sid}') ${comp} ${st}`;
-            }
-            case "EQuestConditionType::Effect": {
-              const f = "hasEffect";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const effect = c.EffectPrototypeSID || "";
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => false;");
-              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""}, ${JSON.stringify(effect)})`, comp);
-            }
-            case "EQuestConditionType::EquipmentInHands": {
-              const f = "hasEquipmentInHands";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const equipment = c.Equipment?.split("::").pop() || "";
-              const itemSid = c.ItemPrototypeSID?.VariableValue ?? c.VariableValue;
-              if (target) {
-                questActors.add(target);
-              }
-              if (itemSid) {
-                globalVars.add(String(itemSid));
-              }
-              globalFunctions.set(f, "() => false;");
-              return renderBooleanComparison(
-                `${f}(${target ? `questActors['${target}']` : "null"}, ${itemSid ? itemSid : "null"}, ${JSON.stringify(equipment)})`,
-                comp,
-              );
-            }
-            case "EQuestConditionType::FactionRelationship": {
-              const f = "getFactionRelationship";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const faction = c.Faction || "";
-              const relation = c.Relationships?.split("::").pop() || "";
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => 'Neutral';");
-              return `${f}(${target ? `questActors['${target}']` : ""}, ${JSON.stringify(faction)}) ${comp} '${relation}'`;
-            }
-            case "EQuestConditionType::GlobalVariable":
-              globalVars.add(c.GlobalVariablePrototypeSID);
-              return `${c.GlobalVariablePrototypeSID} ${getConditionComparance(c.ConditionComparance)} ${c.VariableValue}`;
-            case "EQuestConditionType::HasItemInQuickSlot": {
-              const f = "hasItemInQuickSlot";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const index = c.QuickSlotIndex ?? -1;
-              const itemSid = c.QuickSlotItemSID || "";
-              const consumable = c.QuickSlotConsumableType?.split("::").pop() || "";
-              globalFunctions.set(f, "() => false;");
-              return renderBooleanComparison(`${f}(${index}, ${JSON.stringify(itemSid)}, ${JSON.stringify(consumable)})`, comp);
-            }
-            case "EQuestConditionType::IsAlive":
-              globalFunctions.set(
-                "IsAlive",
-                "(actor) => { const isAlive = !!spawnedActors[actor]; __questLog(`IsAlive(${actor}) === ${isAlive}`); return isAlive; };",
-              );
-              questActors.add(c.TargetCharacter);
-              return `${getConditionComparance(c.ConditionComparance) === "===" ? "" : "!"}IsAlive(questActors['${c.TargetCharacter}'])`;
-
-            case "EQuestConditionType::IsCreated":
-              globalFunctions.set(
-                "IsCreated",
-                "(actor) => { const created = !!spawnedActors[actor]; __questLog(`IsCreated(${actor}) === ${created}`); return created; };",
-              );
-              questActors.add(c.TargetPlaceholder);
-              return `${getConditionComparance(c.ConditionComparance) === "===" ? "" : "!"}IsCreated(questActors['${c.TargetPlaceholder}'])`;
-
-            case "EQuestConditionType::IsEnoughAmmo": {
-              const f = "isEnoughAmmo";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const required = c.AmmoRequired ?? 0;
-              globalFunctions.set(f, "() => true;");
-              return renderBooleanComparison(`${f}(${required})`, comp);
-            }
-            case "EQuestConditionType::IsOnline": {
-              const f = "isOnline";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => true;");
-              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""})`, comp);
-            }
-            case "EQuestConditionType::IsWeaponJammed": {
-              const f = "isWeaponJammed";
-              const comp = getConditionComparance(c.ConditionComparance);
-              globalFunctions.set(f, "() => false;");
-              return renderBooleanComparison(`${f}()`, comp);
-            }
-            case "EQuestConditionType::IsWounded": {
-              const f = "isWounded";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              if (target) {
-                questActors.add(target);
-              }
-              globalFunctions.set(f, "() => false;");
-              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""})`, comp);
-            }
-            case "EQuestConditionType::ItemInContainer": {
-              const f = `is${questConditionSubType}`;
-              const TargetItemContainer = c.TargetItemContainer;
-              const ItemPrototypeSID = c.ItemPrototypeSID?.VariableValue ?? c.VariableValue;
-              const ItemsCount = c.ItemsCount?.VariableValue ?? c.NumericValue ?? 0;
-              const comp = getConditionComparance(c.ConditionComparance);
-
-              globalFunctions.set(f, "() => true;");
-              globalVars.add(String(ItemPrototypeSID));
-              questActors.add(TargetItemContainer);
-
-              return renderBooleanComparison(`${f}(questActors['${TargetItemContainer}'], ${ItemPrototypeSID}, ${ItemsCount})`, comp);
-            }
-            case "EQuestConditionType::ItemInInventory": {
-              const f = `is${questConditionSubType}`;
-              const ItemPrototypeSID = c.ItemPrototypeSID?.VariableValue ?? c.VariableValue;
-              const ItemsCount = c.ItemsCount?.VariableValue ?? c.NumericValue ?? 0;
-              const comp = getConditionComparance(c.ConditionComparance);
-
-              globalFunctions.set(f, "() => true;");
-              globalVars.add(String(ItemPrototypeSID));
-
-              return renderBooleanComparison(`${f}(${ItemPrototypeSID}, ${ItemsCount})`, comp);
-            }
-            case "EQuestConditionType::LookAtAngle": {
-              const f = "getLookAtAngle";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const trigger = c.Trigger;
-              const val = c.NumericValue ?? 0;
-              const point = getConditionPoint(c);
-              if (trigger) {
                 questActors.add(trigger);
+                return renderBooleanComparison(
+                  `${f}(questActors['${trigger}'], questActors['${target}'], '${param1}', '${param2}')`,
+                  comp,
+                );
               }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${trigger ? `questActors['${trigger}']` : ""}, ${JSON.stringify(point ? getCoordsStr(point.X, point.Y, point.Z) : "")}, ${!!c.BoolValue}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::Note": {
-              const f = "hasNote";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const note = c.NotePrototypeSID || "";
-              globalFunctions.set(f, "() => false;");
-              return renderBooleanComparison(`${f}(${JSON.stringify(note)})`, comp);
-            }
-            case "EQuestConditionType::PersonalRelationship": {
-              const f = `is${questConditionSubType}`;
-              const comp = getConditionComparance(c.ConditionComparance);
-              const TargetCharacter = c.TargetCharacter;
-              const Relationships = c.Relationships.split("::").pop();
-              globalFunctions.set(f, "() => 'Friend';");
-              questActors.add(TargetCharacter);
-              globalVars.add(Relationships);
+              case "EQuestConditionType::Emission": {
+                const f = `isEmissionHappening`;
+                const target = c.EmissionPrototypeSID;
+                const comp = getConditionComparance(c.ConditionComparance);
+                globalFunctions.set(f, "(s) => false");
+                if (target) {
+                  questActors.add(target);
+                }
+                return renderBooleanComparison(
+                  `${f}(${target ? `questActors['${target}']` : ""})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::Money": {
+                const f = "getMoney";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.Money?.VariableValue ?? c.VariableValue ?? c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
+              }
+              case "EQuestConditionType::Rank": {
+                const f = "getRank";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const rank = c.Rank?.split("::").pop() || "";
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 'Novice';");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} '${rank}'`;
+              }
+              case "EQuestConditionType::JournalState": {
+                const f = `get${questConditionSubType}`;
+                const st = c.JournalState.split("::").pop();
+                const sid = c.JournalQuestSID;
+                const comp = getConditionComparance(c.ConditionComparance);
 
-              return `${f}(questActors['${TargetCharacter}']) ${comp} ${Relationships}`;
-            }
-            case "EQuestConditionType::PlayerOverload": {
-              const f = "isPlayerOverloaded";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              if (target) {
-                questActors.add(target);
+                globalFunctions.set(f, "(s) => true");
+                globalVars.add(sid);
+                return `${f}(${sid}) ${comp} '${st}'`;
               }
-              globalFunctions.set(f, "() => false;");
-              return renderBooleanComparison(`${f}(${target ? `questActors['${target}']` : ""})`, comp);
-            }
-            case "EQuestConditionType::Psy": {
-              const f = "getPsy";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.NumericValue ?? 0;
-              if (target) {
-                questActors.add(target);
+              case "EQuestConditionType::NodeState": {
+                const f = `get${questConditionSubType}`;
+                const st = c.NodeState.split("::").pop();
+                const sid = getNodeSid(c.TargetNode);
+                const comp = getConditionComparance(c.ConditionComparance);
+
+                globalFunctions.set(f, "(s) => true");
+                return `${f}(${sid}) ${comp} '${st}'`;
               }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
-            }
-            case "EQuestConditionType::Stamina": {
-              const f = "getStamina";
-              const comp = getConditionComparance(c.ConditionComparance);
-              const target = c.TargetCharacter;
-              const val = c.NumericValue ?? 0;
-              if (target) {
-                questActors.add(target);
+              case "EQuestConditionType::Bleeding": {
+                const f = "getBleeding";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
               }
-              globalFunctions.set(f, "() => 0;");
-              return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
+              case "EQuestConditionType::HP": {
+                const f = "getHP";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
+              }
+              case "EQuestConditionType::HPPercent": {
+                const f = "getHPPercent";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
+              }
+              case "EQuestConditionType::HungerPoints": {
+                const f = "getHungerPoints";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
+              }
+              case "EQuestConditionType::InventoryWeight": {
+                const f = "getInventoryWeight";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
+              }
+              case "EQuestConditionType::Radiation": {
+                const f = "getRadiation";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
+              }
+              case "EQuestConditionType::AITarget": {
+                const f = "getAITarget";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const targetNpc = c.TargetNPC;
+                const target = c.AITarget;
+                if (targetNpc) {
+                  questActors.add(targetNpc);
+                }
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 'None';");
+                return `${f}(${targetNpc ? `questActors['${targetNpc}']` : ""}) ${comp} ${target ? `questActors['${target}']` : "None"}`;
+              }
+              case "EQuestConditionType::ArmorState": {
+                const f = "getArmorState";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}, ${!!c.WithHeadArmor}, ${!!c.WithBodyArmor}) ${comp} ${val}`;
+              }
+              case "EQuestConditionType::Awareness": {
+                const f = "getAwareness";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const level = c.ThreatAwareness?.split("::").pop() || "";
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 'Idle';");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} '${level}'`;
+              }
+              case "EQuestConditionType::Bridge": {
+                const linkedNodeSid = getNodeSid(c.LinkedNodePrototypeSID);
+                const completedPins = c.CompletedNodeLauncherNames.entries()
+                  .map(([_k, v]) => JSON.stringify(v))
+                  .join(", ");
+                return renderBooleanComparison(
+                  `hasQuestNodeExecuted(${linkedNodeSid}, [${completedPins}])`,
+                  getConditionComparance(c.ConditionComparance),
+                );
+              }
+              case "EQuestConditionType::ContextualAction": {
+                const f = "hasContextualAction";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const targetNpc = c.TargetNPC;
+                const placeholder = c.TargetContextualActionPlaceholder;
+                if (targetNpc) {
+                  questActors.add(targetNpc);
+                }
+                if (placeholder) {
+                  questActors.add(placeholder);
+                }
+                globalFunctions.set(f, "() => true;");
+                return renderBooleanComparison(
+                  `${f}(${targetNpc ? `questActors['${targetNpc}']` : ""}${placeholder ? `, questActors['${placeholder}']` : ""})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::CorpseCarry": {
+                const f = "isCarryingCorpse";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const corpse = c.TargetCorpsePlaceholder;
+                const anyBody = !!c.AnyBody;
+                if (target) {
+                  questActors.add(target);
+                }
+                if (corpse) {
+                  questActors.add(corpse);
+                }
+                globalFunctions.set(f, "() => false;");
+                return renderBooleanComparison(
+                  `${f}(${target ? `questActors['${target}']` : ""}${corpse ? `, questActors['${corpse}']` : ""}, ${anyBody})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::DistanceToNPC": {
+                const f = `get${questConditionSubType}`;
+                const val = c.NumericValue;
+                const sid1 = c.TargetCharacter;
+                const sid2 = c.TargetNPC;
+                const comp = getConditionComparance(c.ConditionComparance);
+                questActors.add(sid1);
+                questActors.add(sid2);
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(questActors['${sid1}'], questActors['${sid2}']) ${comp} '${val}'`;
+              }
+              case "EQuestConditionType::DistanceToPoint": {
+                const f = `get${questConditionSubType}`;
+                const st = c.NumericValue;
+                const point = getConditionPoint(c);
+                const sid = point ? getCoordsStr(point.X, point.Y, point.Z) : "";
+                const comp = getConditionComparance(c.ConditionComparance);
+
+                globalFunctions.set(f, "() => 0;");
+                return `${f}('${sid}') ${comp} ${st}`;
+              }
+              case "EQuestConditionType::Effect": {
+                const f = "hasEffect";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const effect = c.EffectPrototypeSID || "";
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => false;");
+                return renderBooleanComparison(
+                  `${f}(${target ? `questActors['${target}']` : ""}, ${JSON.stringify(effect)})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::EquipmentInHands": {
+                const f = "hasEquipmentInHands";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const equipment = c.Equipment?.split("::").pop() || "";
+                const itemSid = c.ItemPrototypeSID?.VariableValue ?? c.VariableValue;
+                if (target) {
+                  questActors.add(target);
+                }
+                if (itemSid) {
+                  globalVars.add(String(itemSid));
+                }
+                globalFunctions.set(f, "() => false;");
+                return renderBooleanComparison(
+                  `${f}(${target ? `questActors['${target}']` : "null"}, ${itemSid ? itemSid : "null"}, ${JSON.stringify(equipment)})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::FactionRelationship": {
+                const f = "getFactionRelationship";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const faction = c.Faction || "";
+                const relation = c.Relationships?.split("::").pop() || "";
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 'Neutral';");
+                return `${f}(${target ? `questActors['${target}']` : ""}, ${JSON.stringify(faction)}) ${comp} '${relation}'`;
+              }
+              case "EQuestConditionType::GlobalVariable":
+                globalVars.add(c.GlobalVariablePrototypeSID);
+                return `${c.GlobalVariablePrototypeSID} ${getConditionComparance(c.ConditionComparance)} ${c.VariableValue}`;
+              case "EQuestConditionType::HasItemInQuickSlot": {
+                const f = "hasItemInQuickSlot";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const index = c.QuickSlotIndex ?? -1;
+                const itemSid = c.QuickSlotItemSID || "";
+                const consumable = c.QuickSlotConsumableType?.split("::").pop() || "";
+                globalFunctions.set(f, "() => false;");
+                return renderBooleanComparison(
+                  `${f}(${index}, ${JSON.stringify(itemSid)}, ${JSON.stringify(consumable)})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::IsAlive":
+                globalFunctions.set(
+                  "IsAlive",
+                  "(actor) => { const isAlive = !!spawnedActors[actor]; __questLog(`IsAlive(${actor}) === ${isAlive}`); return isAlive; };",
+                );
+                questActors.add(c.TargetCharacter);
+                return `${getConditionComparance(c.ConditionComparance) === "===" ? "" : "!"}IsAlive(questActors['${c.TargetCharacter}'])`;
+
+              case "EQuestConditionType::IsCreated":
+                globalFunctions.set(
+                  "IsCreated",
+                  "(actor) => { const created = !!spawnedActors[actor]; __questLog(`IsCreated(${actor}) === ${created}`); return created; };",
+                );
+                questActors.add(c.TargetPlaceholder);
+                return `${getConditionComparance(c.ConditionComparance) === "===" ? "" : "!"}IsCreated(questActors['${c.TargetPlaceholder}'])`;
+
+              case "EQuestConditionType::IsEnoughAmmo": {
+                const f = "isEnoughAmmo";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const required = c.AmmoRequired ?? 0;
+                globalFunctions.set(f, "() => true;");
+                return renderBooleanComparison(`${f}(${required})`, comp);
+              }
+              case "EQuestConditionType::IsOnline": {
+                const f = "isOnline";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => true;");
+                return renderBooleanComparison(
+                  `${f}(${target ? `questActors['${target}']` : ""})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::IsWeaponJammed": {
+                const f = "isWeaponJammed";
+                const comp = getConditionComparance(c.ConditionComparance);
+                globalFunctions.set(f, "() => false;");
+                return renderBooleanComparison(`${f}()`, comp);
+              }
+              case "EQuestConditionType::IsWounded": {
+                const f = "isWounded";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => false;");
+                return renderBooleanComparison(
+                  `${f}(${target ? `questActors['${target}']` : ""})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::ItemInContainer": {
+                const f = `is${questConditionSubType}`;
+                const TargetItemContainer = c.TargetItemContainer;
+                const ItemPrototypeSID = c.ItemPrototypeSID?.VariableValue ?? c.VariableValue;
+                const ItemsCount = c.ItemsCount?.VariableValue ?? c.NumericValue ?? 0;
+                const comp = getConditionComparance(c.ConditionComparance);
+
+                globalFunctions.set(f, "() => true;");
+                globalVars.add(String(ItemPrototypeSID));
+                questActors.add(TargetItemContainer);
+
+                return renderBooleanComparison(
+                  `${f}(questActors['${TargetItemContainer}'], ${ItemPrototypeSID}, ${ItemsCount})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::ItemInInventory": {
+                const f = `is${questConditionSubType}`;
+                const ItemPrototypeSID = c.ItemPrototypeSID?.VariableValue ?? c.VariableValue;
+                const ItemsCount = c.ItemsCount?.VariableValue ?? c.NumericValue ?? 0;
+                const comp = getConditionComparance(c.ConditionComparance);
+
+                globalFunctions.set(f, "() => true;");
+                globalVars.add(String(ItemPrototypeSID));
+
+                return renderBooleanComparison(`${f}(${ItemPrototypeSID}, ${ItemsCount})`, comp);
+              }
+              case "EQuestConditionType::LookAtAngle": {
+                const f = "getLookAtAngle";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const trigger = c.Trigger;
+                const val = c.NumericValue ?? 0;
+                const point = getConditionPoint(c);
+                if (trigger) {
+                  questActors.add(trigger);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${trigger ? `questActors['${trigger}']` : ""}, ${JSON.stringify(point ? getCoordsStr(point.X, point.Y, point.Z) : "")}, ${!!c.BoolValue}) ${comp} ${val}`;
+              }
+              case "EQuestConditionType::Note": {
+                const f = "hasNote";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const note = c.NotePrototypeSID || "";
+                globalFunctions.set(f, "() => false;");
+                return renderBooleanComparison(`${f}(${JSON.stringify(note)})`, comp);
+              }
+              case "EQuestConditionType::PersonalRelationship": {
+                const f = `is${questConditionSubType}`;
+                const comp = getConditionComparance(c.ConditionComparance);
+                const TargetCharacter = c.TargetCharacter;
+                const Relationships = c.Relationships.split("::").pop();
+                globalFunctions.set(f, "() => 'Friend';");
+                questActors.add(TargetCharacter);
+                globalVars.add(Relationships);
+
+                return `${f}(questActors['${TargetCharacter}']) ${comp} ${Relationships}`;
+              }
+              case "EQuestConditionType::PlayerOverload": {
+                const f = "isPlayerOverloaded";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => false;");
+                return renderBooleanComparison(
+                  `${f}(${target ? `questActors['${target}']` : ""})`,
+                  comp,
+                );
+              }
+              case "EQuestConditionType::Psy": {
+                const f = "getPsy";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
+              }
+              case "EQuestConditionType::Stamina": {
+                const f = "getStamina";
+                const comp = getConditionComparance(c.ConditionComparance);
+                const target = c.TargetCharacter;
+                const val = c.NumericValue ?? 0;
+                if (target) {
+                  questActors.add(target);
+                }
+                globalFunctions.set(f, "() => 0;");
+                return `${f}(${target ? `questActors['${target}']` : ""}) ${comp} ${val}`;
+              }
             }
-          }
+          };
+
+          const groupExpr = cond.ConditionType
+            ? processCond(cond)
+            : cond
+                .entries()
+                .map(([, cR]) => processCond(cR as QuestNodePrototypeConditionsItemItem))
+                .filter(Boolean)
+                // Conditions inside one group are evaluated conjunctively.
+                .join(" && ");
+          return groupExpr ? `(${groupExpr})` : "";
         })
         .filter(Boolean)
-        // Conditions inside one group are evaluated conjunctively.
-        .join(" && ");
-      return groupExpr ? `(${groupExpr})` : "";
-    })
-    .filter(Boolean)
-    .join(andOr)}`;
+        .join(andOr)}`
+    : "true";
   return renderConditionResultBlock(conditionExpr, conditionSubType === "If");
 }
 
 export function getEventHandler(eventName: string) {
-  return (target: string, content?: string) => `${eventName}(${target}${content ? `, ${content}` : ""})`;
+  return (target: string, content?: string) =>
+    `${eventName}(${target}${content ? `, ${content}` : ""})`;
 }
 
 function indentBlock(content: string, indent = "  ") {
@@ -921,7 +1009,9 @@ function getStructBody(
   let launches = "";
   let usesResultBasedLaunches = false;
   if (node.launches.length) {
-    const isConditionLike = node.raw.NodeType === "EQuestNodeType::Condition" || node.raw.NodeType === "EQuestNodeType::If";
+    const isConditionLike =
+      node.raw.NodeType === "EQuestNodeType::Condition" ||
+      node.raw.NodeType === "EQuestNodeType::If";
     // Condition/If outputs are always result-dependent, even when Name is empty.
     // Other nodes should still use result-dependent dispatch when they expose named outputs.
     const useSwitch = isConditionLike || node.launches.some(({ Name }) => Boolean(Name));
@@ -938,14 +1028,28 @@ function getStructBody(
         })
         .join("\n");
     } else {
-      launches = node.launches.map(({ SID, Name }) => `${getNodeSid(SID)}(f, '${Name || ""}');`).join("\n");
+      launches = node.launches
+        .map(({ SID, Name }) => `${getNodeSid(SID)}(f, '${Name || ""}');`)
+        .join("\n");
     }
   }
   const isCoDep =
-    node.launchersByJsSid && Object.entries(node.launchersByJsSid).length && Object.entries(node.launchersByJsSid).some(([_k, v]) => v.length > 1);
-  const nodeBody = questNodeToJavascript(node.raw, globalVars, globalFunctions, questActors, getNodeSid);
+    node.launchersByJsSid &&
+    Object.entries(node.launchersByJsSid).length &&
+    Object.entries(node.launchersByJsSid).some(([_k, v]) => v.length > 1);
+  const nodeBody = questNodeToJavascript(
+    node.raw,
+    globalVars,
+    globalFunctions,
+    questActors,
+    getNodeSid,
+  );
   const needsResultVar = shouldDeclareResultVar(nodeBody, usesResultBasedLaunches);
-  const bodyLines = [nodeBody, launches, `__questNodeComplete(f, ${needsResultVar ? "result" : "None"});`]
+  const bodyLines = [
+    nodeBody,
+    launches,
+    `__questNodeComplete(f, ${needsResultVar ? "result" : "None"});`,
+  ]
     .filter(Boolean)
     .join("\n");
 
@@ -956,7 +1060,15 @@ function getStructBody(
     ...(isCoDep ? [`  f.Conditions ??= ${JSON.stringify(node.launchersByJsSid || {})};`] : []),
     ...(needsResultVar ? ["  let result = None;"] : []),
     ...(isCoDep
-      ? ["  __questDepth--;", "  waitForCallers(1000, f, caller)", "    .then(() => {", "      __questDepth++;", indentBlock(bodyLines, "      "), "    })", "    .catch((e) => __questLog(e));"]
+      ? [
+          "  __questDepth--;",
+          "  waitForCallers(1000, f, caller)",
+          "    .then(() => {",
+          "      __questDepth++;",
+          indentBlock(bodyLines, "      "),
+          "    })",
+          "    .catch((e) => __questLog(e));",
+        ]
       : [indentBlock(bodyLines, "  ")]),
     "}",
   ];

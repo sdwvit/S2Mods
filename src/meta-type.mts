@@ -16,6 +16,7 @@ export type StructTransformer<T> = ((
   contains?: boolean;
   contents?: string[];
   files: string[];
+  extraStructs?: Struct[]; // optional place for transformer to populate, so that other transformers can await for this information
 };
 export type MetaType<T = Struct> = {
   nameOverride?: string;

@@ -1,24 +1,37 @@
 import type { MetaContext } from "./meta-type.mts";
+import "./ensure-env.mts";
 import { Struct } from "s2cfgtojson";
-import type { ArtifactPrototype, QuestItemPrototype, QuestNodePrototype, SpawnActorPrototype } from "s2cfgtojson";
+import type { ObjPrototype, QuestNodePrototype, SpawnActorPrototype } from "s2cfgtojson";
 import { readFileAndGetStructs } from "./read-file-and-get-structs.mts";
 import { writeFileSync } from "node:fs";
 import { onL1Finish } from "./cache/l1-cache.mts";
-import { allDefaultArtifactPrototypes, allDefaultQuestItemPrototypes } from "./consts.mts";
+import {
+  allDefaultAmmoPrototypesRecord,
+  allDefaultArmorPrototypesRecord,
+  allDefaultArtifactPrototypesRecord,
+  allDefaultAttachPrototypesRecord,
+  allDefaultQuestItemPrototypesRecord,
+  allDefaultWeaponPrototypesRecord,
+} from "./consts.mts";
 import { logger } from "./logger.mts";
 import { normalizeQuestNodes } from "./quest/normalize.mts";
 import { buildQuestScriptParts } from "./quest/codegen.mts";
 import { getRuntimeSource } from "./quest/runtime.mts";
-import path from "node:path";
-import { getCfgFiles } from "./get-cfg-files.mts";
 import { readFile } from "node:fs/promises";
 import { baseCfgDir } from "./base-paths.mts";
 import { pathToFileURL } from "node:url";
-import { renderQuestJsGlobalFunctionStub, resolveQuestNodesToJsInputPath as resolveQuestNodesToJsInputPathRaw } from "./quest/js-gen-utils.mts";
+import {
+  isRecentQuestNodesJsDebugOutput,
+  renderQuestJsGlobalFunctionStub,
+  resolveQuestNodesToJsInputPath as resolveQuestNodesToJsInputPathRaw,
+} from "./quest/js-gen-utils.mts";
+import path from "node:path";
+import { getCfgFiles } from "./get-cfg-files.mts";
 
 export async function questNodesToJs(context: MetaContext<QuestNodePrototype>) {
   const ir = normalizeQuestNodes(context);
-  const { content, globalFunctions, globalVars, questActors, launchOnQuestStart } = buildQuestScriptParts(ir);
+  const { content, globalFunctions, globalVars, questActors, launchOnQuestStart } =
+    buildQuestScriptParts(ir);
   globalVars.add("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"); // Skif
   globalVars.add("None");
   const actorInfos = await getQuestActorsInfo(questActors);
@@ -38,8 +51,11 @@ export async function questNodesToJs(context: MetaContext<QuestNodePrototype>) {
     const bIsStart = b.endsWith("_Start");
     return aIsStart === bIsStart ? 0 : aIsStart ? 1 : -1;
   });
-  const launchOnQuestStartStr = launchOnQuestStart.map((sid) => `console.log('\\n// ${sid}()');\n${sid}(QuestStartCaller, '');`).join("\n");
-  const usesSpawnedActors = globalFunctionsStr.includes("spawnedActors[") || content.includes("spawnedActors[");
+  const launchOnQuestStartStr = launchOnQuestStart
+    .map((sid) => `console.log('\\n// ${sid}()');\n${sid}(QuestStartCaller, '');`)
+    .join("\n");
+  const usesSpawnedActors =
+    globalFunctionsStr.includes("spawnedActors[") || content.includes("spawnedActors[");
   const usesQuestStartCaller = launchOnQuestStart.length > 0;
   const usesHasQuestNodeExecuted = content.includes("hasQuestNodeExecuted(");
   const usesWaitForCallers = content.includes("waitForCallers(");
@@ -72,7 +88,9 @@ export async function questNodesToJs(context: MetaContext<QuestNodePrototype>) {
 }
 
 async function getQuestActorsInfo(questActors: Set<string>) {
-  const questActorsArrWithoutSkif = [...questActors].filter((e) => e !== "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+  const questActorsArrWithoutSkif = [...questActors].filter(
+    (e) => e !== "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+  );
 
   async function tryFindStructWithName(name: string) {
     try {
@@ -82,52 +100,67 @@ async function getQuestActorsInfo(questActors: Set<string>) {
     }
   }
 
-  const relevantStructs: [string, SpawnActorPrototype | QuestNodePrototype | QuestItemPrototype | ArtifactPrototype | undefined][] =
-    await Promise.all(
-      questActorsArrWithoutSkif.map(async (SID) => {
-        const maybeKnownActor = allDefaultQuestItemPrototypes.find((s) => s.SID === SID) || allDefaultArtifactPrototypes.find((s) => s.SID === SID);
-        if (maybeKnownActor) {
-          return [SID, maybeKnownActor];
-        }
-        const maybeActor = await tryFindStructWithName(`${SID}.cfg`);
-        if (maybeActor) {
-          return [SID, maybeActor];
-        }
-        return [SID, undefined];
-      }),
-    );
+  const relevantStructs: [
+    string,
+    SpawnActorPrototype | QuestNodePrototype | ObjPrototype | undefined,
+  ][] = await Promise.all(
+    questActorsArrWithoutSkif.map(async (SID) => {
+      const maybeKnownActor =
+        allDefaultArmorPrototypesRecord[SID] ||
+        allDefaultAmmoPrototypesRecord[SID] ||
+        allDefaultAttachPrototypesRecord[SID] ||
+        allDefaultWeaponPrototypesRecord[SID] ||
+        allDefaultQuestItemPrototypesRecord[SID] ||
+        allDefaultArtifactPrototypesRecord[SID];
+
+      if (maybeKnownActor) {
+        return [SID, maybeKnownActor];
+      }
+      const maybeActor = await tryFindStructWithName(`${SID}.cfg`);
+      if (maybeActor) {
+        return [SID, maybeActor];
+      }
+      return [SID, undefined];
+    }),
+  );
   return Object.fromEntries(
     [["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "Skif"]].concat(
-      relevantStructs.map(([SID, sap]) => {
-        if (!sap) {
+      relevantStructs.map(([SID, spawnActorPrototype]) => {
+        if (!spawnActorPrototype) {
           return [SID, SID];
         }
 
-        if ("PositionX" in sap) {
-          const pos = ` @ ${getCoordsStr(sap.PositionX, sap.PositionY, sap.PositionZ)}`;
+        if ("PositionX" in spawnActorPrototype) {
+          const pos = ` @ ${getCoordsStr(spawnActorPrototype.PositionX, spawnActorPrototype.PositionY, spawnActorPrototype.PositionZ)}`;
 
-          const squadInfo = sap.SpawnedGenericMembers?.entries?.()
+          const squadInfo = spawnActorPrototype.SpawnedGenericMembers?.entries?.()
             .map(([_k, v]) => `${v.SpawnedSquadMembersCount} ${v.SpawnedPrototypeSID}`)
             .join(" + ");
           if (squadInfo) {
-            return [sap.SID, `${squadInfo}${pos}`];
+            return [spawnActorPrototype.SID, `${squadInfo}${pos}`];
           }
-          const maybeContainer = sap.SpawnedPrototypeSID && `${sap.SpawnedPrototypeSID}`;
+          const maybeContainer =
+            (spawnActorPrototype.SpawnedPrototypeSID &&
+              `${spawnActorPrototype.SpawnedPrototypeSID}`) ||
+            (spawnActorPrototype.SpawnType && `${spawnActorPrototype.SpawnType.split("::").pop()}`);
           if (maybeContainer) {
-            return [sap.SID, `${maybeContainer}${pos}`];
+            return [spawnActorPrototype.SID, `${maybeContainer}${pos}`];
           }
-          return [sap.SID, sap.__internal__?.refkey?.toString() || sap.SID];
+          return [
+            spawnActorPrototype.SID,
+            spawnActorPrototype.__internal__?.refkey?.toString() || spawnActorPrototype.SID,
+          ];
         }
 
-        if ("ArtifactType" in sap) {
+        if ("ArtifactType" in spawnActorPrototype) {
           return [SID, SID];
         }
 
-        if ("QuestSID" in sap) {
-          return [SID, sap.QuestSID];
+        if ("QuestSID" in spawnActorPrototype) {
+          return [SID, spawnActorPrototype.QuestSID];
         }
 
-        if ("IsQuestItem" in sap) {
+        if ("IsQuestItem" in spawnActorPrototype) {
           return [SID, SID];
         }
         return [SID, SID];
@@ -149,7 +182,7 @@ export async function runQuestNodesToJsDebug(
 /media/nvme/STALKER2ZoneKit/Stalker2/Content/GameLite/GameData/QuestNodePrototypes/Garbage_L_Svora_Camp.cfg
  `,
 ) {
-  await Promise.all(
+  await Promise.allSettled(
     input
       .trim()
       .split("\n")
@@ -157,17 +190,29 @@ export async function runQuestNodesToJsDebug(
       .filter(Boolean)
       .map(async (filePath) => {
         const resolved = resolveQuestNodesToJsInputPath(filePath);
+        if (
+          process.env.SKIP_RECENT_QUEST_NODES_JS_DEBUG_REGEN &&
+          (await isRecentQuestNodesJsDebugOutput(resolved.outputFilePath))
+        ) {
+          logger.log(`Skipping recent quest node debug js ${resolved.outputFilePath}`);
+          return;
+        }
         const context = {
           fileIndex: 0,
           index: 0,
           array: [] as QuestNodePrototype[],
           filePath: resolved.contextFilePath,
           structsById: {},
+          fileName: path.parse(resolved.contextFilePath).base,
           extraStructs: [],
         };
-        const parsed = Struct.fromString<QuestNodePrototype>((await readFile(resolved.sourceFilePath)).toString());
+        const parsed = Struct.fromString<QuestNodePrototype>(
+          (await readFile(resolved.sourceFilePath)).toString(),
+        );
         context.array = parsed.map((s) => s.clone());
-        context.structsById = Object.fromEntries(context.array.map((s) => [s.__internal__.rawName, s as QuestNodePrototype]));
+        context.structsById = Object.fromEntries(
+          context.array.map((s) => [s.__internal__.rawName, s as QuestNodePrototype]),
+        );
 
         const r = await questNodesToJs(context);
         writeFileSync(resolved.outputFilePath, r);
@@ -179,5 +224,5 @@ export async function runQuestNodesToJsDebug(
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await runQuestNodesToJsDebug();
+  await runQuestNodesToJsDebug((await getCfgFiles("QuestNodePrototypes/", true)).join("\n"));
 }
