@@ -425,6 +425,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     const maxUndoStates = 30;
     let saveLayoutTimer = null;
     let restoredViewport = null;
+    let activeDragGroup = null;
     const undoStack = [];
     const redoStack = [];
 
@@ -561,8 +562,15 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       renderDetails(node);
       highlightNeighborhood(node);
     });
-    cy.on('grab', 'node', () => pushUndoState());
-    cy.on('dragfree', 'node', () => scheduleSaveLayout());
+    cy.on('grab', 'node', (event) => {
+      pushUndoState();
+      beginGroupDrag(event.target);
+    });
+    cy.on('drag', 'node', (event) => updateGroupDrag(event.target));
+    cy.on('dragfree', 'node', () => {
+      finishGroupDrag();
+      scheduleSaveLayout();
+    });
     cy.on('zoom pan', () => scheduleSaveLayout());
 
     cy.on('tap', (event) => {
@@ -713,6 +721,45 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         scheduleSaveLayout();
       });
       layout.run();
+    }
+
+    function beginGroupDrag(node) {
+      const selectedNodes = cy.nodes(':selected').filter((selected) => selected.isNode());
+      if (!node.selected() || selectedNodes.length <= 1) {
+        activeDragGroup = null;
+        return;
+      }
+      activeDragGroup = {
+        anchorId: node.id(),
+        lastAnchorPosition: { ...node.position() },
+        members: selectedNodes.filter((selected) => selected.id() !== node.id()),
+      };
+    }
+
+    function updateGroupDrag(node) {
+      if (!activeDragGroup || activeDragGroup.anchorId !== node.id()) {
+        return;
+      }
+      const currentPosition = node.position();
+      const deltaX = currentPosition.x - activeDragGroup.lastAnchorPosition.x;
+      const deltaY = currentPosition.y - activeDragGroup.lastAnchorPosition.y;
+      if (!deltaX && !deltaY) {
+        return;
+      }
+      cy.batch(() => {
+        activeDragGroup.members.positions((member) => {
+          const position = member.position();
+          return {
+            x: position.x + deltaX,
+            y: position.y + deltaY,
+          };
+        });
+      });
+      activeDragGroup.lastAnchorPosition = { ...currentPosition };
+    }
+
+    function finishGroupDrag() {
+      activeDragGroup = null;
     }
 
     function restoreSavedLayout() {
