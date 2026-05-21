@@ -256,6 +256,21 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       background: var(--control-bg-hover);
     }
 
+    button:disabled {
+      cursor: default;
+      opacity: 0.45;
+      background: var(--card-bg);
+      color: var(--muted);
+      border-color: var(--panel-border);
+      transform: none;
+      box-shadow: none;
+    }
+
+    button:disabled:hover {
+      background: var(--card-bg);
+      transform: none;
+    }
+
     .legend {
       display: grid;
       gap: 8px;
@@ -386,6 +401,8 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     <main class="panel canvas">
       <div class="toolbar">
         <button id="themeButton" type="button">Dark mode</button>
+        <button id="undoButton" type="button" disabled>Undo</button>
+        <button id="redoButton" type="button" disabled>Redo</button>
         <button id="layoutButton" type="button">Relayout</button>
       </div>
       <div id="cy"></div>
@@ -400,8 +417,16 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     const fitButton = document.getElementById('fitButton');
     const resetButton = document.getElementById('resetButton');
     const layoutButton = document.getElementById('layoutButton');
+    const undoButton = document.getElementById('undoButton');
+    const redoButton = document.getElementById('redoButton');
     const themeButton = document.getElementById('themeButton');
     const themeStorageKey = 'quest-graph-theme';
+    const layoutStorageKey = 'quest-graph-layout:' + graph.sourceFilePath;
+    const maxUndoStates = 30;
+    let saveLayoutTimer = null;
+    let restoredViewport = null;
+    const undoStack = [];
+    const redoStack = [];
 
     if (!window.cytoscape) {
       detailsEl.innerHTML = '<div class="error">Failed to load Cytoscape.js from CDN.</div>';
@@ -536,6 +561,9 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       renderDetails(node);
       highlightNeighborhood(node);
     });
+    cy.on('grab', 'node', () => pushUndoState());
+    cy.on('dragfree', 'node', () => scheduleSaveLayout());
+    cy.on('zoom pan', () => scheduleSaveLayout());
 
     cy.on('tap', (event) => {
       if (event.target === cy) {
@@ -545,13 +573,27 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
 
     searchEl.addEventListener('input', applyFilters);
     nodeTypeFilterEl.addEventListener('change', applyFilters);
-    fitButton.addEventListener('click', () => cy.fit(cy.nodes(':visible'), 80));
+    fitButton.addEventListener('click', () => {
+      cy.fit(cy.nodes(':visible'), 80);
+      scheduleSaveLayout();
+    });
     resetButton.addEventListener('click', clearSelection);
-    layoutButton.addEventListener('click', () => runActiveLayout());
+    layoutButton.addEventListener('click', () => {
+      pushUndoState();
+      runActiveLayout();
+    });
+    undoButton.addEventListener('click', undoGraphState);
+    redoButton.addEventListener('click', redoGraphState);
     themeButton.addEventListener('click', toggleTheme);
 
     applyFilters();
-    cy.ready(() => runActiveLayout());
+    cy.ready(() => {
+      if (restoreSavedLayout()) {
+        restoreSavedViewport() || focusInitialView();
+        return;
+      }
+      runActiveLayout();
+    });
 
     function getLayout() {
       if (graph.nodeCount > 120) {
@@ -667,9 +709,177 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       const layout = cy.elements(':visible').layout(getLayout());
       layout.once('layoutstop', () => {
         packVisibleComponents();
-        focusInitialView();
+        restoreSavedViewport() || focusInitialView();
+        scheduleSaveLayout();
       });
       layout.run();
+    }
+
+    function restoreSavedLayout() {
+      try {
+        const raw = localStorage.getItem(layoutStorageKey);
+        if (!raw) {
+          return false;
+        }
+        const saved = JSON.parse(raw);
+        const positions = saved && typeof saved === 'object' ? saved.positions : null;
+        restoredViewport = getValidViewport(saved && typeof saved === 'object' ? saved.viewport : null);
+        if (!positions || typeof positions !== 'object') {
+          return false;
+        }
+
+        let restoredCount = 0;
+        cy.batch(() => {
+          cy.nodes().forEach((node) => {
+            const position = positions[node.id()];
+            if (!position || typeof position.x !== 'number' || typeof position.y !== 'number') {
+              return;
+            }
+            node.position(position);
+            restoredCount++;
+          });
+        });
+        return restoredCount > 0;
+      } catch {
+        return false;
+      }
+    }
+
+    function restoreSavedViewport() {
+      if (!restoredViewport) {
+        return false;
+      }
+      cy.zoom(restoredViewport.zoom);
+      cy.pan(restoredViewport.pan);
+      restoredViewport = null;
+      return true;
+    }
+
+    function pushUndoState() {
+      const state = captureGraphState();
+      const lastState = undoStack[undoStack.length - 1];
+      if (lastState && areGraphStatesEqual(lastState, state)) {
+        return;
+      }
+      undoStack.push(state);
+      if (undoStack.length > maxUndoStates) {
+        undoStack.shift();
+      }
+      redoStack.length = 0;
+      updateHistoryButtons();
+    }
+
+    function undoGraphState() {
+      const state = undoStack.pop();
+      if (!state) {
+        updateHistoryButtons();
+        return;
+      }
+      redoStack.push(captureGraphState());
+      applyGraphState(state);
+      scheduleSaveLayout();
+      updateHistoryButtons();
+    }
+
+    function redoGraphState() {
+      const state = redoStack.pop();
+      if (!state) {
+        updateHistoryButtons();
+        return;
+      }
+      undoStack.push(captureGraphState());
+      applyGraphState(state);
+      scheduleSaveLayout();
+      updateHistoryButtons();
+    }
+
+    function updateHistoryButtons() {
+      undoButton.disabled = undoStack.length === 0;
+      redoButton.disabled = redoStack.length === 0;
+    }
+
+    function captureGraphState() {
+      return {
+        positions: Object.fromEntries(
+          cy.nodes().map((node) => [
+            node.id(),
+            {
+              x: Number(node.position('x').toFixed(2)),
+              y: Number(node.position('y').toFixed(2)),
+            },
+          ]),
+        ),
+        viewport: {
+          zoom: Number(cy.zoom().toFixed(4)),
+          pan: {
+            x: Number(cy.pan('x').toFixed(2)),
+            y: Number(cy.pan('y').toFixed(2)),
+          },
+        },
+      };
+    }
+
+    function applyGraphState(state) {
+      cy.batch(() => {
+        cy.nodes().forEach((node) => {
+          const position = state.positions[node.id()];
+          if (position) {
+            node.position(position);
+          }
+        });
+      });
+      cy.zoom(state.viewport.zoom);
+      cy.pan(state.viewport.pan);
+    }
+
+    function areGraphStatesEqual(a, b) {
+      return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+    function scheduleSaveLayout() {
+      if (saveLayoutTimer) {
+        clearTimeout(saveLayoutTimer);
+      }
+      saveLayoutTimer = setTimeout(() => {
+        saveLayoutTimer = null;
+        saveCurrentLayout();
+      }, 250);
+    }
+
+    function saveCurrentLayout() {
+      const state = captureGraphState();
+      localStorage.setItem(
+        layoutStorageKey,
+        JSON.stringify({
+          version: 1,
+          sourceFilePath: graph.sourceFilePath,
+          positions: state.positions,
+          viewport: state.viewport,
+        }),
+      );
+    }
+
+    function getValidViewport(viewport) {
+      if (!viewport || typeof viewport !== 'object') {
+        return null;
+      }
+      const zoom = viewport.zoom;
+      const pan = viewport.pan;
+      if (
+        typeof zoom !== 'number' ||
+        !Number.isFinite(zoom) ||
+        !pan ||
+        typeof pan.x !== 'number' ||
+        typeof pan.y !== 'number' ||
+        !Number.isFinite(pan.x) ||
+        !Number.isFinite(pan.y)
+      ) {
+        return null;
+      }
+      return {
+        zoom,
+        pan: { x: pan.x, y: pan.y },
+      };
     }
 
     function initializeTheme() {
