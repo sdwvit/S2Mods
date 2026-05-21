@@ -426,6 +426,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     let saveLayoutTimer = null;
     let restoredViewport = null;
     let activeDragGroup = null;
+    let isAltPressed = false;
     const undoStack = [];
     const redoStack = [];
 
@@ -433,6 +434,20 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       detailsEl.innerHTML = '<div class="error">Failed to load Cytoscape.js from CDN.</div>';
       throw new Error('Cytoscape.js failed to load');
     }
+
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Alt') {
+        isAltPressed = true;
+      }
+    });
+    window.addEventListener('keyup', (event) => {
+      if (event.key === 'Alt') {
+        isAltPressed = false;
+      }
+    });
+    window.addEventListener('blur', () => {
+      isAltPressed = false;
+    });
 
     const nodeTypeSet = new Set(graph.nodes.map((node) => node.nodeType).filter(Boolean));
     [...nodeTypeSet].sort().forEach((nodeType) => {
@@ -724,6 +739,10 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     }
 
     function beginGroupDrag(node) {
+      if (!isAltPressed) {
+        activeDragGroup = null;
+        return;
+      }
       const highlightedNodes = cy.nodes('.highlighted').filter((highlighted) => highlighted.isNode());
       if (!node.hasClass('highlighted') || highlightedNodes.length <= 1) {
         activeDragGroup = null;
