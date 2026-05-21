@@ -1,7 +1,9 @@
 import path from "node:path";
+import { stat } from "node:fs/promises";
 import { EVENTS } from "./constants.mts";
 
 const EVENTS_SET = new Set(EVENTS);
+const QUEST_NODES_TO_JS_DEBUG_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 export function renderQuestJsGlobalFunctionStub(v: string, i?: string) {
   if (v === "ItemAdd") {
@@ -52,11 +54,18 @@ export function resolveQuestNodesToJsInputPath(inputPath: string, cfgRoot: strin
   const gameDataPrefix = "GameData/";
 
   if (normalized.startsWith("/")) {
-    const relativeToGameData = normalized.startsWith("/GameData/") ? normalized.slice("/GameData/".length) : normalized.slice(1);
-    const looksLikeGameDataRelative = normalized.startsWith("/GameData/") || normalized.startsWith("/QuestNodePrototypes/");
+    const relativeToGameData = normalized.startsWith("/GameData/")
+      ? normalized.slice("/GameData/".length)
+      : normalized.slice(1);
+    const looksLikeGameDataRelative =
+      normalized.startsWith("/GameData/") || normalized.startsWith("/QuestNodePrototypes/");
     if (looksLikeGameDataRelative) {
       const sourceFilePath = path.join(cfgRoot, "GameData", relativeToGameData);
-      return { contextFilePath: `/${relativeToGameData}`, sourceFilePath, outputFilePath: `${sourceFilePath}.js` };
+      return {
+        contextFilePath: `/${relativeToGameData}`,
+        sourceFilePath,
+        outputFilePath: `${sourceFilePath}.js`,
+      };
     }
   }
 
@@ -64,14 +73,23 @@ export function resolveQuestNodesToJsInputPath(inputPath: string, cfgRoot: strin
     const normalizedAbs = trimmed.replaceAll("\\", "/");
     const gameDataMarker = "/GameData/";
     const gameDataIndex = normalizedAbs.indexOf(gameDataMarker);
-    const contextFilePath = gameDataIndex >= 0 ? `/${normalizedAbs.slice(gameDataIndex + gameDataMarker.length)}` : normalized;
+    const contextFilePath =
+      gameDataIndex >= 0
+        ? `/${normalizedAbs.slice(gameDataIndex + gameDataMarker.length)}`
+        : normalized;
     return { contextFilePath, sourceFilePath: trimmed, outputFilePath: `${trimmed}.js` };
   }
 
   if (normalized.startsWith("/")) {
-    const relativeToGameData = normalized.startsWith("/GameData/") ? normalized.slice("/GameData/".length) : normalized.slice(1);
+    const relativeToGameData = normalized.startsWith("/GameData/")
+      ? normalized.slice("/GameData/".length)
+      : normalized.slice(1);
     const sourceFilePath = path.join(cfgRoot, "GameData", relativeToGameData);
-    return { contextFilePath: `/${relativeToGameData}`, sourceFilePath, outputFilePath: `${sourceFilePath}.js` };
+    return {
+      contextFilePath: `/${relativeToGameData}`,
+      sourceFilePath,
+      outputFilePath: `${sourceFilePath}.js`,
+    };
   }
 
   if (normalized.startsWith(gameLitePrefix)) {
@@ -85,10 +103,25 @@ export function resolveQuestNodesToJsInputPath(inputPath: string, cfgRoot: strin
 
   if (normalized.startsWith(gameDataPrefix)) {
     const sourceFilePath = path.join(cfgRoot, normalized);
-    return { contextFilePath: `/${normalized.slice(gameDataPrefix.length)}`, sourceFilePath, outputFilePath: `${sourceFilePath}.js` };
+    return {
+      contextFilePath: `/${normalized.slice(gameDataPrefix.length)}`,
+      sourceFilePath,
+      outputFilePath: `${sourceFilePath}.js`,
+    };
   }
 
-  const contextFilePath = normalized.startsWith("QuestNodePrototypes/") ? `/${normalized}` : `/QuestNodePrototypes/${normalized}`;
+  const contextFilePath = normalized.startsWith("QuestNodePrototypes/")
+    ? `/${normalized}`
+    : `/QuestNodePrototypes/${normalized}`;
   const sourceFilePath = path.join(cfgRoot, "GameData", contextFilePath.slice(1));
   return { contextFilePath, sourceFilePath, outputFilePath: `${sourceFilePath}.js` };
+}
+
+export async function isRecentQuestNodesJsDebugOutput(outputFilePath: string, now = Date.now()) {
+  try {
+    const outputStats = await stat(outputFilePath);
+    return now - outputStats.mtimeMs < QUEST_NODES_TO_JS_DEBUG_MAX_AGE_MS;
+  } catch {
+    return false;
+  }
 }

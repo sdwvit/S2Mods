@@ -28,6 +28,9 @@ export function normalizeQuestNodes(context: MetaContext<QuestNodePrototype>): Q
       return;
     }
     launchers.forEach(([_k, launcher]) => {
+      if (!launcher.Connections?.forEach) {
+        return;
+      }
       launcher.Connections.forEach(([_ck, item]) => {
         const launcherSid = item.SID;
         const launcherNode = nodeBySid.get(launcherSid);
