@@ -396,6 +396,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       </div>
       <div class="details" id="details">
         <p class="hint">Select a node to inspect its fields and connected edges.</p>
+        <p class="hint">Controls: Ctrl+drag or Shift+drag to box-select, drag to move one node, Alt+drag to move highlighted nodes, Undo/Redo to step through layout changes.</p>
       </div>
     </aside>
     <main class="panel canvas">
@@ -447,6 +448,27 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     });
     window.addEventListener('blur', () => {
       isAltPressed = false;
+    });
+    window.addEventListener('keydown', (event) => {
+      const isPrimaryModifier = event.ctrlKey || event.metaKey;
+      if (!isPrimaryModifier) {
+        return;
+      }
+      const key = event.key.toLowerCase();
+      if (key === 'z' && event.shiftKey) {
+        event.preventDefault();
+        redoGraphState();
+        return;
+      }
+      if (key === 'z') {
+        event.preventDefault();
+        undoGraphState();
+        return;
+      }
+      if (key === 'y') {
+        event.preventDefault();
+        redoGraphState();
+      }
     });
 
     const nodeTypeSet = new Set(graph.nodes.map((node) => node.nodeType).filter(Boolean));
