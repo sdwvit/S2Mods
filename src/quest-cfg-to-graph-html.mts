@@ -204,6 +204,11 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       font-size: 0.92rem;
     }
 
+    .meta {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
     .stats {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -454,17 +459,19 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
             'border-width': 2,
             'border-color': 'data(nodeBorder)',
             'label': 'data(label)',
-            'font-size': 12,
+            'font-size': 11,
             'font-family': 'IBM Plex Sans, Segoe UI, sans-serif',
             'color': 'data(nodeText)',
             'text-wrap': 'wrap',
-            'text-max-width': 150,
+            'text-max-width': 148,
             'text-valign': 'center',
             'text-halign': 'center',
-            'padding': '4px',
+            'line-height': 1.05,
+            'padding': '8px 6px',
             'shape': 'round-rectangle',
             'width': 164,
-            'height': 46,
+            'height': 'label',
+            'min-height': 54,
           },
         },
         {
