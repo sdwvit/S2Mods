@@ -1,13 +1,6 @@
 import type { MetaType } from "../../src/meta-type.mts";
-import type {
-  QuestNodePrototype,
-  QuestNodePrototypeConsoleCommand,
-  QuestNodePrototypeOnJournalQuestEvent,
-  QuestNodePrototypeTechnical,
-} from "s2cfgtojson";
-import { Struct } from "s2cfgtojson";
-import type { MetaContext } from "../../src/meta-type.mts";
-import { getLaunchers, rerouteQuestNode } from "../../src/struct-utils.mts";
+import type { QuestNodePrototype, QuestNodePrototypeTechnical } from "s2cfgtojson";
+import { getLaunchers } from "../../src/struct-utils.mts";
 
 async function transformQuestNodePrototypes(struct: QuestNodePrototype) {
   if (struct.SID === "Garbage_L_Container_SQ103") {

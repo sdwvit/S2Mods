@@ -18,7 +18,7 @@ export const getLaunchers = (
   sids_names: ((
     | DeeplyPartial<QuestNodePrototypeConnectionsItem>
     | DeeplyPartial<QuestNodePrototypeConnectionsItem>[]
-  ) & { Excluding?: boolean })[],
+    ) & { Excluding?: boolean })[],
 ) => {
   const Launchers = new Struct() as QuestNodePrototypeLaunchers;
 
@@ -102,82 +102,6 @@ export function getConditions(
 
 const nextIndexByDependant = new Map<string, number>();
 
-function resolveReroutedConnections(
-  connection: QuestNodePrototypeConnectionsItem,
-  context: MetaContext<QuestNodePrototype>,
-  toReroute: Set<string>,
-  visited = new Set<string>(),
-): QuestNodePrototypeConnectionsItem[] {
-  if (!toReroute.has(connection.SID)) {
-    return [connection.fork()];
-  }
-
-  if (visited.has(connection.SID)) {
-    return [];
-  }
-
-  const reroutedStruct = context.structsById[connection.SID];
-  if (!reroutedStruct?.Launchers) {
-    return [];
-  }
-
-  visited.add(connection.SID);
-
-  const resolvedConnections: QuestNodePrototypeConnectionsItem[] = [];
-  const seenConnectionKeys = new Set<string>();
-
-  reroutedStruct.Launchers.forEach?.(([, launcher]) => {
-    launcher.Connections.forEach(([, nestedConnection]) => {
-      for (const resolvedConnection of resolveReroutedConnections(
-        nestedConnection,
-        context,
-        toReroute,
-        visited,
-      )) {
-        const key = `${resolvedConnection.SID}\u0000${resolvedConnection.Name ?? ""}`;
-        if (seenConnectionKeys.has(key)) {
-          continue;
-        }
-        seenConnectionKeys.add(key);
-        resolvedConnections.push(resolvedConnection);
-      }
-    });
-  });
-
-  visited.delete(connection.SID);
-
-  return resolvedConnections;
-}
-
-/**
- * Rewires quest-node launcher connections so `struct` can be bypassed.
- *
- * Example before rerouting:
- * `someNode -> struct -> targetNode`
- *
- * Here `someNode` means any node returned by `getDependants(struct.SID, context.array)`.
- * The function patches `someNode` so it no longer launches `struct`. Instead, `someNode` gets
- * copies of `struct`'s launcher connections to `targetNode`.
- * The forked copy of `struct` has its `Launchers` cleared, so `struct` itself no longer launches
- * anything in the returned patch.
- *
- * Example after rerouting:
- * `someNode -> targetNode`
- *
- * If one of `struct`'s launcher targets is also in `toReroute`, the function follows that node's
- * launchers until it reaches targets that are not in `toReroute`, then copies those final targets
- * onto `someNode` instead.
- *
- * @param struct The node to bypass. Nodes that launch this node are patched to launch
- *   its targets instead, and this node's own `Launchers` are cleared.
- * @param context Lookup context for all quest nodes in the current transform pass, including
- *   `array` for finding upstream dependants and `structsById` for patching resolved nodes.
- * @param toReroute Node SIDs that should be bypassed when resolving `struct`'s launcher targets.
- *   Direct dependants of `struct` that are also in this set are skipped, because their own call to
- *   `rerouteQuestNode` is expected to patch them separately.
- * @param extraDependantsByParentSID Optional extra dependant SIDs keyed by rerouted parent SID.
- *   Use this when some edges are implicit or are not discoverable from launcher connections alone.
- */
 export function rerouteQuestNode(
   struct: QuestNodePrototype,
   context: MetaContext<QuestNodePrototype>,
@@ -192,37 +116,36 @@ export function rerouteQuestNode(
   structFork.Launchers = new Struct() as any;
   const structs = [structFork];
 
-  const dependants = new Set(getDependants(struct.SID, context.array).map((s) => s.SID));
-  const extras = extraDependantsByParentSID[struct.SID];
-  if (extras) {
-    extras.forEach((sid) => dependants.add(sid));
+  const traversedReroutes = new Set<string>();
+  let dependants = new Set([struct.SID]);
+
+  while (dependants.intersection(toReroute).size) {
+    for (const dependantSID of dependants) {
+      if (toReroute.has(dependantSID)) {
+        traversedReroutes.add(dependantSID);
+      }
+      dependants.delete(dependantSID);
+      dependants = dependants.union(
+        new Set(getDependants(dependantSID, context.array).map((s) => s.SID)),
+      );
+    }
+  }
+
+  for (const sid of traversedReroutes) {
+    const extras = extraDependantsByParentSID[sid];
+    if (extras) {
+      dependants = dependants.union(new Set(extras));
+    }
   }
 
   for (const dependantSID of dependants) {
-    if (toReroute.has(dependantSID)) {
-      continue;
-    }
-
     const dependant = context.structsById[dependantSID];
     const dependantFork = dependant.fork();
     dependantFork.Launchers = dependant.Launchers.fork();
     let nextIndex = nextIndexByDependant.get(dependantSID) ?? dependant.Launchers.entries().length;
     struct.Launchers.forEach?.(([, l]) => {
       const launcher = l.fork();
-      launcher.Connections = new Struct() as any;
-      const seenConnectionKeys = new Set<string>();
-
-      l.Connections.forEach(([, connection]) => {
-        for (const resolvedConnection of resolveReroutedConnections(connection, context, toReroute)) {
-          const key = `${resolvedConnection.SID}\u0000${resolvedConnection.Name ?? ""}`;
-          if (seenConnectionKeys.has(key)) {
-            continue;
-          }
-          seenConnectionKeys.add(key);
-          launcher.Connections.addNode(resolvedConnection);
-        }
-      });
-
+      launcher.Connections ||= l.Connections.filter(([, c]) => !toReroute.has(c.SID));
       if (!launcher.Connections.entries().length) {
         return;
       }
