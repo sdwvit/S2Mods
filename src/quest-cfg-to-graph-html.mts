@@ -209,6 +209,27 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       word-break: break-word;
     }
 
+    .hint-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      display: grid;
+      gap: 6px;
+    }
+
+    .keycap {
+      color: var(--ink);
+      background: var(--control-bg);
+      border: 1px solid var(--control-border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 0.86em;
+      font-weight: 600;
+      box-shadow: inset 0 -1px 0 var(--panel-border);
+      white-space: nowrap;
+    }
+
     .stats {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -395,8 +416,15 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         </div>
       </div>
       <div class="details" id="details">
-        <p class="hint">Select a node to inspect its fields and connected edges.</p>
-        <p class="hint">Controls: Ctrl+drag or Shift+drag to box-select, drag to move one node, Alt+drag to move highlighted nodes, Undo/Redo to step through layout changes.</p>
+        <div id="detailsContent">
+          <p class="hint">Select a node to inspect its fields and connected edges.</p>
+        </div>
+        <ul class="hint-list">
+          <li><span class="keycap">Ctrl</span>/<span class="keycap">Shift</span> + drag: box-select nodes</li>
+          <li>Drag: move one node</li>
+          <li><span class="keycap">Alt</span> + drag: move highlighted nodes</li>
+          <li><span class="keycap">Undo</span>/<span class="keycap">Redo</span> buttons or <span class="keycap">Ctrl/Cmd+Z</span>, <span class="keycap">Ctrl/Cmd+Shift+Z</span>, <span class="keycap">Ctrl/Cmd+Y</span>: history</li>
+        </ul>
       </div>
     </aside>
     <main class="panel canvas">
@@ -412,7 +440,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
   <script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
   <script>
     const graph = ${payload};
-    const detailsEl = document.getElementById('details');
+    const detailsEl = document.getElementById('detailsContent');
     const searchEl = document.getElementById('search');
     const nodeTypeFilterEl = document.getElementById('nodeTypeFilter');
     const fitButton = document.getElementById('fitButton');
