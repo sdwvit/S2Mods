@@ -101,6 +101,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       --edge-text: #5d4d40;
       --edge-text-bg: rgba(255, 250, 240, 0.82);
       --highlight: #b85c19;
+      --selection: #1f6fd1;
       --card-bg: rgba(255, 255, 255, 0.55);
       --control-bg: rgba(255, 255, 255, 0.78);
       --control-bg-hover: rgba(255, 255, 255, 0.94);
@@ -139,6 +140,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       --edge-text: #d6c4ab;
       --edge-text-bg: rgba(28, 25, 23, 0.84);
       --highlight: #f0a24f;
+      --selection: #66b3ff;
       --card-bg: rgba(49, 42, 37, 0.66);
       --control-bg: rgba(42, 36, 32, 0.88);
       --control-bg-hover: rgba(56, 48, 43, 0.96);
@@ -569,6 +571,16 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           style: {
             'border-color': 'data(terminalBorder)',
             'border-style': 'dashed',
+          },
+        },
+        {
+          selector: 'node:selected',
+          style: {
+            'border-width': 5,
+            'border-color': 'data(selection)',
+            'underlay-color': 'data(selection)',
+            'underlay-opacity': 0.28,
+            'underlay-padding': 6,
           },
         },
         {
@@ -1201,6 +1213,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         edgeText: css.getPropertyValue('--edge-text').trim(),
         edgeTextBg: css.getPropertyValue('--edge-text-bg').trim(),
         highlight: css.getPropertyValue('--highlight').trim(),
+        selection: css.getPropertyValue('--selection').trim(),
         inverseText: '#fffaf0',
       };
       cy.batch(() => {
@@ -1212,6 +1225,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
             eventFill: palette.eventFill,
             startFill: palette.startFill,
             terminalBorder: palette.terminalBorder,
+            selection: palette.selection,
             inverseText: palette.inverseText,
           });
         });
