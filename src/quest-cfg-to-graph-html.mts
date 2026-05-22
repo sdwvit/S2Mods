@@ -486,7 +486,9 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           <p class="hint">Select a node to inspect its fields and connected edges.</p>
         </div>
         <ul class="hint-list">
-          <li><span class="keycap">Ctrl</span>/<span class="keycap">Shift</span> + drag: box-select nodes</li>
+          <li>Drag: box-select nodes</li>
+          <li><span class="keycap">Ctrl</span>/<span class="keycap">Shift</span> + drag: pan canvas</li>
+          <li>Middle click + drag: pan canvas</li>
           <li>Drag: move one node</li>
           <li><span class="keycap">Alt</span> + drag: move highlighted nodes</li>
           <li><span class="keycap">Row</span>/<span class="keycap">Column</span>: click again to best-effort sort by arrow direction</li>
@@ -547,8 +549,10 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     let restoredViewport = null;
     let activeDragGroup = null;
     let isAltPressed = false;
+    let isPanModifierPressed = false;
     let activeLegendFilter = '';
     let lastArrangeAction = null;
+    let middlePanState = null;
     let previousFilteredNodeIds = [];
     const undoStack = [];
     const redoStack = [];
@@ -562,6 +566,8 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       container: document.getElementById('cy'),
       elements: buildCyElements(graph),
       wheelSensitivity: 0.22,
+      boxSelectionEnabled: true,
+      userPanningEnabled: false,
       style: [
         {
           selector: 'node',
@@ -655,14 +661,25 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       if (event.key === 'Alt') {
         isAltPressed = true;
       }
+      if (event.key === 'Shift' || event.key === 'Control') {
+        isPanModifierPressed = true;
+        updateInteractionMode();
+      }
     });
     window.addEventListener('keyup', (event) => {
       if (event.key === 'Alt') {
         isAltPressed = false;
       }
+      if (event.key === 'Shift' || event.key === 'Control') {
+        isPanModifierPressed = event.shiftKey || event.ctrlKey;
+        updateInteractionMode();
+      }
     });
     window.addEventListener('blur', () => {
       isAltPressed = false;
+      isPanModifierPressed = false;
+      updateInteractionMode();
+      stopMiddleMousePan();
     });
     window.addEventListener('keydown', (event) => {
       const isPrimaryModifier = event.ctrlKey || event.metaKey;
@@ -756,7 +773,9 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     redoButton.addEventListener('click', redoGraphState);
     themeButton.addEventListener('click', toggleTheme);
     initializeSidebarResizer();
+    initializeMiddleMousePan();
 
+    updateInteractionMode();
     updateLegendFilterUi();
     updateSelectionActionButtons();
     applyFilters();
@@ -992,7 +1011,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       }
       pushUndoState();
       lastArrangeAction = null;
-      const gridSize = 48;
+      const gridSize = 32;
       const anchor = nodes.reduce((best, node) => {
         const position = node.position();
         if (!best) {
@@ -1165,8 +1184,62 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       applyThemeToGraph(document.body.classList.contains('dark') ? 'dark' : 'light');
       updateGraphSummary();
       populateNodeTypeFilter();
+      updateInteractionMode();
       applyFilters();
       initializeGraphView();
+    }
+
+    function updateInteractionMode() {
+      cy.userPanningEnabled(isPanModifierPressed);
+      cy.boxSelectionEnabled(!isPanModifierPressed);
+    }
+
+    function initializeMiddleMousePan() {
+      const container = cy.container();
+      container.addEventListener('mousedown', (event) => {
+        if (event.button !== 1) {
+          return;
+        }
+        middlePanState = {
+          x: event.clientX,
+          y: event.clientY,
+        };
+        event.preventDefault();
+      });
+      container.addEventListener('mousemove', (event) => {
+        if (!middlePanState) {
+          return;
+        }
+        const deltaX = event.clientX - middlePanState.x;
+        const deltaY = event.clientY - middlePanState.y;
+        if (!deltaX && !deltaY) {
+          return;
+        }
+        cy.panBy({ x: deltaX, y: deltaY });
+        middlePanState = {
+          x: event.clientX,
+          y: event.clientY,
+        };
+        event.preventDefault();
+      });
+      container.addEventListener('mouseup', (event) => {
+        if (event.button !== 1) {
+          return;
+        }
+        stopMiddleMousePan();
+      });
+      container.addEventListener('mouseleave', () => {
+        stopMiddleMousePan();
+      });
+      container.addEventListener('auxclick', (event) => {
+        if (event.button === 1) {
+          event.preventDefault();
+        }
+      });
+    }
+
+    function stopMiddleMousePan() {
+      middlePanState = null;
     }
 
     function restoreSavedLayout() {
