@@ -10,7 +10,7 @@ import { baseCfgDir } from "./base-paths.mts";
 import { buildQuestGraphData, type QuestGraphData } from "./quest/graph-data.mts";
 import { resolveQuestNodesToJsInputPath } from "./quest/js-gen-utils.mts";
 
-export async function questCfgToGraphHtml(inputPath: string) {
+export async function questCfgToGraphHtml(inputPath: string, outputFilePath?: string) {
   const resolved = resolveQuestGraphInputPath(inputPath);
   const sourceFilePath = resolveGraphSourceFilePath(resolved.sourceFilePath);
   const fileContents = await readFile(sourceFilePath, "utf8");
@@ -25,9 +25,9 @@ export async function questCfgToGraphHtml(inputPath: string) {
     structsById: Object.fromEntries(array.map((s) => [s.__internal__.rawName, s])),
   };
   const graph = buildQuestGraphData(context, sourceFilePath);
-  const outputFilePath = `${sourceFilePath}.graph.html`;
-  await writeFile(outputFilePath, renderQuestGraphHtml(graph), "utf8");
-  return { outputFilePath, sourceFilePath, graph };
+  const finalOutputFilePath = outputFilePath || `${sourceFilePath}.graph.html`;
+  await writeFile(finalOutputFilePath, renderQuestGraphHtml(graph), "utf8");
+  return { outputFilePath: finalOutputFilePath, sourceFilePath, graph };
 }
 
 export function resolveQuestGraphInputPath(inputPath: string) {
@@ -75,6 +75,9 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
   <title>${escapeHtml(graph.title)} quest graph</title>
   <style>
     :root {
+      --sidebar-width: 340px;
+      --resize-handle: rgba(62, 44, 28, 0.12);
+      --resize-handle-active: rgba(184, 92, 25, 0.34);
       --bg: #f4efe4;
       --panel: rgba(255, 250, 240, 0.94);
       --panel-border: rgba(62, 44, 28, 0.18);
@@ -124,6 +127,8 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       --terminal: #6f9860;
       --start: #c94732;
       --shadow: 0 24px 48px rgba(0, 0, 0, 0.34);
+      --resize-handle: rgba(214, 195, 168, 0.14);
+      --resize-handle-active: rgba(224, 138, 58, 0.38);
       --node-fill: #4e4337;
       --node-border: #bfa88d;
       --node-text: #f6ead8;
@@ -166,7 +171,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
 
     .layout {
       display: grid;
-      grid-template-columns: 340px 1fr;
+      grid-template-columns: minmax(260px, var(--sidebar-width)) 12px minmax(0, 1fr);
       height: 100%;
       gap: 16px;
       padding: 16px;
@@ -185,6 +190,29 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       flex-direction: column;
       min-height: 0;
       overflow: hidden;
+    }
+
+    .sidebar-resizer {
+      position: relative;
+      cursor: col-resize;
+      border-radius: 999px;
+      background: transparent;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .sidebar-resizer::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(180deg, transparent 0%, var(--resize-handle) 12%, var(--resize-handle) 88%, transparent 100%);
+      transition: background 120ms ease;
+    }
+
+    .sidebar-resizer:hover::before,
+    body.is-resizing .sidebar-resizer::before {
+      background: linear-gradient(180deg, transparent 0%, var(--resize-handle-active) 12%, var(--resize-handle-active) 88%, transparent 100%);
     }
 
     .section {
@@ -347,6 +375,13 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       letter-spacing: 0.04em;
     }
 
+    .detail-card h2,
+    .detail-card p,
+    .detail-row span {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
     .canvas {
       position: relative;
       min-width: 0;
@@ -384,6 +419,9 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         grid-template-columns: 1fr;
         grid-template-rows: auto minmax(420px, 1fr);
       }
+      .sidebar-resizer {
+        display: none;
+      }
       .sidebar {
         max-height: 48vh;
       }
@@ -394,13 +432,15 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
   <div class="layout">
     <aside class="panel sidebar">
       <div class="section">
-        <h1>${escapeHtml(graph.title)}</h1>
-        <p class="meta">${escapeHtml(graph.sourceFilePath)}</p>
+        <h1 id="graphTitle">${escapeHtml(graph.title)}</h1>
+        <p class="meta" id="graphSource">${escapeHtml(graph.sourceFilePath)}</p>
         <div class="stats">
-          <div class="stat">Nodes<strong>${graph.nodeCount}</strong></div>
-          <div class="stat">Edges<strong>${graph.edgeCount}</strong></div>
+          <div class="stat">Nodes<strong id="nodeCount">${graph.nodeCount}</strong></div>
+          <div class="stat">Edges<strong id="edgeCount">${graph.edgeCount}</strong></div>
         </div>
         <div class="controls">
+          <button id="openCfgButton" type="button">Open CFG</button>
+          <input id="openCfgInput" type="file" accept=".cfg,text/plain" hidden>
           <input id="search" type="search" placeholder="Search SID or JS name">
           <select id="nodeTypeFilter">
             <option value="">All node types</option>
@@ -427,6 +467,13 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         </ul>
       </div>
     </aside>
+    <div
+      class="sidebar-resizer"
+      id="sidebarResizer"
+      role="separator"
+      aria-label="Resize sidebar"
+      aria-orientation="vertical"
+    ></div>
     <main class="panel canvas">
       <div class="toolbar">
         <button id="themeButton" type="button">Dark mode</button>
@@ -439,8 +486,16 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
   </div>
   <script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
   <script>
-    const graph = ${payload};
+    const initialGraph = ${payload};
+    let graph = cloneGraph(initialGraph);
+    let currentGraphIdentity = createGraphIdentityFromGraph(graph);
     const detailsEl = document.getElementById('detailsContent');
+    const titleEl = document.getElementById('graphTitle');
+    const sourceEl = document.getElementById('graphSource');
+    const nodeCountEl = document.getElementById('nodeCount');
+    const edgeCountEl = document.getElementById('edgeCount');
+    const openCfgButton = document.getElementById('openCfgButton');
+    const openCfgInput = document.getElementById('openCfgInput');
     const searchEl = document.getElementById('search');
     const nodeTypeFilterEl = document.getElementById('nodeTypeFilter');
     const fitButton = document.getElementById('fitButton');
@@ -449,13 +504,17 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     const undoButton = document.getElementById('undoButton');
     const redoButton = document.getElementById('redoButton');
     const themeButton = document.getElementById('themeButton');
+    const sidebarResizer = document.getElementById('sidebarResizer');
     const themeStorageKey = 'quest-graph-theme';
-    const layoutStorageKey = 'quest-graph-layout:' + graph.sourceFilePath;
+    const layoutStoragePrefix = 'quest-graph-layout:v3:';
+    const sidebarWidthStorageKey = 'quest-graph-sidebar-width:v1';
     const maxUndoStates = 30;
     let saveLayoutTimer = null;
+    let resizeFrame = null;
     let restoredViewport = null;
     let activeDragGroup = null;
     let isAltPressed = false;
+    let previousFilteredNodeIds = [];
     const undoStack = [];
     const redoStack = [];
 
@@ -464,83 +523,9 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       throw new Error('Cytoscape.js failed to load');
     }
 
-    window.addEventListener('keydown', (event) => {
-      if (event.key === 'Alt') {
-        isAltPressed = true;
-      }
-    });
-    window.addEventListener('keyup', (event) => {
-      if (event.key === 'Alt') {
-        isAltPressed = false;
-      }
-    });
-    window.addEventListener('blur', () => {
-      isAltPressed = false;
-    });
-    window.addEventListener('keydown', (event) => {
-      const isPrimaryModifier = event.ctrlKey || event.metaKey;
-      if (!isPrimaryModifier) {
-        return;
-      }
-      const key = event.key.toLowerCase();
-      if (key === 'z' && event.shiftKey) {
-        event.preventDefault();
-        redoGraphState();
-        return;
-      }
-      if (key === 'z') {
-        event.preventDefault();
-        undoGraphState();
-        return;
-      }
-      if (key === 'y') {
-        event.preventDefault();
-        redoGraphState();
-      }
-    });
-
-    const nodeTypeSet = new Set(graph.nodes.map((node) => node.nodeType).filter(Boolean));
-    [...nodeTypeSet].sort().forEach((nodeType) => {
-      const option = document.createElement('option');
-      option.value = nodeType;
-      option.textContent = nodeType;
-      nodeTypeFilterEl.appendChild(option);
-    });
-
-    const elements = [
-      ...graph.nodes.map((node) => ({
-        group: 'nodes',
-        data: {
-          id: node.id,
-          sid: node.sid,
-          label: node.label,
-          subtitle: node.subtitle,
-          nodeType: node.nodeType,
-          isStart: node.isStart,
-          isTerminal: node.isTerminal,
-          details: node.details,
-        },
-        classes: [
-          node.isStart ? 'is-start' : '',
-          node.isTerminal ? 'is-terminal' : '',
-          /Event$/.test(node.nodeType) ? 'is-event' : '',
-        ].filter(Boolean).join(' '),
-      })),
-      ...graph.edges.map((edge) => ({
-        group: 'edges',
-        data: {
-          id: edge.id,
-          source: edge.source,
-          target: edge.target,
-          label: edge.label,
-          kind: edge.kind,
-        },
-      })),
-    ];
-
     const cy = cytoscape({
       container: document.getElementById('cy'),
-      elements,
+      elements: buildCyElements(graph),
       wheelSensitivity: 0.22,
       style: [
         {
@@ -594,7 +579,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
             'target-arrow-color': 'data(edgeLine)',
             'line-color': 'data(edgeLine)',
             'width': 2,
-            'label': graph.edgeCount <= 120 ? 'data(label)' : '',
+            'label': 'data(showLabel)',
             'font-size': 9,
             'text-background-color': 'data(edgeTextBg)',
             'text-background-opacity': 1,
@@ -621,7 +606,46 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       ],
     });
 
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Alt') {
+        isAltPressed = true;
+      }
+    });
+    window.addEventListener('keyup', (event) => {
+      if (event.key === 'Alt') {
+        isAltPressed = false;
+      }
+    });
+    window.addEventListener('blur', () => {
+      isAltPressed = false;
+    });
+    window.addEventListener('keydown', (event) => {
+      const isPrimaryModifier = event.ctrlKey || event.metaKey;
+      if (!isPrimaryModifier) {
+        return;
+      }
+      const key = event.key.toLowerCase();
+      if (key === 'z' && event.shiftKey) {
+        event.preventDefault();
+        redoGraphState();
+        return;
+      }
+      if (key === 'z') {
+        event.preventDefault();
+        undoGraphState();
+        return;
+      }
+      if (key === 'y') {
+        event.preventDefault();
+        redoGraphState();
+      }
+    });
+
     initializeTheme();
+    initializeSidebarWidth();
+    updateGraphSummary();
+    populateNodeTypeFilter();
+
     cy.on('tap', 'node', (event) => {
       const node = event.target;
       renderDetails(node);
@@ -637,7 +661,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       scheduleSaveLayout();
     });
     cy.on('zoom pan', () => scheduleSaveLayout());
-
     cy.on('tap', (event) => {
       if (event.target === cy) {
         clearSelection();
@@ -646,6 +669,24 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
 
     searchEl.addEventListener('input', applyFilters);
     nodeTypeFilterEl.addEventListener('change', applyFilters);
+    openCfgButton.addEventListener('click', () => openCfgInput.click());
+    openCfgInput.addEventListener('change', async (event) => {
+      const input = event.target;
+      const file = input.files && input.files[0];
+      if (!file) {
+        return;
+      }
+      try {
+        const text = await file.text();
+        const nextGraph = parseQuestCfgTextToGraph(text, file.name || 'Uploaded.cfg');
+        loadGraph(nextGraph, createGraphIdentityFromCfgText(text, file.name || nextGraph.title));
+      } catch (error) {
+        const message = error && error.message ? error.message : String(error);
+        detailsEl.innerHTML = '<div class="error">Failed to open CFG: ' + escapeHtml(message) + '</div>';
+      } finally {
+        input.value = '';
+      }
+    });
     fitButton.addEventListener('click', () => {
       cy.fit(cy.nodes(':visible'), 80);
       scheduleSaveLayout();
@@ -658,14 +699,11 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     undoButton.addEventListener('click', undoGraphState);
     redoButton.addEventListener('click', redoGraphState);
     themeButton.addEventListener('click', toggleTheme);
+    initializeSidebarResizer();
 
     applyFilters();
     cy.ready(() => {
-      if (restoreSavedLayout()) {
-        restoreSavedViewport() || focusInitialView();
-        return;
-      }
-      runActiveLayout();
+      initializeGraphView();
     });
 
     function getLayout() {
@@ -702,6 +740,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     function applyFilters() {
       const search = searchEl.value.trim().toLowerCase();
       const nodeType = nodeTypeFilterEl.value;
+      const visibleNodeIds = [];
       cy.batch(() => {
         cy.elements().removeClass('faded');
         cy.nodes().forEach((node) => {
@@ -712,6 +751,9 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
             String(node.data('subtitle') || '').toLowerCase().includes(search);
           const matchesType = !nodeType || node.data('nodeType') === nodeType;
           const visible = matchesSearch && matchesType;
+          if (visible) {
+            visibleNodeIds.push(node.id());
+          }
           node.style('display', visible ? 'element' : 'none');
         });
         cy.edges().forEach((edge) => {
@@ -719,12 +761,18 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           edge.style('display', visible ? 'element' : 'none');
         });
       });
-      const visibleNodes = cy.nodes(':visible');
-      if (visibleNodes.length > 40) {
-        packVisibleComponents();
-      } else if (visibleNodes.length > 0) {
-        cy.fit(visibleNodes, 80);
+      if (hasFilteredSelectionChanged(visibleNodeIds)) {
+        clearSelection();
       }
+      previousFilteredNodeIds = visibleNodeIds.sort();
+    }
+
+    function hasFilteredSelectionChanged(visibleNodeIds) {
+      if (visibleNodeIds.length !== previousFilteredNodeIds.length) {
+        return true;
+      }
+      const sortedIds = [...visibleNodeIds].sort();
+      return sortedIds.some((id, index) => id !== previousFilteredNodeIds[index]);
     }
 
     function clearSelection() {
@@ -774,14 +822,28 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       }
     }
 
-    function runActiveLayout() {
+    function initializeGraphView() {
+      if (restoreSavedLayout()) {
+        restoreSavedViewport() || focusInitialView();
+        return;
+      }
+      runActiveLayout();
+    }
+
+    function runActiveLayout(onDone) {
       const visibleNodes = cy.nodes(':visible');
       if (visibleNodes.length === 0) {
+        if (typeof onDone === 'function') {
+          onDone();
+        }
         return;
       }
       const layout = cy.elements(':visible').layout(getLayout());
       layout.once('layoutstop', () => {
         packVisibleComponents();
+        if (typeof onDone === 'function') {
+          onDone();
+        }
         restoreSavedViewport() || focusInitialView();
         scheduleSaveLayout();
       });
@@ -831,9 +893,30 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       activeDragGroup = null;
     }
 
+    function loadGraph(nextGraph, nextIdentity) {
+      graph = cloneGraph(nextGraph);
+      currentGraphIdentity = nextIdentity;
+      restoredViewport = null;
+      previousFilteredNodeIds = [];
+      activeDragGroup = null;
+      searchEl.value = '';
+      nodeTypeFilterEl.value = '';
+      clearSelection();
+      clearHistory();
+      cy.batch(() => {
+        cy.elements().remove();
+        cy.add(buildCyElements(graph));
+      });
+      applyThemeToGraph(document.body.classList.contains('dark') ? 'dark' : 'light');
+      updateGraphSummary();
+      populateNodeTypeFilter();
+      applyFilters();
+      initializeGraphView();
+    }
+
     function restoreSavedLayout() {
       try {
-        const raw = localStorage.getItem(layoutStorageKey);
+        const raw = localStorage.getItem(getCurrentLayoutStorageKey());
         if (!raw) {
           return false;
         }
@@ -843,7 +926,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         if (!positions || typeof positions !== 'object') {
           return false;
         }
-
         let restoredCount = 0;
         cy.batch(() => {
           cy.nodes().forEach((node) => {
@@ -914,6 +996,12 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       redoButton.disabled = redoStack.length === 0;
     }
 
+    function clearHistory() {
+      undoStack.length = 0;
+      redoStack.length = 0;
+      updateHistoryButtons();
+    }
+
     function captureGraphState() {
       return {
         positions: Object.fromEntries(
@@ -965,14 +1053,19 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     function saveCurrentLayout() {
       const state = captureGraphState();
       localStorage.setItem(
-        layoutStorageKey,
+        getCurrentLayoutStorageKey(),
         JSON.stringify({
-          version: 1,
+          version: 3,
           sourceFilePath: graph.sourceFilePath,
+          graphKey: currentGraphIdentity.key,
           positions: state.positions,
           viewport: state.viewport,
         }),
       );
+    }
+
+    function getCurrentLayoutStorageKey() {
+      return layoutStoragePrefix + currentGraphIdentity.key;
     }
 
     function getValidViewport(viewport) {
@@ -1005,6 +1098,84 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       applyTheme(theme);
     }
 
+    function initializeSidebarWidth() {
+      const saved = Number(localStorage.getItem(sidebarWidthStorageKey));
+      if (Number.isFinite(saved) && saved > 0) {
+        setSidebarWidth(saved);
+      } else {
+        setSidebarWidth(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width')) || 340);
+      }
+    }
+
+    function initializeSidebarResizer() {
+      if (!sidebarResizer) {
+        return;
+      }
+      let pointerId = null;
+      const stopResizing = () => {
+        if (pointerId !== null) {
+          try {
+            sidebarResizer.releasePointerCapture(pointerId);
+          } catch {}
+        }
+        pointerId = null;
+        document.body.classList.remove('is-resizing');
+      };
+      sidebarResizer.addEventListener('pointerdown', (event) => {
+        if (window.innerWidth <= 960) {
+          return;
+        }
+        pointerId = event.pointerId;
+        sidebarResizer.setPointerCapture(pointerId);
+        document.body.classList.add('is-resizing');
+        event.preventDefault();
+      });
+      sidebarResizer.addEventListener('pointermove', (event) => {
+        if (pointerId !== event.pointerId) {
+          return;
+        }
+        setSidebarWidth(event.clientX - 16);
+      });
+      sidebarResizer.addEventListener('pointerup', stopResizing);
+      sidebarResizer.addEventListener('pointercancel', stopResizing);
+      sidebarResizer.addEventListener('dblclick', () => setSidebarWidth(340));
+      window.addEventListener('resize', () => {
+        if (window.innerWidth <= 960) {
+          stopResizing();
+          return;
+        }
+        setSidebarWidth(getSidebarWidth());
+      });
+    }
+
+    function getSidebarWidth() {
+      return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-width')) || 340;
+    }
+
+    function getSidebarWidthBounds() {
+      const min = 260;
+      const max = Math.max(min, Math.min(720, window.innerWidth - 420));
+      return { min, max };
+    }
+
+    function setSidebarWidth(width) {
+      const bounds = getSidebarWidthBounds();
+      const nextWidth = Math.round(Math.min(bounds.max, Math.max(bounds.min, width)));
+      document.documentElement.style.setProperty('--sidebar-width', nextWidth + 'px');
+      localStorage.setItem(sidebarWidthStorageKey, String(nextWidth));
+      scheduleCyResize();
+    }
+
+    function scheduleCyResize() {
+      if (resizeFrame !== null) {
+        return;
+      }
+      resizeFrame = window.requestAnimationFrame(() => {
+        resizeFrame = null;
+        cy.resize();
+      });
+    }
+
     function toggleTheme() {
       const nextTheme = document.body.classList.contains('dark') ? 'light' : 'dark';
       applyTheme(nextTheme);
@@ -1032,7 +1203,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         highlight: css.getPropertyValue('--highlight').trim(),
         inverseText: '#fffaf0',
       };
-
       cy.batch(() => {
         cy.nodes().forEach((node) => {
           node.data({
@@ -1057,6 +1227,339 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       cy.style().update();
     }
 
+    function updateGraphSummary() {
+      titleEl.textContent = graph.title;
+      sourceEl.textContent = graph.sourceFilePath;
+      nodeCountEl.textContent = String(graph.nodeCount);
+      edgeCountEl.textContent = String(graph.edgeCount);
+    }
+
+    function populateNodeTypeFilter() {
+      nodeTypeFilterEl.innerHTML = '<option value="">All node types</option>';
+      const nodeTypeSet = new Set(graph.nodes.map((node) => node.nodeType).filter(Boolean));
+      [...nodeTypeSet].sort().forEach((nodeType) => {
+        const option = document.createElement('option');
+        option.value = nodeType;
+        option.textContent = nodeType;
+        nodeTypeFilterEl.appendChild(option);
+      });
+    }
+
+    function buildCyElements(currentGraph) {
+      return [
+        ...currentGraph.nodes.map((node) => ({
+          group: 'nodes',
+          data: {
+            id: node.id,
+            sid: node.sid,
+            label: node.label,
+            subtitle: node.subtitle,
+            nodeType: node.nodeType,
+            isStart: node.isStart,
+            isTerminal: node.isTerminal,
+            details: node.details,
+          },
+          classes: [
+            node.isStart ? 'is-start' : '',
+            node.isTerminal ? 'is-terminal' : '',
+            /Event$/.test(node.nodeType) ? 'is-event' : '',
+          ].filter(Boolean).join(' '),
+        })),
+        ...currentGraph.edges.map((edge) => ({
+          group: 'edges',
+          data: {
+            id: edge.id,
+            source: edge.source,
+            target: edge.target,
+            label: edge.label,
+            showLabel: currentGraph.edgeCount <= 120 ? edge.label : '',
+            kind: edge.kind,
+          },
+        })),
+      ];
+    }
+
+    function cloneGraph(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function createGraphIdentityFromGraph(currentGraph) {
+      const fingerprint = hashString(JSON.stringify({
+        title: currentGraph.title,
+        sourceFilePath: currentGraph.sourceFilePath,
+        fileName: currentGraph.title,
+        nodes: currentGraph.nodes.map((node) => node.sid),
+        edges: currentGraph.edges.map((edge) => [edge.source, edge.target, edge.label]),
+      }));
+      return { key: 'graph:' + slugifyKey(currentGraph.title || currentGraph.sourceFilePath || 'graph') + ':' + fingerprint };
+    }
+
+    function createGraphIdentityFromCfgText(text, fileName) {
+      const normalizedFileName = fileName || 'uploaded.cfg';
+      return {
+        key: 'cfg:' + slugifyKey(normalizedFileName) + ':' + hashString(normalizedFileName + '\\n' + normalizeNewlines(text)),
+      };
+    }
+
+    function hashString(value) {
+      let hash = 2166136261;
+      for (let i = 0; i < value.length; i++) {
+        hash ^= value.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(16);
+    }
+
+    function slugifyKey(value) {
+      return String(value || 'graph')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80) || 'graph';
+    }
+
+    function normalizeNewlines(value) {
+      return String(value).replaceAll('\\r\\n', '\\n').replaceAll('\\r', '\\n');
+    }
+
+    function parseQuestCfgTextToGraph(text, sourceLabel) {
+      const structs = parseCfgStructs(text);
+      if (!structs.length) {
+        throw new Error('No top-level quest node structs found.');
+      }
+      return buildGraphFromStructs(structs, sourceLabel);
+    }
+
+    function parseCfgStructs(text) {
+      const root = [];
+      const stack = [];
+      const lines = normalizeNewlines(text).split('\\n');
+      for (const rawLine of lines) {
+        const line = stripLineComment(rawLine).trim();
+        if (!line) {
+          continue;
+        }
+        const structMatch = line.match(/^(.+?)\\s*:\\s*struct\\.begin\\b/i);
+        if (structMatch) {
+          const name = structMatch[1].trim();
+          const node = { __name: name };
+          if (stack.length === 0) {
+            root.push(node);
+          } else {
+            stack[stack.length - 1][name] = node;
+          }
+          stack.push(node);
+          continue;
+        }
+        if (/^struct\\.end\\b/i.test(line)) {
+          stack.pop();
+          continue;
+        }
+        const fieldMatch = line.match(/^([A-Za-z0-9_]+)\\s*=\\s*(.*)$/);
+        if (fieldMatch && stack.length > 0) {
+          stack[stack.length - 1][fieldMatch[1]] = parseCfgScalar(fieldMatch[2]);
+        }
+      }
+      return root;
+    }
+
+    function stripLineComment(line) {
+      const commentIndex = line.indexOf('//');
+      return commentIndex >= 0 ? line.slice(0, commentIndex) : line;
+    }
+
+    function parseCfgScalar(rawValue) {
+      const value = String(rawValue).trim();
+      if (!value) {
+        return '';
+      }
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith('\\'') && value.endsWith('\\''))) {
+        return value.slice(1, -1);
+      }
+      if (/^(true|false)$/i.test(value)) {
+        return value.toLowerCase() === 'true';
+      }
+      if (/^-?\\d+(\\.\\d+)?$/.test(value)) {
+        return Number(value);
+      }
+      return value;
+    }
+
+    function buildGraphFromStructs(structs, sourceLabel) {
+      const jsNameBySid = new Map();
+      const usedNames = new Set();
+      const nodes = structs.map((raw) => {
+        const sid = String(raw.SID || raw.__name || '');
+        const jsSid = getOrCreateJsSid(sid, jsNameBySid, usedNames);
+        return { raw, sid, jsSid, launches: [] };
+      });
+      const nodeBySid = new Map(nodes.map((node) => [node.sid, node]));
+      nodes.forEach((node) => {
+        forEachStructChild(node.raw.Launchers, (launcher) => {
+          forEachStructChild(launcher.Connections, (connection) => {
+            const launcherNode = nodeBySid.get(String(connection.SID || ''));
+            if (launcherNode) {
+              launcherNode.launches.push({
+                SID: node.sid,
+                Name: String(connection.Name || ''),
+              });
+            }
+          });
+        });
+      });
+      nodes.forEach((node) => {
+        if (getNodeSubType(node.raw.NodeType) !== 'BridgeEvent') {
+          return;
+        }
+        const linkedNode = nodeBySid.get(String(node.raw.LinkedNodePrototypeSID || ''));
+        if (linkedNode) {
+          linkedNode.launches.push({ SID: node.sid, Name: '' });
+        }
+      });
+      const graphNodes = nodes.map((node) => {
+        const nodeType = getNodeSubType(node.raw.NodeType);
+        return {
+          id: node.jsSid,
+          sid: node.sid,
+          nodeType,
+          label: formatNodeLabel(node.jsSid),
+          subtitle: getNodeSubtitle(node.raw),
+          isStart: Boolean(node.raw.LaunchOnQuestStart),
+          isTerminal: nodeType === 'End' || node.launches.length === 0,
+          details: getNodeDetails(node.raw),
+        };
+      });
+      const graphEdges = nodes.flatMap((node) =>
+        node.launches.map((edge, index) => ({
+          id: node.jsSid + '__' + (jsNameBySid.get(edge.SID) || edge.SID) + '__' + index,
+          source: node.jsSid,
+          target: jsNameBySid.get(edge.SID) || edge.SID,
+          label: edge.Name || '',
+          kind: 'launch',
+        })),
+      );
+      return {
+        title: sourceLabel,
+        sourceFilePath: sourceLabel,
+        nodeCount: graphNodes.length,
+        edgeCount: graphEdges.length,
+        nodes: graphNodes,
+        edges: graphEdges,
+      };
+    }
+
+    function getOrCreateJsSid(rawSid, sidToJs, usedNames) {
+      const existing = sidToJs.get(rawSid);
+      if (existing) {
+        return existing;
+      }
+      const base = toJsIdentifier(rawSid);
+      let candidate = base;
+      let suffix = 1;
+      while (usedNames.has(candidate)) {
+        candidate = base + '_' + suffix++;
+      }
+      usedNames.add(candidate);
+      sidToJs.set(rawSid, candidate);
+      return candidate;
+    }
+
+    function toJsIdentifier(raw) {
+      const cleaned = String(raw || '').replace(/[^A-Za-z0-9_$]/g, '_');
+      return /^[A-Za-z_$]/.test(cleaned) ? cleaned : '_' + cleaned;
+    }
+
+    function getNodeSubType(nodeType) {
+      return String(nodeType || '').split('::').pop() || 'Unknown';
+    }
+
+    function getNodeSubtitle(struct) {
+      const nodeType = getNodeSubType(struct.NodeType);
+      const maybeText = firstDefinedString([
+        struct.ScreenText,
+        struct.ItemSID,
+        struct.ItemPrototypeSID,
+        struct.SignalReceiverGuid,
+        struct.LinkedNodePrototypeSID,
+      ]);
+      return maybeText ? nodeType + ': ' + truncate(maybeText, 48) : nodeType;
+    }
+
+    function firstDefinedString(values) {
+      for (const value of values) {
+        if (typeof value === 'string' && value.trim()) {
+          return value.trim();
+        }
+      }
+      return '';
+    }
+
+    function truncate(value, maxLength) {
+      return value.length > maxLength ? value.slice(0, maxLength - 3) + '...' : value;
+    }
+
+    function formatNodeLabel(value) {
+      return String(value).replaceAll('_', '_\\u200b').replace(/([a-z0-9])([A-Z])/g, '$1\\u200b$2');
+    }
+
+    function getNodeDetails(struct) {
+      const details = {
+        SID: struct.SID,
+        NodeType: getNodeSubType(struct.NodeType),
+      };
+      const detailKeys = [
+        'Comment',
+        'QuestSID',
+        'TargetQuestGuid',
+        'LinkedNodePrototypeSID',
+        'SignalReceiverGuid',
+        'SignalSenderGuid',
+        'ItemSID',
+        'ItemPrototypeSID',
+        'ItemsCount',
+        'InGameHours',
+        'VolumeGuid',
+        'SequenceName',
+        'ScreenText',
+        'FadeTime',
+        'LaunchOnQuestStart',
+      ];
+      for (const key of detailKeys) {
+        const value = struct[key];
+        if (value === undefined || value === null || value === '') {
+          continue;
+        }
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+          details[key] = value;
+          continue;
+        }
+        details[key] = summarizeValue(value);
+      }
+      return details;
+    }
+
+    function summarizeValue(value) {
+      if (Array.isArray(value)) {
+        return value.length + ' items';
+      }
+      if (value && typeof value === 'object') {
+        return Object.keys(value).filter((key) => !key.startsWith('__')).length + ' entries';
+      }
+      return String(value);
+    }
+
+    function forEachStructChild(value, callback) {
+      if (!value || typeof value !== 'object') {
+        return;
+      }
+      Object.entries(value).forEach(([key, child]) => {
+        if (key.startsWith('__') || !child || typeof child !== 'object') {
+          return;
+        }
+        callback(child, key);
+      });
+    }
+
     function packVisibleComponents() {
       const visibleElements = cy.elements(':visible');
       const components = visibleElements.components()
@@ -1079,18 +1582,15 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           }
           return b.height * b.width - a.height * a.width;
         });
-
       if (components.length <= 1) {
         return;
       }
-
       const horizontalGap = 110;
       const verticalGap = 120;
       const targetRowWidth = Math.max(1800, Math.sqrt(components.reduce((sum, component) => sum + component.width * component.height, 0)) * 1.8);
       let cursorX = 0;
       let cursorY = 0;
       let rowHeight = 0;
-
       cy.batch(() => {
         for (const component of components) {
           if (cursorX > 0 && cursorX + component.width > targetRowWidth) {
@@ -1098,7 +1598,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
             cursorY += rowHeight + verticalGap;
             rowHeight = 0;
           }
-
           const targetX = cursorX - component.box.x1;
           const targetY = cursorY - component.box.y1;
           component.nodes.positions((node) => {
@@ -1108,7 +1607,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
               y: position.y + targetY,
             };
           });
-
           cursorX += component.width + horizontalGap;
           rowHeight = Math.max(rowHeight, component.height);
         }
@@ -1120,7 +1618,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     }
 
     function escapeHtml(value) {
-      return value
+      return String(value)
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
@@ -1149,9 +1647,29 @@ export async function runQuestCfgToGraphHtml(paths: string[]) {
   if (!paths.length) {
     throw new Error("Expected at least one quest cfg path.");
   }
+  let outputFilePathOverride: string | undefined;
+  const inputPaths: string[] = [];
+  for (let index = 0; index < paths.length; index++) {
+    const value = paths[index];
+    if (value === "--output" || value === "-o") {
+      outputFilePathOverride = paths[index + 1];
+      if (!outputFilePathOverride) {
+        throw new Error(`Expected a path after ${value}.`);
+      }
+      index++;
+      continue;
+    }
+    inputPaths.push(value);
+  }
+  if (!inputPaths.length) {
+    throw new Error("Expected at least one quest cfg path.");
+  }
+  if (outputFilePathOverride && inputPaths.length !== 1) {
+    throw new Error("Explicit output path is only supported for a single input file.");
+  }
   const results = [];
-  for (const inputPath of paths) {
-    results.push(await questCfgToGraphHtml(inputPath));
+  for (const inputPath of inputPaths) {
+    results.push(await questCfgToGraphHtml(inputPath, outputFilePathOverride));
   }
   return results;
 }
