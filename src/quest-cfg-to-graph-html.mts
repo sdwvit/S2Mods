@@ -506,7 +506,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         <button id="arrangeColumnButton" type="button" disabled>Column</button>
         <button id="undoButton" type="button" disabled>Undo</button>
         <button id="redoButton" type="button" disabled>Redo</button>
-        <button id="layoutButton" type="button">Relayout</button>
+        <button id="layoutButton" type="button">Reset layout</button>
       </div>
       <div id="cy"></div>
     </main>
