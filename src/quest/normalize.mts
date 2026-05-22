@@ -1,4 +1,4 @@
-import type { QuestNodePrototype } from "s2cfgtojson";
+import type { DialogPrototype, QuestNodePrototype } from "s2cfgtojson";
 import type { MetaContext } from "../meta-type.mts";
 import { createNodeSidMapper, type QuestIr, type QuestIrNode } from "./ir.mts";
 import { logger } from "../logger.mts";
@@ -79,4 +79,78 @@ export function normalizeQuestNodes(context: MetaContext<QuestNodePrototype>): Q
     nodes,
     jsNameBySid: new Map(nodes.map((n) => [n.sid, n.jsSid])),
   };
+}
+
+export function normalizeDialogNodes(context: MetaContext<DialogPrototype>): QuestIr<DialogPrototype> {
+  const getNodeSid = createNodeSidMapper(context);
+  const nodes = context.array.map((raw) => {
+    const sid = raw.SID;
+    const jsSid = getNodeSid(sid);
+    const node: QuestIrNode<DialogPrototype> = {
+      raw,
+      sid,
+      jsSid,
+      launches: [],
+      launchersByJsSid: {},
+    };
+    return node;
+  });
+
+  const nodeBySid = new Map(nodes.map((node) => [node.sid, node]));
+  const missingTargets = new Set<string>();
+
+  nodes.forEach((node) => {
+    const seen = new Set<string>();
+    const pushEdge = (targetSid: string | undefined, label: string) => {
+      const normalizedTargetSid = targetSid?.trim();
+      if (!normalizedTargetSid || seen.has(`${normalizedTargetSid}::${label}`)) {
+        return;
+      }
+      seen.add(`${normalizedTargetSid}::${label}`);
+      if (!nodeBySid.has(normalizedTargetSid)) {
+        missingTargets.add(normalizedTargetSid);
+      }
+      node.launches.push({ SID: normalizedTargetSid, Name: label });
+    };
+
+    pushEdge(node.raw.NextDialogSID, "");
+
+    const nextDialogOptions = node.raw.NextDialogOptions;
+    if (!nextDialogOptions || typeof nextDialogOptions === "string" || typeof nextDialogOptions.forEach !== "function") {
+      return;
+    }
+    nextDialogOptions.forEach(([_key, option]) => {
+      pushEdge(option.NextDialogSID, getDialogOptionLabel(option));
+    });
+  });
+
+  if (missingTargets.size) {
+    logger.warn(`Dialog normalize: missing next dialog target nodes: ${[...missingTargets].slice(0, 50).join(", ")}`);
+  }
+
+  return {
+    nodes,
+    jsNameBySid: new Map(nodes.map((node) => [node.sid, node.jsSid])),
+  };
+}
+
+function getDialogOptionLabel(option: {
+  AnswerText?: string;
+  MainReply?: boolean;
+  AvailableFromStart?: boolean;
+  Terminate?: boolean;
+}) {
+  if (option.AnswerText?.trim()) {
+    return option.AnswerText.trim();
+  }
+  if (option.Terminate) {
+    return "Terminate";
+  }
+  if (option.MainReply) {
+    return "MainReply";
+  }
+  if (option.AvailableFromStart) {
+    return "Option";
+  }
+  return "";
 }

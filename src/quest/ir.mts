@@ -1,18 +1,20 @@
 import type { MetaContext } from "../meta-type.mts";
-import type { QuestNodePrototype } from "s2cfgtojson";
+import type { DialogPrototype, QuestNodePrototype } from "s2cfgtojson";
+
+export type GraphPrototype = QuestNodePrototype | DialogPrototype;
 
 export type LaunchEdge = { SID: string; Name: string };
 
-export type QuestIrNode = {
-  raw: QuestNodePrototype;
+export type QuestIrNode<T extends GraphPrototype = GraphPrototype> = {
+  raw: T;
   sid: string;
   jsSid: string;
   launches: LaunchEdge[];
   launchersByJsSid: Record<string, LaunchEdge[]>;
 };
 
-export type QuestIr = {
-  nodes: QuestIrNode[];
+export type QuestIr<T extends GraphPrototype = GraphPrototype> = {
+  nodes: QuestIrNode<T>[];
   jsNameBySid: Map<string, string>;
 };
 
@@ -21,7 +23,7 @@ function toJsIdentifier(raw: string) {
   return /^[A-Za-z_$]/.test(cleaned) ? cleaned : `_${cleaned}`;
 }
 
-export function createNodeSidMapper(context: MetaContext<QuestNodePrototype>) {
+export function createNodeSidMapper<T extends GraphPrototype>(context: MetaContext<T>) {
   const used = new Set<string>();
   const sidToJs = new Map<string, string>();
   const getOrCreate = (raw: string) => {

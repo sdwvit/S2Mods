@@ -1,6 +1,7 @@
 import type { MetaContext } from "../meta-type.mts";
-import type { QuestNodePrototype } from "s2cfgtojson";
-import { normalizeQuestNodes } from "./normalize.mts";
+import type { DialogPrototype, QuestNodePrototype } from "s2cfgtojson";
+import { normalizeDialogNodes, normalizeQuestNodes } from "./normalize.mts";
+import type { GraphPrototype } from "./ir.mts";
 
 export type QuestGraphNode = {
   id: string;
@@ -30,21 +31,35 @@ export type QuestGraphData = {
   edges: QuestGraphEdge[];
 };
 
-export function buildQuestGraphData(
-  context: MetaContext<QuestNodePrototype>,
+export function buildQuestGraphData<T extends GraphPrototype>(
+  context: MetaContext<T>,
   sourceFilePath = context.filePath,
 ): QuestGraphData {
-  const ir = normalizeQuestNodes(context);
+  const graphKind = detectGraphKind(sourceFilePath || context.filePath);
+  const ir =
+    graphKind === "dialog"
+      ? normalizeDialogNodes(context as MetaContext<DialogPrototype>)
+      : normalizeQuestNodes(context as MetaContext<QuestNodePrototype>);
+  const incomingCounts = new Map<string, number>();
+  ir.nodes.forEach((node) => {
+    node.launches.forEach((edge) => {
+      incomingCounts.set(edge.SID, (incomingCounts.get(edge.SID) || 0) + 1);
+    });
+  });
   const nodes = ir.nodes.map((node) => {
-    const nodeType = getNodeSubType(node.raw.NodeType);
-    const details = getNodeDetails(node.raw);
+    const nodeType = graphKind === "dialog" ? getDialogNodeType(node.raw as DialogPrototype) : getNodeSubType((node.raw as QuestNodePrototype).NodeType);
+    const details =
+      graphKind === "dialog" ? getDialogNodeDetails(node.raw as DialogPrototype) : getNodeDetails(node.raw as QuestNodePrototype);
     return {
       id: node.jsSid,
       sid: node.sid,
       nodeType,
       label: formatNodeLabel(node.jsSid),
-      subtitle: getNodeSubtitle(node.raw),
-      isStart: Boolean((node.raw as QuestNodePrototype & { LaunchOnQuestStart?: boolean }).LaunchOnQuestStart),
+      subtitle: graphKind === "dialog" ? getDialogNodeSubtitle(node.raw as DialogPrototype) : getNodeSubtitle(node.raw as QuestNodePrototype),
+      isStart:
+        graphKind === "dialog"
+          ? (incomingCounts.get(node.sid) || 0) === 0
+          : Boolean((node.raw as QuestNodePrototype & { LaunchOnQuestStart?: boolean }).LaunchOnQuestStart),
       isTerminal: nodeType === "End" || node.launches.length === 0,
       details,
     };
@@ -74,6 +89,10 @@ function getNodeSubType(nodeType: string | undefined) {
   return String(nodeType || "").split("::").pop() || "Unknown";
 }
 
+function detectGraphKind(filePath: string) {
+  return filePath.replaceAll("\\", "/").includes("/DialogPrototypes/") ? "dialog" : "quest";
+}
+
 function getNodeSubtitle(struct: QuestNodePrototype) {
   const nodeType = getNodeSubType(struct.NodeType);
   const maybeText = firstDefinedString([
@@ -84,6 +103,25 @@ function getNodeSubtitle(struct: QuestNodePrototype) {
     (struct as QuestNodePrototype & { LinkedNodePrototypeSID?: string }).LinkedNodePrototypeSID,
   ]);
   return maybeText ? `${nodeType}: ${truncate(maybeText, 48)}` : nodeType;
+}
+
+function getDialogNodeType(struct: DialogPrototype) {
+  if (struct.ShowNextDialogOptionsAsAnswers) {
+    return "Choice";
+  }
+  if (struct.MainReply) {
+    return "Reply";
+  }
+  if (struct.DialogMemberIndex === -1) {
+    return "Hub";
+  }
+  return "Dialog";
+}
+
+function getDialogNodeSubtitle(struct: DialogPrototype) {
+  const text = firstDefinedString([struct.Text, struct.AnswerText, struct.DialogChainPrototypeSID]);
+  const nodeType = getDialogNodeType(struct);
+  return text ? `${nodeType}: ${truncate(text, 48)}` : nodeType;
 }
 
 function firstDefinedString(values: unknown[]) {
@@ -126,6 +164,27 @@ function getNodeDetails(struct: QuestNodePrototype) {
   return details;
 }
 
+function getDialogNodeDetails(struct: DialogPrototype) {
+  const details: Record<string, string | number | boolean | null> = {
+    SID: struct.SID,
+    NodeType: getDialogNodeType(struct),
+  };
+
+  for (const key of DIALOG_DETAIL_KEYS) {
+    const value = (struct as Record<string, unknown>)[key];
+    if (value === undefined || value === null || value === "") {
+      continue;
+    }
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      details[key] = value;
+      continue;
+    }
+    details[key] = summarizeValue(value);
+  }
+
+  return details;
+}
+
 const DETAIL_KEYS = [
   "Comment",
   "QuestSID",
@@ -142,6 +201,22 @@ const DETAIL_KEYS = [
   "ScreenText",
   "FadeTime",
   "LaunchOnQuestStart",
+] as const;
+
+const DIALOG_DETAIL_KEYS = [
+  "DialogChainPrototypeSID",
+  "DialogMemberIndex",
+  "DialogMemberName",
+  "Text",
+  "AnswerText",
+  "NextDialogSID",
+  "ShowDialogWindow",
+  "ShowNextDialogOptionsAsAnswers",
+  "MainReply",
+  "VisibleOnFailedCondition",
+  "Unskippable",
+  "Conditions",
+  "NextDialogOptions",
 ] as const;
 
 function summarizeValue(value: unknown) {
