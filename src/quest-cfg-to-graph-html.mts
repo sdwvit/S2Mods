@@ -774,6 +774,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     themeButton.addEventListener('click', toggleTheme);
     initializeSidebarResizer();
     initializeMiddleMousePan();
+    initializeWheelPan();
 
     updateInteractionMode();
     updateLegendFilterUi();
@@ -1196,18 +1197,21 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
 
     function initializeMiddleMousePan() {
       const container = cy.container();
-      container.addEventListener('mousedown', (event) => {
-        if (event.button !== 1) {
+      container.addEventListener('pointerdown', (event) => {
+        if (event.button !== 1 || event.pointerType !== 'mouse') {
           return;
         }
         middlePanState = {
+          pointerId: event.pointerId,
           x: event.clientX,
           y: event.clientY,
         };
+        container.setPointerCapture(event.pointerId);
         event.preventDefault();
-      });
-      container.addEventListener('mousemove', (event) => {
-        if (!middlePanState) {
+        event.stopImmediatePropagation();
+      }, { capture: true });
+      container.addEventListener('pointermove', (event) => {
+        if (!middlePanState || middlePanState.pointerId !== event.pointerId) {
           return;
         }
         const deltaX = event.clientX - middlePanState.x;
@@ -1217,29 +1221,52 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         }
         cy.panBy({ x: deltaX, y: deltaY });
         middlePanState = {
+          pointerId: event.pointerId,
           x: event.clientX,
           y: event.clientY,
         };
         event.preventDefault();
-      });
-      container.addEventListener('mouseup', (event) => {
-        if (event.button !== 1) {
+        event.stopImmediatePropagation();
+      }, { capture: true });
+      container.addEventListener('pointerup', (event) => {
+        if (event.button !== 1 || !middlePanState || middlePanState.pointerId !== event.pointerId) {
           return;
         }
-        stopMiddleMousePan();
-      });
-      container.addEventListener('mouseleave', () => {
-        stopMiddleMousePan();
-      });
+        stopMiddleMousePan(event.pointerId);
+      }, { capture: true });
+      container.addEventListener('pointercancel', (event) => {
+        if (!middlePanState || middlePanState.pointerId !== event.pointerId) {
+          return;
+        }
+        stopMiddleMousePan(event.pointerId);
+      }, { capture: true });
       container.addEventListener('auxclick', (event) => {
         if (event.button === 1) {
           event.preventDefault();
+          event.stopImmediatePropagation();
         }
-      });
+      }, { capture: true });
     }
 
-    function stopMiddleMousePan() {
+    function stopMiddleMousePan(pointerId) {
+      if (pointerId !== undefined) {
+        try {
+          cy.container().releasePointerCapture(pointerId);
+        } catch {}
+      }
       middlePanState = null;
+    }
+
+    function initializeWheelPan() {
+      const container = cy.container();
+      container.addEventListener('wheel', (event) => {
+        cy.panBy({
+          x: -event.deltaX,
+          y: -event.deltaY,
+        });
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }, { passive: false, capture: true });
     }
 
     function restoreSavedLayout() {
