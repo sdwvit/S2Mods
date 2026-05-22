@@ -774,7 +774,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     themeButton.addEventListener('click', toggleTheme);
     initializeSidebarResizer();
     initializeMiddleMousePan();
-    initializeWheelPan();
 
     updateInteractionMode();
     updateLegendFilterUi();
@@ -1255,18 +1254,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         } catch {}
       }
       middlePanState = null;
-    }
-
-    function initializeWheelPan() {
-      const container = cy.container();
-      container.addEventListener('wheel', (event) => {
-        cy.panBy({
-          x: -event.deltaX,
-          y: -event.deltaY,
-        });
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      }, { passive: false, capture: true });
     }
 
     function restoreSavedLayout() {
