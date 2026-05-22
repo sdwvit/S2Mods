@@ -491,7 +491,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           <li>Middle click + drag: pan canvas</li>
           <li>Drag: move one node</li>
           <li><span class="keycap">Alt</span> + drag: move highlighted nodes</li>
-          <li><span class="keycap">Q</span>: row, <span class="keycap">W</span>: column, <span class="keycap">E</span>: snap to grid</li>
+          <li><span class="keycap">Q</span>: row, <span class="keycap">W</span>: column, <span class="keycap">E</span>: snap to grid, <span class="keycap">R</span>: compact</li>
           <li><span class="keycap">Row</span>/<span class="keycap">Column</span>: click again to best-effort sort by arrow direction</li>
           <li><span class="keycap">Undo</span>/<span class="keycap">Redo</span> buttons or <span class="keycap">Ctrl/Cmd+Z</span>, <span class="keycap">Ctrl/Cmd+Shift+Z</span>, <span class="keycap">Ctrl/Cmd+Y</span>: history</li>
         </ul>
@@ -510,6 +510,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         <button id="arrangeRowButton" type="button" disabled>Row</button>
         <button id="arrangeColumnButton" type="button" disabled>Column</button>
         <button id="snapGridButton" type="button" disabled>Snap to grid</button>
+        <button id="compactButton" type="button" disabled>Compact</button>
         <button id="undoButton" type="button" disabled>Undo</button>
         <button id="redoButton" type="button" disabled>Redo</button>
         <button id="layoutButton" type="button">Reset layout</button>
@@ -537,6 +538,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     const arrangeRowButton = document.getElementById('arrangeRowButton');
     const arrangeColumnButton = document.getElementById('arrangeColumnButton');
     const snapGridButton = document.getElementById('snapGridButton');
+    const compactButton = document.getElementById('compactButton');
     const undoButton = document.getElementById('undoButton');
     const redoButton = document.getElementById('redoButton');
     const themeButton = document.getElementById('themeButton');
@@ -700,6 +702,11 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       if (key === 'e') {
         event.preventDefault();
         snapArrangableNodesToGrid();
+        return;
+      }
+      if (key === 'r') {
+        event.preventDefault();
+        compactArrangableNodes();
       }
     });
     window.addEventListener('keydown', (event) => {
@@ -790,6 +797,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     arrangeRowButton.addEventListener('click', () => arrangeSelectedNodes('row'));
     arrangeColumnButton.addEventListener('click', () => arrangeSelectedNodes('column'));
     snapGridButton.addEventListener('click', snapArrangableNodesToGrid);
+    compactButton.addEventListener('click', compactArrangableNodes);
     undoButton.addEventListener('click', undoGraphState);
     redoButton.addEventListener('click', redoGraphState);
     themeButton.addEventListener('click', toggleTheme);
@@ -900,6 +908,15 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       arrangeRowButton.disabled = !enabled;
       arrangeColumnButton.disabled = !enabled;
       snapGridButton.disabled = !enabled;
+      compactButton.disabled = !enabled;
+    }
+
+    function getLayoutGridSize() {
+      return 32;
+    }
+
+    function roundToGrid(value, gridSize = getLayoutGridSize()) {
+      return Math.round(value / gridSize) * gridSize;
     }
 
     function arrangeSelectedNodes(direction) {
@@ -909,7 +926,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         return;
       }
       pushUndoState();
-      const spacing = 36;
+      const spacing = getLayoutGridSize();
       const axis = direction === 'column' ? 'y' : 'x';
       const crossAxis = axis === 'x' ? 'y' : 'x';
       const nodeIds = selectedNodes.map((node) => node.id()).sort();
@@ -932,8 +949,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       if (useDirectedOrder) {
         metrics = orderMetricsByEdgeDirection(metrics, axis, crossAxis);
       }
-      const totalPrimarySize = metrics.reduce((sum, metric) => sum + (axis === 'x' ? metric.width : metric.height), 0);
-      const totalSpacing = spacing * (metrics.length - 1);
       const anchorMetric = metrics.reduce((best, metric) => {
         if (!best) {
           return metric;
@@ -944,13 +959,14 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         return best;
       }, null);
       const anchorPosition = anchorMetric ? anchorMetric.position : metrics[0].position;
-      let cursor = anchorPosition[axis];
+      let cursor = roundToGrid(anchorPosition[axis]);
+      const crossAxisPosition = roundToGrid(anchorPosition[crossAxis]);
       cy.batch(() => {
         for (const metric of metrics) {
           const primarySize = axis === 'x' ? metric.width : metric.height;
           metric.node.position({
-            x: axis === 'x' ? cursor + primarySize / 2 : anchorPosition.x,
-            y: axis === 'y' ? cursor + primarySize / 2 : anchorPosition.y,
+            x: axis === 'x' ? roundToGrid(cursor + primarySize / 2) : crossAxisPosition,
+            y: axis === 'y' ? roundToGrid(cursor + primarySize / 2) : crossAxisPosition,
           });
           cursor += primarySize + spacing;
         }
@@ -1032,7 +1048,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       }
       pushUndoState();
       lastArrangeAction = null;
-      const gridSize = 32;
+      const gridSize = getLayoutGridSize();
       const anchor = nodes.reduce((best, node) => {
         const position = node.position();
         if (!best) {
@@ -1053,6 +1069,84 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         });
       });
       scheduleSaveLayout();
+    }
+
+    function compactArrangableNodes() {
+      const nodes = getArrangableNodes();
+      if (nodes.length < 2) {
+        updateSelectionActionButtons();
+        return;
+      }
+      pushUndoState();
+      lastArrangeAction = null;
+      const metrics = nodes.map((node) => {
+        const box = node.boundingBox({ includeLabels: true, includeOverlays: false });
+        return {
+          node,
+          width: Math.max(1, box.w),
+          height: Math.max(1, box.h),
+          centerX: node.position('x'),
+          centerY: node.position('y'),
+        };
+      });
+      const columns = clusterMetricsByAxis(metrics, 'x');
+      const rows = clusterMetricsByAxis(metrics, 'y');
+      const columnCentersById = buildCompactCentersByAxis(columns, 'x', 'width');
+      const rowCentersById = buildCompactCentersByAxis(rows, 'y', 'height');
+      cy.batch(() => {
+        metrics.forEach((metric) => {
+          metric.node.position({
+            x: columnCentersById.get(metric.node.id()),
+            y: rowCentersById.get(metric.node.id()),
+          });
+        });
+      });
+      scheduleSaveLayout();
+    }
+
+    function clusterMetricsByAxis(metrics, axis) {
+      const centerKey = axis === 'x' ? 'centerX' : 'centerY';
+      const sizeKey = axis === 'x' ? 'width' : 'height';
+      const sorted = [...metrics].sort((a, b) => a[centerKey] - b[centerKey]);
+      const groups = [];
+      const overlapTolerance = 18;
+      for (const metric of sorted) {
+        const half = metric[sizeKey] / 2;
+        const start = metric[centerKey] - half;
+        const end = metric[centerKey] + half;
+        const group = groups[groups.length - 1];
+        if (!group || start > group.end + overlapTolerance) {
+          groups.push({ metrics: [metric], start, end });
+          continue;
+        }
+        group.metrics.push(metric);
+        group.start = Math.min(group.start, start);
+        group.end = Math.max(group.end, end);
+      }
+      return groups;
+    }
+
+    function buildCompactCentersByAxis(groups, axis, sizeKey) {
+      const centerKey = axis === 'x' ? 'centerX' : 'centerY';
+      const centerByNodeId = new Map();
+      if (groups.length === 0) {
+        return centerByNodeId;
+      }
+      const gap = getLayoutGridSize();
+      let cursor = roundToGrid(groups[0].start);
+      groups.forEach((group, index) => {
+        if (index > 0) {
+          cursor += gap;
+        }
+        let nextCursor = cursor;
+        group.metrics.forEach((metric) => {
+          const start = cursor + (metric[centerKey] - group.start) - metric[sizeKey] / 2;
+          centerByNodeId.set(metric.node.id(), roundToGrid(start + metric[sizeKey] / 2));
+          nextCursor = Math.max(nextCursor, start + metric[sizeKey]);
+        });
+        cursor = nextCursor;
+      });
+      return centerByNodeId;
     }
 
     function hasFilteredSelectionChanged(visibleNodeIds) {
