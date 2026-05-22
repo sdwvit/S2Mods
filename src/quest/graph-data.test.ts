@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Struct } from "s2cfgtojson";
-import type { QuestNodePrototype } from "s2cfgtojson";
+import type { DialogPrototype, QuestNodePrototype } from "s2cfgtojson";
 import type { MetaContext } from "../meta-type.mts";
 import { buildQuestGraphData } from "./graph-data.mts";
 
@@ -67,6 +67,66 @@ struct.end
         expect.objectContaining({ source: "QuestStart", target: "QuestMiddle", label: "Start" }),
         expect.objectContaining({ source: "QuestMiddle", target: "QuestEnd", label: "Done" }),
         expect.objectContaining({ source: "QuestMiddle", target: "QuestBridge", label: "" }),
+      ]),
+    );
+  });
+
+  it("extracts dialog prototype branches and infers start nodes from incoming edges", () => {
+    const structs = Struct.fromString<DialogPrototype>(`
+DialogStart : struct.begin
+   SID = DialogStart
+   DialogChainPrototypeSID = TestDialog
+   MainReply = true
+   NextDialogOptions : struct.begin
+      [0] : struct.begin
+         NextDialogSID = DialogAsk
+         AvailableFromStart = true
+         MainReply = false
+      struct.end
+      [1] : struct.begin
+         NextDialogSID = DialogEnd
+         Terminate = true
+      struct.end
+   struct.end
+struct.end
+DialogAsk : struct.begin
+   SID = DialogAsk
+   DialogChainPrototypeSID = TestDialog
+   ShowNextDialogOptionsAsAnswers = true
+   NextDialogSID = DialogEnd
+struct.end
+DialogEnd : struct.begin
+   SID = DialogEnd
+   DialogChainPrototypeSID = TestDialog
+   MainReply = true
+struct.end
+    `).map((struct) => struct.clone());
+
+    const context: MetaContext<DialogPrototype> = {
+      fileIndex: 0,
+      index: 0,
+      array: structs,
+      extraStructs: [],
+      filePath: "/DialogPrototypes/TestDialog.cfg",
+      fileName: "TestDialog.cfg",
+      structsById: Object.fromEntries(structs.map((struct) => [struct.__internal__.rawName, struct])),
+    };
+
+    const graph = buildQuestGraphData(context);
+
+    expect(graph.nodeCount).toBe(3);
+    expect(graph.edgeCount).toBe(3);
+    expect(graph.nodes.find((node) => node.id === "DialogStart")).toEqual(
+      expect.objectContaining({ isStart: true, nodeType: "Reply" }),
+    );
+    expect(graph.nodes.find((node) => node.id === "DialogAsk")).toEqual(
+      expect.objectContaining({ nodeType: "Choice", isStart: false }),
+    );
+    expect(graph.edges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ source: "DialogStart", target: "DialogAsk", label: "Option" }),
+        expect.objectContaining({ source: "DialogStart", target: "DialogEnd", label: "Terminate" }),
+        expect.objectContaining({ source: "DialogAsk", target: "DialogEnd", label: "" }),
       ]),
     );
   });

@@ -4,7 +4,7 @@ import { pathToFileURL } from "node:url";
 import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { Struct } from "s2cfgtojson";
-import type { QuestNodePrototype } from "s2cfgtojson";
+import type { DialogPrototype, QuestNodePrototype } from "s2cfgtojson";
 import type { MetaContext } from "./meta-type.mts";
 import { baseCfgDir } from "./base-paths.mts";
 import { buildQuestGraphData, type QuestGraphData } from "./quest/graph-data.mts";
@@ -14,8 +14,10 @@ export async function questCfgToGraphHtml(inputPath: string, outputFilePath?: st
   const resolved = resolveQuestGraphInputPath(inputPath);
   const sourceFilePath = resolveGraphSourceFilePath(resolved.sourceFilePath);
   const fileContents = await readFile(sourceFilePath, "utf8");
-  const array = Struct.fromString<QuestNodePrototype>(fileContents).map((s) => s.clone());
-  const context: MetaContext<QuestNodePrototype> = {
+  const isDialogGraph = resolved.contextFilePath.includes("/DialogPrototypes/") || sourceFilePath.replaceAll("\\", "/").includes("/DialogPrototypes/");
+  const parsed = isDialogGraph ? Struct.fromString<DialogPrototype>(fileContents) : Struct.fromString<QuestNodePrototype>(fileContents);
+  const array = parsed.map((s) => s.clone()).filter((s) => typeof s.SID === "string" && s.SID.trim());
+  const context: MetaContext<QuestNodePrototype | DialogPrototype> = {
     fileIndex: 0,
     index: 0,
     array,
@@ -48,8 +50,8 @@ export function resolveQuestGraphInputPath(inputPath: string) {
 
 export function resolveGraphSourceFilePath(sourceFilePath: string) {
   const normalized = sourceFilePath.replaceAll("\\", "/");
-  const marker = "/GameData/QuestNodePrototypes/";
-  const markerIndex = normalized.indexOf(marker);
+  const marker = ["/GameData/QuestNodePrototypes/", "/GameData/DialogPrototypes/"].find((candidate) => normalized.includes(candidate));
+  const markerIndex = marker ? normalized.indexOf(marker) : -1;
   if (markerIndex < 0 || !normalized.includes("_patch_")) {
     return sourceFilePath;
   }
@@ -72,7 +74,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${escapeHtml(graph.title)} quest graph</title>
+  <title>${escapeHtml(graph.title)} graph</title>
   <style>
     :root {
       --sidebar-width: 340px;
