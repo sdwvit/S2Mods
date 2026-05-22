@@ -7,10 +7,7 @@ on:
       - master
     paths:
       - ".github/workflows/deploy-quest-graph-site.yml"
-      - "package.json"
-      - "src/build-quest-graph-example.cfg"
-      - "src/build-quest-graph-site.mts"
-      - "src/quest-cfg-to-graph-html.mts"
+      - "site/index.html"
 
 permissions:
   contents: read
@@ -29,23 +26,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build quest graph site
-        run: pnpm run build-quest-graph-site
-        env:
-          SDK_PATH: /tmp/sdk
-          STALKER2_FOLDER: /tmp/game
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
