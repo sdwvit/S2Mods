@@ -913,26 +913,25 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       }
       const totalPrimarySize = metrics.reduce((sum, metric) => sum + (axis === 'x' ? metric.width : metric.height), 0);
       const totalSpacing = spacing * (metrics.length - 1);
-      const center = metrics.reduce(
-        (acc, metric) => {
-          acc.x += metric.position.x;
-          acc.y += metric.position.y;
-          return acc;
-        },
-        { x: 0, y: 0 },
-      );
-      center.x /= metrics.length;
-      center.y /= metrics.length;
-      let cursor = center[axis] - (totalPrimarySize + totalSpacing) / 2;
+      const anchorMetric = metrics.reduce((best, metric) => {
+        if (!best) {
+          return metric;
+        }
+        if (metric.position.y < best.position.y || (metric.position.y === best.position.y && metric.position.x < best.position.x)) {
+          return metric;
+        }
+        return best;
+      }, null);
+      const anchorPosition = anchorMetric ? anchorMetric.position : metrics[0].position;
+      let cursor = anchorPosition[axis];
       cy.batch(() => {
         for (const metric of metrics) {
           const primarySize = axis === 'x' ? metric.width : metric.height;
-          cursor += primarySize / 2;
           metric.node.position({
-            x: axis === 'x' ? cursor : center[crossAxis],
-            y: axis === 'y' ? cursor : center[crossAxis],
+            x: axis === 'x' ? cursor + primarySize / 2 : anchorPosition.x,
+            y: axis === 'y' ? cursor + primarySize / 2 : anchorPosition.y,
           });
-          cursor += primarySize / 2 + spacing;
+          cursor += primarySize + spacing;
         }
       });
       lastArrangeAction = {
