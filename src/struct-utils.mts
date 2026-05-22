@@ -15,14 +15,28 @@ import type { DeeplyPartial } from "./consts.mts";
 import type { MetaContext } from "./meta-type.mts";
 
 export const getLaunchers = (
-  sids_names: ((
-    | DeeplyPartial<QuestNodePrototypeConnectionsItem>
-    | DeeplyPartial<QuestNodePrototypeConnectionsItem>[]
-    ) & { Excluding?: boolean })[],
+  sids_names:
+    | ((
+        | DeeplyPartial<QuestNodePrototypeConnectionsItem>
+        | DeeplyPartial<QuestNodePrototypeConnectionsItem>[]
+      ) & { Excluding?: boolean })[]
+    | string[]
+    | string,
 ) => {
   const Launchers = new Struct() as QuestNodePrototypeLaunchers;
+  let correctLaunchers = [];
+  if (Array.isArray(sids_names)) {
+    correctLaunchers = sids_names.map((e) => {
+      if (typeof e === "string") {
+        return { SID: e, Name: "" } as { SID: string; Name: string; Excluding?: boolean };
+      }
 
-  sids_names.map((questNodePrototypeConnectionsItemOrItems) => {
+      return e;
+    });
+  } else {
+    correctLaunchers.push({ SID: sids_names });
+  }
+  correctLaunchers.map((questNodePrototypeConnectionsItemOrItems) => {
     const connections = new Struct() as QuestNodePrototypeLaunchersItem;
     connections.Excluding = questNodePrototypeConnectionsItemOrItems.Excluding ?? false;
     connections.Connections = new Struct() as QuestNodePrototypeConnections;
