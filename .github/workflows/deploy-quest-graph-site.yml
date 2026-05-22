@@ -43,6 +43,9 @@ jobs:
 
       - name: Build quest graph site
         run: pnpm run build-quest-graph-site
+        env:
+          SDK_PATH: /tmp/sdk
+          STALKER2_FOLDER: /tmp/game
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
