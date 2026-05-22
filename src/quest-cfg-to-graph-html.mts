@@ -774,6 +774,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     themeButton.addEventListener('click', toggleTheme);
     initializeSidebarResizer();
     initializeMiddleMousePan();
+    initializeWheelZoom();
 
     updateInteractionMode();
     updateLegendFilterUi();
@@ -1254,6 +1255,25 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         } catch {}
       }
       middlePanState = null;
+    }
+
+    function initializeWheelZoom() {
+      const container = cy.container();
+      container.addEventListener('wheel', (event) => {
+        if (event.ctrlKey || event.metaKey || event.altKey) {
+          return;
+        }
+        const factor = Math.exp(-event.deltaY * 0.0015);
+        cy.zoom({
+          level: cy.zoom() * factor,
+          renderedPosition: {
+            x: event.clientX - container.getBoundingClientRect().left,
+            y: event.clientY - container.getBoundingClientRect().top,
+          },
+        });
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }, { passive: false, capture: true });
     }
 
     function restoreSavedLayout() {
