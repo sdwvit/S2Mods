@@ -477,6 +477,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         <div class="legend">
           <button class="legend-row legend-filter" data-legend-filter="regular" type="button"><span class="swatch" style="background: var(--node)"></span>Regular node</button>
           <button class="legend-row legend-filter" data-legend-filter="eventOrStart" type="button"><span class="swatch" style="background: linear-gradient(90deg, var(--event) 0 50%, var(--start) 50% 100%)"></span>Event / trigger or launch on quest start</button>
+          <button class="legend-row legend-filter" data-legend-filter="singleConnection" type="button"><span class="swatch" style="background: var(--node); border-style: dashed"></span>Single connection</button>
           <button class="legend-row legend-filter" data-legend-filter="terminal" type="button"><span class="swatch" style="background: var(--terminal)"></span>Terminal / no outgoing edges</button>
         </div>
       </div>
@@ -828,6 +829,9 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       if (activeLegendFilter === 'eventOrStart') {
         return node.hasClass('is-event') || Boolean(node.data('isStart'));
       }
+      if (activeLegendFilter === 'singleConnection') {
+        return Number(node.data('connectionCount') || 0) === 1;
+      }
       if (activeLegendFilter === 'terminal') {
         return Boolean(node.data('isTerminal'));
       }
@@ -846,14 +850,13 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     }
 
     function updateSelectionActionButtons() {
-      const selectedVisibleNodes = cy.nodes(':selected:visible');
-      const enabled = selectedVisibleNodes.length >= 2;
+      const enabled = getArrangableNodes().length >= 2;
       arrangeRowButton.disabled = !enabled;
       arrangeColumnButton.disabled = !enabled;
     }
 
     function arrangeSelectedNodes(direction) {
-      const selectedNodes = cy.nodes(':selected:visible').toArray();
+      const selectedNodes = getArrangableNodes();
       if (selectedNodes.length < 2) {
         updateSelectionActionButtons();
         return;
@@ -900,6 +903,13 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       scheduleSaveLayout();
     }
 
+    function getArrangableNodes() {
+      const nodesById = new Map();
+      cy.nodes(':selected:visible').forEach((node) => nodesById.set(node.id(), node));
+      cy.nodes('.highlighted:visible').forEach((node) => nodesById.set(node.id(), node));
+      return [...nodesById.values()];
+    }
+
     function hasFilteredSelectionChanged(visibleNodeIds) {
       if (visibleNodeIds.length !== previousFilteredNodeIds.length) {
         return true;
@@ -911,12 +921,14 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     function clearSelection() {
       cy.elements().removeClass('faded highlighted');
       detailsEl.innerHTML = '<p class="hint">Select a node to inspect its fields and connected edges.</p>';
+      updateSelectionActionButtons();
     }
 
     function highlightNeighborhood(node) {
       cy.elements().addClass('faded').removeClass('highlighted');
       const neighborhood = node.closedNeighborhood().union(node.incomers()).union(node.outgoers());
       neighborhood.removeClass('faded').addClass('highlighted');
+      updateSelectionActionButtons();
     }
 
     function renderDetails(node) {
@@ -1395,6 +1407,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
             nodeType: node.nodeType,
             isStart: node.isStart,
             isTerminal: node.isTerminal,
+            connectionCount: node.connectionCount,
             details: node.details,
           },
           classes: [
@@ -1554,8 +1567,19 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           linkedNode.launches.push({ SID: node.sid, Name: '' });
         }
       });
+      const incomingCountBySid = new Map();
+      nodes.forEach((node) => {
+        incomingCountBySid.set(node.sid, 0);
+      });
+      nodes.forEach((node) => {
+        node.launches.forEach((edge) => {
+          incomingCountBySid.set(edge.SID, (incomingCountBySid.get(edge.SID) || 0) + 1);
+        });
+      });
       const graphNodes = nodes.map((node) => {
         const nodeType = getNodeSubType(node.raw.NodeType);
+        const outgoingCount = node.launches.length;
+        const incomingCount = incomingCountBySid.get(node.sid) || 0;
         return {
           id: node.jsSid,
           sid: node.sid,
@@ -1564,6 +1588,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           subtitle: getNodeSubtitle(node.raw),
           isStart: Boolean(node.raw.LaunchOnQuestStart),
           isTerminal: nodeType === 'End' || node.launches.length === 0,
+          connectionCount: incomingCount + outgoingCount,
           details: getNodeDetails(node.raw),
         };
       });
