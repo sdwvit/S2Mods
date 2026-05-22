@@ -338,6 +338,31 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       font-size: 0.92rem;
     }
 
+    .legend-filter {
+      width: 100%;
+      justify-content: flex-start;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      box-shadow: none;
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 500;
+      transform: none;
+    }
+
+    .legend-filter:hover {
+      background: var(--control-bg-hover);
+      transform: none;
+    }
+
+    .legend-filter.is-active {
+      background: var(--control-bg-hover);
+      border-color: var(--panel-border);
+      color: var(--text);
+    }
+
     .swatch {
       width: 12px;
       height: 12px;
@@ -447,14 +472,12 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           <select id="nodeTypeFilter">
             <option value="">All node types</option>
           </select>
-          <button id="fitButton" type="button">Fit graph</button>
-          <button id="resetButton" type="button">Clear selection</button>
+          <button id="fitButton" type="button">Zoom all way out</button>
         </div>
         <div class="legend">
-          <div class="legend-row"><span class="swatch" style="background: var(--node)"></span>Regular node</div>
-          <div class="legend-row"><span class="swatch" style="background: var(--event)"></span>Event / trigger node</div>
-          <div class="legend-row"><span class="swatch" style="background: var(--start)"></span>Launch on quest start</div>
-          <div class="legend-row"><span class="swatch" style="background: var(--terminal)"></span>Terminal / no outgoing edges</div>
+          <button class="legend-row legend-filter" data-legend-filter="regular" type="button"><span class="swatch" style="background: var(--node)"></span>Regular node</button>
+          <button class="legend-row legend-filter" data-legend-filter="eventOrStart" type="button"><span class="swatch" style="background: linear-gradient(90deg, var(--event) 0 50%, var(--start) 50% 100%)"></span>Event / trigger or launch on quest start</button>
+          <button class="legend-row legend-filter" data-legend-filter="terminal" type="button"><span class="swatch" style="background: var(--terminal)"></span>Terminal / no outgoing edges</button>
         </div>
       </div>
       <div class="details" id="details">
@@ -479,6 +502,8 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     <main class="panel canvas">
       <div class="toolbar">
         <button id="themeButton" type="button">Dark mode</button>
+        <button id="arrangeRowButton" type="button" disabled>Row</button>
+        <button id="arrangeColumnButton" type="button" disabled>Column</button>
         <button id="undoButton" type="button" disabled>Undo</button>
         <button id="redoButton" type="button" disabled>Redo</button>
         <button id="layoutButton" type="button">Relayout</button>
@@ -500,9 +525,11 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     const openCfgInput = document.getElementById('openCfgInput');
     const searchEl = document.getElementById('search');
     const nodeTypeFilterEl = document.getElementById('nodeTypeFilter');
+    const legendFilterEls = Array.from(document.querySelectorAll('[data-legend-filter]'));
     const fitButton = document.getElementById('fitButton');
-    const resetButton = document.getElementById('resetButton');
     const layoutButton = document.getElementById('layoutButton');
+    const arrangeRowButton = document.getElementById('arrangeRowButton');
+    const arrangeColumnButton = document.getElementById('arrangeColumnButton');
     const undoButton = document.getElementById('undoButton');
     const redoButton = document.getElementById('redoButton');
     const themeButton = document.getElementById('themeButton');
@@ -516,6 +543,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     let restoredViewport = null;
     let activeDragGroup = null;
     let isAltPressed = false;
+    let activeLegendFilter = '';
     let previousFilteredNodeIds = [];
     const undoStack = [];
     const redoStack = [];
@@ -672,6 +700,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       finishGroupDrag();
       scheduleSaveLayout();
     });
+    cy.on('select unselect', updateSelectionActionButtons);
     cy.on('zoom pan', () => scheduleSaveLayout());
     cy.on('tap', (event) => {
       if (event.target === cy) {
@@ -681,6 +710,14 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
 
     searchEl.addEventListener('input', applyFilters);
     nodeTypeFilterEl.addEventListener('change', applyFilters);
+    legendFilterEls.forEach((legendFilterEl) => {
+      legendFilterEl.addEventListener('click', () => {
+        const nextFilter = legendFilterEl.dataset.legendFilter || '';
+        activeLegendFilter = activeLegendFilter === nextFilter ? '' : nextFilter;
+        updateLegendFilterUi();
+        applyFilters();
+      });
+    });
     openCfgButton.addEventListener('click', () => openCfgInput.click());
     openCfgInput.addEventListener('change', async (event) => {
       const input = event.target;
@@ -703,16 +740,19 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       cy.fit(cy.nodes(':visible'), 80);
       scheduleSaveLayout();
     });
-    resetButton.addEventListener('click', clearSelection);
     layoutButton.addEventListener('click', () => {
       pushUndoState();
       runActiveLayout();
     });
+    arrangeRowButton.addEventListener('click', () => arrangeSelectedNodes('row'));
+    arrangeColumnButton.addEventListener('click', () => arrangeSelectedNodes('column'));
     undoButton.addEventListener('click', undoGraphState);
     redoButton.addEventListener('click', redoGraphState);
     themeButton.addEventListener('click', toggleTheme);
     initializeSidebarResizer();
 
+    updateLegendFilterUi();
+    updateSelectionActionButtons();
     applyFilters();
     cy.ready(() => {
       initializeGraphView();
@@ -762,7 +802,8 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
             node.data('sid').toLowerCase().includes(search) ||
             String(node.data('subtitle') || '').toLowerCase().includes(search);
           const matchesType = !nodeType || node.data('nodeType') === nodeType;
-          const visible = matchesSearch && matchesType;
+          const matchesLegend = matchesLegendFilter(node);
+          const visible = matchesSearch && matchesType && matchesLegend;
           if (visible) {
             visibleNodeIds.push(node.id());
           }
@@ -777,6 +818,86 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         clearSelection();
       }
       previousFilteredNodeIds = visibleNodeIds.sort();
+      updateSelectionActionButtons();
+    }
+
+    function matchesLegendFilter(node) {
+      if (!activeLegendFilter) {
+        return true;
+      }
+      if (activeLegendFilter === 'eventOrStart') {
+        return node.hasClass('is-event') || Boolean(node.data('isStart'));
+      }
+      if (activeLegendFilter === 'terminal') {
+        return Boolean(node.data('isTerminal'));
+      }
+      if (activeLegendFilter === 'regular') {
+        return !node.hasClass('is-event') && !node.data('isStart') && !node.data('isTerminal');
+      }
+      return true;
+    }
+
+    function updateLegendFilterUi() {
+      legendFilterEls.forEach((legendFilterEl) => {
+        const isActive = (legendFilterEl.dataset.legendFilter || '') === activeLegendFilter;
+        legendFilterEl.classList.toggle('is-active', isActive);
+        legendFilterEl.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    }
+
+    function updateSelectionActionButtons() {
+      const selectedVisibleNodes = cy.nodes(':selected:visible');
+      const enabled = selectedVisibleNodes.length >= 2;
+      arrangeRowButton.disabled = !enabled;
+      arrangeColumnButton.disabled = !enabled;
+    }
+
+    function arrangeSelectedNodes(direction) {
+      const selectedNodes = cy.nodes(':selected:visible').toArray();
+      if (selectedNodes.length < 2) {
+        updateSelectionActionButtons();
+        return;
+      }
+      pushUndoState();
+      const spacing = 36;
+      const axis = direction === 'column' ? 'y' : 'x';
+      const crossAxis = axis === 'x' ? 'y' : 'x';
+      const metrics = selectedNodes
+        .map((node) => {
+          const box = node.boundingBox({ includeLabels: true, includeOverlays: false });
+          return {
+            node,
+            width: Math.max(1, box.w),
+            height: Math.max(1, box.h),
+            position: node.position(),
+          };
+        })
+        .sort((a, b) => a.position[axis] - b.position[axis]);
+      const totalPrimarySize = metrics.reduce((sum, metric) => sum + (axis === 'x' ? metric.width : metric.height), 0);
+      const totalSpacing = spacing * (metrics.length - 1);
+      const center = metrics.reduce(
+        (acc, metric) => {
+          acc.x += metric.position.x;
+          acc.y += metric.position.y;
+          return acc;
+        },
+        { x: 0, y: 0 },
+      );
+      center.x /= metrics.length;
+      center.y /= metrics.length;
+      let cursor = center[axis] - (totalPrimarySize + totalSpacing) / 2;
+      cy.batch(() => {
+        for (const metric of metrics) {
+          const primarySize = axis === 'x' ? metric.width : metric.height;
+          cursor += primarySize / 2;
+          metric.node.position({
+            x: axis === 'x' ? cursor : center[crossAxis],
+            y: axis === 'y' ? cursor : center[crossAxis],
+          });
+          cursor += primarySize / 2 + spacing;
+        }
+      });
+      scheduleSaveLayout();
     }
 
     function hasFilteredSelectionChanged(visibleNodeIds) {
@@ -911,8 +1032,11 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       restoredViewport = null;
       previousFilteredNodeIds = [];
       activeDragGroup = null;
+      activeLegendFilter = '';
       searchEl.value = '';
       nodeTypeFilterEl.value = '';
+      updateLegendFilterUi();
+      updateSelectionActionButtons();
       clearSelection();
       clearHistory();
       cy.batch(() => {
