@@ -8,6 +8,7 @@
     "prepare-configs": "node ./src/run-ts.mjs ./src/prepare-configs.mts",
     "prepare-configs:mods": "pnpm -r --parallel --if-present run prepare-configs",
     "quest-graph-html": "node ./src/run-ts.mjs ./src/quest-cfg-to-graph-html.mts",
+    "build-quest-graph-site": "node ./src/run-ts.mjs ./src/build-quest-graph-site.mts",
     "pack-inject": "node ./src/run-ts.mjs ./src/pack-inject.mts",
     "cook-inject": "node ./src/run-ts.mjs ./src/cook-inject.mts",
     "publish-steam": "node ./src/run-ts.mjs ./src/publish/publish-steam.mts",
