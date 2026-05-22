@@ -1,6 +1,6 @@
 import type { QuestNodePrototype } from "s2cfgtojson";
 import type { MetaContext } from "../meta-type.mts";
-import { createNodeSidMapper, QuestIr, QuestIrNode } from "./ir.mts";
+import { createNodeSidMapper, type QuestIr, type QuestIrNode } from "./ir.mts";
 import { logger } from "../logger.mts";
 
 export function normalizeQuestNodes(context: MetaContext<QuestNodePrototype>): QuestIr {
