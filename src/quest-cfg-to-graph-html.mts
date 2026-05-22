@@ -491,6 +491,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           <li>Middle click + drag: pan canvas</li>
           <li>Drag: move one node</li>
           <li><span class="keycap">Alt</span> + drag: move highlighted nodes</li>
+          <li><span class="keycap">Q</span>: row, <span class="keycap">W</span>: column, <span class="keycap">E</span>: snap to grid</li>
           <li><span class="keycap">Row</span>/<span class="keycap">Column</span>: click again to best-effort sort by arrow direction</li>
           <li><span class="keycap">Undo</span>/<span class="keycap">Redo</span> buttons or <span class="keycap">Ctrl/Cmd+Z</span>, <span class="keycap">Ctrl/Cmd+Shift+Z</span>, <span class="keycap">Ctrl/Cmd+Y</span>: history</li>
         </ul>
@@ -680,6 +681,26 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       isPanModifierPressed = false;
       updateInteractionMode();
       stopMiddleMousePan();
+    });
+    window.addEventListener('keydown', (event) => {
+      if (shouldIgnoreGraphHotkey(event)) {
+        return;
+      }
+      const key = event.key.toLowerCase();
+      if (key === 'q') {
+        event.preventDefault();
+        arrangeSelectedNodes('row');
+        return;
+      }
+      if (key === 'w') {
+        event.preventDefault();
+        arrangeSelectedNodes('column');
+        return;
+      }
+      if (key === 'e') {
+        event.preventDefault();
+        snapArrangableNodesToGrid();
+      }
     });
     window.addEventListener('keydown', (event) => {
       const isPrimaryModifier = event.ctrlKey || event.metaKey;
@@ -1192,6 +1213,17 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     function updateInteractionMode() {
       cy.userPanningEnabled(isPanModifierPressed);
       cy.boxSelectionEnabled(!isPanModifierPressed);
+    }
+
+    function shouldIgnoreGraphHotkey(event) {
+      if (event.ctrlKey || event.metaKey || event.altKey) {
+        return true;
+      }
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        return false;
+      }
+      return Boolean(target.closest('input, textarea, select, button, [contenteditable="true"]'));
     }
 
     function initializeMiddleMousePan() {
