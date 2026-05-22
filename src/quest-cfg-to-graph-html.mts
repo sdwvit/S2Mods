@@ -489,6 +489,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           <li><span class="keycap">Ctrl</span>/<span class="keycap">Shift</span> + drag: box-select nodes</li>
           <li>Drag: move one node</li>
           <li><span class="keycap">Alt</span> + drag: move highlighted nodes</li>
+          <li><span class="keycap">Row</span>/<span class="keycap">Column</span>: click again to best-effort sort by arrow direction</li>
           <li><span class="keycap">Undo</span>/<span class="keycap">Redo</span> buttons or <span class="keycap">Ctrl/Cmd+Z</span>, <span class="keycap">Ctrl/Cmd+Shift+Z</span>, <span class="keycap">Ctrl/Cmd+Y</span>: history</li>
         </ul>
       </div>
@@ -505,6 +506,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         <button id="themeButton" type="button">Dark mode</button>
         <button id="arrangeRowButton" type="button" disabled>Row</button>
         <button id="arrangeColumnButton" type="button" disabled>Column</button>
+        <button id="snapGridButton" type="button" disabled>Snap to grid</button>
         <button id="undoButton" type="button" disabled>Undo</button>
         <button id="redoButton" type="button" disabled>Redo</button>
         <button id="layoutButton" type="button">Reset layout</button>
@@ -531,6 +533,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     const layoutButton = document.getElementById('layoutButton');
     const arrangeRowButton = document.getElementById('arrangeRowButton');
     const arrangeColumnButton = document.getElementById('arrangeColumnButton');
+    const snapGridButton = document.getElementById('snapGridButton');
     const undoButton = document.getElementById('undoButton');
     const redoButton = document.getElementById('redoButton');
     const themeButton = document.getElementById('themeButton');
@@ -545,6 +548,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     let activeDragGroup = null;
     let isAltPressed = false;
     let activeLegendFilter = '';
+    let lastArrangeAction = null;
     let previousFilteredNodeIds = [];
     const undoStack = [];
     const redoStack = [];
@@ -747,6 +751,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     });
     arrangeRowButton.addEventListener('click', () => arrangeSelectedNodes('row'));
     arrangeColumnButton.addEventListener('click', () => arrangeSelectedNodes('column'));
+    snapGridButton.addEventListener('click', snapArrangableNodesToGrid);
     undoButton.addEventListener('click', undoGraphState);
     redoButton.addEventListener('click', redoGraphState);
     themeButton.addEventListener('click', toggleTheme);
@@ -853,6 +858,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       const enabled = getArrangableNodes().length >= 2;
       arrangeRowButton.disabled = !enabled;
       arrangeColumnButton.disabled = !enabled;
+      snapGridButton.disabled = !enabled;
     }
 
     function arrangeSelectedNodes(direction) {
@@ -865,7 +871,13 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       const spacing = 36;
       const axis = direction === 'column' ? 'y' : 'x';
       const crossAxis = axis === 'x' ? 'y' : 'x';
-      const metrics = selectedNodes
+      const nodeIds = selectedNodes.map((node) => node.id()).sort();
+      const useDirectedOrder =
+        lastArrangeAction &&
+        lastArrangeAction.kind === 'line' &&
+        lastArrangeAction.direction === direction &&
+        JSON.stringify(lastArrangeAction.nodeIds) === JSON.stringify(nodeIds);
+      let metrics = selectedNodes
         .map((node) => {
           const box = node.boundingBox({ includeLabels: true, includeOverlays: false });
           return {
@@ -876,6 +888,9 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           };
         })
         .sort((a, b) => a.position[axis] - b.position[axis]);
+      if (useDirectedOrder) {
+        metrics = orderMetricsByEdgeDirection(metrics, axis, crossAxis);
+      }
       const totalPrimarySize = metrics.reduce((sum, metric) => sum + (axis === 'x' ? metric.width : metric.height), 0);
       const totalSpacing = spacing * (metrics.length - 1);
       const center = metrics.reduce(
@@ -900,7 +915,66 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           cursor += primarySize / 2 + spacing;
         }
       });
+      lastArrangeAction = {
+        kind: 'line',
+        direction,
+        nodeIds,
+      };
       scheduleSaveLayout();
+    }
+
+    function orderMetricsByEdgeDirection(metrics, axis, crossAxis) {
+      const metricById = new Map(metrics.map((metric) => [metric.node.id(), metric]));
+      const indegreeById = new Map(metrics.map((metric) => [metric.node.id(), 0]));
+      const outgoingById = new Map(metrics.map((metric) => [metric.node.id(), []]));
+      const compareMetrics = (a, b) =>
+        a.position[axis] - b.position[axis] ||
+        a.position[crossAxis] - b.position[crossAxis] ||
+        a.node.id().localeCompare(b.node.id());
+      cy.edges(':visible').forEach((edge) => {
+        const sourceId = edge.source().id();
+        const targetId = edge.target().id();
+        if (!metricById.has(sourceId) || !metricById.has(targetId) || sourceId === targetId) {
+          return;
+        }
+        outgoingById.get(sourceId).push(targetId);
+        indegreeById.set(targetId, (indegreeById.get(targetId) || 0) + 1);
+      });
+      const queue = metrics
+        .filter((metric) => (indegreeById.get(metric.node.id()) || 0) === 0)
+        .sort(compareMetrics);
+      const ordered = [];
+      const visited = new Set();
+      while (queue.length > 0) {
+        const current = queue.shift();
+        if (visited.has(current.node.id())) {
+          continue;
+        }
+        visited.add(current.node.id());
+        ordered.push(current);
+        const nextIds = (outgoingById.get(current.node.id()) || [])
+          .map((id) => metricById.get(id))
+          .filter(Boolean)
+          .sort(compareMetrics);
+        nextIds.forEach((nextMetric) => {
+          const nextId = nextMetric.node.id();
+          indegreeById.set(nextId, (indegreeById.get(nextId) || 0) - 1);
+          if ((indegreeById.get(nextId) || 0) === 0) {
+            queue.push(nextMetric);
+          }
+        });
+        queue.sort(compareMetrics);
+      }
+      if (ordered.length === metrics.length) {
+        return ordered;
+      }
+      const remaining = metrics
+        .filter((metric) => !visited.has(metric.node.id()))
+        .sort((a, b) =>
+          (indegreeById.get(a.node.id()) || 0) - (indegreeById.get(b.node.id()) || 0) ||
+          compareMetrics(a, b),
+        );
+      return [...ordered, ...remaining];
     }
 
     function getArrangableNodes() {
@@ -908,6 +982,37 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       cy.nodes(':selected:visible').forEach((node) => nodesById.set(node.id(), node));
       cy.nodes('.highlighted:visible').forEach((node) => nodesById.set(node.id(), node));
       return [...nodesById.values()];
+    }
+
+    function snapArrangableNodesToGrid() {
+      const nodes = getArrangableNodes();
+      if (nodes.length < 2) {
+        updateSelectionActionButtons();
+        return;
+      }
+      pushUndoState();
+      lastArrangeAction = null;
+      const gridSize = 48;
+      const anchor = nodes.reduce((best, node) => {
+        const position = node.position();
+        if (!best) {
+          return { x: position.x, y: position.y };
+        }
+        if (position.y < best.y || (position.y === best.y && position.x < best.x)) {
+          return { x: position.x, y: position.y };
+        }
+        return best;
+      }, null);
+      cy.batch(() => {
+        nodes.forEach((node) => {
+          const position = node.position();
+          node.position({
+            x: anchor.x + Math.round((position.x - anchor.x) / gridSize) * gridSize,
+            y: anchor.y + Math.round((position.y - anchor.y) / gridSize) * gridSize,
+          });
+        });
+      });
+      scheduleSaveLayout();
     }
 
     function hasFilteredSelectionChanged(visibleNodeIds) {
@@ -921,6 +1026,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     function clearSelection() {
       cy.elements().removeClass('faded highlighted');
       detailsEl.innerHTML = '<p class="hint">Select a node to inspect its fields and connected edges.</p>';
+      lastArrangeAction = null;
       updateSelectionActionButtons();
     }
 
@@ -1045,6 +1151,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       previousFilteredNodeIds = [];
       activeDragGroup = null;
       activeLegendFilter = '';
+      lastArrangeAction = null;
       searchEl.value = '';
       nodeTypeFilterEl.value = '';
       updateLegendFilterUi();
@@ -1423,7 +1530,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
             source: edge.source,
             target: edge.target,
             label: edge.label,
-            showLabel: currentGraph.edgeCount <= 120 ? edge.label : '',
+            showLabel: edge.label,
             kind: edge.kind,
           },
         })),
