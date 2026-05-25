@@ -41,55 +41,12 @@ export const meta: MetaType = {
     These are mostly post-SIRCAA armors and helmets. Thus you can't see them in the first half of the game[h2][/h2]
     The chance of NPCs dropping armor is based on the armor's overall effectiveness, with cheaper armors being more likely to drop.[h2][/h2]
     [h2][/h2]
-    For your convenience, here is a set of console commands to spawn the new headless armors directly:[h2][/h2]
-    [h1][/h1]
-    Armors:
-    [list]
-    [*] XCreateItemInInventoryByID SEVA_Dolg_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID SEVA_Svoboda_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID SEVA_Neutral_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Dolg_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyExoskeleton_Dolg_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Heavy_Dolg_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Battle_Dolg_End_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Svoboda_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyExoskeleton_Svoboda_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Heavy_Svoboda_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Heavy_Mercenaries_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Mercenaries_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Heavy2_Military_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Monolith_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyExoskeleton_Monolith_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyAnomaly_Monolith_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Neutral_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyBattle_Spark_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyAnomaly_Spark_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID BattleExoskeleton_Varta_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID Anomaly_Scientific_Armor_headless 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyAnomaly_Scientific_Armor_headless 0 1 1 1
-    [/list]   
-     [h1][/h1]
-    Helmets:
-    [list]
-    [*] XCreateItemInInventoryByID SEVA_Dolg_Armor_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID SEVA_Svoboda_Armor_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID SEVA_Neutral_Armor_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Duty_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyBattle_Dolg_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Svoboda_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Mercenaries_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyBattle_Merc_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Monolith_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Neutral_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID Exoskeleton_Spark_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyBattle_Spark_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyAnomaly_Spark_Armor_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID Anomaly_Scientific_Armor_Helmet 0 1 1 1
-    [*] XCreateItemInInventoryByID HeavyAnomaly_Scientific_Armor_Helmet 0 1 1 1
-    [/list]
+    For your convenience, here is a console commands to spawn all new headless armors in Skif's inventory:
+    [h2][/h2]
+    [u]XStartQuestNodeBySID Skif_ItemGen_Skif_All_Gdocs_Armors[u]
   `,
 
-  changenote: `Added SEVA armors and helmets for Duty, Freedom, and Loner factions.
+  changenote: `Fix bug with game crashing. Old changelog: Added SEVA armors and helmets for Duty, Freedom, and Loner factions.
   Added Anomaly Scientific and HeavyAnomaly Scientific armors and helmets.
   Added HeavyAnomaly Spark armor and helmet.
   HeavyExoskeleton Duty and Freedom armors now correctly include the sprint upgrade.
@@ -107,6 +64,7 @@ export const meta: MetaType = {
 };
 
 let addArmorsRunOnce = false;
+let headlessArmorBuildDataPromise: Promise<HeadlessArmorBuildData> | null = null;
 
 const UPGRADE_SID_FIXUPS: Record<string, string> = {
   Battle_Monolith_Armor_rad_container_Left_3_2:
@@ -125,7 +83,48 @@ const EXTRA_UPGRADES_FIXUPS = {
   HeavyExoskeleton_Svoboda_Armor_headless: ["Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1"],
   HeavyExoskeleton_Dolg_Armor: ["Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1"],
   HeavyExoskeleton_Svoboda_Armor: ["Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1"],
+  Exoskeleton_Dolg_Armor: ["Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1"],
+  Exoskeleton_Dolg_Armor_headless: ["Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1"],
 };
+
+type HeadlessArmorBuildData = {
+  armorData: Awaited<ReturnType<typeof getGdocsArmorData>>;
+  referenceMap: Record<string, ArmorPrototype>;
+  gdocsArmorSIDs: string[];
+  backfilledArmors: ArmorPrototype[];
+};
+
+async function getHeadlessArmorBuildData(): Promise<HeadlessArmorBuildData> {
+  if (!headlessArmorBuildDataPromise) {
+    headlessArmorBuildDataPromise = (async () => {
+      const armorData = await getGdocsArmorData();
+      const referenceMap: Record<string, ArmorPrototype> = {
+        ...allDefaultArmorPrototypesRecord,
+        ...armorData.overrides,
+      };
+      const gdocsArmorSIDs = Object.keys(armorData.descriptors);
+      const armorSIDs = [...Object.keys(armorRanksBySID), ...Object.keys(armorData.overrides)];
+      const backfilledArmors = armorSIDs.flatMap((SID) => {
+        const armor = createArmorPrototype(SID, referenceMap);
+        if (!armor) {
+          logger.warn(`Couldn't create cached armor due to no ref? ${SID}`);
+          return [];
+        }
+        referenceMap[SID] = armor;
+        return [armor];
+      });
+
+      return {
+        armorData,
+        referenceMap,
+        gdocsArmorSIDs,
+        backfilledArmors,
+      };
+    })();
+  }
+
+  return headlessArmorBuildDataPromise;
+}
 
 function transformUpgradePrototypes(struct: UpgradePrototype) {
   if (struct.SID === "Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1") {
@@ -164,22 +163,19 @@ export async function transformArmorPrototypes(
   }
 
   addArmorsRunOnce = true;
-  const seenSIDs = new Set<string>();
-  const gdocsData = await getGdocsArmorData();
-  const referenceMap = { ...allDefaultArmorPrototypesRecord, ...gdocsData.overrides };
-  seenSIDs.union(new Set(Object.keys(gdocsData.descriptors)));
-  Object.keys(gdocsData.descriptors).forEach((SID) => {
-    const newArmor = createArmorPrototype(SID, referenceMap);
+  const { gdocsArmorSIDs, referenceMap } = await getHeadlessArmorBuildData();
+  gdocsArmorSIDs.forEach((SID) => {
+    const newArmor = referenceMap[SID];
     if (!newArmor) {
-      logger.warn(`Couldn't create new armor due to no ref? ${SID}`);
+      logger.warn(`Couldn't emit cached armor due to no ref? ${SID}`);
       return;
     }
 
-    fixUpgradePrototypeSIDs(newArmor);
-    dedupeUpgradePrototypeSIDs(newArmor);
-
     const clone = newArmor.clone();
+    fixUpgradePrototypeSIDs(clone);
+    dedupeUpgradePrototypeSIDs(clone);
     clone.__internal__.isRoot = true;
+    delete clone.PreinstalledUpgrades;
     extraStructs.push(clone);
   });
 
@@ -266,7 +262,7 @@ export function createArmorPrototype(SID: string, referenceMap: Record<string, A
 
   deepMerge(backfilled, override, false);
   overrideProtectionNPCWithProtection(backfilled);
-  if (backfilled.bBlockHead === false) {
+  if (backfilled.bBlockHead === false && backfilled.UpgradePrototypeSIDs) {
     backfilled.UpgradePrototypeSIDs = backfilled.UpgradePrototypeSIDs?.filter(
       ([, e]) => e !== "FaustPsyResist_Quest_1_1",
     );
@@ -306,6 +302,7 @@ function shouldProcessStruct(struct: ItemGeneratorPrototype) {
 }
 
 let once = false;
+const SKIF_ALL_GDOCS_ARMORS_GENERATOR_SID = "ItemGen_Skif_All_Gdocs_Armors";
 
 type NewItemGeneratorsByPurpose = Record<
   "helmets" | "armors" | "allHelmets" | "allHeadedArmors" | "allHeadlessArmors" | "combos",
@@ -344,17 +341,8 @@ function getRelevantItemGen(
   return subItemGen;
 }
 
-const armorData = await getGdocsArmorData();
-const referenceMap: Record<string, ArmorPrototype> = {
-  ...allDefaultArmorPrototypesRecord,
-  ...armorData.overrides,
-};
-const armorSIDs = [...Object.keys(armorRanksBySID), ...Object.keys(armorData.overrides)];
-const backfilledArmors = armorSIDs.map((SID) => {
-  const armor = createArmorPrototype(SID, referenceMap);
-  referenceMap[SID] = armor;
-  return armor;
-});
+const { armorData, gdocsArmorSIDs, referenceMap, backfilledArmors } =
+  await getHeadlessArmorBuildData();
 
 function doOnce(extraStructs: any[]) {
   function getLowestLevelGenerators(SID: string, armor: ArmorPrototype) {
@@ -389,6 +377,33 @@ function doOnce(extraStructs: any[]) {
 
     return subItemGen;
   }
+
+  const allGdocsArmorsItemGenerator = new Struct({
+    SID: SKIF_ALL_GDOCS_ARMORS_GENERATOR_SID,
+    ItemGenerator: new Struct(),
+    __internal__: { isRoot: true },
+  }) as ItemGeneratorPrototype;
+  allGdocsArmorsItemGenerator.__internal__.rawName = allGdocsArmorsItemGenerator.SID;
+
+  gdocsArmorSIDs.forEach((SID) => {
+    const igItem = new Struct({
+      Category: "EItemGenerationCategory::BodyArmor",
+      bAllowSameCategoryGeneration: true,
+      PossibleItems: new Struct(),
+    }) as ItemGeneratorPrototypeItemGeneratorItem;
+    igItem.PossibleItems.addNode(
+      new Struct({
+        ItemPrototypeSID: SID,
+        Chance: 1,
+        MinDurability: 1,
+        MaxDurability: 1,
+      }) as ItemGeneratorPrototypePossibleItemsItem,
+      SID,
+    );
+    allGdocsArmorsItemGenerator.ItemGenerator.addNode(igItem, SID);
+  });
+  extraStructs.push(allGdocsArmorsItemGenerator);
+  transformItemGenerators.extraStructs.push(allGdocsArmorsItemGenerator);
 
   backfilledArmors.forEach((armor) => {
     const SID = armor.SID;
