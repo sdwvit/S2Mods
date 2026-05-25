@@ -125,13 +125,8 @@ export const allDefaultItemGeneratorsRecord = getRecord([
 export const armorRanksBySID: Record<string, ERank> = {
   // ALL_RANK
   SkinJacket_Bandit_Armor: ALL_RANK,
-  Battle_Monolith_Armor: ALL_RANK,
-  Battle_Varta_Armor: ALL_RANK,
+  Jacket_Bandit_Armor: ALL_RANK,
   Default_Military_Armor: ALL_RANK,
-  Exoskeleton_Monolith_Armor: ALL_RANK,
-  Anomaly_Scientific_Armor: ALL_RANK,
-  HeavyAnomaly_Monolith_Armor: ALL_RANK,
-  HeavyAnomaly_Spark_Armor: ALL_RANK,
   Jemmy_Neutral_Armor: ALL_RANK,
   Newbee_Neutral_Armor: ALL_RANK,
   Light_Mercenaries_Armor: ALL_RANK,
@@ -139,37 +134,42 @@ export const armorRanksBySID: Record<string, ERank> = {
   Rook_Svoboda_Armor: ALL_RANK,
 
   // EXPERIENCED_MASTER_RANK
-  Jacket_Bandit_Armor: EXPERIENCED_MASTER_RANK,
-  Middle_Bandit_Armor: EXPERIENCED_MASTER_RANK,
   Battle_Dolg_Armor: EXPERIENCED_MASTER_RANK,
   SEVA_Dolg_Armor: EXPERIENCED_MASTER_RANK,
-  Battle_Svoboda_Armor: EXPERIENCED_MASTER_RANK,
+  Anomaly_Scientific_Armor: EXPERIENCED_MASTER_RANK,
+  SciSEVA_Scientific_Armor: EXPERIENCED_MASTER_RANK,
+  Middle_Bandit_Armor: EXPERIENCED_MASTER_RANK,
   Nasos_Neutral_Armor: EXPERIENCED_MASTER_RANK,
-  Zorya_Neutral_Armor: EXPERIENCED_MASTER_RANK,
-  HeavyAnomaly_Scientific_Armor: EXPERIENCED_MASTER_RANK,
   SEVA_Spark_Armor: EXPERIENCED_MASTER_RANK,
+  SEVA_Svoboda_Armor: EXPERIENCED_MASTER_RANK,
+  SEVA_Neutral_Armor: EXPERIENCED_MASTER_RANK,
+  Battle_Svoboda_Armor: EXPERIENCED_MASTER_RANK,
+  Battle_Monolith_Armor: EXPERIENCED_MASTER_RANK,
+  Battle_Varta_Armor: EXPERIENCED_MASTER_RANK,
 
   // VETERAN_MASTER_RANK
+  Zorya_Neutral_Armor: VETERAN_MASTER_RANK,
+  HeavyAnomaly_Monolith_Armor: VETERAN_MASTER_RANK,
+  HeavyAnomaly_Scientific_Armor: VETERAN_MASTER_RANK,
   Heavy_Dolg_Armor: VETERAN_MASTER_RANK,
-  SEVA_Svoboda_Armor: VETERAN_MASTER_RANK,
   Heavy_Svoboda_Armor: VETERAN_MASTER_RANK,
   Heavy_Mercenaries_Armor: VETERAN_MASTER_RANK,
   Heavy2_Military_Armor: VETERAN_MASTER_RANK,
   HeavyExoskeleton_Monolith_Armor: VETERAN_MASTER_RANK,
-  SEVA_Neutral_Armor: VETERAN_MASTER_RANK,
-  SciSEVA_Scientific_Armor: VETERAN_MASTER_RANK,
   Battle_Spark_Armor: VETERAN_MASTER_RANK,
   HeavyBattle_Spark_Armor: VETERAN_MASTER_RANK,
   BattleExoskeleton_Varta_Armor: VETERAN_MASTER_RANK,
+  HeavyExoskeleton_Svoboda_Armor: VETERAN_MASTER_RANK,
+  HeavyExoskeleton_Dolg_Armor: VETERAN_MASTER_RANK,
+  HeavyAnomaly_Spark_Armor: VETERAN_MASTER_RANK,
+  Battle_Dolg_End_Armor: VETERAN_MASTER_RANK,
 
   // MASTER_RANK
-  HeavyExoskeleton_Dolg_Armor: MASTER_RANK,
   Exoskeleton_Dolg_Armor: MASTER_RANK,
-  Battle_Dolg_End_Armor: MASTER_RANK,
-  HeavyExoskeleton_Svoboda_Armor: MASTER_RANK,
   Exoskeleton_Svoboda_Armor: MASTER_RANK,
   Exoskeleton_Mercenaries_Armor: MASTER_RANK,
   Exoskeleton_Neutral_Armor: MASTER_RANK,
+  Exoskeleton_Monolith_Armor: MASTER_RANK,
 
   Light_Bandit_Helmet: ALL_RANK,
   Light_Duty_Helmet: ALL_RANK,
@@ -177,12 +177,12 @@ export const armorRanksBySID: Record<string, ERank> = {
   Light_Military_Helmet: ALL_RANK,
   Light_Neutral_Helmet: ALL_RANK,
 
-  Heavy_Duty_Helmet: EXPERIENCED_MASTER_RANK,
-  Heavy_Military_Helmet: EXPERIENCED_MASTER_RANK,
-  Heavy_Varta_Helmet: EXPERIENCED_MASTER_RANK,
+  Battle_Military_Helmet: EXPERIENCED_MASTER_RANK,
 
+  Heavy_Duty_Helmet: VETERAN_MASTER_RANK,
+  Heavy_Military_Helmet: VETERAN_MASTER_RANK,
+  Heavy_Varta_Helmet: VETERAN_MASTER_RANK,
   Heavy_Svoboda_Helmet: VETERAN_MASTER_RANK,
-  Battle_Military_Helmet: VETERAN_MASTER_RANK,
 };
 
 export const FactionsByArmorSID: Record<string, CoreFaction> = {

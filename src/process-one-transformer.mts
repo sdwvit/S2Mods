@@ -3,8 +3,11 @@ import { getCfgFileProcessor } from "./get-cfg-file-processor.mts";
 import type { StructTransformer } from "./meta-type.mts";
 import { Struct } from "s2cfgtojson";
 
-export async function processOneTransformer<T extends Struct>(transformer: StructTransformer<T>): Promise<(T | Struct)[][]> {
-  const [files, processor] = await Promise.all([getFilesForTransformer(transformer), getCfgFileProcessor(transformer)] as const);
+export async function processOneTransformer<T extends Struct>(
+  transformer: StructTransformer<T>,
+): Promise<(T | Struct)[][]> {
+  const files = await getFilesForTransformer(transformer);
+  const processor = getCfgFileProcessor(transformer);
 
   return await Promise.all(files.map(processor));
 }
