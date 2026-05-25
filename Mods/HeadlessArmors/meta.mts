@@ -17,7 +17,6 @@ import {
   ALL_RANKS_ARR,
   allDefaultArmorPrototypesRecord,
   allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
-  allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID,
   FactionsByArmorSID,
   armorRanksBySID,
   type CoreFaction,
@@ -46,11 +45,7 @@ export const meta: MetaType = {
     [u]XStartQuestNodeBySID Skif_ItemGen_Skif_All_Gdocs_Armors[/u]
   `,
 
-  changenote: `Fix bug with game crashing. Old changelog: Added SEVA armors and helmets for Duty, Freedom, and Loner factions.
-  Added Anomaly Scientific and HeavyAnomaly Scientific armors and helmets.
-  Added HeavyAnomaly Spark armor and helmet.
-  HeavyExoskeleton Duty and Freedom armors now correctly include the sprint upgrade.
-  Headless armors no longer inherit the psy resistance upgrade, since they don't cover the head.`,
+  changenote: `Higher-rank players can now drop lower-rank headless armors with equal probability. Previously, a Master-rank player could only drop Master-rank armors; now Rookie, Experienced, and Veteran armors are equally possible. Same fix applies to Veteran and Experienced ranks. Old changelog: Fix bug with game crashing. Added SEVA armors and helmets for Duty, Freedom, and Loner factions. Added Anomaly Scientific and HeavyAnomaly Scientific armors and helmets. Added HeavyAnomaly Spark armor and helmet. HeavyExoskeleton Duty and Freedom armors now correctly include the sprint upgrade. Headless armors no longer inherit the psy resistance upgrade, since they don't cover the head.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,
@@ -295,10 +290,7 @@ function shouldProcessStruct(struct: ItemGeneratorPrototype) {
     return false;
   }
 
-  return (
-    allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] ||
-    allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID]
-  );
+  return allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
 }
 
 let once = false;
@@ -595,7 +587,23 @@ export async function transformItemGenerators(struct: ItemGeneratorPrototype, { 
     if (perFaction && igFaction === "Noon") {
       perFaction.Noon = perFaction.Monolith;
     }
-    if (!perFaction || !perFaction[igFaction]) {
+    // either combo or headed armor! bingo!
+    // Include combos from all ranks up to and including the current rank so that
+    // higher-rank players have equal possibility of getting lower-rank armors.
+    const relevantCombos: Record<string, ItemGeneratorPrototype> = {};
+    for (const r of ALL_RANKS_ARR.slice(0, ALL_RANKS_ARR.indexOf(rank as ERank) + 1)) {
+      const rPerFaction = armorSIDSubItemGenInjectedPerFactionPerRankMap[r as ERank];
+      if (rPerFaction && rPerFaction[igFaction]) {
+        Object.assign(
+          relevantCombos,
+          rPerFaction[igFaction].combos,
+          rPerFaction[igFaction].allHeadedArmors,
+        );
+      }
+    }
+    const relevantCombosLenght = Object.keys(relevantCombos).length;
+
+    if (!relevantCombosLenght) {
       if (!loggedMissedDrops[igFaction + rank]) {
         loggedMissedDrops[igFaction + rank] = true;
         logger.warn(`No armors to drop for igFaction '${igFaction}' at rank ${rank}`);
@@ -603,26 +611,17 @@ export async function transformItemGenerators(struct: ItemGeneratorPrototype, { 
       return;
     }
 
-    // either combo or headed armor! bingo!
-    const relevantCombos = {
-      ...perFaction[igFaction].combos,
-      ...perFaction[igFaction].allHeadedArmors,
-    };
-    const relevantCombosLenght = Object.keys(relevantCombos).length;
-
-    if (relevantCombosLenght) {
-      const igItem = new Struct() as ItemGeneratorPrototypeItemGeneratorItem;
-      igItem.Category = "EItemGenerationCategory::SubItemGenerator";
-      igItem.PlayerRank = rank;
-      igItem.PossibleItems = new Struct() as ItemGeneratorPrototypePossibleItems;
-      for (const igSID in relevantCombos) {
-        const possibleItem = new Struct() as ItemGeneratorPrototypePossibleItemsItem;
-        possibleItem.ItemGeneratorPrototypeSID = igSID;
-        possibleItem.Weight = 1;
-        igItem.PossibleItems.addNode(possibleItem, igSID);
-      }
-      fork.ItemGenerator.addNode(igItem, `Armors_for_${rank.split("::").pop()}`);
+    const igItem = new Struct() as ItemGeneratorPrototypeItemGeneratorItem;
+    igItem.Category = "EItemGenerationCategory::SubItemGenerator";
+    igItem.PlayerRank = rank;
+    igItem.PossibleItems = new Struct() as ItemGeneratorPrototypePossibleItems;
+    for (const igSID in relevantCombos) {
+      const possibleItem = new Struct() as ItemGeneratorPrototypePossibleItemsItem;
+      possibleItem.ItemGeneratorPrototypeSID = igSID;
+      possibleItem.Weight = 1;
+      igItem.PossibleItems.addNode(possibleItem, igSID);
     }
+    fork.ItemGenerator.addNode(igItem, `Armors_for_${rank.split("::").pop()}`);
   });
 
   if (fork.ItemGenerator.entries().length) {
