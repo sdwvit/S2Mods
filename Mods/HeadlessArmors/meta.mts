@@ -43,7 +43,7 @@ export const meta: MetaType = {
     [h2][/h2]
     For your convenience, here is a console commands to spawn all new headless armors in Skif's inventory:
     [h2][/h2]
-    [u]XStartQuestNodeBySID Skif_ItemGen_Skif_All_Gdocs_Armors[u]
+    [u]XStartQuestNodeBySID Skif_ItemGen_Skif_All_Gdocs_Armors[/u]
   `,
 
   changenote: `Fix bug with game crashing. Old changelog: Added SEVA armors and helmets for Duty, Freedom, and Loner factions.
