@@ -45,48 +45,50 @@ export const meta: MetaType = {
     [h1][/h1]
     Armors:
     [list]
-    [*] XSpawnItemNearPlayerBySID SEVA_Dolg_Armor_headless
-    [*] XSpawnItemNearPlayerBySID SEVA_Svoboda_Armor_headless
-    [*] XSpawnItemNearPlayerBySID SEVA_Neutral_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Dolg_Armor_headless
-    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Dolg_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Heavy_Dolg_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Battle_Dolg_End_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Armor_headless
-    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Svoboda_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Heavy_Svoboda_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Heavy_Mercenaries_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Heavy2_Military_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Armor_headless
-    [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Monolith_Armor_headless
-    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Monolith_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Armor_headless
-    [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Armor_headless
-    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Spark_Armor_headless
-    [*] XSpawnItemNearPlayerBySID BattleExoskeleton_Varta_Armor_headless
-    [*] XSpawnItemNearPlayerBySID Anomaly_Scientific_Armor_headless
-    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Scientific_Armor_headless
-    [/list]    [h1][/h1]
+    [*] XCreateItemInInventoryByID SEVA_Dolg_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID SEVA_Svoboda_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID SEVA_Neutral_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Dolg_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyExoskeleton_Dolg_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Heavy_Dolg_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Battle_Dolg_End_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Svoboda_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyExoskeleton_Svoboda_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Heavy_Svoboda_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Heavy_Mercenaries_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Mercenaries_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Heavy2_Military_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Monolith_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyExoskeleton_Monolith_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyAnomaly_Monolith_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Neutral_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyBattle_Spark_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyAnomaly_Spark_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID BattleExoskeleton_Varta_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID Anomaly_Scientific_Armor_headless 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyAnomaly_Scientific_Armor_headless 0 1 1 1
+    [/list]   
+     [h1][/h1]
     Helmets:
     [list]
-    [*] XSpawnItemNearPlayerBySID SEVA_Dolg_Armor_Helmet
-    [*] XSpawnItemNearPlayerBySID SEVA_Svoboda_Armor_Helmet
-    [*] XSpawnItemNearPlayerBySID SEVA_Neutral_Armor_Helmet
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Duty_Helmet
-    [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Helmet
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Mercenaries_Helmet
-    [*] XSpawnItemNearPlayerBySID HeavyBattle_Merc_Helmet
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Monolith_Helmet
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Helmet
-    [*] XSpawnItemNearPlayerBySID Exoskeleton_Spark_Helmet
-    [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet
-    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Spark_Armor_Helmet
-    [*] XSpawnItemNearPlayerBySID Anomaly_Scientific_Armor_Helmet
-    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Scientific_Armor_Helmet
+    [*] XCreateItemInInventoryByID SEVA_Dolg_Armor_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID SEVA_Svoboda_Armor_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID SEVA_Neutral_Armor_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Duty_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyBattle_Dolg_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Svoboda_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Mercenaries_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyBattle_Merc_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Monolith_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Neutral_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID Exoskeleton_Spark_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyBattle_Spark_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyAnomaly_Spark_Armor_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID Anomaly_Scientific_Armor_Helmet 0 1 1 1
+    [*] XCreateItemInInventoryByID HeavyAnomaly_Scientific_Armor_Helmet 0 1 1 1
     [/list]
   `,
+
   changenote: `Added SEVA armors and helmets for Duty, Freedom, and Loner factions.
   Added Anomaly Scientific and HeavyAnomaly Scientific armors and helmets.
   Added HeavyAnomaly Spark armor and helmet.
