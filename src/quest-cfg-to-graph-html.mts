@@ -470,6 +470,10 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         <div class="controls">
           <button id="openCfgButton" type="button">Open CFG</button>
           <input id="openCfgInput" type="file" accept=".cfg,text/plain" hidden>
+          <button id="exportLayoutButton" type="button">Export layout</button>
+          <button id="importLayoutButton" type="button">Import layout</button>
+          <input id="importLayoutInput" type="file" accept=".json,application/json" hidden>
+          <button id="exportPngButton" type="button">Export PNG</button>
           <input id="search" type="search" placeholder="Search SID or JS name">
           <select id="nodeTypeFilter">
             <option value="">All node types</option>
@@ -532,6 +536,10 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
     const edgeCountEl = document.getElementById('edgeCount');
     const openCfgButton = document.getElementById('openCfgButton');
     const openCfgInput = document.getElementById('openCfgInput');
+    const exportLayoutButton = document.getElementById('exportLayoutButton');
+    const importLayoutButton = document.getElementById('importLayoutButton');
+    const importLayoutInput = document.getElementById('importLayoutInput');
+    const exportPngButton = document.getElementById('exportPngButton');
     const searchEl = document.getElementById('search');
     const nodeTypeFilterEl = document.getElementById('nodeTypeFilter');
     const legendFilterEls = Array.from(document.querySelectorAll('[data-legend-filter]'));
@@ -788,6 +796,45 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         input.value = '';
       }
     });
+    exportLayoutButton.addEventListener('click', () => {
+      const layoutExport = createLayoutExport();
+      downloadTextFile(
+        JSON.stringify(layoutExport, null, 2),
+        getGraphFileStem() + '.layout.json',
+        'application/json',
+      );
+    });
+    importLayoutButton.addEventListener('click', () => importLayoutInput.click());
+    importLayoutInput.addEventListener('change', async (event) => {
+      const input = event.target;
+      const file = input.files && input.files[0];
+      if (!file) {
+        return;
+      }
+      try {
+        const text = await file.text();
+        const layout = JSON.parse(text);
+        importLayout(layout);
+      } catch (error) {
+        const message = error && error.message ? error.message : String(error);
+        detailsEl.innerHTML = '<div class="error">Failed to import layout: ' + escapeHtml(message) + '</div>';
+      } finally {
+        input.value = '';
+      }
+    });
+    exportPngButton.addEventListener('click', () => {
+      const visibleNodes = cy.nodes(':visible');
+      if (visibleNodes.length === 0) {
+        detailsEl.innerHTML = '<div class="error">Nothing visible to export.</div>';
+        return;
+      }
+      const pngDataUrl = cy.png({
+        full: true,
+        scale: 2,
+        bg: getComputedStyle(document.body).getPropertyValue('--panel').trim() || '#ffffff',
+      });
+      downloadDataUrl(pngDataUrl, getGraphFileStem() + '.png');
+    });
     fitButton.addEventListener('click', () => {
       cy.fit(cy.nodes(':visible'), 80);
       scheduleSaveLayout();
@@ -886,7 +933,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         return node.hasClass('is-event') || Boolean(node.data('isStart'));
       }
       if (activeLegendFilter === 'singleConnection') {
-        return Number(node.data('connectionCount') || 0) === 1;
+        return node.connectedEdges(':visible').length === 1;
       }
       if (activeLegendFilter === 'terminal') {
         return Boolean(node.data('isTerminal'));
@@ -1512,6 +1559,20 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       };
     }
 
+    function createLayoutExport() {
+      const state = captureGraphState();
+      return {
+        version: 1,
+        kind: 'quest-graph-layout',
+        title: graph.title,
+        sourceFilePath: graph.sourceFilePath,
+        graphKey: currentGraphIdentity.key,
+        exportedAt: new Date().toISOString(),
+        positions: state.positions,
+        viewport: state.viewport,
+      };
+    }
+
     function applyGraphState(state) {
       cy.batch(() => {
         cy.nodes().forEach((node) => {
@@ -1527,6 +1588,13 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
 
     function areGraphStatesEqual(a, b) {
       return JSON.stringify(a) === JSON.stringify(b);
+    }
+
+    function importLayout(layout) {
+      const importedState = normalizeImportedLayout(layout);
+      pushUndoState();
+      applyGraphState(importedState);
+      scheduleSaveLayout();
     }
 
     function scheduleSaveLayout() {
@@ -1578,6 +1646,71 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         zoom,
         pan: { x: pan.x, y: pan.y },
       };
+    }
+
+    function normalizeImportedLayout(layout) {
+      if (!layout || typeof layout !== 'object') {
+        throw new Error('Layout JSON must be an object.');
+      }
+      const positions = layout.positions;
+      if (!positions || typeof positions !== 'object') {
+        throw new Error('Layout JSON is missing positions.');
+      }
+      const normalizedPositions = {};
+      let restoredCount = 0;
+      cy.nodes().forEach((node) => {
+        const position = positions[node.id()];
+        if (
+          !position ||
+          typeof position !== 'object' ||
+          typeof position.x !== 'number' ||
+          typeof position.y !== 'number' ||
+          !Number.isFinite(position.x) ||
+          !Number.isFinite(position.y)
+        ) {
+          return;
+        }
+        normalizedPositions[node.id()] = {
+          x: position.x,
+          y: position.y,
+        };
+        restoredCount++;
+      });
+      if (restoredCount === 0) {
+        throw new Error('Layout JSON does not contain positions for this graph.');
+      }
+      const viewport = getValidViewport(layout.viewport) || captureGraphState().viewport;
+      return {
+        positions: normalizedPositions,
+        viewport,
+      };
+    }
+
+    function getGraphFileStem() {
+      const raw = graph.sourceFilePath || graph.title || 'quest-graph';
+      const lastSegment = String(raw).split(/[\\\\/]/).pop() || raw;
+      const stem = lastSegment.replace(/\\.[^.]+$/, '');
+      return slugifyKey(stem) || 'quest-graph';
+    }
+
+    function downloadTextFile(text, fileName, mimeType) {
+      const blob = new Blob([text], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      try {
+        downloadDataUrl(url, fileName);
+      } finally {
+        window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      }
+    }
+
+    function downloadDataUrl(url, fileName) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     }
 
     function initializeTheme() {
