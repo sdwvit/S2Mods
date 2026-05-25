@@ -5,10 +5,10 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 `Modified or added assets`:
  - `T_IFI_BattleExoskeleton_Varta_Armor_headless`
  - `T_IFI_BattleExoskeleton_Varta_Armor_headless_upgrade`
- - `T_IFI_Cape2_Bandit_Armor`
- - `T_IFI_Cape2_Bandit_Armor_upgrade`
- - `T_IFI_Cape_Bandit_Armor`
- - `T_IFI_Cape_Bandit_Armor_upgrade`
+ - `T_IFI_Duty_seva_body`
+ - `T_IFI_Duty_seva_body_upgrade`
+ - `T_IFI_Duty_seva_head`
+ - `T_IFI_Duty_seva_head_upgrade`
  - `T_IFI_Exoskeleton_Dolg_Armor_headless`
  - `T_IFI_Exoskeleton_Dolg_Armor_headless_upgrade`
  - `T_IFI_Exoskeleton_Duty_Helmet`
@@ -21,6 +21,7 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 
 `GameData`:
  - `ItemGeneratorPrototypes`
+ - `UpgradePrototypes`
 
 `ItemPrototypes`:
  - `ArmorPrototypes`

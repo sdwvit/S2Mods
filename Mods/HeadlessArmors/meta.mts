@@ -8,10 +8,9 @@ import {
   type ItemGeneratorPrototypeItemGeneratorItem,
   type ItemGeneratorPrototypePossibleItems,
   type ItemGeneratorPrototypePossibleItemsItem,
-  type QuestNodePrototype,
   type QuestNodePrototypeSetItemGenerator,
-  type SpawnActorPrototype,
   Struct,
+  type UpgradePrototype,
 } from "s2cfgtojson";
 
 import {
@@ -33,9 +32,7 @@ import { getDropChance, maxDropChance } from "./calculateArmorScore.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 const finishedTransformers = new Set<string>();
-export const meta: MetaType<
-  ArmorPrototype | ItemGeneratorPrototype | QuestNodePrototype | SpawnActorPrototype
-> = {
+export const meta: MetaType = {
   description: `
     This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection.[h2][/h2]
     It also adds corresponding helmets for exoskeleton and heavy armors, to balance things out.[h2][/h2]
@@ -48,6 +45,9 @@ export const meta: MetaType<
     [h1][/h1]
     Armors:
     [list]
+    [*] XSpawnItemNearPlayerBySID SEVA_Dolg_Armor_headless
+    [*] XSpawnItemNearPlayerBySID SEVA_Svoboda_Armor_headless
+    [*] XSpawnItemNearPlayerBySID SEVA_Neutral_Armor_headless
     [*] XSpawnItemNearPlayerBySID Exoskeleton_Dolg_Armor_headless
     [*] XSpawnItemNearPlayerBySID HeavyExoskeleton_Dolg_Armor_headless
     [*] XSpawnItemNearPlayerBySID Heavy_Dolg_Armor_headless
@@ -63,10 +63,16 @@ export const meta: MetaType<
     [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Monolith_Armor_headless
     [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Armor_headless
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Armor_headless
+    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Spark_Armor_headless
     [*] XSpawnItemNearPlayerBySID BattleExoskeleton_Varta_Armor_headless
+    [*] XSpawnItemNearPlayerBySID Anomaly_Scientific_Armor_headless
+    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Scientific_Armor_headless
     [/list]    [h1][/h1]
-    Helmets: 
+    Helmets:
     [list]
+    [*] XSpawnItemNearPlayerBySID SEVA_Dolg_Armor_Helmet
+    [*] XSpawnItemNearPlayerBySID SEVA_Svoboda_Armor_Helmet
+    [*] XSpawnItemNearPlayerBySID SEVA_Neutral_Armor_Helmet
     [*] XSpawnItemNearPlayerBySID Exoskeleton_Duty_Helmet
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Dolg_Helmet
     [*] XSpawnItemNearPlayerBySID Exoskeleton_Svoboda_Helmet
@@ -76,18 +82,22 @@ export const meta: MetaType<
     [*] XSpawnItemNearPlayerBySID Exoskeleton_Neutral_Helmet
     [*] XSpawnItemNearPlayerBySID Exoskeleton_Spark_Helmet
     [*] XSpawnItemNearPlayerBySID HeavyBattle_Spark_Helmet
-    [/list] 
+    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Spark_Armor_Helmet
+    [*] XSpawnItemNearPlayerBySID Anomaly_Scientific_Armor_Helmet
+    [*] XSpawnItemNearPlayerBySID HeavyAnomaly_Scientific_Armor_Helmet
+    [/list]
   `,
-  changenote: `Rebalanced armor drop chances: max drop chance increased from 5% to 15%, and the minimum drop chance floor has been removed so very weak armors have near-zero chance. 
-  Item generator slots that previously patched to empty are now removed entirely for cleaner loot table behavior. 
-  NPC protection is now pre-scaled to account for armors being worn at 25% durability on average, so NPCs fight at appropriate effectiveness. 
-  Dropped armor durability is now capped based on armor quality.
-  Zombies and Guards no longer receive headless armor drops.`,
+  changenote: `Added SEVA armors and helmets for Duty, Freedom, and Loner factions.
+  Added Anomaly Scientific and HeavyAnomaly Scientific armors and helmets.
+  Added HeavyAnomaly Spark armor and helmet.
+  HeavyExoskeleton Duty and Freedom armors now correctly include the sprint upgrade.
+  Headless armors no longer inherit the psy resistance upgrade, since they don't cover the head.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,
     transformSkifItemGeneratorQuestNodes,
     transformSpawnActors,
+    transformUpgradePrototypes,
   ],
   onTransformerFinish: (transformer) => {
     finishedTransformers.add(transformer.name);
@@ -108,6 +118,22 @@ const UPGRADE_SID_FIXUPS: Record<string, string> = {
   SEVA_Dolg_Armor_carryingCapacity_Left_2_2: "SEVA_Dolg_Armor_Backpack_Left_2_2",
 };
 
+const EXTRA_UPGRADES_FIXUPS = {
+  HeavyExoskeleton_Dolg_Armor_headless: ["Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1"],
+  HeavyExoskeleton_Svoboda_Armor_headless: ["Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1"],
+  HeavyExoskeleton_Dolg_Armor: ["Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1"],
+  HeavyExoskeleton_Svoboda_Armor: ["Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1"],
+};
+
+function transformUpgradePrototypes(struct: UpgradePrototype) {
+  if (struct.SID === "Exoskeleton_Svoboda_Armor_AddRunEffect_Right_2_1") {
+    const fork = struct.fork();
+    fork.RequiredUpgradePrototypeSIDs = new Struct() as any;
+    return fork;
+  }
+}
+
+transformUpgradePrototypes.files = ["/UpgradePrototypes.cfg"];
 /**
  * Adds armor that doesn't block head, but also removes any psy protection. Allows player to use helmets.
  */
@@ -115,6 +141,20 @@ export async function transformArmorPrototypes(
   struct: ArmorPrototype,
   context: MetaContext<ArmorPrototype>,
 ) {
+  if (struct.SID === "HeavyBattle_Spark_Armor") {
+    const fork = struct.fork();
+    fork.Protection = struct.Protection.fork();
+    fork.Protection.PSY = 20; // see comment in gdocs about HeavyBattle_Spark_Helmet PSY
+    return fork;
+  }
+
+  if (EXTRA_UPGRADES_FIXUPS[struct.SID]) {
+    const fork = struct.fork();
+    fork.UpgradePrototypeSIDs = struct.UpgradePrototypeSIDs.fork();
+    EXTRA_UPGRADES_FIXUPS[struct.SID].forEach((u) => fork.UpgradePrototypeSIDs.addNode(u, u));
+    return fork;
+  }
+
   const extraStructs: ArmorPrototype[] = [];
 
   if (addArmorsRunOnce || context.array.length - 1 !== context.index) {
@@ -160,10 +200,13 @@ function fixUpgradePrototypeSIDs(armor: ArmorPrototype) {
       upgrades[key] = replacement;
     }
   }
+  if (EXTRA_UPGRADES_FIXUPS[armor.SID]) {
+    EXTRA_UPGRADES_FIXUPS[armor.SID].forEach((u) => upgrades.addNode(u, u));
+  }
 }
 
 function dedupeUpgradePrototypeSIDs(armor: ArmorPrototype) {
-  const upgrades = (armor as any).UpgradePrototypeSIDs?.fork(true);
+  const upgrades = (armor as any).UpgradePrototypeSIDs;
   if (!upgrades || typeof upgrades.entries !== "function") {
     return;
   }
@@ -182,7 +225,6 @@ function dedupeUpgradePrototypeSIDs(armor: ArmorPrototype) {
     }
     seen.add(value);
   }
-  armor.UpgradePrototypeSIDs = upgrades;
 }
 
 /**
@@ -222,6 +264,11 @@ export function createArmorPrototype(SID: string, referenceMap: Record<string, A
 
   deepMerge(backfilled, override, false);
   overrideProtectionNPCWithProtection(backfilled);
+  if (backfilled.bBlockHead === false) {
+    backfilled.UpgradePrototypeSIDs = backfilled.UpgradePrototypeSIDs?.filter(
+      ([, e]) => e !== "FaustPsyResist_Quest_1_1",
+    );
+  }
   backfilled.__internal__.rawName = SID;
   return backfilled;
 }
@@ -262,10 +309,9 @@ type NewItemGeneratorsByPurpose = Record<
   "helmets" | "armors" | "allHelmets" | "allHeadedArmors" | "allHeadlessArmors" | "combos",
   Record<string, ItemGeneratorPrototype>
 >;
-const armorSIDSubItemGenInjectedPerFactionPerRankMap = {} as Record<
-  ERank,
-  Record<CoreFaction, NewItemGeneratorsByPurpose>
->;
+const armorSIDSubItemGenInjectedPerFactionPerRankMap:
+  | Record<ERank, Record<CoreFaction, NewItemGeneratorsByPurpose>>
+  | {} = {};
 
 function getRelevantItemGen(
   relevantItems: Record<string, ItemGeneratorPrototype>,
@@ -498,6 +544,7 @@ function doOnce(extraStructs: any[]) {
   }
 }
 
+const loggedMissedDrops = {};
 /**
  * Removes existing armor/helmet generation buckets and injects armor sub-item selectors by faction+rank.
  */
@@ -526,13 +573,16 @@ export async function transformItemGenerators(struct: ItemGeneratorPrototype, { 
   fork.ItemGenerator = new Struct().fork() as any;
   resetCss(struct, fork);
 
-  for (const rank of ALL_RANKS_ARR) {
+  ALL_RANKS_ARR.forEach((rank) => {
     const perFaction = armorSIDSubItemGenInjectedPerFactionPerRankMap[rank as ERank];
     if (perFaction && igFaction === "Noon") {
       perFaction.Noon = perFaction.Monolith;
     }
     if (!perFaction || !perFaction[igFaction]) {
-      logger.warn(`No armors to drop for igFaction '${igFaction}'`);
+      if (!loggedMissedDrops[igFaction + rank]) {
+        loggedMissedDrops[igFaction + rank] = true;
+        logger.warn(`No armors to drop for igFaction '${igFaction}' at rank ${rank}`);
+      }
       return;
     }
 
@@ -556,7 +606,7 @@ export async function transformItemGenerators(struct: ItemGeneratorPrototype, { 
       }
       fork.ItemGenerator.addNode(igItem, `Armors_for_${rank.split("::").pop()}`);
     }
-  }
+  });
 
   if (fork.ItemGenerator.entries().length) {
     extraStructs.push(fork);
