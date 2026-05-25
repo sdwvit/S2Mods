@@ -474,6 +474,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
           <button id="importLayoutButton" type="button">Import layout</button>
           <input id="importLayoutInput" type="file" accept=".json,application/json" hidden>
           <button id="exportPngButton" type="button">Export PNG</button>
+          <button id="layoutButton" type="button">Reset layout</button>
           <input id="search" type="search" placeholder="Search SID or JS name">
           <select id="nodeTypeFilter">
             <option value="">All node types</option>
@@ -519,7 +520,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         <button id="compactButton" type="button" disabled>Compact</button>
         <button id="undoButton" type="button" disabled>Undo</button>
         <button id="redoButton" type="button" disabled>Redo</button>
-        <button id="layoutButton" type="button">Reset layout</button>
       </div>
       <div id="cy"></div>
     </main>
@@ -833,7 +833,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         scale: 2,
         bg: getComputedStyle(document.body).getPropertyValue('--panel').trim() || '#ffffff',
       });
-      downloadDataUrl(pngDataUrl, getGraphFileStem() + '.png');
+      downloadBlobFile(dataUrlToBlob(pngDataUrl), getGraphFileStem() + '.png');
     });
     fitButton.addEventListener('click', () => {
       cy.fit(cy.nodes(':visible'), 80);
@@ -1695,15 +1695,11 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
 
     function downloadTextFile(text, fileName, mimeType) {
       const blob = new Blob([text], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      try {
-        downloadDataUrl(url, fileName);
-      } finally {
-        window.setTimeout(() => URL.revokeObjectURL(url), 0);
-      }
+      downloadBlobFile(blob, fileName);
     }
 
-    function downloadDataUrl(url, fileName) {
+    function downloadBlobFile(blob, fileName) {
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = fileName;
@@ -1711,6 +1707,26 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+
+    function dataUrlToBlob(dataUrl) {
+      const parts = String(dataUrl).match(/^data:([^;,]+)?(?:;charset=[^;,]+)?(;base64)?,(.*)$/);
+      if (!parts) {
+        throw new Error('PNG export returned an invalid data URL.');
+      }
+      const mimeType = parts[1] || 'application/octet-stream';
+      const isBase64 = Boolean(parts[2]);
+      const data = parts[3] || '';
+      if (isBase64) {
+        const binary = atob(data);
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index++) {
+          bytes[index] = binary.charCodeAt(index);
+        }
+        return new Blob([bytes], { type: mimeType });
+      }
+      return new Blob([decodeURIComponent(data)], { type: mimeType });
     }
 
     function initializeTheme() {
