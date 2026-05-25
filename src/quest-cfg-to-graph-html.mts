@@ -829,15 +829,7 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         return;
       }
       try {
-        const pngBlob = await cy.png({
-          output: 'blob-promise',
-          full: true,
-          scale: 2,
-          bg: getComputedStyle(document.body).getPropertyValue('--panel').trim() || '#ffffff',
-        });
-        if (!(pngBlob instanceof Blob) || pngBlob.size === 0) {
-          throw new Error('Cytoscape returned an empty PNG blob.');
-        }
+        const pngBlob = await exportGraphPngBlob();
         downloadBlobFile(pngBlob, getGraphFileStem() + '.png');
       } catch (error) {
         const message = error && error.message ? error.message : String(error);
@@ -1700,6 +1692,81 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       const lastSegment = String(raw).split(/[\\\\/]/).pop() || raw;
       const stem = lastSegment.replace(/\\.[^.]+$/, '');
       return slugifyKey(stem) || 'quest-graph';
+    }
+
+    async function exportGraphPngBlob() {
+      const background = getComputedStyle(document.body).getPropertyValue('--panel').trim() || '#ffffff';
+      const attempts = [
+        {
+          full: true,
+          bg: background,
+          maxWidth: 8192,
+          maxHeight: 8192,
+        },
+        {
+          full: true,
+          bg: background,
+          maxWidth: 4096,
+          maxHeight: 4096,
+        },
+        {
+          full: false,
+          bg: background,
+          maxWidth: 4096,
+          maxHeight: 4096,
+        },
+      ];
+      let lastError = null;
+      for (const options of attempts) {
+        try {
+          const base64URI = cy.png(options);
+          const pngBlob = await renderBase64PngToBlob(base64URI);
+          if (pngBlob.size > 0) {
+            return pngBlob;
+          }
+          lastError = new Error('Rendered PNG blob was empty.');
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      throw lastError || new Error('PNG export failed.');
+    }
+
+    function renderBase64PngToBlob(base64URI) {
+      return new Promise((resolve, reject) => {
+        if (typeof base64URI !== 'string' || !base64URI.startsWith('data:image/png')) {
+          reject(new Error('Cytoscape did not return a PNG data URI.'));
+          return;
+        }
+        const img = document.createElement('img');
+        img.decoding = 'async';
+        img.onload = () => {
+          const width = img.naturalWidth || img.width;
+          const height = img.naturalHeight || img.height;
+          if (!width || !height) {
+            reject(new Error('PNG image dimensions were empty.'));
+            return;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const context = canvas.getContext('2d');
+          if (!context) {
+            reject(new Error('Failed to acquire a 2D canvas context.'));
+            return;
+          }
+          context.drawImage(img, 0, 0);
+          canvas.toBlob((blob) => {
+            if (blob && blob.size > 0) {
+              resolve(blob);
+              return;
+            }
+            reject(new Error('canvas.toBlob() returned an empty blob.'));
+          }, 'image/png');
+        };
+        img.onerror = () => reject(new Error('Failed to load PNG data URI into an image.'));
+        img.src = base64URI;
+      });
     }
 
     function downloadTextFile(text, fileName, mimeType) {
