@@ -1700,6 +1700,18 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         {
           full: true,
           bg: background,
+          maxWidth: 16384,
+          maxHeight: 16384,
+        },
+        {
+          full: true,
+          bg: background,
+          maxWidth: 12288,
+          maxHeight: 12288,
+        },
+        {
+          full: true,
+          bg: background,
           maxWidth: 8192,
           maxHeight: 8192,
         },
