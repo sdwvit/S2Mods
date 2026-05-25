@@ -822,18 +822,27 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
         input.value = '';
       }
     });
-    exportPngButton.addEventListener('click', () => {
+    exportPngButton.addEventListener('click', async () => {
       const visibleNodes = cy.nodes(':visible');
       if (visibleNodes.length === 0) {
         detailsEl.innerHTML = '<div class="error">Nothing visible to export.</div>';
         return;
       }
-      const pngDataUrl = cy.png({
-        full: true,
-        scale: 2,
-        bg: getComputedStyle(document.body).getPropertyValue('--panel').trim() || '#ffffff',
-      });
-      downloadBlobFile(dataUrlToBlob(pngDataUrl), getGraphFileStem() + '.png');
+      try {
+        const pngBlob = await cy.png({
+          output: 'blob-promise',
+          full: true,
+          scale: 2,
+          bg: getComputedStyle(document.body).getPropertyValue('--panel').trim() || '#ffffff',
+        });
+        if (!(pngBlob instanceof Blob) || pngBlob.size === 0) {
+          throw new Error('Cytoscape returned an empty PNG blob.');
+        }
+        downloadBlobFile(pngBlob, getGraphFileStem() + '.png');
+      } catch (error) {
+        const message = error && error.message ? error.message : String(error);
+        detailsEl.innerHTML = '<div class="error">Failed to export PNG: ' + escapeHtml(message) + '</div>';
+      }
     });
     fitButton.addEventListener('click', () => {
       cy.fit(cy.nodes(':visible'), 80);
@@ -1708,25 +1717,6 @@ export function renderQuestGraphHtml(graph: QuestGraphData) {
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 0);
-    }
-
-    function dataUrlToBlob(dataUrl) {
-      const parts = String(dataUrl).match(/^data:([^;,]+)?(?:;charset=[^;,]+)?(;base64)?,(.*)$/);
-      if (!parts) {
-        throw new Error('PNG export returned an invalid data URL.');
-      }
-      const mimeType = parts[1] || 'application/octet-stream';
-      const isBase64 = Boolean(parts[2]);
-      const data = parts[3] || '';
-      if (isBase64) {
-        const binary = atob(data);
-        const bytes = new Uint8Array(binary.length);
-        for (let index = 0; index < binary.length; index++) {
-          bytes[index] = binary.charCodeAt(index);
-        }
-        return new Blob([bytes], { type: mimeType });
-      }
-      return new Blob([decodeURIComponent(data)], { type: mimeType });
     }
 
     function initializeTheme() {
