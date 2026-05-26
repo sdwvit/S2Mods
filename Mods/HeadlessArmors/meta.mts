@@ -21,6 +21,7 @@ import {
   armorRanksBySID,
   type CoreFaction,
   getFactionFromItemGeneratorSID,
+  allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID,
 } from "../../src/consts.mts";
 import { logger } from "../../src/logger.mts";
 import { waitFor } from "../../src/wait-for.mts";
@@ -290,7 +291,10 @@ function shouldProcessStruct(struct: ItemGeneratorPrototype) {
     return false;
   }
 
-  return allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID];
+  return (
+    allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] ||
+    allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID]
+  );
 }
 
 let once = false;
