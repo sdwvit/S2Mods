@@ -46,7 +46,7 @@ export const meta: MetaType = {
     [u]XStartQuestNodeBySID Skif_ItemGen_Skif_All_Gdocs_Armors[/u]
   `,
 
-  changenote: `Higher-rank players can now drop lower-rank headless armors with equal probability. Previously, a Master-rank player could only drop Master-rank armors; now Rookie, Experienced, and Veteran armors are equally possible. Same fix applies to Veteran and Experienced ranks. Old changelog: Fix bug with game crashing. Added SEVA armors and helmets for Duty, Freedom, and Loner factions. Added Anomaly Scientific and HeavyAnomaly Scientific armors and helmets. Added HeavyAnomaly Spark armor and helmet. HeavyExoskeleton Duty and Freedom armors now correctly include the sprint upgrade. Headless armors no longer inherit the psy resistance upgrade, since they don't cover the head.`,
+  changenote: `Quest NPCs (named characters from main and side quenow also drop headless armors.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,

@@ -14,7 +14,10 @@ const SKIF_GUID = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
 let once = false;
 
-export const transformQuestNodePrototypes: StructTransformer<QuestNodePrototype> = (struct, context) => {
+export const transformQuestNodePrototypes: StructTransformer<QuestNodePrototype> = (
+  struct,
+  context,
+) => {
   if (!context.filePath.endsWith("/QuestNodePrototypes/rootgraph.cfg") || once) {
     return;
   }
