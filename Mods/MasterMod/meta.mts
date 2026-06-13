@@ -55,7 +55,7 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [Balance] Rifles default scopes can now be detached and sold.
  [*] [QoL] Allows buying/selling/dropping quest items.
 [/list]`,
-  changenote: `Extracted faction relations into a separate mod (TrilogyFactionRelations). Extracted quest rewards into a separate mod (BetterQuestRewards).`,
+  changenote: `Remove duplicate trade prototype logic (faction money, buy limitations) — now handled solely by SpecialistMerchants`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);

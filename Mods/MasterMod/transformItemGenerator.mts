@@ -1,5 +1,5 @@
-import { ItemGeneratorPrototypePossibleItems, Struct } from "s2cfgtojson";
-import type { ItemGeneratorPrototypePossibleItemsItem, ItemGeneratorPrototype } from "s2cfgtojson";
+import { Struct } from "s2cfgtojson";
+import type { ItemGeneratorPrototypePossibleItems, ItemGeneratorPrototypePossibleItemsItem, ItemGeneratorPrototype } from "s2cfgtojson";
 import { ALL_RANKS_SET, generalTradersTradeItemGenerators } from "../../src/consts.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { precision } from "../../src/precision.mts";
