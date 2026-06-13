@@ -7,18 +7,28 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { logger } from "../../src/logger.mts";
 
 const HEADLESS_ARMORS_DATA_TABLE_URL = process.env.HEADLESS_ARMORS_DATA_TABLE_URL;
+const HEADLESS_ARMORS_MESH_TABLE_URL = process.env.HEADLESS_ARMORS_MESH_TABLE_URL;
 const GDOCS_CACHE_PATH = new URL("./.gdocs.armors.cache.json", import.meta.url);
 
 let gdocsDataPromise: Promise<GdocsArmorData> | null = null;
 
+export type GdocsMeshDescriptor = {
+  SID: string;
+  MeshPath: string;
+  Materials: Array<{ MaterialSlot: number; MaterialPath: string }>;
+};
+
 export type GdocsArmorData = {
   overrides: Record<string, ArmorPrototype>;
   descriptors: Record<string, { Faction: CoreFaction; Rank: ERank; SID: string }>;
+  meshPrototypes: Record<string, GdocsMeshDescriptor>;
 };
 
 type GdocsArmorCache = {
   etag?: string;
   lastModified?: string;
+  meshEtag?: string;
+  meshLastModified?: string;
   fetchedAt: string;
   data: GdocsArmorData;
 };
@@ -34,54 +44,92 @@ async function fetchGdocsData(): Promise<GdocsArmorData> {
   if (!HEADLESS_ARMORS_DATA_TABLE_URL) {
     throw new Error("Missing HEADLESS_ARMORS_DATA_TABLE_URL in .env");
   }
+  if (!HEADLESS_ARMORS_MESH_TABLE_URL) {
+    throw new Error("Missing HEADLESS_ARMORS_MESH_TABLE_URL in .env");
+  }
 
   const cache = readGdocsCache();
-  const headers: Record<string, string> = {};
-  if (cache?.etag) {
-    headers["If-None-Match"] = cache.etag;
-  }
-  if (cache?.lastModified) {
-    headers["If-Modified-Since"] = cache.lastModified;
-  }
 
-  let response: Response;
+  const armorHeaders: Record<string, string> = {};
+  if (cache?.etag) armorHeaders["If-None-Match"] = cache.etag;
+  if (cache?.lastModified) armorHeaders["If-Modified-Since"] = cache.lastModified;
+
+  const meshHeaders: Record<string, string> = {};
+  if (cache?.meshEtag) meshHeaders["If-None-Match"] = cache.meshEtag;
+  if (cache?.meshLastModified) meshHeaders["If-Modified-Since"] = cache.meshLastModified;
+
+  let armorResponse: Response;
+  let meshResponse: Response;
   try {
-    response = await fetch(HEADLESS_ARMORS_DATA_TABLE_URL, { headers });
+    [armorResponse, meshResponse] = await Promise.all([
+      fetch(HEADLESS_ARMORS_DATA_TABLE_URL, { headers: armorHeaders }),
+      fetch(HEADLESS_ARMORS_MESH_TABLE_URL, { headers: meshHeaders }),
+    ]);
   } catch (error) {
     if (cache?.data) {
-      logger.warn(`Failed to fetch gdocs armor table, using cached data: ${(error as Error).message}`);
+      logger.warn(`Failed to fetch gdocs tables, using cached data: ${(error as Error).message}`);
       return cache.data;
     }
     throw error;
   }
 
-  if (response.status === 304 && cache?.data) {
-    logger.log(`Gdocs armor table unchanged, using cache (${Object.keys(cache.data.overrides).length} overrides)`);
-    return cache.data;
+  let overrides: GdocsArmorData["overrides"];
+  let descriptors: GdocsArmorData["descriptors"];
+  let meshPrototypes: GdocsArmorData["meshPrototypes"];
+  let newEtag = cache?.etag;
+  let newLastModified = cache?.lastModified;
+  let newMeshEtag = cache?.meshEtag;
+  let newMeshLastModified = cache?.meshLastModified;
+
+  if (armorResponse.status === 304 && cache?.data) {
+    logger.log(`Gdocs armor table unchanged (${Object.keys(cache.data.overrides).length} overrides)`);
+    overrides = cache.data.overrides;
+    descriptors = cache.data.descriptors;
+  } else if (armorResponse.ok) {
+    const parsed = parseArmorDataFromCsv(await armorResponse.text());
+    overrides = parsed.overrides;
+    descriptors = parsed.descriptors;
+    newEtag = armorResponse.headers.get("etag") ?? cache?.etag;
+    newLastModified = armorResponse.headers.get("last-modified") ?? cache?.lastModified;
+    logger.log(`Loaded ${Object.keys(overrides).length} armor overrides from gdocs`);
+  } else if (cache?.data) {
+    logger.warn(`Failed to fetch gdocs armor table (HTTP ${armorResponse.status}), using cached data`);
+    overrides = cache.data.overrides;
+    descriptors = cache.data.descriptors;
+  } else {
+    throw new Error(`Failed to fetch gdocs armor table. HTTP ${armorResponse.status}`);
   }
 
-  if (!response.ok) {
-    if (cache?.data) {
-      logger.warn(`Failed to fetch gdocs armor table (HTTP ${response.status}), using cached data`);
-      return cache.data;
-    }
-    throw new Error(`Failed to fetch gdocs armor table. HTTP ${response.status}`);
+  if (meshResponse.status === 304 && cache?.data?.meshPrototypes) {
+    logger.log(`Gdocs mesh table unchanged`);
+    meshPrototypes = cache.data.meshPrototypes;
+  } else if (meshResponse.ok) {
+    meshPrototypes = parseMeshDataFromCsv(await meshResponse.text());
+    newMeshEtag = meshResponse.headers.get("etag") ?? cache?.meshEtag;
+    newMeshLastModified = meshResponse.headers.get("last-modified") ?? cache?.meshLastModified;
+    logger.log(`Loaded ${Object.keys(meshPrototypes).length} mesh prototypes from gdocs`);
+  } else if (cache?.data?.meshPrototypes) {
+    logger.warn(`Failed to fetch gdocs mesh table (HTTP ${meshResponse.status}), using cached data`);
+    meshPrototypes = cache.data.meshPrototypes;
+  } else {
+    throw new Error(`Failed to fetch gdocs mesh table. HTTP ${meshResponse.status}`);
   }
 
-  const csv = await response.text();
-  const data = parseDataFromCsv(csv);
+  const data: GdocsArmorData = { overrides: overrides!, descriptors: descriptors!, meshPrototypes: meshPrototypes! };
   writeGdocsCache({
-    etag: response.headers.get("etag") || cache?.etag,
-    lastModified: response.headers.get("last-modified") || cache?.lastModified,
+    etag: newEtag,
+    lastModified: newLastModified,
+    meshEtag: newMeshEtag,
+    meshLastModified: newMeshLastModified,
     fetchedAt: new Date().toISOString(),
     data,
   });
-
-  logger.log(`Loaded ${Object.keys(data.overrides).length} armor overrides from gdocs`);
   return data;
 }
+
 const PROTECTION_KEYS = ["PSY", "Burn", "Shock", "ChemicalBurn", "Radiation", "Strike", "Fall"];
-const EXPECTED_HEADER = new Set([
+
+const EXPECTED_ARMOR_HEADER = new Set([
   "SID",
   "Sort priority",
   "refkey",
@@ -98,11 +146,14 @@ const EXPECTED_HEADER = new Set([
   "bBlockHead",
   "Icon",
   "LocalizationSID",
+  "MeshPrototypeSID",
   "Faction",
   "Rank",
 ]);
 
-function parseDataFromCsv(csv: string): GdocsArmorData {
+const EXPECTED_MESH_HEADER = new Set(["SID", "MeshPath", "MaterialSlot", "MaterialPath"]);
+
+function parseArmorDataFromCsv(csv: string): Omit<GdocsArmorData, "meshPrototypes"> {
   const rows = parseCsv(csv);
   if (!rows.length) {
     throw new Error("Gdocs armor CSV is empty");
@@ -110,9 +161,9 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
 
   const header = rows[0].map((h) => h.trim());
 
-  if (EXPECTED_HEADER.difference(new Set(header)).size) {
+  if (EXPECTED_ARMOR_HEADER.difference(new Set(header)).size) {
     throw new Error(
-      `Header doesn't match the schema: missing '${[...EXPECTED_HEADER.difference(new Set(header))]}', extra fields ${[...new Set(header).difference(EXPECTED_HEADER)]}`,
+      `Header doesn't match the schema: missing '${[...EXPECTED_ARMOR_HEADER.difference(new Set(header))]}', extra fields ${[...new Set(header).difference(EXPECTED_ARMOR_HEADER)]}`,
     );
   }
 
@@ -146,9 +197,7 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
     if (descriptors[SID]) {
       duplicateSIDs.add(SID);
     }
-    descriptors[SID] = { SID } as any;
-    descriptors[SID].Faction = row[factionIndex] as CoreFaction;
-    descriptors[SID].Rank = row[ranksIndex] as ERank;
+    descriptors[SID] = { SID, Faction: row[factionIndex] as CoreFaction, Rank: row[ranksIndex] as ERank };
 
     const armorDef: ArmorPrototype = new Struct() as ArmorPrototype;
 
@@ -168,6 +217,7 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
     assignIfDefined(armorDef, "Weight", parseScalar(row[byHeader.Weight]));
     assignIfDefined(armorDef, "bBlockHead", parseScalar(row[byHeader.bBlockHead]));
     assignIfDefined(armorDef, "Invisible", parseScalar(row[byHeader.Invisible]));
+    assignIfDefined(armorDef, "MeshPrototypeSID", parseScalar(row[byHeader.MeshPrototypeSID]));
 
     if (Object.keys(armorDef).length) {
       overrides[SID] = armorDef;
@@ -178,6 +228,41 @@ function parseDataFromCsv(csv: string): GdocsArmorData {
   }
 
   return { overrides, descriptors };
+}
+
+function parseMeshDataFromCsv(csv: string): Record<string, GdocsMeshDescriptor> {
+  const rows = parseCsv(csv);
+  if (!rows.length) {
+    throw new Error("Gdocs mesh CSV is empty");
+  }
+
+  const header = rows[0].map((h) => h.trim());
+  if (EXPECTED_MESH_HEADER.difference(new Set(header)).size) {
+    throw new Error(
+      `Mesh header doesn't match the schema: missing '${[...EXPECTED_MESH_HEADER.difference(new Set(header))]}', extra fields ${[...new Set(header).difference(EXPECTED_MESH_HEADER)]}`,
+    );
+  }
+
+  const byHeader = Object.fromEntries(header.map((h, i) => [h, i]));
+  const result: Record<string, GdocsMeshDescriptor> = {};
+
+  for (const rawRow of rows.slice(1)) {
+    const row = rawRow.map((v) => v.trim());
+    const SID = row[byHeader.SID];
+    if (!SID) continue;
+    const MeshPath = row[byHeader.MeshPath];
+    if (!MeshPath) continue;
+    const MaterialPath = row[byHeader.MaterialPath];
+    if (!MaterialPath) continue;
+    const MaterialSlot = Number(row[byHeader.MaterialSlot] ?? 0);
+
+    if (!result[SID]) {
+      result[SID] = { SID, MeshPath, Materials: [] };
+    }
+    result[SID].Materials.push({ MaterialSlot, MaterialPath });
+  }
+
+  return result;
 }
 
 function assignIfDefined<T extends object>(target: T, key: keyof T, value: unknown) {
