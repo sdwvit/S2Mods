@@ -6,16 +6,15 @@ import { bartendersTradePrototypes, generalTradersTradePrototypes, medicsTradePr
 import { precision } from "../../src/precision.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 
-let oncePerFile = false;
+const oncePerFile = new Set<string>();
 /**
  * Restrict what each trader category can buy, and create Guide_TradePrototype.
  */
 export const transformTradePrototypes: StructTransformer<TradePrototype> = async (struct, context) => {
   const extraStructs: TradePrototype[] = [];
-  if (!oncePerFile) {
-    oncePerFile = true;
-    const guideTP = getGuideTp();
-    extraStructs.push(guideTP);
+  if (!oncePerFile.has(context.filePath)) {
+    oncePerFile.add(context.filePath);
+    extraStructs.push(getGuideTp());
   }
 
   if (!struct.TradeGenerators || ignoreSIDs.has(struct.SID)) {
@@ -23,75 +22,13 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
   }
   const fork = struct.fork();
 
-  if (generalNPCTradePrototypesMoneyMult.has(struct.SID)) {
-    fork.Money = precision(
-      generalNPCTradePrototypesMoneyMult.get(struct.SID)! * (struct.Money ?? 1000) * (semiRandom(context.index) + 1),
-      1,
-    );
-  }
+  applyGeneralNPCMoney(fork, struct, context.index);
 
   const TradeGenerators = struct.TradeGenerators.map(([_k, tg]) => {
     const fork = tg.fork();
     fork.BuyLimitations = tg.BuyLimitations?.fork?.() || (new Struct({ __internal__: { isArray: true, bpatch: true } }) as any);
 
-    const limitations = ["EItemType::MutantLoot"];
-
-    if (bartendersTradePrototypes.has(struct.SID)) {
-      limitations.push(
-        ...[
-          "EItemType::Armor",
-          "EItemType::Artifact",
-          "EItemType::Weapon",
-          "EItemType::Ammo",
-          "EItemType::Attach",
-          "EItemType::Detector",
-          "EItemType::Grenade",
-          "EItemType::MutantLoot",
-          "EItemType::NightVisionGoggles",
-        ],
-      );
-    }
-
-    if (medicsTradePrototypes.has(struct.SID)) {
-      limitations.push(
-        ...[
-          "EItemType::Armor",
-          "EItemType::Artifact",
-          "EItemType::Weapon",
-          "EItemType::Ammo",
-          "EItemType::Attach",
-          "EItemType::Detector",
-          "EItemType::Grenade",
-          "EItemType::Other",
-          "EItemType::MutantLoot",
-          "EItemType::NightVisionGoggles",
-        ],
-      );
-    }
-
-    if (generalTradersTradePrototypes.has(struct.SID)) {
-      limitations.push(
-        ...[
-          "EItemType::Armor",
-          "EItemType::Weapon",
-          "EItemType::Ammo",
-          "EItemType::Attach",
-          "EItemType::Consumable",
-          "EItemType::Detector",
-          "EItemType::Grenade",
-          "EItemType::Other",
-          "EItemType::NightVisionGoggles",
-        ],
-      );
-    }
-
-    if (technicianTradePrototypes.has(struct.SID)) {
-      limitations.push(
-        ...["EItemType::Artifact", "EItemType::Armor", "EItemType::Weapon", "EItemType::Ammo", "EItemType::Consumable", "EItemType::Other"],
-      );
-    }
-
-    limitations.forEach((l) => fork.BuyLimitations.addNode(l));
+    buildTradeGeneratorLimitations(struct.SID).forEach((l) => fork.BuyLimitations.addNode(l));
 
     if (generalNPCTradePrototypesMoneyMult.has(struct.SID)) {
       fork.ArmorSellMinDurability = 0.99;
@@ -109,21 +46,89 @@ export const transformTradePrototypes: StructTransformer<TradePrototype> = async
 
 transformTradePrototypes.files = ["/TradePrototypes.cfg"];
 
-const ignoreSIDs = new Set(["BaseTraderNPC_Template", "BasicTrader", "TraderNPC", "AllTraderNPC", "RC_TraderNPC", "TradeTest"]);
+export const ignoreSIDs = new Set(["BaseTraderNPC_Template", "BasicTrader", "TraderNPC", "AllTraderNPC", "RC_TraderNPC", "TradeTest"]);
 
-const generalNPCTradePrototypesMoneyMult = new Map([
-  ["GeneralNPC_TradePrototype_Bandit", 0.8],
-  ["GeneralNPC_TradePrototype", 1],
-  ["GeneralNPC_TradePrototype_Militaries", 1.1],
-  ["GeneralNPC_TradePrototype_Scientists", 1.4],
-  ["GeneralNPC_TradePrototype_Duty", 1.8],
-  ["GeneralNPC_TradePrototype_Mercenary", 2.1],
-  ["GeneralNPC_TradePrototype_Freedom", 2.5],
-  ["GeneralNPC_TradePrototype_Spark", 3],
-  ["GeneralNPC_TradePrototype_Corpus", 5],
+export function applyGeneralNPCMoney(fork: TradePrototype, struct: TradePrototype, index: number, scale = 1): void {
+  if (!generalNPCTradePrototypesMoneyMult.has(struct.SID)) return;
+  fork.Money = precision(
+    generalNPCTradePrototypesMoneyMult.get(struct.SID)! * scale * (struct.Money ?? 1000) * (semiRandom(index) + 1),
+    1,
+  );
+}
+
+// mult = armor_cost × 0.06 / vanilla_base (700) — ensures min money roll covers faction's top armor
+export const generalNPCTradePrototypesMoneyMult = new Map([
+  ["GeneralNPC_TradePrototype_Bandit", 2.06],   // Middle_Bandit_Armor 24k
+  ["GeneralNPC_TradePrototype", 4.11],           // SEVA_Neutral_Armor 48k
+  ["GeneralNPC_TradePrototype_Militaries", 3.94],// Heavy2_Military_Armor 46k
+  ["GeneralNPC_TradePrototype_Scientists", 4.63],// SciSEVA_Scientific_Armor 54k
+  ["GeneralNPC_TradePrototype_Spark", 4.59],     // HeavyBattle_Spark_Armor 53.5k
+  ["GeneralNPC_TradePrototype_Corpus", 5.36],    // BattleExoskeleton_Varta_Armor 62.5k
+  ["GeneralNPC_TradePrototype_Mercenary", 5.40], // Exoskeleton_Mercenaries_Armor 63k
+  ["GeneralNPC_TradePrototype_Duty", 7.71],      // Exoskeleton_Dolg_Armor 90k
+  ["GeneralNPC_TradePrototype_Freedom", 8.14],   // Exoskeleton_Svoboda_Armor 95k
 ]);
 
-function getGuideTp() {
+export function buildTradeGeneratorLimitations(structSID: string): string[] {
+  const limitations = ["EItemType::MutantLoot"];
+
+  if (bartendersTradePrototypes.has(structSID)) {
+    limitations.push(
+      ...[
+        "EItemType::Armor",
+        "EItemType::Artifact",
+        "EItemType::Weapon",
+        "EItemType::Ammo",
+        "EItemType::Attach",
+        "EItemType::Detector",
+        "EItemType::Grenade",
+        "EItemType::NightVisionGoggles",
+      ],
+    );
+  }
+
+  if (medicsTradePrototypes.has(structSID)) {
+    limitations.push(
+      ...[
+        "EItemType::Armor",
+        "EItemType::Artifact",
+        "EItemType::Weapon",
+        "EItemType::Ammo",
+        "EItemType::Attach",
+        "EItemType::Detector",
+        "EItemType::Grenade",
+        "EItemType::Other",
+        "EItemType::NightVisionGoggles",
+      ],
+    );
+  }
+
+  if (generalTradersTradePrototypes.has(structSID)) {
+    limitations.push(
+      ...[
+        "EItemType::Armor",
+        "EItemType::Weapon",
+        "EItemType::Ammo",
+        "EItemType::Attach",
+        "EItemType::Consumable",
+        "EItemType::Detector",
+        "EItemType::Grenade",
+        "EItemType::Other",
+        "EItemType::NightVisionGoggles",
+      ],
+    );
+  }
+
+  if (technicianTradePrototypes.has(structSID)) {
+    limitations.push(
+      ...["EItemType::Artifact", "EItemType::Armor", "EItemType::Weapon", "EItemType::Ammo", "EItemType::Consumable", "EItemType::Other"],
+    );
+  }
+
+  return limitations;
+}
+
+export function getGuideTp() {
   return new Struct({
     __internal__: {
       rawName: "Guide_TradePrototype",
