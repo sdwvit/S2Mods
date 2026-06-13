@@ -14,6 +14,6 @@ export const meta: MetaType = {
  [*] Guides buy and sell key items like PDAs, with rank-based discounts.
  [*] Technicians and guides across the Zone now offer trading.
 [/list]`,
-  changenote: "General traders can't buy weapons/armor; General NPCs have faction-scaled money and only buy 99%+ durability weapons/armor",
+  changenote: "Recalculate faction money multipliers based on actual 6% buy rate and vanilla base (700): each faction NPC now affords their top armor",
   structTransformers: [transformTradePrototypes, transformQuestObjPrototypes] as any,
 };
