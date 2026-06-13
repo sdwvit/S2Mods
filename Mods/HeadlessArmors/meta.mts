@@ -8,6 +8,7 @@ import {
   type ItemGeneratorPrototypeItemGeneratorItem,
   type ItemGeneratorPrototypePossibleItems,
   type ItemGeneratorPrototypePossibleItemsItem,
+  type MeshPrototype,
   type QuestNodePrototypeSetItemGenerator,
   Struct,
   type UpgradePrototype,
@@ -46,10 +47,11 @@ export const meta: MetaType = {
     [u]XStartQuestNodeBySID Skif_ItemGen_Skif_All_Gdocs_Armors[/u]
   `,
 
-  changenote: `Quest NPCs (named characters from main and side quenow also drop headless armors.`,
+  changenote: `Exoskeleton helmets now have faction-specific visuals: each faction (Duty, Mercenaries, Monolith, Neutral, Spark, Svoboda) uses its own colored mesh instead of all sharing the Svoboda helmet appearance.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,
+    transformMeshPrototypes,
     transformSkifItemGeneratorQuestNodes,
     transformSpawnActors,
     transformUpgradePrototypes,
@@ -131,6 +133,36 @@ function transformUpgradePrototypes(struct: UpgradePrototype) {
 }
 
 transformUpgradePrototypes.files = ["/UpgradePrototypes.cfg"];
+
+let transformMeshPrototypesOnce = false;
+
+async function transformMeshPrototypes() {
+  if (transformMeshPrototypesOnce) return null;
+  transformMeshPrototypesOnce = true;
+
+  const { armorData } = await getHeadlessArmorBuildData();
+
+  return Object.values(armorData.meshPrototypes).map((mesh) => {
+    const materials = new Struct();
+    mesh.Materials.forEach((m) =>
+      materials.addNode(new Struct({ MaterialSlot: m.MaterialSlot, MaterialPath: m.MaterialPath })),
+    );
+    return new Struct({
+      __internal__: {
+        rawName: mesh.SID,
+        isRoot: true,
+        refurl: "../MeshPrototypes.cfg",
+        refkey: "[0]",
+      },
+      SID: mesh.SID,
+      MeshPath: mesh.MeshPath,
+      Materials: materials,
+    }) as MeshPrototype;
+  });
+}
+
+transformMeshPrototypes.files = ["/MeshPrototypes.cfg"];
+
 /**
  * Adds armor that doesn't block head, but also removes any psy protection. Allows player to use helmets.
  */

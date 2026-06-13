@@ -21,6 +21,7 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 
 `GameData`:
  - `ItemGeneratorPrototypes`
+ - `MeshPrototypes`
  - `UpgradePrototypes`
 
 `ItemPrototypes`:
