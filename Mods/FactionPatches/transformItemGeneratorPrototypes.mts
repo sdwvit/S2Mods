@@ -6,7 +6,6 @@ import { logger } from "../../src/logger.mts";
 import { FactionPatchSID, patchDefsRecord } from "./addFactionPatchItems.mts";
 import {
   allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID,
-  allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID,
   getFactionFromItemGeneratorSID,
 } from "../../src/consts.mts";
 
@@ -14,10 +13,11 @@ import {
  * Add faction patches to drops
  */
 export const transformItemGeneratorPrototypes: StructTransformer<ItemGeneratorPrototype> = (struct) => {
-  if (
-    !allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID] &&
-    !allDefaultQuestObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID]
-  ) {
+  // Skip quest-object / corpse generators: their containers are populated once by
+  // the quest (SetItemGenerator + ItemAdd, e.g. Garbage_L_Factory_Camp StrangePDA).
+  // Injecting a RefreshTime'd bucket here turns the static corpse into a refreshing
+  // container that re-rolls and wipes the quest-placed item (a timing race).
+  if (!allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID[struct.SID]) {
     return;
   }
 
