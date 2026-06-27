@@ -76,7 +76,7 @@ export function commitAndPushIfDirty(platform: PublishPlatform, publishedAt = ne
   }
   const isoTimestamp = publishedAt.toISOString();
   runGit(`git add -A -- ${quoteForBash(modFolderPath)}`);
-  runGit(`git commit -m "publish: ${modName} ${platform} ${isoTimestamp}"`);
+  runGit(`git commit -m "publish: ${modName} ${platform} ${isoTimestamp}" -- ${quoteForBash(modFolderPath)}`);
   if (process.env.PUBLISH_PUSH) {
     runGit(resolvePushCommand());
   } else {

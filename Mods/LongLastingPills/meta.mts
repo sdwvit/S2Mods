@@ -50,7 +50,6 @@ export const meta: MetaType<EffectPrototype | ConsumablePrototype> = {
   [*] 🧠 PSY Block: PSY Protection duration increased from 1 minute to 10 minutes
   [*] 🏋️ Hercules: Weight buff duration increased from 5 minutes to 50 minutes
   [*] 🔢 All of the above show numeric effect values instead of level bars
-  [/list]
-  bPatches EffectPrototypes.cfg, ConsumablePrototypes.cfg`,
+  [/list]`,
   changenote: "Compatible with 1.8.x",
 };
