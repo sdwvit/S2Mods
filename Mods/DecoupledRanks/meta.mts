@@ -7,6 +7,7 @@ import { addMutantPartItems } from "./addMutantPartItems.mts";
 import { transformMutantLootGenerators } from "./transformMutantLootGenerators.mts";
 export const meta: MetaType = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 Decoupled Ranks separates player rank progression from story quest milestones.[h1][/h1]
 Instead of quest nodes force-setting rank (Newbie/Experienced/Veteran/Master), this mod is intended to drive rank from an XP-like progression score.[h1][/h1]
 Design goals:[h1][/h1]
@@ -53,6 +54,8 @@ XP table:[h1][/h1]
 - Level 28: 211000 XP[h1][/h1]
 - Level 29: 264000 XP[h1][/h1]
 - Level 30: 330000 XP — Master[h1][/h1]
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Scale level thresholds past 15 exponentially: level 30 now requires 330000 XP (up from 36000).",
   structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformGlobalVariablePrototypes, transformItemGeneratorPrototypes, addMutantPartItems, transformMutantLootGenerators],
