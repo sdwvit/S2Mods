@@ -45,8 +45,12 @@ transformTrade.files = ["/DynamicItemGenerator.cfg"];
 
 export const meta: MetaType<ItemGeneratorPrototype> = {
   structTransformers: [transformTrade],
-  description: `Adds Cinnamon, Hercules, and PSYBlocker pills to every medic's trade inventory across the Zone.
+  description: `
+[h1]Deprecated in 2.0[/h1]
+Adds Cinnamon, Hercules, and PSYBlocker pills to every medic's trade inventory across the Zone.
 [hr][/hr]
-Pills scale with player rank — rare at Newbie, guaranteed at Master.`,
+Pills scale with player rank — rare at Newbie, guaranteed at Master.
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: "Initial release",
 };
