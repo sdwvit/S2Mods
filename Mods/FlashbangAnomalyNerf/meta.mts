@@ -4,6 +4,7 @@ import type { MetaType } from "../../src/meta-type.mts";
 export const meta: MetaType = {
   structTransformers: [anomalyTransformer, hitTransformer],
   description: `
+[h1]Deprecated in 2.0[/h1]
 Nerfs the Clicker (Flashbang) anomaly so it's far less punishing.
 [hr][/hr]
 [list]
@@ -11,6 +12,8 @@ Nerfs the Clicker (Flashbang) anomaly so it's far less punishing.
 [*] ParticleCooldownTime increased from 4s to 10s.
 [*] ClickerAnomalyHit damage changed to a 10-80 range (was a flat 105).
 [/list]
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Initial release",
 };
