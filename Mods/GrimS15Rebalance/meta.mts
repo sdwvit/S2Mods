@@ -28,6 +28,7 @@ s15PlayerSettings.__internal__.refkey = "GunGrim_ST_Player";
 
 export const meta: MetaType<Struct> = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 Rebalances the Grim S-15 assault rifle.[h3][/h3]
 [list]
   [*] Durability damage per shot reduced 2x
@@ -35,6 +36,8 @@ Rebalances the Grim S-15 assault rifle.[h3][/h3]
   [*] Increased magazine: 45 rounds
   [*] Large magazine: 60 rounds
 [/list]
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Removed base durability increase; now only reduces durability damage per shot",
   structTransformers: [
