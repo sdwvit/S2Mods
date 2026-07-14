@@ -4,6 +4,7 @@ import type { AttachPrototype, UpgradePrototype, WeaponGeneralSetupPrototype } f
 
 export const meta: MetaType<WeaponGeneralSetupPrototype> = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 Adds various attachments to TOZ 
 [hr][/hr]
  Makes Three Line Rifle scope detachable and compatible with TOZ. Base cost 9500, weight 0.6 kg.[h1][/h1]
@@ -18,6 +19,8 @@ bPatches:
   [*] AttachPrototypes.cfg
   [*] NPCPrototypes.cfg
  [/list]
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Initial release",
   structTransformers: [structTransformer],
