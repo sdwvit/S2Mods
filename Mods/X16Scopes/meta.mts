@@ -6,12 +6,15 @@ import { xNCompatibleScopeByWeapon } from "./xNCompatibleScopeByWeapon.mts";
 
 export const meta: MetaType = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 Adds 2 new X16 Scopes for Gvyntar / Lavina / Merc / Trophy / SVDM / Lynx / SVU3 / Whip / G37 / G37V2 / Kharod / Dnipro / Sotnyk / AR416 / Sharpshooter / Unknown AR416 / SOFMOD.
 [hr][/hr]
 You can buy these new scopes from T4 attachment traders like the one on Yaniv.
 [hr][/hr]
 Now with attach animations. Please be aware that animations are WIP and some are placeholders. 
 bPatches AttachPrototypes, MeshPrototypes, DynamicItemGenerator, QuestItemGeneratorPrototypes, and WeaponGeneralSetupPrototypes.
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: `Added detachable 8x/16x scope support and matching icons/animations across many weapons, fixed
   special cases (including GP37v2, UDP, Dnipro/Sotnyk, Gvintar/Lavina/Lynx/Whip/SVU/SVDM)`,
