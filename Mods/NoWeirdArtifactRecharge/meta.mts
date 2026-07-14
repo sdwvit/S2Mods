@@ -23,11 +23,14 @@ transformArtifactPrototypes.files = ["/ArtifactPrototypes.cfg"];
 export const meta: MetaType<ArtifactPrototype> = {
   structTransformers: [transformArtifactPrototypes],
   description: `
+[h1]Deprecated in 2.0[/h1]
 Removes the need to recharge Weird Flower and Weird Bolt uber artifacts.
 [list]
 [*] Weird Flower: effects are always active without needing to wake it up in an anomaly
 [*] Weird Bolt: charge capacity massively increased so it effectively never runs out
 [/list]
-bPatches ArtifactPrototypes.cfg`,
+bPatches ArtifactPrototypes.cfg
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: "Initial release",
 };
