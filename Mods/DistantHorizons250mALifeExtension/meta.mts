@@ -8,6 +8,7 @@ import { type CoreVariable } from "s2cfgtojson";
 
 export const meta: MetaType = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 Distant Horizons (Shay's) 250m: ALife Extension 
 [hr][/hr]
 This is an extension for Shay's 250m Distant Horizons mod[h1][/h1]
@@ -28,6 +29,8 @@ Non-bubble related changes:
 [*] Remove restrictions on which mutants can spawn naturally.
 [*] Remove restrictions on which NPC factions can spawn naturally.
 [/list]
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: `
 [list]
