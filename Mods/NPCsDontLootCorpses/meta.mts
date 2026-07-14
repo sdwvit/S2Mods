@@ -5,7 +5,7 @@ type LootingNpcPrototype = ObjPrototype | QuestObjPrototype;
 
 export const meta: MetaType<LootingNpcPrototype> = {
   description:
-    "This mod prevents NPCs from looting corpses.[hr][/hr]Prevents situations where when you loot a body you find 15 armors and 25 weapons on them.",
+    "[h1]Deprecated in 2.0[/h1] This mod prevents NPCs from looting corpses.[hr][/hr]Prevents situations where when you loot a body you find 15 armors and 25 weapons on them. [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.",
   changenote:
     "Patch all current ObjPrototypes entries with CanProcessCorpses and keep NPCBase disabled as a fallback.",
   structTransformers: [transformNpcCorpseProcessing],
