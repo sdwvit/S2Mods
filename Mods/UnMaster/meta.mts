@@ -4,12 +4,15 @@ import type { DifficultyPrototype } from "s2cfgtojson";
 
 export const meta: MetaType<DifficultyPrototype> = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 Quality of Life changes for Master difficulty. 
 [hr][/hr]
 Brings back unlimited saves, compass, and unlocks settings on Master difficulty.[h1][/h1]
 Rest of Master specific things are left intact.[h1][/h1]
 [hr][/hr]
 bpatches DifficultyPrototypes
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Enable crosshair",
   structTransformers: [structTransformer],
