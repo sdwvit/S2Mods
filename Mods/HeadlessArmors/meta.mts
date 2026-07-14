@@ -35,6 +35,7 @@ dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 const finishedTransformers = new Set<string>();
 export const meta: MetaType = {
   description: `
+[h1]Deprecated in 2.0[/h1]
     This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection.[h2][/h2]
     It also adds corresponding helmets for exoskeleton and heavy armors, to balance things out.[h2][/h2]
     The armor has no psi and reduced radiation protection, you need to rely on helmets for that.[h2][/h2]
@@ -45,7 +46,9 @@ export const meta: MetaType = {
     For your convenience, here is a console commands to spawn all new headless armors in Skif's inventory:
     [h2][/h2]
     [u]XStartQuestNodeBySID Skif_ItemGen_Skif_All_Gdocs_Armors[/u]
-  `,
+  
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
 
   changenote: `Exoskeleton helmets now have faction-specific visuals: each faction (Duty, Mercenaries, Monolith, Neutral, Spark, Svoboda) uses its own colored mesh instead of all sharing the Svoboda helmet appearance.`,
   structTransformers: [
