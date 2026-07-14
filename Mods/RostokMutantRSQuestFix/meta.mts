@@ -4,11 +4,14 @@ import { getConditions } from "../../src/struct-utils.mts";
 
 export const meta: MetaType<QuestNodePrototype> = {
   description: `
+[h1]Deprecated in 2.0[/h1]
     Rostok Mutant RS Quest Fix
     [hr][/hr]
     This mod fixes the bug with the Bar mutant quest auto finishes moment after you start it.
     [hr][/hr]
     bpatches RSQ08_C01_K_M.cfg
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Initial release",
   structTransformers: [structTransformer],
