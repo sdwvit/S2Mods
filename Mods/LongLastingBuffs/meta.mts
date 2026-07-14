@@ -38,6 +38,7 @@ transformEffectPrototypes.files = ["/EffectPrototypes.cfg"];
 export const meta: MetaType<EffectPrototype> = {
   structTransformers: [transformEffectPrototypes],
   description: `
+[h1]Deprecated in 2.0[/h1]
   [h3]Makes some consumables last longer, with the same value (antirad remove radiation slowly).[/h3]
     [list]
   [*] 🔋 Limited Edition Energy Drink: Stamina buff duration increased from 30 seconds to 300 seconds
@@ -60,6 +61,8 @@ export const meta: MetaType<EffectPrototype> = {
   [*] 🧠 PSY Block: PSY Protection duration increased from 1 minute to 10 minutes
   [*] 🏋️ Hercules: Weight buff duration increased from 5 minutes to 50 minutes
   [/list]
-  bPatches EffectPrototypes.cfg`,
+  bPatches EffectPrototypes.cfg
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: "Compatible with 1.8.x",
 };
