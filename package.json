@@ -15,6 +15,7 @@
     "publish-modio": "node ./src/publish/publish-modio.mts",
     "zip-for-xbox": "node ./src/publish/zip-for-xbox.mts",
     "publish-platforms": "node ./src/publish/publish-platforms.mts",
+    "publish-descriptions-all": "node ./src/publish/publish-descriptions-all.mts",
     "check-unpublished": "node ./src/publish/check-unpublished-mods.mts",
     "update-readme": "node ./src/update-readme.mts",
     "update-readme:mods": "pnpm -r --parallel --if-present run update-readme",
