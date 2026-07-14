@@ -3,6 +3,7 @@ import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType<ObjPrototype> = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 This mode does only one thing: it makes you unable to be knocked down by any NPCs, or mutants, including bosses. [h1][/h1]
 Bloodsuckers won't bully you anymore.
 [hr][/hr]
@@ -13,7 +14,9 @@ Bloodsuckers won't bully you anymore.
 [/list]
 [hr][/hr]
 It is meant to be used in other collections of mods. Does not conflict with anything. It's a combo of two one-line patches: one for player and one for npcs, sets CanBeKnockedDown to false. 
-  `,
+  
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: "Update for 1.8.1",
   structTransformers: [entriesTransformer],
 };
