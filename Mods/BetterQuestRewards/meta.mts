@@ -12,7 +12,9 @@ const structTransformers = [
 ] as const;
 
 export const meta: MetaType = {
-  description: `Unique and fair rewards for each possible variant of repeating side quests. Each quest variant gets its own reward scaled by distance, danger, and effort.
+  description: `
+[h1]Deprecated in 2.0[/h1]
+Unique and fair rewards for each possible variant of repeating side quests. Each quest variant gets its own reward scaled by distance, danger, and effort.
 
 [url=https://docs.google.com/spreadsheets/d/191NWVb0VGKhryJAQenYTV2zbGuLk2RMkEOw5Tuo9WQw/edit?gid=0#gid=0]Quest reward data spreadsheet[/url]
 [h3][/h3]
@@ -23,7 +25,9 @@ export const meta: MetaType = {
  [*] Rewards use a +/-20% spread around the calculated fair value.
  [*] Covers all recurring quest vendors: Warlock, Boozer, Owl, Sidorovych, Hera, Barkeep, Needle, Harpy.
  [*] Dialog now shows the correct reward amount for each quest.
-[/list]`,
+[/list]
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: "Dialog now shows the correct reward amount for each quest.",
   structTransformers: structTransformers as any,
 };
