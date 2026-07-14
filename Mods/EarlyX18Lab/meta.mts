@@ -28,8 +28,11 @@ transformQuestNodePrototypes.files = ["Garbage_L.cfg", "SQ103.cfg"];
 
 export const meta: MetaType = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 Unblocks the X18 Lab side quest (SQ103) from the later main-quest gate.
 Normally Diod's radio call only fires in the narrow window between completing E03_MQ06 and starting E08_MQ01.
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Roll back to the simplest variant",
   structTransformers: [transformQuestNodePrototypes],
