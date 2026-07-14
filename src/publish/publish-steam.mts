@@ -61,7 +61,10 @@ async function publishToSteam() {
   });
 
   spawnSync("paplay", ["./pop.wav"]);
-  finalizePublish("steam", publishNote, publishedAt);
+  // Description-only refresh is not a new version — skip finalizePublish (no git commit/tag).
+  if (!process.env.DESC_ONLY) {
+    finalizePublish("steam", publishNote, publishedAt);
+  }
 }
 
 await publishToSteam();
