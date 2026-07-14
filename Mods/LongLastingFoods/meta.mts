@@ -81,6 +81,7 @@ transformConsumables.files = ["/ConsumablePrototypes.cfg", "/QuestItemPrototypes
 export const meta: MetaType<EffectPrototype | ConsumablePrototype | QuestItemPrototype> = {
   structTransformers: [transformEffectPrototypes, transformConsumables],
   description: `
+[h1]Deprecated in 2.0[/h1]
   [h3]Makes food & drink consumables last longer, with the same value (antirad remove radiation slowly), and shows their effects as numeric values instead of bars.[/h3]
     [list]
   [*] 🔋 Limited Edition Energy Drink: Stamina buff duration increased from 30 seconds to 300 seconds
@@ -94,6 +95,8 @@ export const meta: MetaType<EffectPrototype | ConsumablePrototype | QuestItemPro
   [*] ☢️ Dvupalov Vodka: Radiation reduction duration increased from 10 seconds to 100 seconds
   [*] 🧠 Dvupalov Vodka: PSY Protection duration increased from 90 seconds to 900 seconds
   [*] 🔢 Each item shows its main effect as a numeric value + time (other effects unchanged)
-  [/list]`,
+  [/list]
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: "Initial release",
 };
