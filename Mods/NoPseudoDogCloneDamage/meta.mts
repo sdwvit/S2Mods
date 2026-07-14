@@ -11,13 +11,16 @@ const targetSIDs = new Set([
 
 export const meta: MetaType<Struct> = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 This mod removes damage from pseudodog psy clones (combat summons).[h1][/h1]
 [hr][/hr]
 [list]
 [*] Pseudodog clones will still spawn and chase you, but they deal no damage and cause no bleeding.
 [*] The real pseudodog is unaffected — only its summoned copies are nerfed.
 [/list] 
-  `,
+  
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: "Fix: also disable damage on left/right run attack variants",
   structTransformers: [transformSummonAbilities],
 };
