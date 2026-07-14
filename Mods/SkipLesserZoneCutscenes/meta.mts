@@ -11,6 +11,7 @@ import { getLaunchers } from "../../src/struct-utils.mts";
 
 export const meta: MetaType = {
   description: `
+[h1]Deprecated in 2.0[/h1]
     This mod skips / speeds up Intro / Scanner / Wake up with Richter / Zalissya bar / Sphere cutscenes.
     [hr][/hr]
     Quest changes:
@@ -21,7 +22,9 @@ export const meta: MetaType = {
     - E02_MQ03_Dialog_Warlock_in_Bar_after_CS: makes the post-cutscene dialog skippable and disables forced VO-in-sequence when present.
     [hr][/hr]
     Use this mod for frequent game resets.[h1][/h1]
-  `,
+  
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote:
     "Reworked SkipLesserZoneCutscenes into explicit per-quest patches: rerouted intro / wake-up / bar / Pripoy flows, removed more cutscene and save-blocking launchers, shortened technical delays, replaced gating nodes with technical pass-throughs, preserved player inventory on scanner setup, and made the Warlock post-cutscene dialog skippable",
   structTransformers: [structTransformer],
