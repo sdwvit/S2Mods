@@ -42,7 +42,9 @@ const structTransformers = [
 export const finishedTransformers = new Set<string>();
 
 export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> = {
-  description: `A collection of various configs aimed to increase game difficulty and make it more interesting.[h3][/h3]
+  description: `
+[h1]Deprecated in 2.0[/h1]
+A collection of various configs aimed to increase game difficulty and make it more interesting.[h3][/h3]
 [hr][/hr]
 [h3]All changes to the base game:[/h3]
 [list]
@@ -54,7 +56,9 @@ export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> 
  [*] [QoL] Unique weapons are now compatible with basic scopes. 
  [*] [Balance] Rifles default scopes can now be detached and sold.
  [*] [QoL] Allows buying/selling/dropping quest items.
-[/list]`,
+[/list]
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: `Remove duplicate trade prototype logic (faction money, buy limitations) — now handled solely by SpecialistMerchants`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
