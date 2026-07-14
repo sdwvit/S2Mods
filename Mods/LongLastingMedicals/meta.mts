@@ -80,6 +80,7 @@ transformConsumables.files = ["/ConsumablePrototypes.cfg"];
 export const meta: MetaType<EffectPrototype | ConsumablePrototype> = {
   structTransformers: [transformEffectPrototypes, transformConsumables],
   description: `
+[h1]Deprecated in 2.0[/h1]
   [h3]Makes medkits, bandages & antirad last longer, with the same value (heals/antirad apply slower), and shows their main effect as a numeric value instead of bars.[/h3]
     [list]
   [*] ❤️ Medkit / Army Medkit / Scientist Medkit: Health restore duration increased from 1 second to ~10 seconds (same total healing)
@@ -90,6 +91,8 @@ export const meta: MetaType<EffectPrototype | ConsumablePrototype> = {
   [*] ☢️ Scientist Medkit: Radiation reduction duration increased from 2 seconds to 20 seconds
   [*] ☢️ Antirad: Radiation reduction duration increased from 2 seconds to 20 seconds
   [*] 🔢 Each item shows its main effect as a numeric value + time (other effects unchanged)
-  [/list]`,
+  [/list]
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: "Initial release",
 };
