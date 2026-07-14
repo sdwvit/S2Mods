@@ -3,7 +3,9 @@ import type { MetaType } from "../../src/meta-type.mts";
 import { logger } from "../../src/logger.mts";
 
 export const meta: MetaType<SpawnActorPrototype> = {
-  description: `This mode does only one thing: removes all 650+ medkits placed around the map for more challenging gameplay.[h1][/h1]
+  description: `
+[h1]Deprecated in 2.0[/h1]
+This mode does only one thing: removes all 650+ medkits placed around the map for more challenging gameplay.[h1][/h1]
 [hr][/hr]
 😤 Tired of those cute little medkits scattered around the map like breadcrumbs for weaklings?[h1][/h1]
 💀 This mod is for players who want to feel the sting of death without any pre-placed safety nets.[h1][/h1]
@@ -12,7 +14,9 @@ export const meta: MetaType<SpawnActorPrototype> = {
 [hr][/hr]
 It is meant to be used in other collections of mods. Does not conflict with anything.
 [hr][/hr]
-Thanks @rbwadle for suggesting how to modify map objects.`,
+Thanks @rbwadle for suggesting how to modify map objects.
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+`,
   changenote: "Update for 1.8.1",
   structTransformers: [transformItems],
 };
