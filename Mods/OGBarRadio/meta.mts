@@ -2,6 +2,7 @@ import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType = {
   description: `
+[h1]Deprecated in 2.0[/h1]
 This mod restores the original OST to the 100 Rads Bar
 [hr][/hr]
 In the quiet moments after a long run, there’s a strange feeling — like coming home. 
@@ -18,6 +19,8 @@ Replaces BP_100_Rads_Bar_120 Blueprint.
 ☢️ Classic radio OST from S.T.A.L.K.E.R.: Shadow of Chornobyl! Good hunting and listening, Stalkers!
 
 📻 Track: Addaraya - Gurza Dreaming
+
+[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Reduce volume to 50%",
   structTransformers: [],
