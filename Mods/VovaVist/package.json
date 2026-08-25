@@ -4,7 +4,6 @@
   "scripts": {
     "prepare-configs": "S2_MOD=VovaVist node ../../src/prepare-configs.mts",
     "update-readme": "S2_MOD=VovaVist node ../../src/update-readme.mts",
-    "pack-inject": "S2_MOD=VovaVist node ../../src/pack-inject.mts",
     "cook-inject": "S2_MOD=VovaVist node ../../src/cook-inject.mts",
     "publish-steam": "S2_MOD=VovaVist node ../../src/publish/publish-steam.mts",
     "publish-modio": "S2_MOD=VovaVist node ../../src/publish/publish-modio.mts",
