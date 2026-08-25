@@ -157,6 +157,9 @@ transformTechnicians.files = ["/NPCPrototypes.cfg"];
 export const meta: MetaType<any> = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Adds 3 extra tiers for every durability upgrade on weapons and armors.
 [hr][/hr]
 Each tier has the same effect as the original, with cost scaling up 2x per tier (capped at 10k for tier 2, 100k overall).

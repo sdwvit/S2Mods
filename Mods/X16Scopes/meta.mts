@@ -7,6 +7,9 @@ import { xNCompatibleScopeByWeapon } from "./xNCompatibleScopeByWeapon.mts";
 export const meta: MetaType = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Adds 2 new X16 Scopes for Gvyntar / Lavina / Merc / Trophy / SVDM / Lynx / SVU3 / Whip / G37 / G37V2 / Kharod / Dnipro / Sotnyk / AR416 / Sharpshooter / Unknown AR416 / SOFMOD.
 [hr][/hr]
 You can buy these new scopes from T4 attachment traders like the one on Yaniv.

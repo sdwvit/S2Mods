@@ -6,6 +6,9 @@ import type { MetaType } from "../../src/meta-type.mts";
 export const meta: MetaType = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Drinking energy drink or wearing Thunderberry artifact increases Skif’s running speed (finally!).[h2][/h2]
 Now you can speedrun main questline and easily outrun bloodsuckers.
 [hr][/hr]

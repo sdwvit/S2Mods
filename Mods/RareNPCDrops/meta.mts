@@ -5,6 +5,9 @@ import { transformItemGenerators } from "./transformItemGenerators.mts";
 export const meta: MetaType<ItemGeneratorPrototype> = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Each NPC corpse has a 1% chance to drop a detector and a separate 1% chance to drop an artifact. Drops are tiered by NPC rank:
     [h2][/h2]
     [list]

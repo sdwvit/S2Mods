@@ -9,6 +9,9 @@ import { type CoreVariable } from "s2cfgtojson";
 export const meta: MetaType = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Distant Horizons (Shay's) 250m: ALife Extension 
 [hr][/hr]
 This is an extension for Shay's 250m Distant Horizons mod[h1][/h1]

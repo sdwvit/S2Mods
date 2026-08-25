@@ -5,6 +5,9 @@ import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts
 export const meta: MetaType = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 This mod expands the dialogue options offered by NPCs when requesting side quests.[h2][/h2]
 Every repeatable side quest is offered at once instead of a random rotation, using the
 vanilla dialog and quest flow. Also shows all mutant-parts hand-in options at Malachite (EQ197), gated on actually having the parts.

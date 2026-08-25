@@ -6,6 +6,9 @@ import { logger } from "../../src/logger.mts";
 export const meta: MetaType<SpawnActorPrototype> = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
     This mode does only one thing: removes all 436 weapons / armors placed around the Zone[hr][/hr]
 Full scavenger mode! 
     
