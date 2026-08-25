@@ -7,7 +7,6 @@
   "scripts": {
     "prepare-configs": "S2_MOD=NodeBridge node ../../src/prepare-configs.mts",
     "update-readme": "S2_MOD=NodeBridge node ../../src/update-readme.mts",
-    "pack-inject": "S2_MOD=NodeBridge node ../../src/pack-inject.mts",
     "cook-inject": "S2_MOD=NodeBridge node ../../src/cook-inject.mts",
     "inject-nodebridge": "S2_MOD=NodeBridge node ../../src/inject-nodebridge.mts",
     "inject-nodebridge:watch": "S2_MOD=NodeBridge node ../../src/inject-nodebridge.mts --watch",

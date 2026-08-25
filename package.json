@@ -9,7 +9,6 @@
     "prepare-configs:mods": "pnpm -r --parallel --if-present run prepare-configs",
     "quest-graph-html": "node ./src/quest-cfg-to-graph-html.mts",
     "build-quest-graph-site": "node ./src/build-quest-graph-site.mts",
-    "pack-inject": "node ./src/pack-inject.mts",
     "cook-inject": "node ./src/cook-inject.mts",
     "publish-steam": "node ./src/publish/publish-steam.mts",
     "publish-modio": "node ./src/publish/publish-modio.mts",
