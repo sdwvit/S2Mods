@@ -4,6 +4,9 @@ import type { WeaponGeneralSetupPrototype } from "s2cfgtojson";
 export const meta: MetaType<WeaponGeneralSetupPrototype> = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Offset aim with any weapon any scope at any time. 
 [hr][/hr]
 bPatches WeaponGeneralSetupPrototypes.cfg

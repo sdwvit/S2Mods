@@ -4,6 +4,9 @@ import type { MetaType } from "../../src/meta-type.mts";
 export const meta: MetaType<DifficultyPrototype> = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 This mod does only one thing: removes coupon rewards from the main quest.
 [hr][/hr]
 It patches DifficultyPrototypes and sets Reward_MainLine_Money to 0 for all playable difficulties.[h1][/h1]

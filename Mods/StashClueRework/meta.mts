@@ -10,6 +10,9 @@ export const finishedTransformers = new Set<string>();
 export const meta: MetaType = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 This mod reworks the stash clues system and makes exploring stashes a bit more interesting.
 [hr][/hr]
 First, it makes all existing stashes to not spawn on game start (new game required).[h1][/h1]

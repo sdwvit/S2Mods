@@ -4,6 +4,9 @@ import type { MetaType } from "../../src/meta-type.mts";
 export const meta: MetaType<ObjPrototype> = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 This mode does only one thing: it makes you unable to be knocked down by any NPCs, or mutants, including bosses. [h1][/h1]
 Bloodsuckers won't bully you anymore.
 [hr][/hr]

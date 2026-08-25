@@ -1,10 +1,13 @@
 import { logger } from "../../src/logger.mts";
 import type { MetaType } from "../../src/meta-type.mts";
-import { SpawnActorPrototype } from "s2cfgtojson";
+import type { SpawnActorPrototype } from "s2cfgtojson";
 
 export const meta: MetaType<SpawnActorPrototype> = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Replaces all MSOP guards with Corpus guards at Malachite Hub.
 [hr][/hr]
 Seems more fitting that way.

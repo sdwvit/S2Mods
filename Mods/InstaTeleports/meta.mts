@@ -9,6 +9,9 @@ import type { MetaType } from "../../src/meta-type.mts";
 export const meta: MetaType = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Changes all teleports to instant — no fade, no delay, no loading screen blur.
 [hr][/hr]
 [list]

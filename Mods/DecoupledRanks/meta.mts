@@ -8,6 +8,9 @@ import { transformMutantLootGenerators } from "./transformMutantLootGenerators.m
 export const meta: MetaType = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Decoupled Ranks separates player rank progression from story quest milestones.[h1][/h1]
 Instead of quest nodes force-setting rank (Newbie/Experienced/Veteran/Master), this mod is intended to drive rank from an XP-like progression score.[h1][/h1]
 Design goals:[h1][/h1]

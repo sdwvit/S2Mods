@@ -11,10 +11,13 @@ import type {
 export const meta: MetaType<QuestNodePrototype> = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Fixes the vanilla bug where Hera's package delivery quest (RSQ07_C05_B_B) doesn't formally complete after turn-in.
 [hr][/hr]
 [h3]Problem:[/h3]
-After delivering the package and receiving money, the quest stays active with a "Return to Hera" marker. Hera won't offer new jobs or allow cancellation.
+After delivering the package and receiving money, the quest stays active with a “Return to Hera” marker. Hera won't offer new jobs or allow cancellation.
 [h3]Fix:[/h3]
 Removes circular node references in the quest's turn-in flow that prevented proper completion.
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.

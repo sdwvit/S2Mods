@@ -1,6 +1,7 @@
 import type { MetaType } from "../../src/meta-type.mts";
 import { transformRelationPrototypes } from "./transformRelationPrototypes.mts";
 
+// todo: crashes on 2.0
 export const meta: MetaType = {
   description: `
 Fixes some of the faction relationships to be more lore-friendly.[h1][/h1]

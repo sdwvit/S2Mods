@@ -36,6 +36,9 @@ const finishedTransformers = new Set<string>();
 export const meta: MetaType = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
     This mod adds armor that does not include helmets, forcing players to wear helmets to have adequate protection.[h2][/h2]
     It also adds corresponding helmets for exoskeleton and heavy armors, to balance things out.[h2][/h2]
     The armor has no psi and reduced radiation protection, you need to rely on helmets for that.[h2][/h2]

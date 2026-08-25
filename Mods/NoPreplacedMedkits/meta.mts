@@ -5,6 +5,9 @@ import { logger } from "../../src/logger.mts";
 export const meta: MetaType<SpawnActorPrototype> = {
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 This mode does only one thing: removes all 650+ medkits placed around the map for more challenging gameplay.[h1][/h1]
 [hr][/hr]
 😤 Tired of those cute little medkits scattered around the map like breadcrumbs for weaklings?[h1][/h1]

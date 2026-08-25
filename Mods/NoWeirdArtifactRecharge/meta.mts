@@ -24,6 +24,9 @@ export const meta: MetaType<ArtifactPrototype> = {
   structTransformers: [transformArtifactPrototypes],
   description: `
 [h1]Deprecated in 2.0[/h1]
+[h1][/h1]
+With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+[hr][/hr]
 Removes the need to recharge Weird Flower and Weird Bolt uber artifacts.
 [list]
 [*] Weird Flower: effects are always active without needing to wake it up in an anomaly
