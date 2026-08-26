@@ -15,24 +15,12 @@ Mutants always drop 1 loot item.
   structTransformers: [structTransformer],
 };
 
-const mutantLootSet = new Set([
-  "BlinddogLootGenerator",
-  "BloodsuckerLootGenerator",
-  "BoarLootGenerator",
-  "BurerLootGenerator",
-  "CatLootGenerator",
-  "ChimeraLootGenerator",
-  "ControllerLootGenerator",
-  "FleshLootGenerator",
-  "PoltergeistLootGenerator",
-  "PseudodogLootGenerator",
-  "PseudogiantLootGenerator",
-  "TushkanLootGenerator",
-  "SnorkLootGenerator",
-]);
-
 function structTransformer(struct: ItemGeneratorPrototype) {
-  if (mutantLootSet.has(struct.SID) && struct.ItemGenerator[0].PossibleItems[0].Chance !== 1) {
+  if (
+    struct.SID.endsWith("LootGenerator") &&
+    struct.SID !== "DefaultMutantLootGenerator" &&
+    struct.ItemGenerator[0].PossibleItems[0].Chance !== 1
+  ) {
     const fork = struct.fork();
 
     fork.ItemGenerator = struct.ItemGenerator.fork();
@@ -46,3 +34,4 @@ function structTransformer(struct: ItemGeneratorPrototype) {
 }
 
 structTransformer.files = ["/ItemGeneratorPrototypes.cfg"];
+structTransformer.dlc = true;
