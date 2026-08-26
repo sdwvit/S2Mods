@@ -32,3 +32,4 @@ export function transformWeaponPrototypes(struct: WeaponPrototype) {
 }
 
 transformWeaponPrototypes.files = ["/WeaponPrototypes.cfg"];
+transformWeaponPrototypes.dlc = true;

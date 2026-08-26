@@ -1,6 +1,6 @@
 import type { StructTransformer } from "./meta-type.mts";
 import { logger } from "./logger.mts";
-import { getCfgFiles } from "./get-cfg-files.mts";
+import { getCfgFiles, getDlcCfgFiles } from "./get-cfg-files.mts";
 import { getL2CacheKey, L2Cache, L2CacheState } from "./cache/l2-cache.mts";
 
 export async function getFilesForTransformer<T>(transformer: StructTransformer<T>): Promise<string[]> {
@@ -14,6 +14,13 @@ export async function getFilesForTransformer<T>(transformer: StructTransformer<T
   }
   L2CacheState.needsUpdate = true;
   logger.log(`Getting files for transformer ${transformer.name}...`);
-  L2Cache[cacheKey] = (await Promise.all(transformer.files.map((suffix) => getCfgFiles(suffix, transformer.contains)))).flat();
+  const suffixes = transformer.files;
+  L2Cache[cacheKey] = (
+    await Promise.all([
+      ...suffixes.map((suffix) => getCfgFiles(suffix, transformer.contains)),
+      // opt-in: also patch the same prototypes as they appear in DLC game data
+      ...(transformer.dlc ? suffixes.map((suffix) => getDlcCfgFiles(suffix, transformer.contains)) : []),
+    ])
+  ).flat();
   return L2Cache[cacheKey];
 }

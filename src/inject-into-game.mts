@@ -1,20 +1,24 @@
 import { logger } from "./logger.mts";
-import { gameModsFolder, modName, projectRoot } from "./base-paths.mts";
-import childProcess from "node:child_process";
+import { gameModsFolder, modName } from "./base-paths.mts";
+import { cpSync, mkdirSync, rmSync } from "node:fs";
+import path from "node:path";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
+import { sdkStagedModFolder } from "./mod-meta-paths.mts";
+import { purgePaksForMod } from "./inject-raw.mts";
 
-export async function injectIntoGame(sourcePath: string) {
-  await withSdkMutationLock(`inject-into-game:${modName}`, async () => {
-    logger.log("Injecting into the game using command: ");
-
-    const fullCmd = ["cp", sourcePath, `'${gameModsFolder}'`].join(" ");
-
-    logger.log(fullCmd + "\n\nExecuting...\n");
-
-    childProcess.execSync(fullCmd, {
-      stdio: "inherit",
-      cwd: projectRoot,
-      shell: "/usr/bin/bash",
-    });
+/**
+ * Install a cooked mod the way the game expects it: the whole staged tree (one folder per cook
+ * variant) under a folder named after the mod, rather than loose paks in the mods root.
+ */
+export async function injectStagedIntoGame() {
+  const source = await sdkStagedModFolder;
+  await withSdkMutationLock(`inject-staged:${modName}`, async () => {
+    await purgePaksForMod();
+    const destination = path.join(gameModsFolder, modName);
+    logger.log(`Injecting cooked mod from ${source} into ${destination}...`);
+    mkdirSync(gameModsFolder, { recursive: true });
+    rmSync(destination, { recursive: true, force: true });
+    cpSync(source, path.join(destination, "Windows"), { recursive: true });
+    logger.log("Done.");
   });
 }
