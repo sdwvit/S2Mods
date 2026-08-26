@@ -2,7 +2,8 @@ import fs, { rmSync } from "node:fs";
 import path from "node:path";
 import "../ensure-env.mts";
 import { modFolder, modName } from "../base-paths.mts";
-import { modFolderSteamStruct, modMeta } from "../mod-meta-paths.mts";
+import { modMeta } from "../mod-meta-paths.mts";
+import { ensureCooked } from "../ensure-cooked.mts";
 import { sanitize } from "../sanitize.mts";
 import { createModZip } from "./zip.mts";
 import { logger } from "../logger.mts";
@@ -30,7 +31,9 @@ function storeModId(modId: string) {
 function setNameSummaryDescription(form: FormData) {
   form.append(
     "name",
-    sanitize(`${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} by ${meta.originalAuthor || process.env.STEAM_USER}`),
+    sanitize(
+      `${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} by ${meta.originalAuthor || process.env.STEAM_USER}`,
+    ),
   );
   form.append("summary", `Mod by ${meta.originalAuthor || process.env.STEAM_USER}`);
   form.append(
@@ -173,20 +176,33 @@ async function publishToModIO() {
   if (process.env.DESC_ONLY) {
     const modId = getStoredModId() || (await createMod());
     await updateMod(modId, true);
-    logger.log(`mod.io description update complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-${meta.originalAuthor || process.env.STEAM_USER}`);
+    logger.log(
+      `mod.io description update complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-${meta.originalAuthor || process.env.STEAM_USER}`,
+    );
     // Description-only refresh is not a new version — skip finalizePublish (no git commit/tag).
     return;
   }
 
+  await ensureCooked();
   await Promise.allSettled([import("../pull-assets.mts"), import("../pull-staged.mts")]);
-  const [outputZip, modId] = await Promise.all([createModZip(await modFolderSteamStruct, undefined, `${modName}-modio`), Promise.resolve(getStoredModId() || createMod())]);
+  const [outputZip, modId] = await Promise.all([
+    createModZip(undefined, undefined, `${modName}-modio`),
+    Promise.resolve(getStoredModId() || createMod()),
+  ]);
   await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
   rmSync(outputZip);
-  logger.log(`mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-${meta.originalAuthor || process.env.STEAM_USER}`);
+  logger.log(
+    `mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-${meta.originalAuthor || process.env.STEAM_USER}`,
+  );
   finalizePublish("modio", publishNote, publishedAt);
 }
 
-async function getFormFile(form = new FormData(), field: string, filePath: string, fileType: string) {
+async function getFormFile(
+  form = new FormData(),
+  field: string,
+  filePath: string,
+  fileType: string,
+) {
   const buffer = await fs.promises.readFile(filePath);
   const blob = new Blob([buffer], { type: fileType });
 

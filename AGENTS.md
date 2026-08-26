@@ -24,7 +24,8 @@ Copy `.env.sample` to `.env` and fill paths/secrets. Common vars:
 ## Repo layout
 - `src/`: all scripts and utilities (TypeScript `.mts` + a few `.ts`).
 - `Mods/`: mod source/config payloads (project-specific content).
-- `DLCGameData/`: extracted or staged DLC game data (generated or synced).
+- `DLCGameData/`: extracted or staged DLC game data (generated or synced). Mirrors the in-game
+  `Stalker2/Content/GameLite/DLCGameData` layout; transformers opt in with `transformer.dlc = true`.
 - `GameLite/`: staged lightweight game data copy (generated).
 - `DesignDocs/`: docs/specs for mods and workflows; treat as the canonical spec location for gameplay/system notes.
 - `.env.sample`: environment template.

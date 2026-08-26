@@ -11,16 +11,21 @@ import { sanitize } from "../sanitize.mts";
 import { logger } from "../logger.mts";
 import { getModifiedFiles } from "../get-modified-files.mts";
 import { finalizePublish } from "./publish-tracker.mts";
+import { ensureCooked } from "../ensure-cooked.mts";
 const meta = await modMeta;
 const cmd = () => {
   const vdfFilePath = path.join(modFolder, `workshopitem.vdf`);
-  const vdfData = fs.existsSync(vdfFilePath) ? VDF.parse(fs.readFileSync(vdfFilePath, "utf8")) : { workshopitem: {} };
+  const vdfData = fs.existsSync(vdfFilePath)
+    ? VDF.parse(fs.readFileSync(vdfFilePath, "utf8"))
+    : { workshopitem: {} };
 
   vdfData.workshopitem.appid = STALKER_STEAM_ID;
   vdfData.workshopitem.publishedfileid ||= "0"; // This will be set by SteamCMD
   vdfData.workshopitem.contentfolder = modFolderSteam;
   vdfData.workshopitem.previewfile = path.join(modFolder, "512.png");
-  vdfData.workshopitem.title = sanitize(`${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} by ${meta.originalAuthor || "sdwvit"}`);
+  vdfData.workshopitem.title = sanitize(
+    `${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} by ${meta.originalAuthor || "sdwvit"}`,
+  );
   vdfData.workshopitem.description = sanitize(
     meta.description +
       `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[hr][/hr]
@@ -51,6 +56,12 @@ async function publishToSteam() {
   }
   const publishedAt = new Date();
   const publishNote = process.env.CHANGENOTE || meta.changenote || "Update";
+  if (process.env.WRITE_VDF_ONLY) {
+    cmd(); // writes the workshopitem.vdf (title/description/changenote) without invoking steamcmd
+    logger.log(`Wrote vdf only for ${modName}`);
+    return;
+  }
+  await ensureCooked();
   await import("../pull-assets.mts");
   await import("../pull-staged.mts");
   childProcess.execSync(cmd(), {

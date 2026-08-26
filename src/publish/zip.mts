@@ -1,7 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { deflate, inflate } from "node:zlib";
-import { modName, projectRoot } from "../base-paths.mts";
-import { modFolderSteamStruct, stagedFolderStruct } from "../mod-meta-paths.mts";
+import { modFolderSteam, modName, projectRoot } from "../base-paths.mts";
+
 import archiver from "archiver";
 import fs from "node:fs";
 import path from "node:path";
@@ -11,22 +11,27 @@ const resolver = (resolve, reject) => (err, result) => (err ? reject(err) : reso
 
 export async function readWithUnzip(filePath: string): Promise<string> {
   const contents = await readFile(filePath);
-  const unzipped = await new Promise<Buffer<ArrayBufferLike>>((resolve, reject) => inflate(contents, resolver(resolve, reject)));
+  const unzipped = await new Promise<Buffer<ArrayBufferLike>>((resolve, reject) =>
+    inflate(contents, resolver(resolve, reject)),
+  );
 
   return unzipped.toString();
 }
 
 export async function writeWithZip(filePath: string, data: string): Promise<void> {
-  const zipped = await new Promise<Buffer<ArrayBufferLike>>((resolve, reject) => deflate(data, resolver(resolve, reject)));
+  const zipped = await new Promise<Buffer<ArrayBufferLike>>((resolve, reject) =>
+    deflate(data, resolver(resolve, reject)),
+  );
   await writeFile(filePath, zipped);
 }
 
 export async function createModZip(sourceDir?: string, dest?: string | false, zipName?: string) {
   if (!sourceDir) {
-    sourceDir = await modFolderSteamStruct;
+    // steamworkshop/ already mirrors the installed shape (Windows/<variant>/...), so it is zipped as is.
+    sourceDir = modFolderSteam;
   }
   if (dest === undefined) {
-    dest = path.join("Windows", await stagedFolderStruct);
+    dest = false;
   }
   const outZipPath = path.join(projectRoot, `${zipName ?? modName}.zip`);
   logger.log(`Creating mod ZIP ${modName}…`);

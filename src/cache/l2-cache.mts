@@ -17,7 +17,7 @@ export const L2CacheState = {
  */
 export const L2Cache = fs.existsSync(L2CacheFileName) ? JSON.parse(await readWithUnzip(L2CacheFileName)) : {};
 export const getL2CacheKey = (transformer: StructTransformer<any>) =>
-  `${transformer.files.sort().join()}:${transformer.contains}:${transformer.contents ? transformer.contents.sort().join() : ""}`;
+  `${transformer.files.sort().join()}:${transformer.contains}:${transformer.contents ? transformer.contents.sort().join() : ""}:${transformer.dlc ? "dlc" : ""}`;
 
 export const onL2Finish = () => {
   if (!L2CacheState.needsUpdate) return;

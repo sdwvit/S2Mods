@@ -1,14 +1,18 @@
 import "./ensure-env.mts";
-import { sdkStagedPakFolder } from "./mod-meta-paths.mts";
 import { spawnSync } from "child_process";
 import { cookMod } from "./cook.mts";
-import { injectIntoGame } from "./inject-into-game.mts";
+import { injectStagedIntoGame } from "./inject-into-game.mts";
+import { injectRawIntoGame, isCfgOnlyMod } from "./inject-raw.mts";
 import { maybeLaunchStalker2 } from "./launch-stalker2.mts";
-import path from "node:path";
+import { logger } from "./logger.mts";
 
-await cookMod();
-
-await injectIntoGame(path.join(await sdkStagedPakFolder, "*"));
+if (isCfgOnlyMod() && !process.env.FORCE_COOK) {
+  logger.log("Mod has no cookable assets, skipping the cook and injecting loose configs.");
+  await injectRawIntoGame();
+} else {
+  await cookMod();
+  await injectStagedIntoGame();
+}
 
 maybeLaunchStalker2();
 

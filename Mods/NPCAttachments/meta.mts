@@ -94,6 +94,7 @@ const newlyCreatedWeaponParamsWithPreinstalledAttachments: Record<
 const requiredUpgradesRecord: Record<string, string[]> = {};
 
 const newWeaponAttachCount: Record<string, number> = {};
+const newWeaponAttachItems: Record<string, string[]> = {};
 /**
  * 1
  */
@@ -192,6 +193,7 @@ function createWeaponParamsWithPreinstalledAttachments(
       ],
     } as DeeplyPartial<WeaponGeneralSetupPrototype>) as WeaponGeneralSetupPrototype;
     newWeaponAttachCount[newWeaponSetup.SID] = items.length;
+    newWeaponAttachItems[newWeaponSetup.SID] = items;
     newlyCreatedWeaponParamsWithPreinstalledAttachments[struct.SID] ||= [];
     newlyCreatedWeaponParamsWithPreinstalledAttachments[struct.SID].push(newWeaponSetup);
     requiredUpgradesRecord[newWeaponSetup.SID] = requiredUpgrades;
@@ -204,6 +206,14 @@ function createWeaponParamsWithPreinstalledAttachments(
 createWeaponParamsWithPreinstalledAttachments.files = ["/WeaponGeneralSetupPrototypes.cfg"];
 
 const newlyCreatedWeaponsRarity: Record<string, number> = {};
+/**
+ * For each generated weapon variant: how to reproduce it through the vanilla
+ * ItemGenerator Attaches/Upgrades system instead of a dedicated weapon prototype.
+ */
+const newWeaponGenerationRecipe: Record<
+  string,
+  { baseItemPrototypeSID: string; attaches: string[]; upgrades: string[] }
+> = {};
 const newlyCreatedWeaponsWithPreinstalledAttachments: Record<string, WeaponPrototype[]> = {};
 /**
  * 2
@@ -244,6 +254,12 @@ async function createWeapons(struct: WeaponPrototype) {
       const attachCount =
         newWeaponAttachCount[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID];
       newlyCreatedWeaponsRarity[newWeapon.SID] = 1 / (10 * Math.pow(10, attachCount - 1));
+      newWeaponGenerationRecipe[newWeapon.SID] = {
+        baseItemPrototypeSID: struct.SID,
+        attaches: newWeaponAttachItems[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID],
+        upgrades:
+          requiredUpgradesRecord[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID] || [],
+      };
       extraStructs.push(newWeapon);
     },
   );
@@ -280,14 +296,46 @@ async function addNewWeaponsToDynamicItemGenerators(struct: ItemGeneratorPrototy
 
       newWeapons.forEach((weapon) => {
         const rarity = newlyCreatedWeaponsRarity[weapon.SID];
+        const recipe = newWeaponGenerationRecipe[weapon.SID];
+        if (!recipe?.attaches.length) {
+          return;
+        }
 
         const newOption = struct.ItemGenerator[k1].PossibleItems[k2].clone();
+        // Scale whichever field the base entry actually uses: Weight for weighted
+        // pick-one lists, Chance for independently rolled entries. Writing Weight on a
+        // Chance-based entry leaves the cloned Chance untouched, which would make the
+        // variant spawn unconditionally on top of the base weapon.
         if (baseWeight > 0) {
           newOption.Weight = rarity * baseWeight;
         } else if (baseChance > 0) {
-          newOption.Weight = rarity * baseChance;
+          newOption.Chance = rarity * baseChance;
+        } else {
+          return;
         }
-        newOption.ItemPrototypeSID = weapon.SID;
+        // The base weapon is generated as-is; the attachments (and the upgrades they
+        // require) are applied by the vanilla ItemGenerator Attaches/Upgrades system.
+        newOption.ItemPrototypeSID = recipe.baseItemPrototypeSID;
+        newOption.addNode(
+          new Struct({
+            MinCount: recipe.attaches.length,
+            MaxCount: recipe.attaches.length,
+            Chance: 1,
+            PossibleItems: recipe.attaches.join(", "),
+          }),
+          "Attaches",
+        );
+        if (recipe.upgrades.length) {
+          newOption.addNode(
+            new Struct({
+              MinCount: recipe.upgrades.length,
+              MaxCount: recipe.upgrades.length,
+              Chance: 1,
+              PossibleItems: recipe.upgrades.join(", "),
+            }),
+            "Upgrades",
+          );
+        }
 
         fork.ItemGenerator[k1].PossibleItems ||= struct.ItemGenerator[k1].PossibleItems.fork();
         fork.ItemGenerator[k1].PossibleItems.__internal__.useAsterisk = false;

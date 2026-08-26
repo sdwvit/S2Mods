@@ -23,3 +23,4 @@ nodejs/
 stalker_commands.txt
 **/Resources/Icon128.png
 .claude/
+.injected-gamedata-files.json
