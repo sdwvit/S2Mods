@@ -5,7 +5,7 @@ import type { MetaContext } from "../../src/meta-type.mts";
 import { finishedTransformers } from "./meta.mts";
 import { modName } from "../../src/base-paths.mts";
 import { waitFor } from "../../src/wait-for.mts";
-import { allStashes, transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
+import { allStashes, finalizeStashes, transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
 import { precision } from "../../src/precision.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
 
@@ -78,6 +78,7 @@ export const recurringQuestsFilenames = ["BodyParts_Malahit", "RSQ01", "RSQ04", 
 
 export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<string>) {
   await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
+  finalizeStashes();
   const extraStructs: QuestNodePrototype[] = [];
 
   const questStart = getQuestStart();
@@ -121,6 +122,7 @@ export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, N
 
 export async function hookStashSpawners(struct: QuestNodePrototypeItemAdd, finishedTransformers: Set<string>) {
   await waitFor(() => finishedTransformers.has(transformSpawnActorPrototypes.name), 180000);
+  finalizeStashes();
 
   // only quest stashes that are hidden by this mod are interesting here
   if (!allStashes.has(struct.TargetQuestGuid) || !struct.Launchers) {
