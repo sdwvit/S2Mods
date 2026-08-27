@@ -14,7 +14,9 @@ async function pullAssets() {
     return;
   }
 
-  cpSync(sourcePath, destinationPath, { recursive: true, force: true });
+  // preserveTimestamps keeps raw/ dated by the SDK sources rather than by this copy - without it
+  // the pull makes raw/ look newer than the staged cook, and the next publisher re-cooks for nothing.
+  cpSync(sourcePath, destinationPath, { recursive: true, force: true, preserveTimestamps: true });
 }
 
 await pullAssets();

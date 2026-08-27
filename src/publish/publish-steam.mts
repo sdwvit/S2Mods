@@ -62,8 +62,7 @@ async function publishToSteam() {
     return;
   }
   await ensureCooked();
-  await import("../pull-assets.mts");
-  await import("../pull-staged.mts");
+  await Promise.allSettled([import("../pull-assets.mts"), import("../pull-staged.mts")]);
   childProcess.execSync(cmd(), {
     stdio: "inherit",
     cwd: modFolder,

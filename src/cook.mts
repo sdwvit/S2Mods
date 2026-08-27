@@ -7,6 +7,7 @@ import { existsSync } from "node:fs";
 import { projectRoot } from "./base-paths.mts";
 import { sdkModFolder, sdkModName, sdkPackageClassifierFolder } from "./mod-meta-paths.mts";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
+import { writePackageClassifierLists } from "./package-classifier.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 export const getNTPath = (p: string) => p.replaceAll("\\", "/").replaceAll("/media/", "U:/");
@@ -70,12 +71,7 @@ export async function cookMod() {
     // 3 files each in their own staged folder. The children are steered by the PackageClassifier
     // lists, so cooking them directly would produce a half-empty container.
     const classifierDir = await sdkPackageClassifierFolder;
-    if (!existsSync(classifierDir)) {
-      logger.log(
-        `No PackageClassifier lists at ${classifierDir} - GSCCookMod is expected to generate them. ` +
-          `If the cook comes out empty, open the mod in the Mod Editor and hit Package once to produce them.`,
-      );
-    }
+    await writePackageClassifierLists();
     logger.log("Now cooking using command: ");
     const fullCmd = [
       "time",
