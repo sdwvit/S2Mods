@@ -156,10 +156,12 @@ export function printReport(report: Report, { quiet = false } = {}) {
     `\n${same} same, ${differs} differ, ${tolerated} tolerated, ` +
       `${report.counts["only-in-a"]} only in A, ${report.counts["only-in-b"]} only in B`,
   );
+  // Deliberately not "byte-identical": a passing run may still have tolerated files that
+  // differ, and this comparator is used for more than trimmed cooks.
   logger.log(
     report.ok
-      ? "OK - the trimmed cook is byte-identical."
-      : "MISMATCH - do not trust the trimmed cook.",
+      ? `OK - the trees match${tolerated ? ` (${tolerated} tolerated, see the ~ rows)` : ""}.`
+      : "MISMATCH - the trees differ in bytes that are not time-derived.",
   );
 }
 
