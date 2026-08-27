@@ -4,10 +4,6 @@ import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType<QuestNodePrototype> = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Keep Hub Doors Open[h1][/h1]
 Prevents hub doors from closing during attacks.
 [hr][/hr]

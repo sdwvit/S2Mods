@@ -80,10 +80,6 @@ transformConsumables.files = ["/ConsumablePrototypes.cfg"];
 export const meta: MetaType<EffectPrototype | ConsumablePrototype> = {
   structTransformers: [transformEffectPrototypes, transformConsumables],
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
   [h3]Makes medkits, bandages & antirad last longer, with the same value (heals/antirad apply slower), and shows their main effect as a numeric value instead of bars.[/h3]
     [list]
   [*] ❤️ Medkit / Army Medkit / Scientist Medkit: Health restore duration increased from 1 second to ~10 seconds (same total healing)

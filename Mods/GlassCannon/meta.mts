@@ -4,10 +4,6 @@ import type { MetaType } from "../../src/meta-type.mts";
 export const DIFFICULTY_FACTOR = 4;
 export const meta: MetaType<DifficultyPrototype> = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 This mode does only one thing: increases weapons damage quite a bit on Hard/Master difficulty.
 [hr][/hr]
 🤠 Here’s the deal, kiddo - this mod makes you a glass cannon, so you’re basically one-shotting everything, at the same time you’ll get wrecked by every bullet, every mutant, every *thing* that’s not you.[h1][/h1]
