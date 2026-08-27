@@ -30,6 +30,28 @@ export function hashRaw(): string {
   return hash.digest("hex");
 }
 
+/**
+ * Only these need the cooker. Everything else in raw/ - the .cfg patches, the .uplugin - is a
+ * loose file that UnrealPak stages directly, so a change to it can be shipped by repacking the
+ * existing cooked tree instead of paying a ~43 min cook for a ~1.1s packaging step.
+ */
+const COOKABLE_EXTENSIONS = new Set([".uasset", ".uexp", ".umap", ".ubulk", ".uptnl"]);
+
+/**
+ * Fingerprint raw/ in two halves, so we can tell "the assets changed" (needs the cooker) from
+ * "only loose files changed" (needs only the packaging tail). Same per-file content hashing as
+ * hashRaw for the same reason - mtimes churn while bytes do not.
+ */
+export function hashRawSplit(): { cookable: string; loose: string } {
+  const hashes = { cookable: createHash("sha1"), loose: createHash("sha1") };
+  for (const file of walk(modFolderRaw)) {
+    const half = COOKABLE_EXTENSIONS.has(path.extname(file).toLowerCase()) ? "cookable" : "loose";
+    hashes[half].update(path.relative(modFolderRaw, file));
+    hashes[half].update(readFileSync(file));
+  }
+  return { cookable: hashes.cookable.digest("hex"), loose: hashes.loose.digest("hex") };
+}
+
 /** Sits beside the staged output, not inside Windows/, so pull-staged never ships it. */
 export const hashFileFor = (staged: string) => path.join(path.dirname(staged), ".raw-hash");
 
@@ -44,16 +66,35 @@ export async function ensureCooked() {
   const stagedExists = existsSync(staged) && readdirSync(staged).length > 0;
   const rawHash = hashRaw();
 
+  const split = hashRawSplit();
+  const fingerprint = JSON.stringify({ raw: rawHash, ...split });
+
   if (stagedExists) {
     if (!existsSync(hashFile)) {
       // Pre-existing cook from before hashing, or one restored by hand. Trust it and record
       // the fingerprint rather than burning 40 minutes to prove it is current.
-      writeFileSync(hashFile, rawHash);
+      writeFileSync(hashFile, fingerprint);
       logger.log(`Staged cook found with no fingerprint - adopting it (${hashFile}).`);
       return;
     }
-    if (readFileSync(hashFile, "utf8").trim() === rawHash) {
+    const recorded = readFileSync(hashFile, "utf8").trim();
+    // The fingerprint used to be a bare sha1 of all of raw/; keep reading those.
+    const previous: { raw: string; cookable?: string; loose?: string } = recorded.startsWith("{")
+      ? JSON.parse(recorded)
+      : { raw: recorded };
+
+    if (previous.raw === rawHash) {
       logger.log("Staged cook matches raw/, skipping cook.");
+      return;
+    }
+    // The cooked .uasset/.uexp are still current and only loose files moved, so the cooker has
+    // nothing to do - replay just the two UnrealPak calls that write the shipped containers.
+    // ~9s instead of ~43 min; see src/repack.mts for how that equivalence was verified.
+    if (previous.cookable && previous.cookable === split.cookable) {
+      logger.log("Only loose files changed since the staged cook - repacking instead of cooking.");
+      const { repackMod } = await import("./repack.mts");
+      await repackMod();
+      writeFileSync(hashFile, fingerprint);
       return;
     }
   }
@@ -64,5 +105,5 @@ export async function ensureCooked() {
       : "No staged cook found, cooking...",
   );
   await cookMod();
-  writeFileSync(hashFile, rawHash);
+  writeFileSync(hashFile, fingerprint);
 }
