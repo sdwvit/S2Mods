@@ -28,10 +28,6 @@ s15PlayerSettings.__internal__.refkey = "GunGrim_ST_Player";
 
 export const meta: MetaType<Struct> = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Rebalances the Grim S-15 assault rifle.[h3][/h3]
 [list]
   [*] Durability damage per shot reduced 2x

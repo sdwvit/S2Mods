@@ -45,5 +45,8 @@ DefaultConfig : struct.begin {bpatch}
       [13] : struct.begin {bpatch}
          CutRadiusModifier = 15
       struct.end
+      [14] : struct.begin {bpatch}
+         CutRadiusModifier = 10
+      struct.end
    struct.end
 struct.end

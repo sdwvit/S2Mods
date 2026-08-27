@@ -10,10 +10,6 @@ import type {
 
 export const meta: MetaType<QuestNodePrototype> = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Fixes the vanilla bug where Hera's package delivery quest (RSQ07_C05_B_B) doesn't formally complete after turn-in.
 [hr][/hr]
 [h3]Problem:[/h3]

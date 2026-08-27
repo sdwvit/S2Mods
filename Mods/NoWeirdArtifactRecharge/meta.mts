@@ -6,8 +6,14 @@ function transformArtifactPrototypes(struct: ArtifactPrototype) {
   if (struct.SID === "AArtifactWeirdFlower") {
     const fork = struct.fork();
     fork.EffectsDuration = 31536000;
-    fork.EffectPrototypeSIDs = fork.EffectPrototypeSIDs.fork();
-    fork.EffectPrototypeSIDs.addNode("FlairDistanceModifierEffect", "FlairDistanceModifierEffect");
+    // 2.0 renamed the flower's effect list to WakeUpEffectSIDs and ships
+    // FlairDistanceModifierEffect in it already, so only the duration needs patching.
+    const effects = (struct as any).WakeUpEffectSIDs ?? struct.EffectPrototypeSIDs;
+    if (effects && !effects.entries().some(([, sid]: [unknown, unknown]) => sid === "FlairDistanceModifierEffect")) {
+      const effectsFork = effects.fork();
+      effectsFork.addNode("FlairDistanceModifierEffect", "FlairDistanceModifierEffect");
+      (fork as any)[(struct as any).WakeUpEffectSIDs ? "WakeUpEffectSIDs" : "EffectPrototypeSIDs"] = effectsFork;
+    }
     return fork;
   }
 

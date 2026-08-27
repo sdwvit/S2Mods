@@ -61,8 +61,12 @@ async function publishToSteam() {
     logger.log(`Wrote vdf only for ${modName}`);
     return;
   }
-  await ensureCooked();
-  await Promise.allSettled([import("../pull-assets.mts"), import("../pull-staged.mts")]);
+  // A description-only refresh re-uploads the already staged content folder untouched, so
+  // cooking (and pulling SDK output over raw/) would only risk replacing shipped content.
+  if (!process.env.DESC_ONLY) {
+    await ensureCooked();
+    await Promise.allSettled([import("../pull-assets.mts"), import("../pull-staged.mts")]);
+  }
   childProcess.execSync(cmd(), {
     stdio: "inherit",
     cwd: modFolder,

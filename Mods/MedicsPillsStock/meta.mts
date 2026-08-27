@@ -46,10 +46,6 @@ transformTrade.files = ["/DynamicItemGenerator.cfg"];
 export const meta: MetaType<ItemGeneratorPrototype> = {
   structTransformers: [transformTrade],
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Adds Cinnamon, Hercules, and PSYBlocker pills to every medic's trade inventory across the Zone.
 [hr][/hr]
 Pills scale with player rank — rare at Newbie, guaranteed at Master.

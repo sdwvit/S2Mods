@@ -44,10 +44,6 @@ transformConsumables.files = ["/ConsumablePrototypes.cfg"];
 export const meta: MetaType<EffectPrototype | ConsumablePrototype> = {
   structTransformers: [transformEffectPrototypes, transformConsumables],
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
   [h3]Makes pill consumables last longer, with the same value, and shows their effects as numeric values instead of bars.[/h3]
     [list]
   [*] 🩸 Barvinok: Bleeding control duration increased from 3 minutes to 30 minutes
