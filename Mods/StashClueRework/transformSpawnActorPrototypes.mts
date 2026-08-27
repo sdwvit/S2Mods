@@ -2,6 +2,20 @@ import type { SpawnActorPrototype } from "s2cfgtojson";
 import type { MetaContext } from "../../src/meta-type.mts";
 
 export const allStashes: Map<string, number> = new Map();
+
+// Stash SIDs are collected while the (concurrent) file dispatch runs, so insertion order
+// depends on which file resolves first. Indices are therefore assigned only once, from a
+// sorted key list, by finalizeStashes() — called by readers right after the barrier.
+const collectedStashSIDs = new Set<string>();
+let stashesFinalized = false;
+
+/** Idempotently assigns deterministic indices to every collected stash. */
+export function finalizeStashes(): Map<string, number> {
+  if (stashesFinalized) return allStashes;
+  stashesFinalized = true;
+  [...collectedStashSIDs].sort().forEach((sid, i) => allStashes.set(sid, i));
+  return allStashes;
+}
 export function transformSpawnActorPrototypes(struct: SpawnActorPrototype, context: MetaContext<SpawnActorPrototype>) {
   if (struct.SpawnType === "ESpawnType::ItemContainer") {
     return rememberAndEmptyStash(struct, context);
@@ -17,7 +31,7 @@ export function rememberAndEmptyStash(struct: SpawnActorPrototype, context: Meta
     return;
   }
   const fork = struct.fork();
-  allStashes.set(struct.SID, allStashes.size);
+  collectedStashSIDs.add(struct.SID);
 
   fork.ClueVariablePrototypeSID = getGeneratedStashSID((context.fileIndex % 100) + 1);
   fork.SpawnOnStart = false;

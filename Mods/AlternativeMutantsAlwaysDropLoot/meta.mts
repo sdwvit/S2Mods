@@ -30,4 +30,4 @@ function structTransformer(struct: ItemGeneratorPrototype) {
 }
 
 structTransformer.files = ["/ItemGeneratorPrototypes.cfg"];
-structTransformer.dlc = true;
+structTransformer.dlc = false;

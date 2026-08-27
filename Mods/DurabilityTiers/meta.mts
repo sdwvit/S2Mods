@@ -1,6 +1,7 @@
 import type { MetaContext, MetaType, StructTransformer } from "../../src/meta-type.mts";
 import { Struct } from "s2cfgtojson";
 import type { ArmorPrototype, UpgradePrototype, WeaponGeneralSetupPrototype } from "s2cfgtojson";
+import { waitFor } from "../../src/wait-for.mts";
 
 const EXTRA_TIERS = 3;
 const COST_SCALE = 2;
@@ -9,6 +10,22 @@ const MAX_COST = 100_000;
 
 // Map from leaf durability upgrade SID to array of new tier SIDs
 const tierMap = new Map<string, string[]>();
+
+// All of a mod's transformers are dispatched concurrently, so the readers of `tierMap`
+// (transformWeaponsAndArmors / transformTechnicians) must wait for `transformUpgrades`
+// to finish populating it — otherwise every lookup misses and the mod silently emits
+// nothing. Same barrier pattern as Mods/StashClueRework.
+const finishedTransformers = new Set<string>();
+
+async function awaitTierMap(): Promise<void> {
+  await waitFor(() => finishedTransformers.has(transformUpgrades.name), 180000);
+  if (!tierMap.size) {
+    throw new Error(
+      "DurabilityTiers: tierMap is empty after transformUpgrades finished — " +
+        "no durability upgrades were found in UpgradePrototypes.cfg. Refusing to emit an empty patch set.",
+    );
+  }
+}
 
 function isDurabilityUpgrade(struct: UpgradePrototype): boolean {
   if (!struct.EffectPrototypeSIDs) return false;
@@ -104,8 +121,9 @@ const transformUpgrades: StructTransformer<UpgradePrototype> = (struct, context)
 };
 transformUpgrades.files = ["/UpgradePrototypes.cfg"];
 
-const transformWeaponsAndArmors: StructTransformer<WeaponGeneralSetupPrototype | ArmorPrototype> = (struct) => {
+const transformWeaponsAndArmors: StructTransformer<WeaponGeneralSetupPrototype | ArmorPrototype> = async (struct) => {
   if (!struct.UpgradePrototypeSIDs) return null;
+  await awaitTierMap();
 
   const newSIDs: string[] = [];
   for (const [, sid] of struct.UpgradePrototypeSIDs.entries()) {
@@ -131,7 +149,8 @@ transformWeaponsAndArmors.files = [
 // All new tier SIDs flattened, populated after transformUpgrades runs
 let allNewTierSIDs: string[] = [];
 
-const transformTechnicians: StructTransformer<any> = (struct, context) => {
+const transformTechnicians: StructTransformer<any> = async (struct, context) => {
+  await awaitTierMap();
   if (!allNewTierSIDs.length) {
     allNewTierSIDs = [...tierMap.values()].flat();
   }
@@ -156,10 +175,6 @@ transformTechnicians.files = ["/NPCPrototypes.cfg"];
 
 export const meta: MetaType<any> = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Adds 3 extra tiers for every durability upgrade on weapons and armors.
 [hr][/hr]
 Each tier has the same effect as the original, with cost scaling up 2x per tier (capped at 10k for tier 2, 100k overall).
@@ -179,6 +194,9 @@ bPatches:
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Price scaling changed to 2x per tier with caps (10k for tier 2, 100k overall)",
+  changenote: "Updated for 2.0: patches regenerated against 2.0 game data. Price scaling changed to 2x per tier with caps (10k for tier 2, 100k overall).",
   structTransformers: [transformUpgrades, transformWeaponsAndArmors, transformTechnicians] as any,
+  onTransformerFinish(transformer) {
+    finishedTransformers.add(transformer.name);
+  },
 };

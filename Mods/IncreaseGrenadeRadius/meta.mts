@@ -4,17 +4,13 @@ import { precision } from "../../src/precision.mts";
 
 export const meta: MetaType<ExplosionPrototype> = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Changes RGD5, F1, VOG-25, and M203 explosion radius to 12, 20, 10, and 10 meters respectively.
 [hr][/hr]
 This aligns better with IRL danger/injury radii.
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Improved compatibility with recent game updates.",
+  changenote: "Updated for 2.0: patches regenerated against 2.0 game data.",
   structTransformers: [structTransformer],
   onFinish(): void | Promise<void> {},
 };

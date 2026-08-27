@@ -4,10 +4,6 @@ import { rerouteQuestNode } from "../../src/struct-utils.mts";
 
 export const meta: MetaType<QuestNodePrototype> = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Side Quest Keep Bodies
 [hr][/hr]
 Prevents kill/eliminate quest targets from despawning on quest completion.[h1][/h1]
@@ -16,7 +12,7 @@ Now you can loot the bodies after completing the quest.[h1][/h1]
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Cover all vendor kill quests (Sidorovich, Rostok Barmen, Malahit, Harpy).",
+  changenote: "Updated for 2.0: patches regenerated against 2.0 game data. Cover all vendor kill quests (Sidorovich, Rostok Barmen, Malahit, Harpy).",
   structTransformers: [structTransformer],
 };
 

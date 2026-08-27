@@ -8,10 +8,6 @@ import { type CoreVariable } from "s2cfgtojson";
 
 export const meta: MetaType = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Distant Horizons (Shay's) 250m: ALife Extension 
 [hr][/hr]
 This is an extension for Shay's 250m Distant Horizons mod[h1][/h1]
@@ -35,11 +31,7 @@ Non-bubble related changes:
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: `
-[list]
-[*] Rebalanced Swamp_ScenarioGroups weights: generic Mutant scenarios (Mutant3_5VsMutant3_5, Mutant5_7VsMutant5_7 - the only Pseudogiant spawn vector) lowered from 5 to 1, and specific-mutant scenarios (BlinddogPack, BoarPack, FleshPack, SnorkPack, BloodsuckerSingle, BloodsuckerDuo, CatPack) added at weight 5. Pseudogiants become ~2/37 of swamp rolls instead of dominating.
-[/list]
-`,
+  changenote: "Updated for 2.0: patches regenerated against 2.0 game data, and fixes the CoreVariables patch being missing from the packaged mod. Rebalanced Swamp_ScenarioGroups weights: generic Mutant scenarios (Mutant3_5VsMutant3_5, Mutant5_7VsMutant5_7 - the only Pseudogiant spawn vector) lowered from 5 to 1, and specific-mutant scenarios (BlinddogPack, BoarPack, FleshPack, SnorkPack, BloodsuckerSingle, BloodsuckerDuo, CatPack) added at weight 5. Pseudogiants become ~2/37 of swamp rolls instead of dominating.",
   structTransformers: [
     coreVarsTransformer,
     transformAIGlobals,

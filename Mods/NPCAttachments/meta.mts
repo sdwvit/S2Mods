@@ -20,10 +20,6 @@ const finishedTransformers = new Set<string>();
 
 export const meta: MetaType = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Adds all 357 possible weapons with attachments combos to NPCs. 
 [hr][/hr]
 Way more variety to what NPCs wield on the battlefield. That being friend or foe. 
@@ -33,7 +29,7 @@ Attachments are still rare: 1-attachment weapons are 10x rarer than base, each e
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote:
-    "Fix looted NPC weapons missing upgrade slots / available attachments in weapon workshop (CompatibleAttachments and UpgradePrototypeSIDs now properly reference base weapon data); rework attachment rarity to geometric scaling: 1-attachment weapons are 10x rarer than base, each additional attachment is 10x rarer than the previous",
+    "Updated for 2.0: patches regenerated against 2.0 game data. Fix looted NPC weapons missing upgrade slots / available attachments in weapon workshop (CompatibleAttachments and UpgradePrototypeSIDs now properly reference base weapon data); rework attachment rarity to geometric scaling: 1-attachment weapons are 10x rarer than base, each additional attachment is 10x rarer than the previous.",
   structTransformers: [
     createWeaponParamsWithPreinstalledAttachments,
     createWeapons,
