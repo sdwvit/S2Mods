@@ -7,6 +7,7 @@ import type {
   ArmorPrototype,
   AttachPrototype,
   ConsumablePrototype,
+  ExplosionPrototype,
   GeneralNPCObjPrototype,
   GrenadePrototype,
   ItemGeneratorPrototype,
@@ -45,6 +46,7 @@ export let allDefaultQuestObjPrototypes: QuestObjPrototype[];
 export let allDefaultItemGeneratorPrototypes: ItemGeneratorPrototype[];
 export let allDefaultDynamicItemGeneratorPrototypes: ItemGeneratorPrototype[];
 export let allDefaultQuestItemGeneratorPrototypes: ItemGeneratorPrototype[];
+export let allDefaultExplosionPrototypes: ExplosionPrototype[];
 
 [
   allDefaultWeaponGeneralSetupPrototypes,
@@ -63,6 +65,7 @@ export let allDefaultQuestItemGeneratorPrototypes: ItemGeneratorPrototype[];
   allDefaultItemGeneratorPrototypes,
   allDefaultDynamicItemGeneratorPrototypes,
   allDefaultQuestItemGeneratorPrototypes,
+  allDefaultExplosionPrototypes,
 ] = await Promise.all([
   readFileAndGetStructs<WeaponGeneralSetupPrototype>("WeaponData/WeaponGeneralSetupPrototypes.cfg"),
   readFileAndGetStructs<NPCWeaponSettingsPrototype>(
@@ -84,6 +87,7 @@ export let allDefaultQuestItemGeneratorPrototypes: ItemGeneratorPrototype[];
   readFileAndGetStructs<ItemGeneratorPrototype>(
     "ItemGeneratorPrototypes/QuestItemGeneratorPrototypes.cfg",
   ),
+  readFileAndGetStructs<ExplosionPrototype>("ExplosionPrototypes.cfg"),
 ]);
 
 // Records:
@@ -121,6 +125,8 @@ export const allDefaultItemGeneratorsRecord = getRecord([
   ...allDefaultDynamicItemGeneratorPrototypes,
   ...allDefaultQuestItemGeneratorPrototypes,
 ]);
+
+export const allDefaultExplosionPrototypesRecord = getRecord(allDefaultExplosionPrototypes);
 
 export const armorRanksBySID: Record<string, ERank> = {
   // ALL_RANK
@@ -831,7 +837,7 @@ export function getCorePrototype<T extends Struct>(
   while (collection[ref] && !stopSignal(collection[ref])) {
     ref = collection[ref].__internal__.refkey;
   }
-  return stopSignal(collection[ref]);
+  return stopSignal(collection[ref]) && collection[ref];
 }
 
 export function guessAttachmentSlot(itemSID: string) {
