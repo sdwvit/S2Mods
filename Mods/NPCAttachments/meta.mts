@@ -241,11 +241,6 @@ async function createWeapons(struct: WeaponPrototype) {
       }
       newlyCreatedWeaponsWithPreinstalledAttachments[struct.SID] ||= [];
       newlyCreatedWeaponsWithPreinstalledAttachments[struct.SID].push(newWeapon);
-      const refCost = getCorePrototype(
-        struct.SID,
-        allDefaultWeaponPrototypesRecord,
-        (item) => item.Cost,
-      );
 
       const attachCount =
         newWeaponAttachCount[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID];
