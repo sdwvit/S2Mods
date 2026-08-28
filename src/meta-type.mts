@@ -15,9 +15,11 @@ export type StructTransformer<T> = ((
 ) => Struct | Struct[] | null | void | Promise<void | Struct | Struct[] | null>) & {
   contains?: boolean;
   /**
-   * Also process the matching prototypes inside DLCGameData (Deluxe/Ultimate/PreOrder/DLC1).
-   * DLC items live in one flat ItemPrototypes.cfg per DLC; only structs whose `refurl` chain
-   * leads to one of `files` are passed to the transformer.
+   * Process ONLY the matching prototypes inside DLCGameData (Deluxe/Ultimate/PreOrder/DLC1),
+   * skipping base GameData entirely. DLC items live in one flat ItemPrototypes.cfg per DLC;
+   * only structs whose `refurl` chain leads to one of `files` are passed to the transformer.
+   * Because the resulting patches require the player to own the DLC, a mod that should cover
+   * both worlds must be split into a non-DLC mod and a `dlc: true` companion.
    */
   dlc?: boolean;
   contents?: string[];

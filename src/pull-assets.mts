@@ -3,10 +3,13 @@ import path from "node:path";
 import * as fs from "node:fs";
 import { logger } from "./logger.mts";
 import { modFolderRaw } from "./base-paths.mts";
-import { sdkModFolder } from "./mod-meta-paths.mts";
+import { primarySdkModTarget } from "./mod-meta-paths.mts";
 import { cpSync } from "node:fs";
 async function pullAssets() {
-  const sourcePath = path.join(await sdkModFolder);
+  // Only the half that owns the mod's own SDK name: it is the one the Mod Editor authors assets
+  // in, and the one whose .uplugin belongs in raw/. Pulling the cfg half back would copy its
+  // <Mod>Cfg.uplugin into raw/ and its own .cfgs over the generated ones.
+  const sourcePath = (await primarySdkModTarget).modFolder;
   const destinationPath = path.join(modFolderRaw, "Stalker2");
   logger.log(`Pulling mod assets from ${sourcePath}...`);
   if (fs.readdirSync(sourcePath).length === 0) {

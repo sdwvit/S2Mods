@@ -11,11 +11,12 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
+import { gunzipSync } from "node:zlib";
 import dotEnv from "dotenv";
 import { logger } from "./logger.mts";
 import { projectRoot, sdkModsFolder, sdkStagedFolder } from "./base-paths.mts";
 import { cookVariants } from "./cook-variants.mts";
-import { sdkModName, sdkStagedPakFolderFor } from "./mod-meta-paths.mts";
+import { primarySdkModTarget, type SdkModTarget, sdkModTargets } from "./mod-meta-paths.mts";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
 import { getNTPath } from "./cook.mts";
 
@@ -113,6 +114,44 @@ const PAK_INTERNAL_ROOT = "../../../";
 const getNTWinPath = (p: string) => getNTPath(p).replaceAll("/", "\\");
 
 export type RepackEntry = { src: string; dest: string };
+
+/**
+ * The metadata a cfg-only pack needs, kept in the repo rather than taken from a cook.
+ *
+ * A cook writes five files into `Metadata/`, and an empty container needs exactly one of them.
+ * `packagestore.manifest` and `scriptobjects.bin` both describe packages, and there are none -
+ * `unrealPakCommands` drops both arguments when `packageEntries` is empty. That leaves
+ * `Crypto.json`, which is 350 bytes of all-null boilerplate (no keys, every flag but
+ * `bDataCryptoRequired`/`PakEncryptionRequired`/`PakSigningRequired` false) and byte-identical
+ * across every cooked mod and both variants on this SDK. It exists nowhere outside a cooked
+ * tree - not at project level, and `Releases/Latest/Windows` holds only AssetRegistry.bin - so
+ * it is committed at src/cook-templates/Crypto.json and a cfg-only mod needs no cook, ever.
+ *
+ * It has to be copied into the SDK tree rather than pointed at in place: every path handed to
+ * UnrealPak goes through `getNTPath`, which only knows how to turn `/media/...` into `U:/...`.
+ * A repo path under /home survives untranslated and UnrealPak cannot open it - which is exactly
+ * how this failed the first time, with a bare `exit 3` naming no file.
+ */
+function cfgOnlyMetadataDir(modName: string): string {
+  const dir = path.join(sdkStagedFolder, modName, ".repack", "Metadata");
+  mkdirSync(dir, { recursive: true });
+  for (const file of CFG_ONLY_METADATA_FILES) {
+    const template = path.join(import.meta.dirname, "cook-templates", file);
+    // scriptobjects.bin is 3.3 MB of engine script objects that gzip to 1.3 MB, so the repo
+    // carries it compressed and it is expanded here rather than committed at full size.
+    const bytes = file.endsWith(".gz")
+      ? gunzipSync(readFileSync(template))
+      : readFileSync(template);
+    writeFileSync(path.join(dir, path.basename(file, ".gz")), bytes);
+  }
+  return dir;
+}
+
+const CFG_ONLY_METADATA_FILES = [
+  "Crypto.json",
+  "packagestore.manifest",
+  "scriptobjects.bin.gz",
+];
 
 /**
  * Files of a directory before its subdirectories, alphabetical within each level - the order
@@ -243,6 +282,60 @@ export function planVariant(variant: string, modName: string): VariantPlan | nul
     packageEntries,
   };
 }
+
+/**
+ * Plan the one variant a cfg-only mod ships, without needing a cooked tree at all.
+ *
+ * A cfg-only mod has nothing the cooker can cook - `.cfg` files never reach it - so the ~22 min
+ * editor round-trip produces literally an empty IoStore container. That is not a guess: every
+ * cfg-only mod published from this repo ships a 48-byte `.ucas` and a 249-byte `.utoc`
+ * (UnMaster, HoldYourBreath, SkifOnSpeed, NoAPForMobs - all four identical in size), next to a
+ * `.pak` carrying only the cfgs. The empty containers are not byte-identical between mods, so
+ * they cannot be copied from a neighbour; they have to come out of UnrealPak, which is the
+ * ~1.1s part. Hence: synthesize the plan and run the packaging tail, never the cook.
+ *
+ * Only OverrideContent exists. NewContent ships the .uplugin and new packages, and a cfg-only
+ * mod has neither - cook.mts already skips that pass for it (`0 new packages`).
+ */
+export function planCfgOnlyVariant(variant: string, modName: string): VariantPlan | null {
+  if (variant !== "OverrideContent") return null;
+
+  const sdkModFolder = path.join(sdkModsFolder, modName);
+  const gameDataDir = path.join(sdkModFolder, "Content", "GameLite", "GameData");
+  const looseEntries: RepackEntry[] = walkFilesBeforeDirs(gameDataDir).map((src) => {
+    const rest = path.relative(path.join(sdkModFolder, "Content"), src);
+    return { src, dest: path.posix.join("Stalker2", "Content", rest.split(path.sep).join("/")) };
+  });
+  if (looseEntries.length === 0) return null;
+
+  return {
+    variant,
+    isOverride: true,
+    // No cooked tree to read packages out of - the container is deliberately empty.
+    cookedDir: path.join(sdkStagedFolder, modName, ".repack", "cfg-only-cooked"),
+    metadataDir: cfgOnlyMetadataDir(modName),
+    stagedPakDir: path.join(
+      sdkStagedFolder,
+      modName,
+      "Windows",
+      variant,
+      "Windows",
+      "Stalker2",
+      "Mods",
+      modName,
+      "Content",
+      "Paks",
+      "Windows",
+    ),
+    snapshotDir: path.join(sdkStagedFolder, modName, ".repack", variant),
+    upluginPath: path.join(sdkModFolder, `${modName}.uplugin`),
+    containerName: `${modName}${CONTAINER_SUFFIX}`,
+    stagedBaseName: `${modName}${CONTAINER_SUFFIX}-${variant}`,
+    looseEntries,
+    packageEntries: [],
+  };
+}
+
 
 /**
  * packagestore.manifest is the oplog the container writer reads ("Fetched N oplog items from
@@ -424,19 +517,27 @@ function runVariant(plan: VariantPlan, outputDir: string) {
  * cook variant that has one. Does not touch the cooked assets, so it is only correct when the
  * cooked .uasset/.uexp are current - it is the tail of a cook, not a replacement for one.
  */
-export async function repackMod(): Promise<void> {
-  const modName = await sdkModName;
+export async function repackMod(target?: SdkModTarget): Promise<void> {
+  const resolved = target ?? (await primarySdkModTarget);
+  const modName = resolved.name;
   return withSdkMutationLock(`repackMod:${modName}`, async () => {
+    // A cfg-only SDK mod has no cookable files, so it never has a cooked tree to replay and
+    // must never be sent to the cooker to grow one - see planCfgOnlyVariant.
+    const planFor = (variant: string) =>
+      resolved.kind === "cfgs" ? planCfgOnlyVariant(variant, modName) : planVariant(variant, modName);
     const plans = cookVariants
-      .map((variant) => planVariant(variant, modName))
+      .map(planFor)
       .filter((plan): plan is VariantPlan => plan !== null);
     if (plans.length === 0) {
       throw new Error(
-        `[repack] no cooked tree for ${modName} under SavedMods/Cooked - cook it once first.`,
+        resolved.kind === "cfgs"
+          ? `[repack] ${modName} has no .cfg files under Mods/${modName}/Content/GameLite/GameData ` +
+            `- run push-to-sdk first.`
+          : `[repack] no cooked tree for ${modName} under SavedMods/Cooked - cook it once first.`,
       );
     }
     for (const plan of plans) {
-      const expected = await sdkStagedPakFolderFor(plan.variant);
+      const expected = resolved.stagedPakFolderFor(plan.variant);
       if (plan.stagedPakDir !== expected) {
         throw new Error(`[repack] staged pak folder drifted: ${plan.stagedPakDir} != ${expected}`);
       }
@@ -449,14 +550,20 @@ export async function repackMod(): Promise<void> {
   });
 }
 
+/** Repack every SDK mod this repo mod is built as - one, or two for a split mod. */
+export async function repackAllTargets(): Promise<void> {
+  for (const target of await sdkModTargets) await repackMod(target);
+}
+
 /**
  * Unpack two .paks with repak and compare the extracted trees. Used instead of a byte compare
  * because of the per-run path hash seed - see the call site.
  */
 function pakContentsEqual(expected: string, actual: string): boolean {
-  const repak = process.env.REPAK_PATH;
-  if (!repak || !existsSync(repak)) {
-    logger.log("[repack] REPAK_PATH is unset or missing - cannot compare .pak entries.");
+  // REPAK_PATH pins a specific build; otherwise take repak off PATH, where it normally lives.
+  const repak = process.env.REPAK_PATH || "repak";
+  if (process.env.REPAK_PATH && !existsSync(process.env.REPAK_PATH)) {
+    logger.log(`[repack] REPAK_PATH=${process.env.REPAK_PATH} does not exist.`);
     return false;
   }
   const root = path.join(os.tmpdir(), `s2mods-pak-compare-${process.pid}`);
@@ -487,7 +594,8 @@ function pakContentsEqual(expected: string, actual: string): boolean {
  * cook left in the staged tree. Returns the number of mismatching files.
  */
 export async function verifyRepack(): Promise<number> {
-  const modName = await sdkModName;
+  const target = await primarySdkModTarget;
+  const modName = target.name;
   return withSdkMutationLock(`verifyRepack:${modName}`, async () => {
     const rows: { file: string; status: string }[] = [];
     for (const variant of cookVariants) {
@@ -498,7 +606,7 @@ export async function verifyRepack(): Promise<number> {
       runVariant(plan, scratch);
       if (process.env.DRY) continue;
 
-      const expectedDir = await sdkStagedPakFolderFor(variant);
+      const expectedDir = target.stagedPakFolderFor(variant);
       for (const extension of CONTAINER_EXTENSIONS) {
         const name = `${plan.stagedBaseName}${extension}`;
         const expected = path.join(expectedDir, name);
@@ -645,6 +753,6 @@ if (process.argv[1] === new URL(import.meta.url).pathname) {
   } else if (process.argv.includes("--verify")) {
     process.exitCode = (await verifyRepack()) === 0 ? 0 : 1;
   } else {
-    await repackMod();
+    await repackAllTargets();
   }
 }
