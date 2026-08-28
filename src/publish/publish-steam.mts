@@ -65,7 +65,10 @@ async function publishToSteam() {
   // cooking (and pulling SDK output over raw/) would only risk replacing shipped content.
   if (!process.env.DESC_ONLY) {
     await ensureCooked();
-    await Promise.allSettled([import("../pull-assets.mts"), import("../pull-staged.mts")]);
+    await Promise.allSettled([
+      import("../pull-assets.mts").then((m) => m.pullAssets()),
+      import("../pull-staged.mts"),
+    ]);
   }
   childProcess.execSync(cmd(), {
     stdio: "inherit",

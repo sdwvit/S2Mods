@@ -6,6 +6,7 @@ import { modFolderRaw } from "./base-paths.mts";
 import { modClassification, sdkModTargets, type SdkModTarget } from "./mod-meta-paths.mts";
 import { COOKABLE_EXTENSIONS, isCfgFile, walkRaw } from "./mod-kinds.mts";
 import { cookMod } from "./cook.mts";
+import { pullAssets } from "./pull-assets.mts";
 
 /**
  * Fingerprint of raw/ by content, not by mtime: the publish pipeline itself rewrites raw/
@@ -65,6 +66,10 @@ export const hashFileFor = (staged: string) => path.join(path.dirname(staged), "
  * at all, so it is always served by the ~9s repack instead of a ~22 min cook.
  */
 export async function ensureCooked() {
+  // Before anything is fingerprinted: pull-assets copies the SDK mod folder over raw/, so raw/
+  // has to be in its final state first. Hashing before the pull records a fingerprint the pull
+  // invalidates on the spot, and the next publisher takes the full cook branch for nothing.
+  await pullAssets();
   for (const target of await sdkModTargets) await ensureCookedTarget(target);
 }
 
