@@ -184,7 +184,10 @@ async function publishToModIO() {
   }
 
   await ensureCooked();
-  await Promise.allSettled([import("../pull-assets.mts"), import("../pull-staged.mts")]);
+  await Promise.allSettled([
+    import("../pull-assets.mts").then((m) => m.pullAssets()),
+    import("../pull-staged.mts"),
+  ]);
   const [outputZip, modId] = await Promise.all([
     createModZip(undefined, undefined, `${modName}-modio`),
     Promise.resolve(getStoredModId() || createMod()),
