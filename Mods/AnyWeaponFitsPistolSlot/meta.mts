@@ -11,11 +11,20 @@ bPatches WeaponPrototypes.cfg
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Updated for 2.0: patches regenerated against 2.0 game data, now covering the weapons 2.0 added. DLC weapon prototypes are no longer patched.",
+  changenote:
+    "Updated for 2.0: patches regenerated against 2.0 game data, now covering the weapons 2.0 added. DLC weapon prototypes are no longer patched.",
   structTransformers: [transformWeaponPrototypes],
 };
 
 export function transformWeaponPrototypes(struct: WeaponPrototype) {
+  if (
+    struct.SID === "UA_GLaunch_Weapon_Data_En" ||
+    struct.SID === "UA_GLaunch_Weapon_Data_Ru" ||
+    struct.SID === "EN_BuckLaunch_Data"
+  ) {
+    return;
+  }
+
   const fork = struct.fork();
 
   if (getTemplate(struct, allDefaultWeaponPrototypesRecord) !== "TemplatePistol") {
