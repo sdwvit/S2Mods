@@ -37,14 +37,14 @@ export const sdkModsFolder = path.join(process.env.SDK_PATH, "Stalker2", "Mods")
 
 export const gameRootFolder = process.env.STALKER2_FOLDER;
 export const gameModsFolder = path.join(gameRootFolder, "Stalker2", "Content", "Paks", "notmods");
-/** Loose .cfg overlay the game reads directly - takes precedence over the packed GameData. */
-export const gameGameDataFolder = path.join(
-  gameRootFolder,
-  "Stalker2",
-  "Content",
-  "GameLite",
-  "GameData",
-);
+/**
+ * Loose .cfg overlay the game reads directly - takes precedence over the packed data. Both
+ * `GameData` and `DLCGameData/<DLC>` live below it; a mod with `dlc = true` patches only the latter.
+ */
+export const gameGameLiteFolder = path.join(gameRootFolder, "Stalker2", "Content", "GameLite");
+export const gameGameDataFolder = path.join(gameGameLiteFolder, "GameData");
+/** The overlay subtrees a mod may inject into, as paths relative to GameLite. */
+export const injectableCfgTrees = ["GameData", dlcCfgFolderName] as const;
 export const gameUE4SSModsFolder = path.join(
   gameRootFolder,
   "Stalker2",

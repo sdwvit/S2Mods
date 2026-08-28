@@ -228,9 +228,18 @@ let KNOWN_ENUM_TYPES = new Set([
 
 const knownEnums = KNOWN_ENUM_TYPES;
 
+/**
+ * Keys the parser had to rename because the same key appeared twice in one struct
+ * (see `parseKey` in s2cfgtojson). The un-suffixed key is already part of the type,
+ * so the `_dupe_N` variants carry no extra type information and must not leak into
+ * the emitted types or the dedup fingerprint.
+ */
+const isDupeKey = (key: string | number | symbol) => String(key).includes("_dupe_");
+
 const getUniqueStructFingerprint = (s: GetStructType<Record<string, unknown>>) => {
   return s
     .entries()
+    .filter(([k]) => !isDupeKey(k))
     .sort(([a], [b]) => a.localeCompare(b))
     .map((e) => `${e[0]}_:_${valueToTypeLiteral(e[1], 0)}`)
     .join("_\n_");
@@ -248,7 +257,7 @@ function renderTypesFile(mergedByCategory: Record<string, Struct>) {
 
   const byFingerprint = Object.entries(mergedByCategory)
     .map(([cat, s]) => [cat, s, getUniqueStructFingerprint(s as GetStructType<Record<string, unknown>>)] as const)
-    .filter(([cat, _, fingerprint]) => !cat.includes("_dupe_") && !fingerprint.includes("_dupe_"));
+    .filter(([cat]) => !cat.includes("_dupe_"));
   const byFingerprintSorted = byFingerprint.sort(([catA], [catB]) => {
     /**
      * If category A is same length as category B, pick A-Z sort
@@ -283,7 +292,8 @@ function renderTypesFile(mergedByCategory: Record<string, Struct>) {
 
   if (usedEnums.size) {
     const updatedImports = ["GetStructType", ...[...usedEnums].sort()];
-    lines[1] = `import type { ${updatedImports.join(", ")} } from "s2cfgtojson";`;
+    // lines[0] is the placeholder import pushed before rendering, when usedEnums was still empty.
+    lines[0] = `import type { ${updatedImports.join(", ")} } from "s2cfgtojson";`;
   }
 
   return lines.reduce((mem, l) => mem + l + "\n", "");
@@ -300,7 +310,7 @@ function structToTypeLiteral(struct: Struct, indent: number): string {
   const elementTypes = new Set<string>();
   struct
     .entries()
-    .filter(([k]) => Number(k).toString() === k)
+    .filter(([k]) => !isDupeKey(k) && Number(k).toString() === k)
     .forEach(([, value]) => elementTypes.add(valueToTypeLiteral(value, indent)));
   if (elementTypes.size) {
     const union = unionTypes([...elementTypes]);
@@ -310,7 +320,7 @@ function structToTypeLiteral(struct: Struct, indent: number): string {
 
   const entries = struct
     .entries()
-    .filter(([k]) => Number(k).toString() !== k)
+    .filter(([k]) => !isDupeKey(k) && Number(k).toString() !== k)
     .sort(([a], [b]) => String(a).localeCompare(String(b)));
   if (!entries.length) {
     return type || "{}";
@@ -342,7 +352,9 @@ function valueToTypeLiteral(value: unknown, indent: number): string {
     return `${wrapped}[]`;
   }
   if (value && typeof value === "object") {
-    const entries = Object.entries(value).sort(([a], [b]) => a.localeCompare(b));
+    const entries = Object.entries(value)
+      .filter(([k]) => !isDupeKey(k))
+      .sort(([a], [b]) => a.localeCompare(b));
     if (!entries.length) return "{}";
 
     const indentStr = "  ".repeat(indent);

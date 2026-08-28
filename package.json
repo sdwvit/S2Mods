@@ -22,6 +22,7 @@
     "update-readme": "node ./src/update-readme.mts",
     "update-readme:mods": "pnpm -r --parallel --if-present run update-readme",
     "prepare-all": "node ./src/prepare-all.ts",
+    "report-mod-kinds": "node ./src/report-mod-kinds.mts",
     "push-to-sdk": "node ./src/push-to-sdk.mts",
     "pull-staged": "node ./src/pull-staged.mts",
     "pull-assets": "node ./src/pull-assets.mts",

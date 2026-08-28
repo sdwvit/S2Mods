@@ -317,10 +317,18 @@ export async function withTrimmedGameData<T>(label: string, fn: () => Promise<T>
 
     const saved = plan.before - plan.after;
     const percent = plan.before ? ((saved / plan.before) * 100).toFixed(1) : "0.0";
+    // MEASURED 2026-08-27, AnomaliesHitAllMutants, same mod/machine/SDK contents:
+    //   untrimmed  editor process 1322.67s, 151363 cfgs walked
+    //   trimmed    editor process 1273.34s,  20843 cfgs walked
+    // Removing 86.2% of the files saved 49s = 3.7%. Output verified identical either way
+    // (verify-cook-output: 3 same, 0 differ, 4 tolerated). So this is NOT a real lever: the
+    // ~21 min of startup is Wine stat'ing the four mounted content paks (578 GB), not the
+    // loose .cfg tree, which is only ~189s of it. Kept because it is measured, safe and
+    // opt-in - but do not expect it to matter. Use repack.mts instead where it applies.
     logger.log(
       `[trim-gamedata] hiding ${plan.moves.map((m) => m.subtree).join(", ")}: ` +
-        `${plan.before} -> ${plan.after} .cfg files (-${saved}, ${percent}%). The plugin walks ` +
-        `this tree 4x per cook, so expect roughly the same proportion off the ~40 min scan.`,
+        `${plan.before} -> ${plan.after} .cfg files (-${saved}, ${percent}%). Measured saving is ` +
+        `only ~3.7% (~49s) - the cook's startup cost is the mounted paks, not this tree.`,
     );
 
     if (process.env.DRY) {

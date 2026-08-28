@@ -1,4 +1,4 @@
-export function waitFor(condition: () => boolean, timeout = 60000): Promise<void> {
+export function waitFor(condition: () => boolean, timeout = 120000): Promise<void> {
   return new Promise((resolve, reject) => {
     const err = new Error("Timeout waiting for condition " + condition.toString());
     const to = setTimeout(() => {

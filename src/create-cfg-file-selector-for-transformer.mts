@@ -16,11 +16,14 @@ export async function getFilesForTransformer<T>(transformer: StructTransformer<T
   logger.log(`Getting files for transformer ${transformer.name}...`);
   const suffixes = transformer.files;
   L2Cache[cacheKey] = (
-    await Promise.all([
-      ...suffixes.map((suffix) => getCfgFiles(suffix, transformer.contains)),
-      // opt-in: also patch the same prototypes as they appear in DLC game data
-      ...(transformer.dlc ? suffixes.map((suffix) => getDlcCfgFiles(suffix, transformer.contains)) : []),
-    ])
+    await Promise.all(
+      // `dlc` is exclusive: a DLC-only transformer never touches base GameData, so the mod it
+      // produces can be shipped separately from its non-DLC twin (patching base data would make
+      // the DLC half a hard requirement for everyone).
+      transformer.dlc
+        ? suffixes.map((suffix) => getDlcCfgFiles(suffix, transformer.contains))
+        : suffixes.map((suffix) => getCfgFiles(suffix, transformer.contains)),
+    )
   ).flat();
   return L2Cache[cacheKey];
 }
