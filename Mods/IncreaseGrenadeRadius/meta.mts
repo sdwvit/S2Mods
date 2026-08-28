@@ -1,6 +1,7 @@
 import type { ExplosionPrototype } from "s2cfgtojson";
 import type { MetaType } from "../../src/meta-type.mts";
 import { precision } from "../../src/precision.mts";
+import { allDefaultExplosionPrototypesRecord, getCorePrototype } from "../../src/consts.mts";
 
 export const meta: MetaType<ExplosionPrototype> = {
   description: `
@@ -25,9 +26,20 @@ function structTransformer(struct: ExplosionPrototype) {
 structTransformer.files = ["ExplosionPrototypes.cfg"]; //
 
 function withRadius(struct: ExplosionPrototype, radiusMeters: number) {
+  const base = getCorePrototype(
+    struct.SID,
+    allDefaultExplosionPrototypesRecord,
+    (item) => item.DamagePlayer,
+  );
   const fork = struct.fork();
   fork.Radius = 100 * radiusMeters;
-  fork.DamagePlayer = Math.max(struct.DamagePlayer, struct.DamageNPC);
-  fork.ConcussionRadius = precision(struct.ConcussionRadius * (1 + fork.Radius / struct.Radius));
+  fork.DamagePlayer = Math.max(
+    struct.DamagePlayer || base.DamagePlayer,
+    struct.DamageNPC || base.DamageNPC,
+  );
+  fork.ConcussionRadius = precision(
+    (struct.ConcussionRadius || base.ConcussionRadius) *
+      (1 + fork.Radius / (struct.Radius || base.Radius)),
+  );
   return fork;
 }
