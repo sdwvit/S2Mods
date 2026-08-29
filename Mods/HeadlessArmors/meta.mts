@@ -53,7 +53,7 @@ With the new game on the new Unreal Engine, mod structure changes — some mods 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
 
-  changenote: `Exoskeleton helmets now have faction-specific visuals: each faction (Duty, Mercenaries, Monolith, Neutral, Spark, Svoboda) uses its own colored mesh instead of all sharing the Svoboda helmet appearance.`,
+  changenote: `Fixed the mod's own assets not loading: custom inventory icons and the exoskeleton helmet mesh/materials were still pointing at /Game/ paths that only exist inside this mod, so they showed up blank or missing. They now resolve from the mod's own /HeadlessArmors/ mount.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,
