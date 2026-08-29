@@ -5,13 +5,12 @@ import type {
   ItemGeneratorPrototypeItemGeneratorItem,
   WeaponGeneralSetupPrototypePreinstalledAttachmentsItemPrototypeSIDsItem,
   WeaponPrototype,
+  QuestNodePrototypeSetItemGenerator,
 } from "s2cfgtojson";
 import type { MetaContext, MetaType } from "../../src/meta-type.mts";
 import { waitFor } from "../../src/wait-for.mts";
 import {
   allDefaultDroppableAttachments,
-  allDefaultWeaponPrototypesRecord,
-  getCorePrototype,
   guessAttachmentSlot,
   allUniqueWeaponGeneralSetupPrototypesSIDs,
 } from "../../src/consts.mts";
@@ -25,15 +24,20 @@ Adds all 357 possible weapons with attachments combos to NPCs.
 Way more variety to what NPCs wield on the battlefield. That being friend or foe. 
 [h1][/h1]
 Attachments are still rare: 1-attachment weapons are 10x rarer than base, each extra attachment is 10x rarer than the previous (so 2 attachments = 100x rarer, 3 = 1000x rarer than base).
+[h1][/h1]
+For debugging, this console command rolls every NPC weapon generator this mod touches straight into Skif's inventory:
+[h2][/h2]
+[u]XStartQuestNodeBySID Skif_Give_All_NPC_Weapons[/u]
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote:
-    "Updated for 2.0: patches regenerated against 2.0 game data. Fix looted NPC weapons missing upgrade slots / available attachments in weapon workshop (CompatibleAttachments and UpgradePrototypeSIDs now properly reference base weapon data); rework attachment rarity to geometric scaling: 1-attachment weapons are 10x rarer than base, each additional attachment is 10x rarer than the previous.",
+    "Added a debug quest node chain: XStartQuestNodeBySID Skif_Give_All_NPC_Weapons now rolls every NPC weapon generator this mod patches straight into Skif's inventory, so all attachment combos can be inspected without farming NPCs.",
   structTransformers: [
     createWeaponParamsWithPreinstalledAttachments,
     createWeapons,
     addNewWeaponsToDynamicItemGenerators,
+    transformSkifItemGeneratorQuestNodes,
   ],
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
@@ -336,8 +340,67 @@ async function addNewWeaponsToDynamicItemGenerators(struct: ItemGeneratorPrototy
     });
   });
   if (fork.entries().length) {
+    patchedDynamicItemGeneratorSIDs.push(struct.SID);
     return fork;
   }
 }
 
 addNewWeaponsToDynamicItemGenerators.files = ["/DynamicItemGenerator.cfg"];
+
+const SKIF_QUEST_GUID = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+const SKIF_CHAIN_ENTRY_NODE_SID = "Skif_Give_All_NPC_Weapons";
+/** SIDs of the vanilla dynamic generators this mod actually injected variants into. */
+const patchedDynamicItemGeneratorSIDs: string[] = [];
+
+let addQuestOnce = false;
+/**
+ * 4
+ * Debug quest nodes: one SetItemGenerator node per dynamic generator this mod patched,
+ * chained so each launches the next. A single generator holding them as sub-generators
+ * does not work - the categories are exclusive, so only the first weapon is rolled.
+ * Use with console: XStartQuestNodeBySID Skif_Give_All_NPC_Weapons
+ */
+async function transformSkifItemGeneratorQuestNodes(s) {
+  if (addQuestOnce) {
+    return;
+  }
+  addQuestOnce = true;
+
+  await waitFor(() => finishedTransformers.has(addNewWeaponsToDynamicItemGenerators.name));
+
+  const entryNode = new Struct({
+    SID: SKIF_CHAIN_ENTRY_NODE_SID,
+    QuestSID: s.QuestSID,
+    NodeType: "EQuestNodeType::Technical",
+    StartDelay: 0,
+    __internal__: { isRoot: true, rawName: SKIF_CHAIN_ENTRY_NODE_SID },
+  }) as Struct;
+
+  let previousNodeSID = SKIF_CHAIN_ENTRY_NODE_SID;
+  const nodes = patchedDynamicItemGeneratorSIDs.map((itemGeneratorSID) => {
+    const nodeSID = `Skif_${itemGeneratorSID}`;
+    const node = new Struct({
+      SID: nodeSID,
+      QuestSID: s.QuestSID,
+      NodeType: "EQuestNodeType::SetItemGenerator",
+      Launchers: [
+        {
+          Excluding: false,
+          Connections: [{ SID: previousNodeSID, Name: "" }],
+        },
+      ],
+      TargetQuestGuid: SKIF_QUEST_GUID,
+      ReplaceInventory: false,
+      EquipItems: false,
+      Repeatable: true,
+      ItemGeneratorSID: itemGeneratorSID,
+      __internal__: { isRoot: true, rawName: nodeSID },
+    }) as QuestNodePrototypeSetItemGenerator;
+    previousNodeSID = nodeSID;
+    return node;
+  });
+
+  return [entryNode, ...nodes];
+}
+
+transformSkifItemGeneratorQuestNodes.files = ["/QuestNodePrototypes/A-life_interrupts.cfg"];
