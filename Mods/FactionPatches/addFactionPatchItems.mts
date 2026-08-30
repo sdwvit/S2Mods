@@ -6,7 +6,7 @@ import { getRecord } from "../../src/consts.mts";
 
 let addFactionPatchesOnce = false;
 
-const ICON_BASE = "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/PDA/FractionIcons/";
+const ICON_BASE = "Texture2D'/FactionPatches/GameLite/FPS_Game/UIRemaster/UITextures/PDA/FractionIcons/";
 export const FactionPatchSID = "FactionPatch";
 
 export const FactionPatchDefinitions: {
