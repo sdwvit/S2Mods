@@ -8,6 +8,8 @@ import {
 } from "./basicAttachments.mts";
 import { getXnCompatibleScope } from "../X16Scopes/meta.mts";
 import { GunDnipro_Upgrade_HoldBreathPos75Effect } from "./transformUpgradePrototypes.mts";
+import { modName } from "../../src/base-paths.mts";
+import { getDroppableScopeAlternative, removedDefaultScopeByWeaponSetupSID } from "./defaultScopes.mts";
 
 function mapUniqueAttachmentsToGeneric(
   fork: WeaponGeneralSetupPrototype,
@@ -16,7 +18,8 @@ function mapUniqueAttachmentsToGeneric(
 ) {
   if (struct.PreinstalledAttachmentsItemPrototypeSIDs) {
     fork.PreinstalledAttachmentsItemPrototypeSIDs = struct.PreinstalledAttachmentsItemPrototypeSIDs.filter(
-      ([_k, e]) => !!uniqueAttachmentsToAlternatives[e.AttachSID],
+      // Scopes are handled by stripDefaultScopes: removed here, rolled by the item generators instead.
+      ([_k, e]) => !!uniqueAttachmentsToAlternatives[e.AttachSID] && !getDroppableScopeAlternative(e.AttachSID),
     ).map(([_k, e]) => {
       return Object.assign(e.fork(), {
         AttachSID: uniqueAttachmentsToAlternatives[e.AttachSID],
@@ -68,17 +71,51 @@ function mapUniqueAttachmentsToGeneric(
   }
 }
 
+/**
+ * Weapons that always came with a scope now spawn without one. The scope is added back by the
+ * item generators (see defaultScopes.mts) with a small chance, so most of these weapons are
+ * found bare and a scope stays a lucky find. Only scopes that have a droppable generic
+ * equivalent are removed - the rest have no inventory representation to hand out.
+ */
+function stripDefaultScopes(fork: WeaponGeneralSetupPrototype, struct: WeaponGeneralSetupPrototype) {
+  if (!struct.PreinstalledAttachmentsItemPrototypeSIDs) {
+    return;
+  }
+  let removedScope: string;
+  struct.PreinstalledAttachmentsItemPrototypeSIDs.forEach(([k, e]) => {
+    const scope = getDroppableScopeAlternative(e.AttachSID);
+    if (!scope) {
+      return;
+    }
+    const isCompatible = [fork.CompatibleAttachments, struct.CompatibleAttachments].some((ca) =>
+      ca?.entries().some(([_k, c]) => c.AttachPrototypeSID === scope),
+    );
+    if (!isCompatible) {
+      return;
+    }
+    fork.PreinstalledAttachmentsItemPrototypeSIDs ||= struct.PreinstalledAttachmentsItemPrototypeSIDs.fork();
+    fork.PreinstalledAttachmentsItemPrototypeSIDs.__internal__.bskipref = false;
+    fork.PreinstalledAttachmentsItemPrototypeSIDs.__internal__.bpatch = true;
+    fork.PreinstalledAttachmentsItemPrototypeSIDs.addNode(e.fork(), k);
+    fork.PreinstalledAttachmentsItemPrototypeSIDs.removeNode(k);
+    removedScope = scope;
+  });
+  if (removedScope) {
+    removedDefaultScopeByWeaponSetupSID[struct.SID] = removedScope;
+  }
+}
+
 function addUdpScopeCompatibility(fork: WeaponGeneralSetupPrototype, struct: WeaponGeneralSetupPrototype) {
   if (struct.SID !== "GunUDP_HG" && struct.SID !== "GunUDP_Deadeye_HG" && struct.SID !== "Gun_Krivenko_HG_GS") {
     return false;
   }
 
-  fork.CompatibleAttachments ||= struct.CompatibleAttachments?.fork() || new Struct({});
+  fork.CompatibleAttachments ||= struct.CompatibleAttachments?.fork() || new Struct({}) as any;
   fork.CompatibleAttachments.addNode(
     Object.assign(getCompatibleAttachmentDefinition("EN_ColimScope_1"), {
       Socket: "ColimScopeSocket_corrected",
       WeaponSpecificIcon:
-        "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/UDP/T_inv_w_en_colim_scope.T_inv_w_en_colim_scope'",
+        `Texture2D'/Game/${modName}/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/UDP/T_inv_w_en_colim_scope.T_inv_w_en_colim_scope'`,
     }),
     "EN_ColimScope_1",
   );
@@ -113,9 +150,11 @@ export const transformWeaponGeneralSetupPrototypes: StructTransformer<WeaponGene
 
   const compX8 = getXnCompatibleScope(struct, 8);
   if (compX8) {
-    fork.CompatibleAttachments ||= struct.CompatibleAttachments?.fork() || new Struct({});
+    fork.CompatibleAttachments ||= struct.CompatibleAttachments?.fork() || new Struct({}) as any;
     fork.CompatibleAttachments.addNode(compX8, "X8");
   }
+
+  stripDefaultScopes(fork, struct);
 
   switch (struct.SID) {
     case "Gun_Sotnyk_AR_GS":

@@ -17,6 +17,7 @@ import type { MetaType } from "../../src/meta-type.mts";
 import { transformNPCPrototypes } from "./transformNPCPrototypes.mts";
 import { transformDynamicItemGenerator } from "./transformItemGenerator.mts";
 import { transformTradePrototypes } from "./transformTradePrototypes.mts";
+import { finishedTransformers } from "./finished-transformers.mts";
 
 const structTransformers = [
   transformNPCPrototypes,
@@ -39,7 +40,7 @@ const structTransformers = [
   transformWeaponPrototypes,
 ] as const;
 
-export const finishedTransformers = new Set<string>();
+export { finishedTransformers } from "./finished-transformers.mts";
 
 export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> = {
   description: `
@@ -58,11 +59,12 @@ A collection of various configs aimed to increase game difficulty and make it mo
  [*] [QoL] Satiety effect now lasts as long as on normal difficulty, as it was more like a slowdown and not a challenge.
  [*] [QoL] Unique weapons are now compatible with basic scopes. 
  [*] [Balance] Rifles default scopes can now be detached and sold.
+ [*] [Challenge] Weapons that always came with a scope now spawn with one only 10% of the time.
  [*] [QoL] Allows buying/selling/dropping quest items.
 [/list]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: `Remove duplicate trade prototype logic (faction money, buy limitations) — now handled solely by SpecialistMerchants`,
+  changenote: `Weapons that used to always come with a preinstalled scope (SVD, SVU, M701, Gvintar, Lynx, Whip, SOFMOD and friends) now spawn bare — item generators roll the scope onto them with a 10% chance instead`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);

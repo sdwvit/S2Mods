@@ -1,12 +1,17 @@
 import type { ItemGeneratorPrototype } from "s2cfgtojson";
 import type { StructTransformer } from "../../src/meta-type.mts";
 import { semiRandom } from "../../src/semi-random.mts";
+import { waitFor } from "../../src/wait-for.mts";
+import { finishedTransformers } from "./finished-transformers.mts";
+import { transformWeaponGeneralSetupPrototypes } from "./transformWeaponGeneralSetupPrototypes.mts";
+import { withScopeChance } from "./defaultScopes.mts";
 import { allDefaultAmmoPrototypesRecord, allDefaultConsumablePrototypesRecord, allDefaultGrenadePrototypesRecord } from "../../src/consts.mts";
 
 export const transformItemGeneratorPrototypes: StructTransformer<ItemGeneratorPrototype> = async (struct, context) => {
   if (prohibitedIds.some((id) => struct.SID.includes(id))) {
     return null;
   }
+  await waitFor(() => finishedTransformers.has(transformWeaponGeneralSetupPrototypes.name));
   const ItemGenerator = struct.ItemGenerator?.map(([_k, itemGen], i) => {
     const fork = itemGen.fork();
     const PossibleItems = itemGen.PossibleItems?.map?.(([_k, possibleItem], j) => {
@@ -17,7 +22,9 @@ export const transformItemGeneratorPrototypes: StructTransformer<ItemGeneratorPr
       const isAmmo = ammoPrototypeSIDs.has(possibleItem?.ItemPrototypeSID);
       const isGrenade = grenadePrototypeSIDs.has(possibleItem?.ItemPrototypeSID);
       if (!isConsumable && !isAmmo && !isGrenade) {
-        return;
+        // Weapons that lost their preinstalled scope roll it here instead.
+        const weaponFork = possibleItem.fork();
+        return withScopeChance(possibleItem, weaponFork) ? weaponFork : undefined;
       }
       let chance = semiRandom(i + j + context.index);
       while (chance > 0.02) {

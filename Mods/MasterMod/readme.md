@@ -11,6 +11,7 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `T_inv_w_deadeye_scope_upgrade`
  - `T_inv_w_en_colim_scope`
  - `T_inv_w_en_colim_scope_upgrade`
+ - `MasterMod`
 
 `ArtifactPrototypes`:
  - `QuestArtifactPrototypes`
@@ -44,8 +45,6 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `AttachPrototypes`
  - `QuestItemPrototypes`
  - `WeaponPrototypes`
-
-`QuestNodePrototypes`
 
 `CharacterWeaponSettingsPrototypes`:
  - `NPCWeaponSettingsPrototypes`
