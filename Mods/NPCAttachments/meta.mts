@@ -32,7 +32,7 @@ For debugging, this console command rolls every NPC weapon generator this mod to
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote:
-    "Added a debug quest node chain: XStartQuestNodeBySID Skif_Give_All_NPC_Weapons now rolls every NPC weapon generator this mod patches straight into Skif's inventory, so all attachment combos can be inspected without farming NPCs.",
+    "Fixed the generated Attaches/Upgrades nodes on NPC weapon rolls not being marked as patch structs, which could make the added attachment combos fail to apply on top of the base game's item generators.",
   structTransformers: [
     createWeaponParamsWithPreinstalledAttachments,
     createWeapons,
@@ -320,6 +320,7 @@ async function addNewWeaponsToDynamicItemGenerators(struct: ItemGeneratorPrototy
           }),
           "Attaches",
         );
+        newOption.Attaches.__internal__.bpatch = true;
         if (recipe.upgrades.length) {
           newOption.addNode(
             new Struct({
@@ -330,6 +331,7 @@ async function addNewWeaponsToDynamicItemGenerators(struct: ItemGeneratorPrototy
             }),
             "Upgrades",
           );
+          newOption.Upgrades.__internal__.bpatch = true;
         }
 
         fork.ItemGenerator[k1].PossibleItems ||= struct.ItemGenerator[k1].PossibleItems.fork();
