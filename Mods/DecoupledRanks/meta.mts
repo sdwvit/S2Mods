@@ -60,6 +60,6 @@ XP table:[h1][/h1]
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Deprecated in 2.0: with the new engine and reworked mod structure, this mod is no longer maintained. A replacement will be released separately.",
+  changenote: "Fixed missing faction patch icons: icon textures were referenced from the FactionPatches mount instead of this mod's own, so they did not show up unless FactionPatches was installed.",
   structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformGlobalVariablePrototypes, transformItemGeneratorPrototypes, addMutantPartItems, transformMutantLootGenerators],
 };
