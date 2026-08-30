@@ -15,12 +15,17 @@ export const RANK_INDICATOR_ITEM_SIDS = {
 } as Record<ERank, string>;
 
 let once = false;
-const LEVEL_COUNTER_ICON = "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Quest/IIT_QuestItem_USB_Stalker_Big.IIT_QuestItem_USB_Stalker_Big'";
+const LEVEL_COUNTER_ICON =
+  "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Quest/IIT_QuestItem_USB_Stalker_Big.IIT_QuestItem_USB_Stalker_Big'";
 const RANK_INDICATOR_ICONS = {
-  "ERank::Newbie": "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_G.T_dev_SDCard_G'",
-  "ERank::Experienced": "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_B.T_dev_SDCard_B'",
-  "ERank::Veteran": "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_P.T_dev_SDCard_P'",
-  "ERank::Master": "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_Y.T_dev_SDCard_Y'",
+  "ERank::Newbie":
+    "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_G.T_dev_SDCard_G'",
+  "ERank::Experienced":
+    "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_B.T_dev_SDCard_B'",
+  "ERank::Veteran":
+    "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_P.T_dev_SDCard_P'",
+  "ERank::Master":
+    "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Consumable/T_dev_SDCard_Y.T_dev_SDCard_Y'",
 } as Record<ERank, string>;
 
 export function transformKeyItemPrototypes() {
@@ -28,7 +33,12 @@ export function transformKeyItemPrototypes() {
   once = true;
 
   const levelCounterItem = new Struct({
-    __internal__: { refurl: "../ItemPrototypes.cfg", refkey: "[0]", rawName: LEVEL_COUNTER_ITEM_SID, isRoot: true },
+    __internal__: {
+      refurl: "../ItemPrototypes.cfg",
+      refkey: "[0]",
+      rawName: LEVEL_COUNTER_ITEM_SID,
+      isRoot: true,
+    },
     SID: LEVEL_COUNTER_ITEM_SID,
     Name: "Rank Level",
     LocalizationSID: "Rank Level",
