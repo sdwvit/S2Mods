@@ -3,10 +3,11 @@ import type { EItemType } from "s2cfgtojson";
 import type { QuestItemPrototype } from "s2cfgtojson";
 import type { CoreFaction } from "../../src/consts.mts";
 import { getRecord } from "../../src/consts.mts";
+import { modName } from "../../src/base-paths.mts";
 
 let addFactionPatchesOnce = false;
 
-const ICON_BASE = "Texture2D'/FactionPatches/GameLite/FPS_Game/UIRemaster/UITextures/PDA/FractionIcons/";
+const ICON_BASE = `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/PDA/FractionIcons/`;
 export const FactionPatchSID = "FactionPatch";
 
 export const FactionPatchDefinitions: {
