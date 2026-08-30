@@ -3,6 +3,10 @@ import type { ItemGeneratorPrototypePossibleItems, ItemGeneratorPrototypePossibl
 import { ALL_RANKS_SET, generalTradersTradeItemGenerators } from "../../src/consts.mts";
 import { semiRandom } from "../../src/semi-random.mts";
 import { precision } from "../../src/precision.mts";
+import { waitFor } from "../../src/wait-for.mts";
+import { finishedTransformers } from "./finished-transformers.mts";
+import { transformWeaponGeneralSetupPrototypes } from "./transformWeaponGeneralSetupPrototypes.mts";
+import { withScopeChance } from "./defaultScopes.mts";
 
 function transformTrade(struct: ItemGeneratorPrototype) {
   const fork = struct.fork();
@@ -128,9 +132,12 @@ function transformWeapons(e: ItemGeneratorPrototype["ItemGenerator"]["0"], i: nu
     AmmoMinCount: 0,
     AmmoMaxCount: Math.min(Math.floor(1 + 10 * semiRandom(i + j)), pi.AmmoMaxCount || 1),
   });
-  const PossibleItems = e.PossibleItems.map(([_k, pi], j) =>
-    Object.assign(pi.fork(), minMaxAmmo(pi, j)),
-  );
+  const PossibleItems = e.PossibleItems.map(([_k, pi], j) => {
+    const pf = Object.assign(pi.fork(), minMaxAmmo(pi, j));
+    // Weapons that lost their preinstalled scope roll it here instead.
+    withScopeChance(pi, pf);
+    return pf;
+  });
 
   // add lavinas
   const [_, gvintarMaybe] =
@@ -228,6 +235,7 @@ function transformCombat(struct: ItemGeneratorPrototype) {
  * Allows NPCs to drop armor.
  */
 export async function transformDynamicItemGenerator(struct: ItemGeneratorPrototype) {
+  await waitFor(() => finishedTransformers.has(transformWeaponGeneralSetupPrototypes.name));
   /**
    * Does not allow traders to sell gear.
    */
