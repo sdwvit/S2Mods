@@ -18,12 +18,12 @@ bpatches DifficultyPrototypes
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote:
-    "Fixed broken repairs and item condition: the EnvironmentDifficulty patch was replacing the whole block instead of patching it, wiping Master's Armor_Durability, weapon/explosion damage, radiation, bleeding and hunger tuning. Only the HUD toggles are changed now.",
+    "Now also applies to the Custom difficulty preset: unlimited saves, compass, crosshair, stash and dead body markers, and unlocked settings work when you play on Custom, not just Master.",
   structTransformers: [structTransformer],
 };
 
 function structTransformer(struct: DifficultyPrototype, context: MetaContext<DifficultyPrototype>) {
-  if (struct.SID !== "Hard" && struct.SID !== "Stalker") {
+  if (struct.SID !== "Hard" && struct.SID !== "Stalker" && struct.SID !== "Custom") {
     return null;
   }
   const fork = struct.fork();
