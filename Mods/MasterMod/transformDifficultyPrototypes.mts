@@ -5,8 +5,11 @@ import { DIFFICULTY_FACTOR } from "../GlassCannon/meta.mts";
 /**
  * Increases cost of everything and damage on Hard and Stalker difficulty.
  */
-export const transformDifficultyPrototypes: StructTransformer<DifficultyPrototype> = async (struct, context) => {
-  if (struct.SID !== "Hard" && struct.SID !== "Stalker") {
+export const transformDifficultyPrototypes: StructTransformer<DifficultyPrototype> = async (
+  struct,
+  context,
+) => {
+  if (struct.SID !== "Hard" && struct.SID !== "Stalker" && struct.SID !== "Custom") {
     return null;
   }
 
@@ -14,6 +17,6 @@ export const transformDifficultyPrototypes: StructTransformer<DifficultyPrototyp
     Repair_Cost: DIFFICULTY_FACTOR,
     Upgrade_Cost: DIFFICULTY_FACTOR,
     Effect_Satiety: 1,
-  } as DifficultyPrototype);
+  }) as DifficultyPrototype;
 };
 transformDifficultyPrototypes.files = ["/DifficultyPrototypes.cfg"];

@@ -64,7 +64,7 @@ A collection of various configs aimed to increase game difficulty and make it mo
 [/list]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: `Weapons that used to always come with a preinstalled scope (SVD, SVU, M701, Gvintar, Lynx, Whip, SOFMOD and friends) now spawn bare — item generators roll the scope onto them with a 10% chance instead`,
+  changenote: `Custom difficulty now gets the same treatment as Master: repair/upgrade cost scaling and the normal-difficulty satiety duration apply on the Custom preset too`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
