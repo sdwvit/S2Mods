@@ -64,7 +64,7 @@ A collection of various configs aimed to increase game difficulty and make it mo
 [/list]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: `Custom difficulty now gets the same treatment as Master: repair/upgrade cost scaling and the normal-difficulty satiety duration apply on the Custom preset too`,
+  changenote: `Fixed the guns that shipped with a built-in scope keeping it: Gvintar's scope was permanent and could not be taken off, and the SVDM and Falcon scopes had no weight, cost or name. Those weapons now drop bare and their compatible scopes are the normal x4/x8 ones you can loot, mount and sell, still rolled at a 10% chance by the item generators. Unique scopes inherited from a parent weapon are also swapped for their generic equivalent, so the Cavalier can mount an x8 scope again`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
