@@ -27,7 +27,9 @@
     "pull-staged": "node ./src/pull-staged.mts",
     "pull-assets": "node ./src/pull-assets.mts",
     "purge-caches": "find . -path '*/node_modules' -prune -o -type f -name '.*.cache.zlib' -exec rm -f {} +",
-    "create-git-branches": "node ./src/gitbranches/create-git-branches.mts"
+    "create-git-branches": "node ./src/gitbranches/create-git-branches.mts",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@node-steam/vdf": "^2.2.0",
@@ -36,7 +38,7 @@
     "archiver": "^7.0.1",
     "dotenv": "^17.2.0",
     "prettier": "^3.6.2",
-    "s2cfgtojson": "9.0.0",
+    "s2cfgtojson": "9.0.1",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   }

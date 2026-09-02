@@ -6,6 +6,13 @@ import { logger } from "./logger.mts";
 const SDK_MUTATION_LOCK_DIR = path.join(os.tmpdir(), "s2mods-sdk-mutation.lock");
 const SDK_MUTATION_LOCK_INFO = path.join(SDK_MUTATION_LOCK_DIR, "owner.json");
 const SDK_MUTATION_WAIT_MS = 1000;
+/**
+ * Has to exceed the longest operation the lock guards, which is a cook (~22 min, ~43 for a split
+ * mod). At the old 5 min a second publisher stole the lock out from under a running cook and
+ * started its own concurrently - the exact double-cook the lock exists to prevent. Press Y to
+ * force-release earlier when the holder really is dead.
+ */
+const SDK_MUTATION_FORCE_RELEASE_MS = 60 * 60 * 1000;
 
 let localDepth = 0;
 
@@ -51,7 +58,7 @@ async function waitForLock(label: string) {
       );
       await sleep(SDK_MUTATION_WAIT_MS);
       cycle++;
-      if (yPressed || cycle * SDK_MUTATION_WAIT_MS > 5 * 60 * 1000) {
+      if (yPressed || cycle * SDK_MUTATION_WAIT_MS > SDK_MUTATION_FORCE_RELEASE_MS) {
         logger.log(`[sdk-lock] force-releasing lock before ${label}`);
         await releaseLock();
         yPressed = false;

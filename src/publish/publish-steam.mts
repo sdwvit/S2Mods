@@ -67,7 +67,7 @@ async function publishToSteam() {
     await ensureCooked();
     await Promise.allSettled([
       import("../pull-assets.mts").then((m) => m.pullAssets()),
-      import("../pull-staged.mts"),
+      import("../pull-staged.mts").then((m) => m.copyStaged()),
     ]);
   }
   childProcess.execSync(cmd(), {

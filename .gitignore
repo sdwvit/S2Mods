@@ -26,3 +26,6 @@ stalker_commands.txt
 .injected-gamedata-files.json
 
 .asset-registry-cache.json
+
+# Cooker scratch packages: regenerated with a new id every cook, never authored content.
+__ModKitWwiseCookAnchor_*__.uasset

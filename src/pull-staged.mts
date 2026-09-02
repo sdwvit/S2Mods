@@ -1,4 +1,5 @@
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { logger } from "./logger.mts";
 import { modFolderSteam } from "./base-paths.mts";
@@ -15,7 +16,7 @@ import { modClassification, sdkModTargets } from "./mod-meta-paths.mts";
  * steamworkshop/ as its content folder, mod.io zips it, xbox zips raw/) ships both halves
  * without knowing there are two.
  */
-const copyStaged = async () => {
+export const copyStaged = async () => {
   const targets = await sdkModTargets;
   const destinationPath = path.join(modFolderSteam, "Windows");
   const usable = targets.filter(
@@ -51,4 +52,5 @@ const copyStaged = async () => {
   logger.log(`Staged mod copied to ${destinationPath}`);
 };
 
-await copyStaged();
+// Only when run as a script: exported so the merge can be tested without shelling out.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await copyStaged();

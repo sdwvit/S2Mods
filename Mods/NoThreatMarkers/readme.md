@@ -11,4 +11,5 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `T_noise_line_bg`
  - `T_ThreatGlowing`
  - `T_ThreatGray`
+ - `NoThreatMarkers`
  - `PAK_Mod`

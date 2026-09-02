@@ -3,6 +3,7 @@ import { Struct } from "s2cfgtojson";
 import type { AttachPrototype, EffectPrototype, ItemGeneratorPrototype, MeshPrototype, WeaponGeneralSetupPrototype } from "s2cfgtojson";
 import { allCompatibleAttachmentDefs } from "../MasterMod/basicAttachments.mts";
 import { xNCompatibleScopeByWeapon } from "./xNCompatibleScopeByWeapon.mts";
+import { modName } from "../../src/base-paths.mts";
 
 export const meta: MetaType = {
   description: `
@@ -59,7 +60,7 @@ export function getX16AttachPrototypes() {
       CanHoldBreath: true,
       EffectPrototypeSIDs: sharedEffects,
       MeshPrototypeSID: "EN_X16Scope_1",
-      Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Attach/T_inv_icon_en_x16scope_1.T_inv_icon_en_x16scope_1'`,
+      Icon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Attach/T_inv_icon_en_x16scope_1.T_inv_icon_en_x16scope_1'`,
     }) as AttachPrototype,
   );
   extraStructs.push(
@@ -73,7 +74,7 @@ export function getX16AttachPrototypes() {
       Weight: 1.1,
       EffectPrototypeSIDs: sharedEffects,
       MeshPrototypeSID: "UA_X16Scope_1",
-      Icon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Attach/T_inv_icon_ua_x16scope.T_inv_icon_ua_x16scope'`,
+      Icon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/Attach/T_inv_icon_ua_x16scope.T_inv_icon_ua_x16scope'`,
     }) as AttachPrototype,
   );
   return extraStructs;

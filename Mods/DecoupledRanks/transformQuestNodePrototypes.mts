@@ -122,7 +122,7 @@ function getLaunchQuestNode(struct: QuestNodePrototype) {
   const launchQuestSID = `${struct.QuestSID}_run_${modName}`;
 
   return new Struct({
-    ConsoleCommand: "XStartQuestNodeBySID DecoupledRanks_OnPlayerGetItemEvent_FactionPatchBandits",
+    ConsoleCommand: `XStartQuestBySID ${modName}`,
     NodeType: "EQuestNodeType::ConsoleCommand",
     QuestSID: struct.QuestSID,
     SID: launchQuestSID,

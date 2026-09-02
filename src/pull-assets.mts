@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { logger } from "./logger.mts";
 import { modFolderRaw } from "./base-paths.mts";
 import { primarySdkModTarget } from "./mod-meta-paths.mts";
+import { isTransientCookArtifact } from "./mod-kinds.mts";
 import { cpSync } from "node:fs";
 
 /**
@@ -26,7 +27,30 @@ export async function pullAssets() {
 
   // preserveTimestamps keeps raw/ dated by the SDK sources rather than by this copy - without it
   // the pull makes raw/ look newer than the staged cook, and the next publisher re-cooks for nothing.
-  cpSync(sourcePath, destinationPath, { recursive: true, force: true, preserveTimestamps: true });
+  // The filter keeps the cooker's own scratch packages out of raw/: they are regenerated with a new
+  // id every cook, so pulling them in would invalidate the fingerprint the cook just recorded.
+  cpSync(sourcePath, destinationPath, {
+    recursive: true,
+    force: true,
+    preserveTimestamps: true,
+    filter: (source) => !isTransientCookArtifact(source),
+  });
+
+  // Earlier pulls (and the commits they produced) may already have left one in raw/. Drop it, or
+  // it keeps counting as authored content for everything that reads raw/ off disk directly.
+  for (const stale of findTransientCookArtifacts(destinationPath)) {
+    logger.log(`Removing stale cook artifact from raw/: ${path.relative(modFolderRaw, stale)}`);
+    fs.rmSync(stale, { force: true });
+  }
+}
+
+function findTransientCookArtifacts(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) return findTransientCookArtifacts(full);
+    return isTransientCookArtifact(full) ? [full] : [];
+  });
 }
 
 // Only when run as a script (`pnpm pull-assets`): importers call pullAssets() themselves, and a

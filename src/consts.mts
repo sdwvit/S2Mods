@@ -10,6 +10,7 @@ import type {
   ExplosionPrototype,
   GeneralNPCObjPrototype,
   GrenadePrototype,
+  ObjPrototype,
   ItemGeneratorPrototype,
   NPCWeaponSettingsPrototype,
   QuestObjPrototype,
@@ -41,6 +42,7 @@ export let allDefaultGrenadePrototypes: GrenadePrototype[];
 export let allDefaultQuestItemPrototypes: SpawnActorPrototype[];
 export let allDefaultWeaponPrototypes: WeaponPrototype[];
 export let allDefaultAttachPrototypes: AttachPrototype[];
+export let allDefaultObjPrototypes: ObjPrototype[];
 export let allDefaultGeneralNPCObjPrototypes: GeneralNPCObjPrototype[];
 export let allDefaultQuestObjPrototypes: QuestObjPrototype[];
 export let allDefaultItemGeneratorPrototypes: ItemGeneratorPrototype[];
@@ -60,6 +62,7 @@ export let allDefaultExplosionPrototypes: ExplosionPrototype[];
   allDefaultQuestItemPrototypes,
   allDefaultWeaponPrototypes,
   allDefaultAttachPrototypes,
+  allDefaultObjPrototypes,
   allDefaultGeneralNPCObjPrototypes,
   allDefaultQuestObjPrototypes,
   allDefaultItemGeneratorPrototypes,
@@ -80,6 +83,7 @@ export let allDefaultExplosionPrototypes: ExplosionPrototype[];
   readFileAndGetStructs<SpawnActorPrototype>(`/QuestItemPrototypes.cfg`),
   readFileAndGetStructs<WeaponPrototype>("ItemPrototypes/WeaponPrototypes.cfg"),
   readFileAndGetStructs<AttachPrototype>("ItemPrototypes/AttachPrototypes.cfg"),
+  readFileAndGetStructs<ObjPrototype>("/ObjPrototypes.cfg"),
   readFileAndGetStructs<GeneralNPCObjPrototype>("ObjPrototypes/GeneralNPCObjPrototypes.cfg"),
   readFileAndGetStructs<QuestObjPrototype>("ObjPrototypes/QuestObjPrototypes.cfg"),
   readFileAndGetStructs<ItemGeneratorPrototype>("ItemGeneratorPrototypes.cfg"),
@@ -110,6 +114,10 @@ export const allDefaultPlayerWeaponSettingsPrototypesRecord = getRecord(
   allDefaultPlayerWeaponSettingsPrototypes,
 );
 export const allDefaultAttachPrototypesRecord = getRecord(allDefaultAttachPrototypes);
+/** Keyed by raw struct name (not SID), so `refkey`s like `[0]` resolve. */
+export const allDefaultObjPrototypesRecordByRawName = Object.fromEntries(
+  allDefaultObjPrototypes.map((e) => [e.__internal__.rawName, e]),
+);
 export const allDefaultGeneralNPCObjPrototypesRecord = getRecord(allDefaultGeneralNPCObjPrototypes);
 export const allDefaultGeneralNPCObjPrototypesRecordByItemGeneratorPrototypeSID = getRecordByKey(
   allDefaultGeneralNPCObjPrototypes,
@@ -841,7 +849,7 @@ export function getCorePrototype<T extends Struct>(
 }
 
 export function guessAttachmentSlot(itemSID: string) {
-  return getCorePrototype(itemSID, allDefaultAttachPrototypesRecord, (item) => item.Slot);
+  return getCorePrototype(itemSID, allDefaultAttachPrototypesRecord, (item) => item.Slot).Slot;
 }
 
 export type DefaultArtifact =

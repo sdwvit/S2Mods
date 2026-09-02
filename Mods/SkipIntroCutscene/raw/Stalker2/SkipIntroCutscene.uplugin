@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0",
+	"VersionName": "",
 	"FriendlyName": "SkipIntroCutscene",
 	"Description": "",
 	"Category": "Other",
@@ -10,8 +10,5 @@
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
-	"CanContainContent": true,
-	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
-	"Installed": false
+	"CanContainContent": true
 }
