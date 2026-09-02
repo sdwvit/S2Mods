@@ -44,10 +44,6 @@ export { finishedTransformers } from "./finished-transformers.mts";
 
 export const meta: MetaType<Parameters<(typeof structTransformers)[number]>[0]> = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 A collection of various configs aimed to increase game difficulty and make it more interesting.[h3][/h3]
 [hr][/hr]
 [h3]All changes to the base game:[/h3]

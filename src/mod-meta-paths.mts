@@ -9,6 +9,9 @@ import {
   type ModClassification,
   type ModContentKind,
 } from "./mod-kinds.mts";
+import { sdkModTargetShape, type SdkModTarget } from "./sdk-target-shape.mts";
+
+export type { SdkModTarget };
 
 const metaPath = path.join(modFolder, "meta.mts");
 
@@ -61,51 +64,9 @@ export const sdkStagedPakFolderFor = (variant: string) =>
   );
 export const sdkStagedPakFolders = Promise.all(cookVariants.map(sdkStagedPakFolderFor));
 
-/**
- * One SDK mod. A mod whose raw/ holds both .cfg patches and cooked assets is driven as TWO of
- * these, because the two kinds have nothing in common in the pipeline: the cfg half never needs
- * the cooker for its own sake and can be rebuilt in ~9s by src/repack.mts, while a mixed SDK mod
- * pays the full ~22 min cook (~21 of which is editor startup) whenever any of its .cfgs move.
- *
- * A single-kind mod has exactly one target, carrying the mod's existing SDK name - so nothing
- * about it changes. Published mods still ship as ONE mod: both targets' staged trees are merged
- * into the single steamworkshop/ payload (they differ in their `Stalker2/Mods/<name>` subfolder,
- * so the merge is a plain overlay and the game loads both containers).
- */
-export type SdkModTarget = {
-  kind: ModContentKind;
-  name: string;
-  /** $SDK/Stalker2/Mods/<name> */
-  modFolder: string;
-  /** Staged/<name>/Windows - one folder per cook variant below it. */
-  stagedModFolder: string;
-  /** SavedMods/PackageClassifier/<name> */
-  packageClassifierFolder: string;
-  /** Stalker2/Mods/<name>/Content/Paks/Windows */
-  stagedFolderStruct: string;
-  stagedPakFolderFor(variant: string): string;
-};
-
 /** Same derivation as the top-level exports, for an arbitrary SDK mod name. */
 export function sdkModTargetOf(kind: ModContentKind, name: string): SdkModTarget {
-  const folderStruct = path.join("Stalker2", "Mods", name, "Content", "Paks", "Windows");
-  const stagedModFolder = path.join(sdkStagedFolder, name, "Windows");
-  return {
-    kind,
-    name,
-    modFolder: path.join(sdkModsFolder, name),
-    stagedModFolder,
-    packageClassifierFolder: path.join(
-      process.env.SDK_PATH,
-      "Stalker2",
-      "SavedMods",
-      "PackageClassifier",
-      name,
-    ),
-    stagedFolderStruct: folderStruct,
-    stagedPakFolderFor: (variant: string) =>
-      path.join(stagedModFolder, variant, "Windows", folderStruct),
-  };
+  return sdkModTargetShape(kind, name, process.env.SDK_PATH);
 }
 
 /** How this mod's raw/ splits by content kind. Cheap, synchronous, re-derived per process. */

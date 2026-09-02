@@ -1,4 +1,5 @@
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { logger } from "./logger.mts";
 import { modFolderRaw, modFolderSdkLink } from "./base-paths.mts";
@@ -14,7 +15,8 @@ import { createMod } from "./cook.mts";
 import { recursiveCfgFind } from "./recursive-cfg-find.mts";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
 
-async function cmd() {
+/** Exported so the SDK-mod creation and cfg routing can be tested without the Mod Editor. */
+export async function pushToSdk() {
   await withSdkMutationLock("push-to-sdk", async () => {
     const meta = await modMeta;
     const sourcePath = path.join(modFolderRaw, "Stalker2", "Content");
@@ -26,9 +28,14 @@ async function cmd() {
       : await primarySdkModTarget;
     const destinationPath = path.join(target.modFolder, "Content");
     logger.log(`Pushing raw mod from ${sourcePath} to ${destinationPath}...`);
-    if (!existsSync(target.modFolder)) {
-      logger.log(`SDK mod ${target.name} doesn't exist, creating...`);
-      await createMod(target);
+    // Create every SDK mod this repo mod is built as, not just the push destination: for a split
+    // mod the assets half is where the Mod Editor authors .uassets, and it has to exist (and be
+    // what the `sdk` symlink points at) before anyone can open it there. Only the missing ones -
+    // GSCCreatePlainMod on an existing mod folder is not something to run for nothing.
+    for (const t of await sdkModTargets) {
+      if (existsSync(t.modFolder)) continue;
+      logger.log(`SDK mod ${t.name} doesn't exist, creating...`);
+      await createMod(t);
     }
     if (readdirSync(sourcePath).length === 0) {
       console.error(`No files found in source path: ${sourcePath}`);
@@ -66,4 +73,5 @@ async function cmd() {
   });
 }
 
-await cmd();
+// Only when run as a script; importers call pushToSdk() themselves.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await pushToSdk();

@@ -1,16 +1,13 @@
 import type { MetaType } from "../../src/meta-type.mts";
 import { transformKeyItemPrototypes } from "./transformKeyItemPrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
+import { transformQuestRegistration } from "./transformQuestRegistration.mts";
 import { transformItemGeneratorPrototypes } from "../FactionPatches/transformItemGeneratorPrototypes.mts";
 import { transformGlobalVariablePrototypes } from "./transformGlobalVariablePrototypes.mts";
 import { addMutantPartItems } from "./addMutantPartItems.mts";
 import { transformMutantLootGenerators } from "./transformMutantLootGenerators.mts";
 export const meta: MetaType = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
 Decoupled Ranks separates player rank progression from story quest milestones.[h1][/h1]
 Instead of quest nodes force-setting rank (Newbie/Experienced/Veteran/Master), this mod is intended to drive rank from an XP-like progression score.[h1][/h1]
 Design goals:[h1][/h1]
@@ -61,5 +58,5 @@ XP table:[h1][/h1]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Fixed missing faction patch icons: icon textures were referenced from the FactionPatches mount instead of this mod's own, so they did not show up unless FactionPatches was installed.",
-  structTransformers: [transformQuestNodePrototypes, transformKeyItemPrototypes, transformGlobalVariablePrototypes, transformItemGeneratorPrototypes, addMutantPartItems, transformMutantLootGenerators],
+  structTransformers: [transformQuestNodePrototypes, transformQuestRegistration, transformKeyItemPrototypes, transformGlobalVariablePrototypes, transformItemGeneratorPrototypes, addMutantPartItems, transformMutantLootGenerators],
 };

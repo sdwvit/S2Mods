@@ -5,3 +5,4 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
 `Modified or added assets`:
  - `T_enemymarker`
  - `T_quest_enemymarker`
+ - `NoEnemyMarkers`

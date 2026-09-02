@@ -35,9 +35,10 @@ logger.log(`Total: ${writtenFiles.flat().length} structs in ${writtenFiles.lengt
 // SKIP_SDK_PUSH=1 regenerates raw/ only: no readme, no SDK push (a full build), no asset pull.
 // Useful for sweeping many cfg-only mods against a freshly extracted GameLite.
 if (!process.env.SKIP_SDK_PUSH) {
-  await Promise.allSettled([import("./update-readme.mts"), import("./push-to-sdk.mts")]).then(() =>
-    import("./pull-assets.mts").then((m) => m.pullAssets()),
-  );
+  await Promise.allSettled([
+    import("./update-readme.mts"),
+    import("./push-to-sdk.mts").then((m) => m.pushToSdk()),
+  ]).then(() => import("./pull-assets.mts").then((m) => m.pullAssets()));
 }
 await Promise.allSettled([onL1Finish(), onL2Finish(), onL3Finish(), onL1GlobalFinish()]);
 

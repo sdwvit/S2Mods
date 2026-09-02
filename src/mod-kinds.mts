@@ -39,7 +39,23 @@ export type ModClassification = {
   isSplit: boolean;
 };
 
-/** Files of a mod's raw/ tree, sorted, or [] when there is no raw/ at all. */
+/**
+ * Scratch packages the cooker writes into the SDK mod folder, not content the mod authored.
+ * The Wwise cook anchor is the one that matters: the cooker regenerates it with a fresh numeric
+ * id every pass, so if it is allowed into raw/ it changes the *cookable* half of the fingerprint
+ * on every cook - the next publisher then sees "raw/ changed since the staged cook" and pays a
+ * full ~22 min re-cook for a file the cook itself just produced. It can also flip a cfg-only mod
+ * to `both`, renaming the cfg half's SDK mod and orphaning its staged output.
+ */
+export function isTransientCookArtifact(filePath: string): boolean {
+  return /^__ModKitWwiseCookAnchor_.*__\.uasset$/i.test(path.basename(filePath));
+}
+
+/**
+ * Files of a mod's raw/ tree, sorted, or [] when there is no raw/ at all. Transient cook output
+ * is filtered out here rather than at each call site so the fingerprint, the content
+ * classification and push-to-sdk cannot disagree about whether it counts.
+ */
 export function walkRaw(dir: string): string[] {
   if (!existsSync(dir)) return [];
   return readdirSync(dir)
@@ -47,6 +63,7 @@ export function walkRaw(dir: string): string[] {
       const full = path.join(dir, entry);
       return statSync(full).isDirectory() ? walkRaw(full) : [full];
     })
+    .filter((file) => !isTransientCookArtifact(file))
     .sort();
 }
 
