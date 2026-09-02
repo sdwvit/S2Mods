@@ -7,9 +7,9 @@ import {
   uniqueAttachmentsToAlternatives,
 } from "./basicAttachments.mts";
 import { getXnCompatibleScope } from "../X16Scopes/meta.mts";
+import { getDroppableScopeAlternative, removedDefaultScopeByWeaponSetupSID } from "./defaultScopes.mts";
 import { GunDnipro_Upgrade_HoldBreathPos75Effect } from "./transformUpgradePrototypes.mts";
 import { modName } from "../../src/base-paths.mts";
-import { getDroppableScopeAlternative, removedDefaultScopeByWeaponSetupSID } from "./defaultScopes.mts";
 
 function mapUniqueAttachmentsToGeneric(
   fork: WeaponGeneralSetupPrototype,
@@ -52,14 +52,16 @@ function mapUniqueAttachmentsToGeneric(
 
     while (parent && parent.CompatibleAttachments) {
       parent.CompatibleAttachments.forEach(([_k, e]) => {
+        // An inherited unique attachment is pulled in as its generic alternative, never as itself.
+        const sid = uniqueAttachmentsToAlternatives[e.AttachPrototypeSID] || e.AttachPrototypeSID;
         if (
-          !fork.CompatibleAttachments[e.AttachPrototypeSID] &&
-          !struct.CompatibleAttachments.entries().find(([_k2, e2]) => e2.AttachPrototypeSID === e.AttachPrototypeSID)
+          !fork.CompatibleAttachments[sid] &&
+          !struct.CompatibleAttachments.entries().find(([_k2, e2]) => e2.AttachPrototypeSID === sid)
         ) {
           // no reassigning
-          const newE = e.clone();
+          const newE = Object.assign(e.clone(), { AttachPrototypeSID: sid });
           delete newE.BlockingUpgradeIDs;
-          fork.CompatibleAttachments.addNode(newE, e.AttachPrototypeSID);
+          fork.CompatibleAttachments.addNode(newE, sid);
         }
       });
       parent = context.structsById[parent.__internal__.refkey];
@@ -76,33 +78,41 @@ function mapUniqueAttachmentsToGeneric(
  * item generators (see defaultScopes.mts) with a small chance, so most of these weapons are
  * found bare and a scope stays a lucky find. Only scopes that have a droppable generic
  * equivalent are removed - the rest have no inventory representation to hand out.
+ *
+ * The whole preinstalled list is re-emitted, reindexed from 0 and without bpatch, so it replaces
+ * the shipped one outright - a bpatch merges the listed keys and never drops a sibling, and
+ * removing a single index with `[0] : removenode` did not take effect in game.
  */
 function stripDefaultScopes(fork: WeaponGeneralSetupPrototype, struct: WeaponGeneralSetupPrototype) {
   if (!struct.PreinstalledAttachmentsItemPrototypeSIDs) {
     return;
   }
   let removedScope: string;
-  struct.PreinstalledAttachmentsItemPrototypeSIDs.forEach(([k, e]) => {
+  const kept: Struct[] = [];
+  struct.PreinstalledAttachmentsItemPrototypeSIDs.forEach(([_k, e]) => {
     const scope = getDroppableScopeAlternative(e.AttachSID);
-    if (!scope) {
+    const isCompatible =
+      !!scope &&
+      [fork.CompatibleAttachments, struct.CompatibleAttachments].some((ca) =>
+        ca?.entries().some(([_k2, c]) => c.AttachPrototypeSID === scope),
+      );
+    if (isCompatible) {
+      removedScope = scope;
       return;
     }
-    const isCompatible = [fork.CompatibleAttachments, struct.CompatibleAttachments].some((ca) =>
-      ca?.entries().some(([_k, c]) => c.AttachPrototypeSID === scope),
-    );
-    if (!isCompatible) {
-      return;
-    }
-    fork.PreinstalledAttachmentsItemPrototypeSIDs ||= struct.PreinstalledAttachmentsItemPrototypeSIDs.fork();
-    fork.PreinstalledAttachmentsItemPrototypeSIDs.__internal__.bskipref = false;
-    fork.PreinstalledAttachmentsItemPrototypeSIDs.__internal__.bpatch = true;
-    fork.PreinstalledAttachmentsItemPrototypeSIDs.addNode(e.fork(), k);
-    fork.PreinstalledAttachmentsItemPrototypeSIDs.removeNode(k);
-    removedScope = scope;
+    kept.push(e.clone());
   });
-  if (removedScope) {
-    removedDefaultScopeByWeaponSetupSID[struct.SID] = removedScope;
+  if (!removedScope) {
+    return;
   }
+  const list = new Struct({}) as WeaponGeneralSetupPrototype["PreinstalledAttachmentsItemPrototypeSIDs"];
+  list.__internal__.isArray = true;
+  // Whatever the shipped list did about refkey inheritance still has to hold.
+  list.__internal__.bskipref = struct.PreinstalledAttachmentsItemPrototypeSIDs.__internal__.bskipref;
+  list.__internal__.bpatch = false;
+  kept.forEach((e, i) => list.addNode(e, i));
+  fork.PreinstalledAttachmentsItemPrototypeSIDs = list;
+  removedDefaultScopeByWeaponSetupSID[struct.SID] = removedScope;
 }
 
 function addUdpScopeCompatibility(fork: WeaponGeneralSetupPrototype, struct: WeaponGeneralSetupPrototype) {
