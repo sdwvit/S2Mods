@@ -1,0 +1,319 @@
+import { describe, expect, it } from "vitest";
+import { copyFileSync, readFileSync } from "node:fs";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import {
+  parseUasset,
+  renameLocalizationPackage,
+  writeLocalizedTexts,
+  type LocalizedTextEntry,
+} from "./uasset.mts";
+
+/**
+ * A localization asset exactly as the Mod Editor creates it: the `LocalizationModTextToolAsset`
+ * export is there but holds no texts. Every mod's asset starts life as this file, so writing into
+ * it is the path that has to work first.
+ */
+const EMPTY_FIXTURE = path.join(import.meta.dirname, "fixtures/empty-localization.uasset");
+
+/**
+ * The same asset after the Mod Editor saved three real, fully translated dialog topics into it -
+ * the shape (`ELocalizationLanguage::*` keys, non-ASCII text in most languages) our writer has to
+ * reproduce byte for byte.
+ */
+const AUTHORED_FIXTURE = path.join(import.meta.dirname, "fixtures/authored-localization.uasset");
+
+/** The same package with a fourth entry added - the editor's output for "add one more topic". */
+const AUTHORED2_FIXTURE = path.join(import.meta.dirname, "fixtures/authored2-localization.uasset");
+
+/** `AssetRegistryDataOffset` is a summary field; the section it names opens with an int64. */
+const dependencyDataOffset = (file: string) => {
+  const bytes = readFileSync(file);
+  const { summary } = parseUasset(file);
+  const at = summary.assetRegistryDataOffsetAt;
+  if (at === null) throw new Error("summary tail did not decode");
+  return Number(bytes.readBigInt64LE(bytes.readInt32LE(at)));
+};
+
+/** Copies a fixture into a scratch dir so the test writes over its own copy. */
+const scratchCopy = (fixture: string) => {
+  const file = path.join(mkdtempSync(path.join(tmpdir(), "s2-uasset-")), "localization.uasset");
+  copyFileSync(fixture, file);
+  return file;
+};
+
+describe("writeLocalizedTexts", () => {
+  it("fills an empty Mod Editor asset with entries that parse back", () => {
+    const file = scratchCopy(EMPTY_FIXTURE);
+    const before = parseUasset(file);
+    expect(before.exports[0].properties).toEqual({});
+
+    const entries = [
+      {
+        SID: "sid_test_a",
+        LanguagesToLocalizedStrings: {
+          English: "Alpha",
+          Ukrainian: "\u0410\u043b\u044c\u0444\u0430",
+        },
+      },
+      { SID: "sid_test_b", LanguagesToLocalizedStrings: { English: "Beta" } },
+    ];
+    writeLocalizedTexts(file, entries);
+
+    const after = parseUasset(file);
+    // The round trip is the contract: whatever we hand the writer is what the editor will read.
+    expect(after.exports[0].properties).toEqual({ LocalizedTexts: entries });
+    // Non-ASCII text goes out as UTF-16, so the payload is not simply the ASCII byte count.
+    expect(after.exports[0].serialSize).toBeGreaterThan(before.exports[0].serialSize);
+    expect(after.exports[0].serialOffset).toBe(after.summary.totalHeaderSize);
+  });
+
+  it("rewrites an asset that already has entries, without accumulating them", () => {
+    const file = scratchCopy(AUTHORED_FIXTURE);
+    writeLocalizedTexts(file, [
+      { SID: "sid_only_entry", LanguagesToLocalizedStrings: { English: "Only" } },
+    ]);
+    const { properties } = parseUasset(file).exports[0];
+    expect(properties).toEqual({
+      LocalizedTexts: [{ SID: "sid_only_entry", LanguagesToLocalizedStrings: { English: "Only" } }],
+    });
+  });
+
+  it("reproduces the editor's own bytes when rewriting what the editor wrote", () => {
+    const file = scratchCopy(AUTHORED_FIXTURE);
+    const original = readFileSync(AUTHORED_FIXTURE);
+    const entries = parseUasset(file).exports[0].properties?.LocalizedTexts as LocalizedTextEntry[];
+    expect(entries).toHaveLength(3);
+    // Every language the enum offers, keyed the way the editor keys them.
+    expect(Object.keys(entries[0].LanguagesToLocalizedStrings)).toContain(
+      "ELocalizationLanguage::Ukrainian",
+    );
+
+    writeLocalizedTexts(file, entries);
+    const rewritten = readFileSync(file);
+
+    expect(rewritten.length).toBe(original.length);
+    // NamesReferencedFromExportDataCount is the one field we do not reproduce: the editor counts
+    // the names the export data actually uses, we write the whole name count. It is a preload hint,
+    // so erring high costs a few eager name loads and nothing else. Everything else must match.
+    const at = parseUasset(file).summary.namesReferencedFromExportDataCountAt;
+    expect(at).not.toBeNull();
+    const differing = [...original.keys()].filter((i) => original[i] !== rewritten[i]);
+    expect(differing.every((i) => i >= at! && i < at! + 4)).toBe(true);
+  });
+
+  it("writes the same bytes whatever the template already held", () => {
+    // The point of dropping the old prefix: the output is a function of the package's identity and
+    // the entries, nothing else. Without it, writing over an asset that held *more* text leaves
+    // that text's names in the table, and the committed bytes drift with edit history.
+    const entries = [
+      { SID: "sid_test_a", LanguagesToLocalizedStrings: { English: "Alpha" } },
+      { SID: "sid_test_b", LanguagesToLocalizedStrings: { English: "Beta" } },
+    ];
+    const fresh = scratchCopy(AUTHORED2_FIXTURE);
+    writeLocalizedTexts(fresh, entries);
+
+    const reused = scratchCopy(AUTHORED2_FIXTURE);
+    writeLocalizedTexts(reused, [
+      ...entries,
+      { SID: "sid_test_c", LanguagesToLocalizedStrings: { English: "Gamma", Polish: "Gamma" } },
+    ]);
+    writeLocalizedTexts(reused, entries);
+
+    expect(readFileSync(reused)).toEqual(readFileSync(fresh));
+  });
+
+  it("leaves the template alone when writing to a separate destination", () => {
+    const template = scratchCopy(EMPTY_FIXTURE);
+    const before = readFileSync(template);
+    const dest = path.join(path.dirname(template), "generated.uasset");
+
+    writeLocalizedTexts(
+      template,
+      [{ SID: "sid_x", LanguagesToLocalizedStrings: { English: "X" } }],
+      dest,
+    );
+
+    expect(readFileSync(template)).toEqual(before);
+    expect(parseUasset(dest).exports[0].properties).toEqual({
+      LocalizedTexts: [{ SID: "sid_x", LanguagesToLocalizedStrings: { English: "X" } }],
+    });
+  });
+
+  it("shifts the asset registry's dependency data offset with the name table", () => {
+    const file = scratchCopy(AUTHORED_FIXTURE);
+    const before = parseUasset(file);
+    const dependencyBefore = dependencyDataOffset(file);
+
+    writeLocalizedTexts(file, [
+      { SID: "sid_test_entry_name", LanguagesToLocalizedStrings: { English: "Test" } },
+    ]);
+
+    const after = parseUasset(file);
+    const nameDelta = after.nameTableEnd - before.nameTableEnd;
+    // One entry in place of three: the names the old entries used are dropped, so the table
+    // shrinks. Either direction has to move the offsets below with it.
+    expect(nameDelta).toBeLessThan(0);
+    // Stale here and the editor seeks into the name table: "SerializeAssetRegistryDependencyData".
+    expect(dependencyDataOffset(file)).toBe(dependencyBefore + nameDelta);
+    expect(dependencyDataOffset(file)).toBeLessThan(after.summary.totalHeaderSize);
+  });
+});
+
+/**
+ * Bytes that identify the *package* rather than its content: the localization id (in the summary
+ * and again in `PackageMetaData`), the package guid and saved hash, `PackageSource` (a hash of the
+ * package name), and the FName hashes of the two names that spell the package path. Two assets the
+ * editor saved under different names differ here no matter what text they hold, so a test that
+ * rewrites one package's entries into another package's file has to look past them.
+ */
+const identityRanges = (file: string) => {
+  const bytes = readFileSync(file);
+  const { summary } = parseUasset(file);
+  const ranges: [number, number][] = [
+    [202, 234], // Guid + PackageSavedHash
+    [282, 286], // PackageSource
+  ];
+  const occurrences = (needle: string) => {
+    const found: number[] = [];
+    for (
+      let at = bytes.indexOf(needle, 0, "latin1");
+      at !== -1;
+      at = bytes.indexOf(needle, at + 1, "latin1")
+    )
+      found.push(at);
+    return found;
+  };
+  for (const at of occurrences(summary.localizationId))
+    ranges.push([at, at + summary.localizationId.length]);
+  // An FName entry is the string then its two hashes; both spellings of the package name are FNames.
+  const shortName = summary.packageName.slice(summary.packageName.lastIndexOf("/") + 1);
+  for (const name of [summary.packageName, shortName])
+    for (const at of occurrences(name + "\0")) {
+      const end = at + name.length + 1;
+      if (end + 4 <= summary.nameOffset + bytes.length) ranges.push([end, end + 4]);
+    }
+  return ranges;
+};
+
+/** Byte positions where two buffers differ, as inclusive-exclusive runs. */
+const differingRanges = (a: Buffer, b: Buffer) => {
+  const runs: [number, number][] = [];
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    if (a[i] === b[i]) continue;
+    const last = runs[runs.length - 1];
+    if (last && last[1] === i) last[1] = i + 1;
+    else runs.push([i, i + 1]);
+  }
+  return runs;
+};
+
+describe.each([
+  ["an empty asset", EMPTY_FIXTURE, AUTHORED_FIXTURE],
+  ["an empty asset", EMPTY_FIXTURE, AUTHORED2_FIXTURE],
+  ["an asset that already has entries", AUTHORED_FIXTURE, AUTHORED2_FIXTURE],
+])("filling %s", (_what, from, expected) => {
+  it(`reproduces the editor's own bytes for ${path.basename(expected)}`, () => {
+    const wanted = readFileSync(expected);
+    const entries = parseUasset(expected).exports[0].properties
+      ?.LocalizedTexts as LocalizedTextEntry[];
+    const file = scratchCopy(from);
+    writeLocalizedTexts(file, entries);
+
+    // The scratch file is still the *source* package, so rename it onto the expected one - every
+    // spelling is the same length - and what is left has to be identity bytes only.
+    const source = parseUasset(from).summary.packageName;
+    const target = parseUasset(expected).summary.packageName;
+    const ours = Buffer.from(
+      readFileSync(file)
+        .toString("latin1")
+        .replaceAll(source, target)
+        .replaceAll(
+          source.slice(source.lastIndexOf("/") + 1),
+          target.slice(target.lastIndexOf("/") + 1),
+        ),
+      "latin1",
+    );
+
+    expect(ours.length).toBe(wanted.length);
+    const allowed = identityRanges(expected);
+    const unexplained = differingRanges(wanted, ours).filter(
+      ([a, b]) => !allowed.some(([from_, to]) => a >= from_ && b <= to),
+    );
+    expect(unexplained).toEqual([]);
+  });
+});
+
+describe("renameLocalizationPackage", () => {
+  /** A scratch path to rename into, next to the copy so nothing is written over a fixture. */
+  const scratchDest = (name = "renamed.uasset") =>
+    path.join(mkdtempSync(path.join(tmpdir(), "s2-rename-")), name);
+
+  it("spells the new name everywhere the old one appeared", () => {
+    const dest = scratchDest();
+    renameLocalizationPackage(
+      EMPTY_FIXTURE,
+      "/AVeryLongModNameIndeed/AVeryLongModNameIndeed-Localization12",
+      dest,
+    );
+
+    const parsed = parseUasset(dest);
+    expect(parsed.summary.packageName).toBe(
+      "/AVeryLongModNameIndeed/AVeryLongModNameIndeed-Localization12",
+    );
+    expect(parsed.exports[0].objectName).toBe("AVeryLongModNameIndeed-Localization12");
+    // The asset registry section and the summary spell it out too, so nothing may be left over -
+    // a stale spelling there is what makes the editor list a package it cannot then load.
+    expect(readFileSync(dest).includes("FactionPatches")).toBe(false);
+    // Both length changes (the summary FString, the name table, the registry strings) have to have
+    // been pushed through every stored offset: the parser is strict about the summary tail landing
+    // on the name table, and these two are the offsets it does not check for itself.
+    expect(parsed.exports[0].serialOffset).toBe(parsed.summary.totalHeaderSize);
+    expect(dependencyDataOffset(dest)).toBeLessThan(parsed.summary.totalHeaderSize);
+  });
+
+  it("is byte-exact in reverse, so the offsets it patched were the only difference", () => {
+    const away = scratchDest("away.uasset");
+    const back = scratchDest("back.uasset");
+    renameLocalizationPackage(EMPTY_FIXTURE, "/Other/Other-LocalizationWithALongName", away);
+    renameLocalizationPackage(away, parseUasset(EMPTY_FIXTURE).summary.packageName, back);
+
+    const original = readFileSync(EMPTY_FIXTURE);
+    const returned = readFileSync(back);
+    expect(returned.length).toBe(original.length);
+    // Except the localization id, which is re-derived rather than carried: it namespaces the
+    // package's gathered text, so two mods minted from this fixture must not share one.
+    const idAt = [...original.keys()].filter(
+      (i) =>
+        original.subarray(i, i + 32).toString("latin1") ===
+        parseUasset(EMPTY_FIXTURE).summary.localizationId,
+    );
+    expect(idAt.length).toBe(2); // the summary, and PackageMetaData's localization namespace
+    const differing = [...original.keys()].filter((i) => original[i] !== returned[i]);
+    expect(differing.every((i) => idAt.some((at) => i >= at && i < at + 32))).toBe(true);
+  });
+
+  it("derives the localization id from the new name", () => {
+    const a = scratchDest("a.uasset");
+    const b = scratchDest("b.uasset");
+    const again = scratchDest("again.uasset");
+    renameLocalizationPackage(EMPTY_FIXTURE, "/A/A-Localization", a);
+    renameLocalizationPackage(EMPTY_FIXTURE, "/B/B-Localization", b);
+    renameLocalizationPackage(EMPTY_FIXTURE, "/A/A-Localization", again);
+
+    expect(parseUasset(a).summary.localizationId).not.toBe(parseUasset(b).summary.localizationId);
+    expect(parseUasset(a).summary.localizationId).toBe(parseUasset(again).summary.localizationId);
+  });
+
+  it("hands the writer a package it can fill", () => {
+    const dest = scratchDest();
+    renameLocalizationPackage(EMPTY_FIXTURE, "/NewMod/NewMod-Localization2", dest);
+    const entries = [{ SID: "sid_new", LanguagesToLocalizedStrings: { English: "New" } }];
+    writeLocalizedTexts(dest, entries);
+
+    const parsed = parseUasset(dest);
+    expect(parsed.exports[0].properties).toEqual({ LocalizedTexts: entries });
+    expect(parsed.summary.packageName).toBe("/NewMod/NewMod-Localization2");
+  });
+});

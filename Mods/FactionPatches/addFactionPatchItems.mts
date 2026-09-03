@@ -4,6 +4,7 @@ import type { QuestItemPrototype } from "s2cfgtojson";
 import type { CoreFaction } from "../../src/consts.mts";
 import { getRecord } from "../../src/consts.mts";
 import { modName } from "../../src/base-paths.mts";
+import { writeFactionPatchLocalization } from "./writeLocalization.mts";
 
 let addFactionPatchesOnce = false;
 
@@ -16,19 +17,71 @@ export const FactionPatchDefinitions: {
   cost?: number;
   Faction: CoreFaction;
 }[] = [
-  { Faction: "Bandits", SID: `FactionPatchBandits`, Icon: `${ICON_BASE}T_inv_BanditsPatch.T_inv_BanditsPatch'` },
-  { Faction: "Corpus", SID: `FactionPatchCorpus`, Icon: `${ICON_BASE}T_inv_CorpusPatch.T_inv_CorpusPatch'` },
-  { Faction: "Duty", SID: `FactionPatchDuty`, Icon: `${ICON_BASE}T_inv_DutyPatch.T_inv_DutyPatch'` },
-  { Faction: "FreeStalkers", SID: `FactionPatchFreeStalkers`, Icon: `${ICON_BASE}T_inv_LonersPatch.T_inv_LonersPatch'` },
-  { Faction: "Freedom", SID: `FactionPatchFreedom`, Icon: `${ICON_BASE}T_inv_FreedomPatch.T_inv_FreedomPatch'` },
-  { Faction: "Mercenaries", SID: `FactionPatchMercenaries`, Icon: `${ICON_BASE}T_inv_MercenariesPatch.T_inv_MercenariesPatch'` },
-  { Faction: "Militaries", SID: `FactionPatchMilitaries`, Icon: `${ICON_BASE}T_inv_ISPFPatch.T_inv_ISPFPatch'` },
-  { Faction: "Monolith", SID: `FactionPatchMonolith`, Icon: `${ICON_BASE}T_inv_MonolithPatch.T_inv_MonolithPatch'` },
-  { Faction: "Neutrals", SID: `FactionPatchNeutrals`, Icon: `${ICON_BASE}T_inv_NeutralPatch.T_inv_NeutralPatch'` },
-  { Faction: "Noon", SID: `FactionPatchNoon`, Icon: `${ICON_BASE}T_inv_NoonPatch.T_inv_NoonPatch'` },
-  { Faction: "Scientists", SID: `FactionPatchScientists`, Icon: `${ICON_BASE}T_inv_ScientistPatch.T_inv_ScientistPatch'` },
-  { Faction: "Spark", SID: `FactionPatchSpark`, Icon: `${ICON_BASE}T_inv_SparkPatch.T_inv_SparkPatch'` },
-  { Faction: "Varta", SID: `FactionPatchVarta`, Icon: `${ICON_BASE}T_inv_VartaPatch.T_inv_VartaPatch'` },
+  {
+    Faction: "Bandits",
+    SID: `FactionPatchBandits`,
+    Icon: `${ICON_BASE}T_inv_BanditsPatch.T_inv_BanditsPatch'`,
+  },
+  {
+    Faction: "Corpus",
+    SID: `FactionPatchCorpus`,
+    Icon: `${ICON_BASE}T_inv_CorpusPatch.T_inv_CorpusPatch'`,
+  },
+  {
+    Faction: "Duty",
+    SID: `FactionPatchDuty`,
+    Icon: `${ICON_BASE}T_inv_DutyPatch.T_inv_DutyPatch'`,
+  },
+  {
+    Faction: "FreeStalkers",
+    SID: `FactionPatchFreeStalkers`,
+    Icon: `${ICON_BASE}T_inv_LonersPatch.T_inv_LonersPatch'`,
+  },
+  {
+    Faction: "Freedom",
+    SID: `FactionPatchFreedom`,
+    Icon: `${ICON_BASE}T_inv_FreedomPatch.T_inv_FreedomPatch'`,
+  },
+  {
+    Faction: "Mercenaries",
+    SID: `FactionPatchMercenaries`,
+    Icon: `${ICON_BASE}T_inv_MercenariesPatch.T_inv_MercenariesPatch'`,
+  },
+  {
+    Faction: "Militaries",
+    SID: `FactionPatchMilitaries`,
+    Icon: `${ICON_BASE}T_inv_ISPFPatch.T_inv_ISPFPatch'`,
+  },
+  {
+    Faction: "Monolith",
+    SID: `FactionPatchMonolith`,
+    Icon: `${ICON_BASE}T_inv_MonolithPatch.T_inv_MonolithPatch'`,
+  },
+  {
+    Faction: "Neutrals",
+    SID: `FactionPatchNeutrals`,
+    Icon: `${ICON_BASE}T_inv_NeutralPatch.T_inv_NeutralPatch'`,
+  },
+  {
+    Faction: "Noon",
+    SID: `FactionPatchNoon`,
+    Icon: `${ICON_BASE}T_inv_NoonPatch.T_inv_NoonPatch'`,
+  },
+  {
+    Faction: "Scientists",
+    SID: `FactionPatchScientists`,
+    Icon: `${ICON_BASE}T_inv_ScientistPatch.T_inv_ScientistPatch'`,
+  },
+  {
+    Faction: "Spark",
+    SID: `FactionPatchSpark`,
+    Icon: `${ICON_BASE}T_inv_SparkPatch.T_inv_SparkPatch'`,
+  },
+  {
+    Faction: "Varta",
+    SID: `FactionPatchVarta`,
+    Icon: `${ICON_BASE}T_inv_VartaPatch.T_inv_VartaPatch'`,
+  },
 ];
 
 export const patchDefsRecord = getRecord(FactionPatchDefinitions);
@@ -39,8 +92,17 @@ export function addFactionPatchItems() {
   }
   addFactionPatchesOnce = true;
 
+  // The item names and descriptions live in the mod's text asset, keyed off the same SIDs as the
+  // prototypes below - regenerate it here so the two can never drift apart.
+  writeFactionPatchLocalization();
+
   const template = new Struct({
-    __internal__: { refurl: "../ItemPrototypes.cfg", refkey: "[0]", rawName: FactionPatchSID, isRoot: true },
+    __internal__: {
+      refurl: "../ItemPrototypes.cfg",
+      refkey: "[0]",
+      rawName: FactionPatchSID,
+      isRoot: true,
+    },
     SID: FactionPatchSID,
     Icon: `${ICON_BASE}T_inv_BanditsPatch.T_inv_BanditsPatch'`,
     MeshPrototypeSID: "Icon",

@@ -29,6 +29,11 @@ export async function pullAssets() {
   // the pull makes raw/ look newer than the staged cook, and the next publisher re-cooks for nothing.
   // The filter keeps the cooker's own scratch packages out of raw/: they are regenerated with a new
   // id every cook, so pulling them in would invalidate the fingerprint the cook just recorded.
+  // Localization assets are deliberately NOT filtered out any more: writeModLocalization writes
+  // the generated one into raw/ *and* over the SDK's copy, so the pull is a no-op for it - while
+  // an asset authored in the Mod Editor and never generated here (a mod with no
+  // writeLocalization.mts) has to reach raw/ like any other .uasset, or it is never committed and
+  // never packed.
   cpSync(sourcePath, destinationPath, {
     recursive: true,
     force: true,

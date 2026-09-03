@@ -1,5 +1,5 @@
 /**
- * Regenerates `raw/Stalker2/Content/DecoupledRanks-localization.uasset` from this mod's own item
+ * Regenerates `raw/Stalker2/Content/DecoupledRanks-Localization2.uasset` from this mod's own item
  * definitions: the level counter, the four rank indicators, and the faction patches it ships
  * alongside FactionPatches.
  *
@@ -22,8 +22,8 @@ import {
   itemLocalization,
   writeModLocalization,
   type TemplateByLanguage,
-} from "../../src/localization-text.mts";
-import type { LocalizedTextEntry } from "../../src/localization-uasset.mts";
+} from "../../src/localization/text.mts";
+import type { LocalizedTextEntry } from "../../src/localization/uasset.mts";
 import { factionPatchLocalization } from "../FactionPatches/writeLocalization.mts";
 import { FactionPatchDefinitions } from "../FactionPatches/addFactionPatchItems.mts";
 import {
@@ -425,4 +425,4 @@ const onNonQuestSIDs = (entries: LocalizedTextEntry[]): LocalizedTextEntry[] => 
  * from the item definitions, so the bytes only change when an item or a translation does.
  */
 export const writeDecoupledRanksLocalization = () =>
-  writeModLocalization(import.meta.url, decoupledRanksLocalization());
+  writeModLocalization(import.meta.url, decoupledRanksLocalization(), "DecoupledRanks-Localization2");

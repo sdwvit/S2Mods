@@ -8,7 +8,8 @@ export const meta: MetaType = {
 Adds Faction Patches as a simple item. Drops from dead bodies. 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "recook",
+  changenote:
+    "Faction patches now have localized names and descriptions in all 18 game languages instead of showing raw SIDs.",
   structTransformers: [
     addFactionPatchItems,
     transformItemGeneratorPrototypes,
