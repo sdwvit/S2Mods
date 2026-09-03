@@ -59,10 +59,19 @@ export type UassetSummary = {
   importCount: number;
   importOffset: number;
   dependsOffset: number;
+  /**
+   * Byte offsets *of* the two summary fields that point past the export data, so the writer can
+   * patch them without guessing. `null` when the summary tail did not decode to exactly
+   * `nameOffset`, i.e. we lost alignment and must not write to this package at all.
+   */
+  bulkDataStartOffsetAt: number | null;
+  payloadTocOffsetAt: number | null;
 };
 
 export type Uasset = {
   summary: UassetSummary;
+  /** Derived from the table bounds, not hardcoded - see `readExports`. */
+  exportStride: number;
   names: string[];
   imports: UassetImport[];
   exports: UassetExport[];
@@ -70,12 +79,25 @@ export type Uasset = {
 
 const PACKAGE_FILE_TAG = 0x9e2a83c1;
 
+/**
+ * `EUnrealEngineObjectUE5Version` values the summary layout and the property-tag layout hinge on.
+ * The SDK writes 1013; older hand-made assets in this repo are 1008, which is *before* complete
+ * property type names, so their exports use the legacy tag format this parser does not implement.
+ */
+const UE5_NAMES_REFERENCED_FROM_EXPORT_DATA = 1001;
+const UE5_PAYLOAD_TOC = 1002;
+const UE5_ADD_SOFTOBJECTPATH_LIST = 1008;
+const UE5_DATA_RESOURCES = 1009;
+const UE5_PROPERTY_TAG_COMPLETE_TYPE_NAME = 1012;
+
 /** `EPropertyTagFlags` (UE 5.4). */
 const TAG_HAS_ARRAY_INDEX = 1 << 0;
 const TAG_HAS_PROPERTY_GUID = 1 << 1;
 const TAG_HAS_PROPERTY_EXTENSIONS = 1 << 2;
 const TAG_HAS_BINARY_OR_NATIVE_SERIALIZE = 1 << 3;
 const TAG_BOOL_TRUE = 1 << 4;
+/** `EPropertyTagExtension::OverridableInformation`. */
+const TAG_EXT_OVERRIDABLE_INFORMATION = 1 << 0;
 /**
  * Native structs (`Guid`, vectors, ...) serialise as opaque binary rather than tagged properties,
  * and there is no schema in the package to tell us their layout. Those are surfaced as raw bytes
@@ -83,12 +105,28 @@ const TAG_BOOL_TRUE = 1 << 4;
  */
 export const RAW_BYTES = "__rawBytes";
 
-class Reader {
-  constructor(
-    readonly buf: Buffer,
-    public pos = 0,
-  ) {}
+/** Export classes whose bytes are not a tagged property list at all. */
+const NATIVELY_SERIALISED_EXPORTS = new Set([
+  "MetaData",
+  "AssetImportData",
+  "InterchangeAssetImportData",
+]);
 
+class Reader {
+  // Spelled out rather than as constructor parameter properties: these .mts files are run by
+  // `node` directly, whose type-stripping does not support them.
+  readonly buf: Buffer;
+  pos: number;
+
+  constructor(buf: Buffer, pos = 0) {
+    this.buf = buf;
+    this.pos = pos;
+  }
+
+  /** `this.pos += n` is a trap here: it reads the old `pos` before evaluating `n`. */
+  skip(n: number) {
+    this.pos += n;
+  }
   u8() {
     return this.buf.readUInt8(this.pos++);
   }
@@ -166,6 +204,49 @@ const readTypeName = (r: Reader, names: string[]): PropertyTypeName => {
 export const formatTypeName = (t: PropertyTypeName): string =>
   t.params.length ? `${t.name}(${t.params.map(formatTypeName).join(",")})` : t.name;
 
+/** `PKG_FilterEditorOnly` - set on cooked packages, and drops a handful of summary fields. */
+const PKG_FILTER_EDITOR_ONLY = 0x8000_0000;
+
+/** `FEngineVersion`: major/minor/patch as uint16, changelist as uint32, then the branch name. */
+const readEngineVersion = (r: Reader) => {
+  r.skip(2 * 3 + 4); // major, minor, patch (uint16), changelist (uint32)
+  r.fstring(); // branch
+};
+
+/**
+ * The tail of `FPackageFileSummary` past `DependsOffset`. Nothing in it is interesting to read,
+ * but two of its fields (`BulkDataStartOffset`, `PayloadTocOffset`) are the only offsets in the
+ * package that point *past* the export data, so the writer has to patch them - and their byte
+ * positions move with the length of every FString ahead of them (the package name, the
+ * localization id, the two engine-version branch names). Hence: walk it, record where they landed.
+ */
+function readSummaryTail(r: Reader, packageFlags: number, ue5: number) {
+  r.skip(4 * 2); // SoftPackageReferencesCount, SoftPackageReferencesOffset
+  r.i32(); // SearchableNamesOffset
+  r.i32(); // ThumbnailTableOffset
+  r.guid(); // Guid
+  if (!(packageFlags & PKG_FILTER_EDITOR_ONLY)) r.guid(); // PersistentGuid
+  r.skip(r.i32() * 8); // Generations: (ExportCount, NameCount) each
+  readEngineVersion(r); // SavedByEngineVersion
+  readEngineVersion(r); // CompatibleWithEngineVersion
+  r.u32(); // CompressionFlags
+  r.skip(r.i32() * 16); // CompressedChunks - always empty in modern packages
+  r.u32(); // PackageSource
+  r.skip(r.i32() * 4); // AdditionalPackagesToCook - FString array, always empty
+  r.i32(); // AssetRegistryDataOffset
+  const bulkDataStartOffsetAt = r.pos;
+  r.i64();
+  r.i32(); // WorldTileInfoDataOffset
+  r.skip(r.i32() * 4); // ChunkIDs
+  r.i32(); // PreloadDependencyCount
+  r.i32(); // PreloadDependencyOffset
+  if (ue5 >= UE5_NAMES_REFERENCED_FROM_EXPORT_DATA) r.i32(); // NamesReferencedFromExportDataCount
+  const payloadTocOffsetAt = ue5 >= UE5_PAYLOAD_TOC ? r.pos : null;
+  if (payloadTocOffsetAt !== null) r.i64();
+  if (ue5 >= UE5_DATA_RESOURCES) r.i32(); // DataResourceOffset
+  return { bulkDataStartOffsetAt, payloadTocOffsetAt, end: r.pos };
+}
+
 function readSummary(r: Reader): UassetSummary {
   const tag = r.u32();
   if (tag !== PACKAGE_FILE_TAG) {
@@ -176,7 +257,8 @@ function readSummary(r: Reader): UassetSummary {
   const legacyFileVersion = r.i32();
   if (legacyFileVersion !== -4) r.i32(); // LegacyUE3Version
   const fileVersionUE4 = r.i32();
-  const fileVersionUE5 = r.i32();
+  // Only packages at LegacyFileVersion -8 or older carry a separate UE5 version.
+  const fileVersionUE5 = legacyFileVersion <= -8 ? r.i32() : 0;
   const fileVersionLicenseeUE4 = r.i32();
 
   const customVersions: { key: string; version: number }[] = [];
@@ -190,8 +272,10 @@ function readSummary(r: Reader): UassetSummary {
   const packageFlags = r.u32();
   const nameCount = r.i32();
   const nameOffset = r.i32();
-  r.i32(); // SoftObjectPathsCount
-  r.i32(); // SoftObjectPathsOffset
+  if (fileVersionUE5 >= UE5_ADD_SOFTOBJECTPATH_LIST) {
+    r.i32(); // SoftObjectPathsCount
+    r.i32(); // SoftObjectPathsOffset
+  }
   const localizationId = r.fstring();
   r.i32(); // GatherableTextDataCount
   r.i32(); // GatherableTextDataOffset
@@ -200,6 +284,17 @@ function readSummary(r: Reader): UassetSummary {
   const importCount = r.i32();
   const importOffset = r.i32();
   const dependsOffset = r.i32();
+
+  // The tail is only trustworthy if it lands exactly on the name table; if it does not, we
+  // mis-modelled some field and the writer must refuse rather than corrupt the summary.
+  let tail: { bulkDataStartOffsetAt: number; payloadTocOffsetAt: number | null } | null = null;
+  try {
+    const t = readSummaryTail(r, packageFlags, fileVersionUE5);
+    if (t.end === nameOffset) tail = t;
+    else logger.warn(`summary tail ended at ${t.end}, expected name table at ${nameOffset}`);
+  } catch (e) {
+    logger.warn(`could not read summary tail: ${(e as Error).message}`);
+  }
 
   return {
     legacyFileVersion,
@@ -218,6 +313,8 @@ function readSummary(r: Reader): UassetSummary {
     importCount,
     importOffset,
     dependsOffset,
+    bulkDataStartOffsetAt: tail?.bulkDataStartOffsetAt ?? null,
+    payloadTocOffsetAt: tail?.payloadTocOffsetAt ?? null,
   };
 }
 
@@ -226,7 +323,7 @@ const readNameTable = (r: Reader, summary: UassetSummary) => {
   const names: string[] = [];
   for (let i = 0; i < summary.nameCount; i++) {
     names.push(r.fstring());
-    r.pos += 4; // FNameEntry hashes
+    r.skip(4); // FNameEntry hashes: two uint16 (case-preserving and not)
   }
   return names;
 };
@@ -256,7 +353,7 @@ function readImports(r: Reader, summary: UassetSummary, names: string[]): Uasset
 
 function readExports(r: Reader, summary: UassetSummary, names: string[], imports: UassetImport[]) {
   const { exportOffset, exportCount, dependsOffset } = summary;
-  if (exportCount === 0) return [];
+  if (exportCount === 0) return { exports: [], stride: 0 };
   const stride = (dependsOffset - exportOffset) / exportCount;
   const exports: UassetExport[] = [];
   for (let i = 0; i < exportCount; i++) {
@@ -271,12 +368,13 @@ function readExports(r: Reader, summary: UassetSummary, names: string[], imports
     const serialOffset = r.i64();
     exports.push({
       objectName,
+      // FPackageIndex: negative is an import, positive a (1-based) export, 0 is null.
       className: classIndex < 0 ? (imports[-classIndex - 1]?.objectName ?? null) : null,
       serialOffset,
       serialSize,
     });
   }
-  return exports;
+  return { exports, stride };
 }
 
 function readTaggedProperties(
@@ -293,7 +391,13 @@ function readTaggedProperties(
     const flags = r.u8();
     if (flags & TAG_HAS_ARRAY_INDEX) r.i32();
     if (flags & TAG_HAS_PROPERTY_GUID) r.guid();
-    if (flags & TAG_HAS_PROPERTY_EXTENSIONS) r.u8();
+    if (flags & TAG_HAS_PROPERTY_EXTENSIONS) {
+      // `EPropertyTagExtension` bitfield; `OverridableInformation` adds an operation byte and a
+      // bool after it. Never seen in these packages, but mis-sizing it would desynchronise the
+      // whole property list rather than a single value.
+      const ext = r.u8();
+      if (ext & TAG_EXT_OVERRIDABLE_INFORMATION) r.skip(2);
+    }
 
     // A bool carries its value in the flags and occupies no bytes at all.
     if (type.name === "BoolProperty" && size === 0) {
@@ -327,8 +431,11 @@ function readValue(r: Reader, names: string[], type: PropertyTypeName, end: numb
     case "Int8Property":
       return r.buf.readInt8(r.pos++);
     case "ByteProperty":
-      // Serialises as an FName when the tag names an enum, as a raw byte otherwise.
-      return end - r.pos === 8 ? readName(r, names) : r.buf.readUInt8(r.pos++);
+      // Serialises as an FName when the property has an enum, as a raw byte otherwise. UE 5.4's
+      // complete type names carry the enum as a parameter (`ByteProperty(EFoo)`), so ask the type
+      // rather than guessing from the remaining length - which would be wrong for every element
+      // but the last inside an array or map of byte enums.
+      return type.params.length ? readName(r, names) : r.buf.readUInt8(r.pos++);
     case "EnumProperty":
       return readName(r, names);
     case "Int16Property": {
@@ -398,10 +505,23 @@ export function parseUasset(file: string): Uasset {
   const summary = readSummary(r);
   const names = readNameTable(r, summary);
   const imports = readImports(r, summary, names);
-  const exports = readExports(r, summary, names, imports);
+  const { exports, stride: exportStride } = readExports(r, summary, names, imports);
+
+  // Tagged property values are only readable here in the UE 5.4 complete-type-name format; the
+  // legacy Type/InnerType/StructName layout is a different parser and not implemented.
+  if (summary.fileVersionUE5 < UE5_PROPERTY_TAG_COMPLETE_TYPE_NAME) {
+    logger.warn(
+      `${file}: FileVersionUE5 ${summary.fileVersionUE5} predates complete property type names,` +
+        ` reading header only`,
+    );
+    return { summary, exportStride, names, imports, exports };
+  }
 
   for (const exp of exports) {
     if (!exp.serialSize) continue;
+    // These serialise natively (MetaData is a TMap<FName, TMap<FName, FString>>), so attempting a
+    // tagged-property read only produces a warning about garbage.
+    if (exp.className && NATIVELY_SERIALISED_EXPORTS.has(exp.className)) continue;
     r.pos = exp.serialOffset;
     r.u8(); // __SerializationControlExtensions
     try {
@@ -411,7 +531,7 @@ export function parseUasset(file: string): Uasset {
     }
   }
 
-  return { summary, names, imports, exports };
+  return { summary, exportStride, names, imports, exports };
 }
 
 /**
@@ -428,10 +548,6 @@ export type LocalizedTextEntry = {
   LanguagesToLocalizedStrings: Record<string, string>;
 };
 
-/** Byte offsets of the summary fields that point past the export data. */
-const BULK_DATA_START_OFFSET_AT = 286;
-const PAYLOAD_TOC_OFFSET_AT = 314;
-const EXPORT_ENTRY_STRIDE = 112;
 const EXPORT_SERIAL_SIZE_AT = 28;
 const EXPORT_SERIAL_OFFSET_AT = 36;
 
@@ -562,6 +678,9 @@ export function serializeLocalizedTexts(names: string[], entries: LocalizedTextE
 export function writeLocalizedTexts(file: string, entries: LocalizedTextEntry[]) {
   const original = readFileSync(file);
   const parsed = parseUasset(file);
+  const { summary, exportStride } = parsed;
+  if (summary.bulkDataStartOffsetAt === null)
+    throw new Error(`${file}: summary tail did not decode, refusing to write`);
   const index = parsed.exports.findIndex((e) => e.className === "LocalizationModTextToolAsset");
   if (index === -1) throw new Error(`${file} has no LocalizationModTextToolAsset export`);
   const target = parsed.exports[index];
@@ -575,23 +694,20 @@ export function writeLocalizedTexts(file: string, entries: LocalizedTextEntry[])
   ]);
 
   // Everything after this export shifts by `delta`: the later exports' payloads, plus the two
-  // summary offsets that point past the export data.
-  out.writeBigInt64LE(
-    BigInt(payload.length),
-    parsed.summary.exportOffset + index * EXPORT_ENTRY_STRIDE + EXPORT_SERIAL_SIZE_AT,
-  );
+  // summary offsets that point past the export data. Every other offset in the package lives
+  // inside the header, which we do not touch.
+  const exportField = (i: number, at: number) => summary.exportOffset + i * exportStride + at;
+  out.writeBigInt64LE(BigInt(payload.length), exportField(index, EXPORT_SERIAL_SIZE_AT));
   for (let i = index + 1; i < parsed.exports.length; i++) {
-    const at = parsed.summary.exportOffset + i * EXPORT_ENTRY_STRIDE + EXPORT_SERIAL_OFFSET_AT;
+    const at = exportField(i, EXPORT_SERIAL_OFFSET_AT);
     out.writeBigInt64LE(BigInt(parsed.exports[i].serialOffset + delta), at);
   }
-  out.writeBigInt64LE(
-    BigInt(Number(out.readBigInt64LE(BULK_DATA_START_OFFSET_AT)) + delta),
-    BULK_DATA_START_OFFSET_AT,
-  );
-  out.writeBigInt64LE(
-    BigInt(Number(out.readBigInt64LE(PAYLOAD_TOC_OFFSET_AT)) + delta),
-    PAYLOAD_TOC_OFFSET_AT,
-  );
+  for (const at of [summary.bulkDataStartOffsetAt, summary.payloadTocOffsetAt]) {
+    if (at === null) continue; // PayloadTocOffset predates this package's engine version
+    const value = Number(out.readBigInt64LE(at));
+    // Both fields use INDEX_NONE when absent; shifting a sentinel would turn it into an offset.
+    if (value > 0) out.writeBigInt64LE(BigInt(value + delta), at);
+  }
 
   writeFileSync(file, out);
   return out.length;
