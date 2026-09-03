@@ -30,6 +30,10 @@ export function addMutantPartItems() {
       new Struct({
         __internal__: { refkey: SID, rawName: questSID, isRoot: true },
         SID: questSID,
+        // Without this the clone keeps the vanilla loot item's `LocalizationSID` and shows its
+        // name. This variant never survives pickup - the quest graph swaps it for the vanilla
+        // part - so it gets text of its own, saying only how much XP it is worth.
+        LocalizationSID: questSID,
       }),
   ) as MutantLootPrototype[];
 }

@@ -57,6 +57,15 @@ XP table:[h1][/h1]
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Fixed missing faction patch icons: icon textures were referenced from the FactionPatches mount instead of this mod's own, so they did not show up unless FactionPatches was installed.",
-  structTransformers: [transformQuestNodePrototypes, transformQuestRegistration, transformKeyItemPrototypes, transformGlobalVariablePrototypes, transformItemGeneratorPrototypes, addMutantPartItems, transformMutantLootGenerators],
+  changenote:
+    "The quest-only pickups now say what they are worth: a faction patch taken off a body and a part cut from a mutant show \"+N XP\" with a line explaining it counts the moment you pick it up, instead of borrowing the patch's or the vanilla mutant part's name. The patch you actually keep is unchanged - it still carries its faction's name and description.",
+  structTransformers: [
+    transformQuestNodePrototypes,
+    transformQuestRegistration,
+    transformKeyItemPrototypes,
+    transformGlobalVariablePrototypes,
+    transformItemGeneratorPrototypes,
+    addMutantPartItems,
+    transformMutantLootGenerators,
+  ],
 };

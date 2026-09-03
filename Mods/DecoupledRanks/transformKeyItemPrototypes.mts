@@ -2,6 +2,7 @@ import { Struct } from "s2cfgtojson";
 import type { EItemType, ERank } from "s2cfgtojson";
 import type { QuestItemPrototype } from "s2cfgtojson";
 import { addFactionPatchItems } from "../FactionPatches/addFactionPatchItems.mts";
+import { writeDecoupledRanksLocalization } from "./writeLocalization.mts";
 
 const NON_QUEST_SUFFIX = "_NonQuest";
 
@@ -32,6 +33,10 @@ export function transformKeyItemPrototypes() {
   if (once) return;
   once = true;
 
+  // The names and descriptions of every item below live in the mod's text asset, keyed off these
+  // same SIDs - regenerate it here so the two can never drift apart.
+  writeDecoupledRanksLocalization();
+
   const levelCounterItem = new Struct({
     __internal__: {
       refurl: "../ItemPrototypes.cfg",
@@ -40,8 +45,6 @@ export function transformKeyItemPrototypes() {
       isRoot: true,
     },
     SID: LEVEL_COUNTER_ITEM_SID,
-    Name: "Rank Level",
-    LocalizationSID: "Rank Level",
     Icon: LEVEL_COUNTER_ICON,
     MeshPrototypeSID: "Icon",
     Weight: 0,
@@ -52,24 +55,27 @@ export function transformKeyItemPrototypes() {
     ItemGridWidth: 1,
     ItemGridHeight: 1,
   }) as QuestItemPrototype;
-  const rankIndicatorItems = Object.entries(RANK_INDICATOR_ITEM_SIDS).map(([rank, sid]) => {
-    const rankName = rank.replace("ERank::", "");
-    return new Struct({
-      __internal__: { refurl: "../ItemPrototypes.cfg", refkey: "[0]", rawName: sid, isRoot: true },
-      SID: sid,
-      Name: `Rank: ${rankName}`,
-      LocalizationSID: `Rank: ${rankName}`,
-      Icon: RANK_INDICATOR_ICONS[rank as keyof typeof RANK_INDICATOR_ICONS],
-      MeshPrototypeSID: "Icon",
-      Weight: 0,
-      Cost: 0,
-      Type: "EItemType::Other" as EItemType,
-      MaxStackCount: 1,
-      IsQuestItem: true,
-      ItemGridWidth: 1,
-      ItemGridHeight: 1,
-    }) as QuestItemPrototype;
-  });
+  const rankIndicatorItems = Object.entries(RANK_INDICATOR_ITEM_SIDS).map(
+    ([rank, sid]) =>
+      new Struct({
+        __internal__: {
+          refurl: "../ItemPrototypes.cfg",
+          refkey: "[0]",
+          rawName: sid,
+          isRoot: true,
+        },
+        SID: sid,
+        Icon: RANK_INDICATOR_ICONS[rank as keyof typeof RANK_INDICATOR_ICONS],
+        MeshPrototypeSID: "Icon",
+        Weight: 0,
+        Cost: 0,
+        Type: "EItemType::Other" as EItemType,
+        MaxStackCount: 1,
+        IsQuestItem: true,
+        ItemGridWidth: 1,
+        ItemGridHeight: 1,
+      }) as QuestItemPrototype,
+  );
   const [templatePatch, ...patches] = addFactionPatchItems();
   return [
     levelCounterItem,
@@ -80,6 +86,10 @@ export function transformKeyItemPrototypes() {
       const cloned = p.fork();
       cloned.IsQuestItem = false;
       cloned.SID = getNonQuestFactionPatchSID(p.SID);
+      // The quest variant's text says only how much XP it grants - it is consumed the instant it
+      // is picked up. This clone is the patch the player actually keeps, so it carries the
+      // faction's own name and description, under its own SID, which the text asset does hold.
+      cloned.LocalizationSID = cloned.SID;
       cloned.__internal__.rawName = cloned.SID;
       // Inherit visuals/data from the corresponding faction patch variant (keeps per-faction icon).
       cloned.__internal__.refkey = p.SID;
