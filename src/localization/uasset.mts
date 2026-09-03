@@ -1,7 +1,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { logger } from "./logger.mts";
+import { logger } from "../logger.mts";
 
 /**
  * Minimal reader for UE5 `.uasset` packages as written by the STALKER 2 Mod SDK
@@ -50,6 +51,12 @@ export type UassetSummary = {
   customVersions: { key: string; version: number }[];
   totalHeaderSize: number;
   packageName: string;
+  /** Byte position of `PackageName`'s length prefix - a rename resizes the summary from here. */
+  packageNameAt: number;
+  /** ...and of `LocalizationId`'s, which a rename rewrites in place (same length). */
+  localizationIdAt: number;
+  /** `NameOffset` is the one header offset a name-table resize does *not* move, so it is separate. */
+  nameOffsetAt: number;
   packageFlags: number;
   localizationId: string;
   nameCount: number;
@@ -66,10 +73,34 @@ export type UassetSummary = {
    */
   bulkDataStartOffsetAt: number | null;
   payloadTocOffsetAt: number | null;
+  /**
+   * Byte offset *of* `AssetRegistryDataOffset`. The section it points at opens with an `int64`
+   * offset to the package's dependency data, which the writer must shift along with the section.
+   */
+  assetRegistryDataOffsetAt: number | null;
+  /** Byte offset of `NameCount`, so a writer that appends names can correct it. */
+  nameCountAt: number;
+  /** Every `Generations[i].NameCount`: a second copy of the name count the writer must keep true. */
+  generationNameCountsAt: number[];
+  /**
+   * Byte offset of `NamesReferencedFromExportDataCount`, or `null` before UE5 1001. It is a hint
+   * for the cooker's name batching, not a real bound, so a writer that appends names referenced
+   * from export data just raises it to the new name count.
+   */
+  namesReferencedFromExportDataCountAt: number | null;
+  /**
+   * Every summary field holding a file offset that lies *after* the name table, so inserting name
+   * entries can shift them all. `bulkDataStartOffsetAt` / `payloadTocOffsetAt` are excluded - they
+   * point past the export data and so also move with the export payload, and are patched
+   * separately. `NameOffset` itself is excluded: the table does not move, it only grows.
+   */
+  postNameOffsetFieldsAt: { at: number; bytes: 4 | 8 }[];
 };
 
 export type Uasset = {
   summary: UassetSummary;
+  /** First byte after the last name entry - where a writer appends new ones. */
+  nameTableEnd: number;
   /** Derived from the table bounds, not hardcoded - see `readExports`. */
   exportStride: number;
   names: string[];
@@ -221,30 +252,58 @@ const readEngineVersion = (r: Reader) => {
  * localization id, the two engine-version branch names). Hence: walk it, record where they landed.
  */
 function readSummaryTail(r: Reader, packageFlags: number, ue5: number) {
-  r.skip(4 * 2); // SoftPackageReferencesCount, SoftPackageReferencesOffset
-  r.i32(); // SearchableNamesOffset
-  r.i32(); // ThumbnailTableOffset
+  const offsets: { at: number; bytes: 4 | 8 }[] = [];
+  /** Reads an offset field, remembering where it was so the writer can shift it. */
+  const offset32 = () => {
+    offsets.push({ at: r.pos, bytes: 4 });
+    return r.i32();
+  };
+  r.i32(); // SoftPackageReferencesCount
+  offset32(); // SoftPackageReferencesOffset
+  offset32(); // SearchableNamesOffset
+  offset32(); // ThumbnailTableOffset
   r.guid(); // Guid
   if (!(packageFlags & PKG_FILTER_EDITOR_ONLY)) r.guid(); // PersistentGuid
-  r.skip(r.i32() * 8); // Generations: (ExportCount, NameCount) each
+  // Generations: (ExportCount, NameCount) each. The last generation's NameCount mirrors the
+  // summary's - the editor trusts it, so a writer that grows the name table has to grow it too.
+  const generationCount = r.i32();
+  const generationNameCountsAt: number[] = [];
+  for (let i = 0; i < generationCount; i++) {
+    r.i32(); // ExportCount
+    generationNameCountsAt.push(r.pos);
+    r.i32(); // NameCount
+  }
   readEngineVersion(r); // SavedByEngineVersion
   readEngineVersion(r); // CompatibleWithEngineVersion
   r.u32(); // CompressionFlags
   r.skip(r.i32() * 16); // CompressedChunks - always empty in modern packages
   r.u32(); // PackageSource
   r.skip(r.i32() * 4); // AdditionalPackagesToCook - FString array, always empty
-  r.i32(); // AssetRegistryDataOffset
+  const assetRegistryDataOffsetAt = r.pos;
+  offset32(); // AssetRegistryDataOffset
   const bulkDataStartOffsetAt = r.pos;
   r.i64();
-  r.i32(); // WorldTileInfoDataOffset
+  offset32(); // WorldTileInfoDataOffset
   r.skip(r.i32() * 4); // ChunkIDs
   r.i32(); // PreloadDependencyCount
-  r.i32(); // PreloadDependencyOffset
-  if (ue5 >= UE5_NAMES_REFERENCED_FROM_EXPORT_DATA) r.i32(); // NamesReferencedFromExportDataCount
+  offset32(); // PreloadDependencyOffset
+  let namesReferencedFromExportDataCountAt: number | null = null;
+  if (ue5 >= UE5_NAMES_REFERENCED_FROM_EXPORT_DATA) {
+    namesReferencedFromExportDataCountAt = r.pos;
+    r.i32();
+  }
   const payloadTocOffsetAt = ue5 >= UE5_PAYLOAD_TOC ? r.pos : null;
   if (payloadTocOffsetAt !== null) r.i64();
-  if (ue5 >= UE5_DATA_RESOURCES) r.i32(); // DataResourceOffset
-  return { bulkDataStartOffsetAt, payloadTocOffsetAt, end: r.pos };
+  if (ue5 >= UE5_DATA_RESOURCES) offset32(); // DataResourceOffset
+  return {
+    generationNameCountsAt,
+    assetRegistryDataOffsetAt,
+    bulkDataStartOffsetAt,
+    payloadTocOffsetAt,
+    namesReferencedFromExportDataCountAt,
+    offsets,
+    end: r.pos,
+  };
 }
 
 function readSummary(r: Reader): UassetSummary {
@@ -267,27 +326,39 @@ function readSummary(r: Reader): UassetSummary {
     customVersions.push({ key: r.guid(), version: r.i32() });
   }
 
-  const totalHeaderSize = r.i32();
+  const postNameOffsetFieldsAt: { at: number; bytes: 4 | 8 }[] = [];
+  /** Reads an offset field, remembering where it was so the writer can shift it. */
+  const offset32 = () => {
+    postNameOffsetFieldsAt.push({ at: r.pos, bytes: 4 });
+    return r.i32();
+  };
+
+  // TotalHeaderSize is the end of the header, so it moves with everything the name table pushes.
+  const totalHeaderSize = offset32();
+  const packageNameAt = r.pos;
   const packageName = r.fstring();
   const packageFlags = r.u32();
+  const nameCountAt = r.pos;
   const nameCount = r.i32();
+  const nameOffsetAt = r.pos;
   const nameOffset = r.i32();
   if (fileVersionUE5 >= UE5_ADD_SOFTOBJECTPATH_LIST) {
     r.i32(); // SoftObjectPathsCount
-    r.i32(); // SoftObjectPathsOffset
+    offset32(); // SoftObjectPathsOffset
   }
+  const localizationIdAt = r.pos;
   const localizationId = r.fstring();
   r.i32(); // GatherableTextDataCount
-  r.i32(); // GatherableTextDataOffset
+  offset32(); // GatherableTextDataOffset
   const exportCount = r.i32();
-  const exportOffset = r.i32();
+  const exportOffset = offset32();
   const importCount = r.i32();
-  const importOffset = r.i32();
-  const dependsOffset = r.i32();
+  const importOffset = offset32();
+  const dependsOffset = offset32();
 
   // The tail is only trustworthy if it lands exactly on the name table; if it does not, we
   // mis-modelled some field and the writer must refuse rather than corrupt the summary.
-  let tail: { bulkDataStartOffsetAt: number; payloadTocOffsetAt: number | null } | null = null;
+  let tail: ReturnType<typeof readSummaryTail> | null = null;
   try {
     const t = readSummaryTail(r, packageFlags, fileVersionUE5);
     if (t.end === nameOffset) tail = t;
@@ -304,6 +375,9 @@ function readSummary(r: Reader): UassetSummary {
     customVersions,
     totalHeaderSize,
     packageName,
+    packageNameAt,
+    localizationIdAt,
+    nameOffsetAt,
     packageFlags,
     localizationId,
     nameCount,
@@ -313,8 +387,13 @@ function readSummary(r: Reader): UassetSummary {
     importCount,
     importOffset,
     dependsOffset,
+    assetRegistryDataOffsetAt: tail?.assetRegistryDataOffsetAt ?? null,
     bulkDataStartOffsetAt: tail?.bulkDataStartOffsetAt ?? null,
     payloadTocOffsetAt: tail?.payloadTocOffsetAt ?? null,
+    nameCountAt,
+    generationNameCountsAt: tail?.generationNameCountsAt ?? [],
+    namesReferencedFromExportDataCountAt: tail?.namesReferencedFromExportDataCountAt ?? null,
+    postNameOffsetFieldsAt: [...postNameOffsetFieldsAt, ...(tail?.offsets ?? [])],
   };
 }
 
@@ -325,7 +404,7 @@ const readNameTable = (r: Reader, summary: UassetSummary) => {
     names.push(r.fstring());
     r.skip(4); // FNameEntry hashes: two uint16 (case-preserving and not)
   }
-  return names;
+  return { names, end: r.pos };
 };
 
 /**
@@ -503,7 +582,7 @@ function readValue(r: Reader, names: string[], type: PropertyTypeName, end: numb
 export function parseUasset(file: string): Uasset {
   const r = new Reader(readFileSync(file));
   const summary = readSummary(r);
-  const names = readNameTable(r, summary);
+  const { names, end: nameTableEnd } = readNameTable(r, summary);
   const imports = readImports(r, summary, names);
   const { exports, stride: exportStride } = readExports(r, summary, names, imports);
 
@@ -514,7 +593,7 @@ export function parseUasset(file: string): Uasset {
       `${file}: FileVersionUE5 ${summary.fileVersionUE5} predates complete property type names,` +
         ` reading header only`,
     );
-    return { summary, exportStride, names, imports, exports };
+    return { summary, nameTableEnd, exportStride, names, imports, exports };
   }
 
   for (const exp of exports) {
@@ -531,7 +610,7 @@ export function parseUasset(file: string): Uasset {
     }
   }
 
-  return { summary, exportStride, names, imports, exports };
+  return { summary, nameTableEnd, exportStride, names, imports, exports };
 }
 
 /**
@@ -550,6 +629,12 @@ export type LocalizedTextEntry = {
 
 const EXPORT_SERIAL_SIZE_AT = 28;
 const EXPORT_SERIAL_OFFSET_AT = 36;
+/**
+ * `ScriptSerializationEndOffset`: where the export's tagged-property block ends, relative to the
+ * export's own data. It is `SerialSize - 4` in every asset the Mod Editor has written here, so it
+ * moves with the payload; left stale, the editor stops reading properties mid-entry.
+ */
+const EXPORT_SCRIPT_SERIALIZATION_END_AT = 104;
 
 class Writer {
   private parts: Buffer[] = [];
@@ -584,11 +669,102 @@ class Writer {
   }
 }
 
-/** Resolves an FName to its table index; these assets never need to grow the name table. */
+/**
+ * Resolves an FName to its table index, appending it to `names` if it is not there yet - the SDK
+ * hands out a text asset whose name table holds nothing but the package's own names, so every
+ * language key and property name has to be added on the first write.
+ */
 const nameIndex = (names: string[], name: string) => {
   const i = names.indexOf(name);
-  if (i === -1) throw new Error(`"${name}" is not in the package name table`);
-  return i;
+  return i === -1 ? names.push(name) - 1 : i;
+};
+
+/** CRC table for `FCrc::Strihash_DEPRECATED`: polynomial 0x04C11DB7, MSB-first. */
+const STRIHASH_TABLE = Array.from({ length: 256 }, (_, i) => {
+  let c = i << 24;
+  for (let bit = 0; bit < 8; bit++) c = c & 0x8000_0000 ? (c << 1) ^ 0x04c1_1db7 : c << 1;
+  return c >>> 0;
+});
+
+/** Standard reflected CRC-32 table, as `FCrc::CRCTablesSB8[0]` used by `FCrc::StrCrc32`. */
+const CRC32_TABLE = Array.from({ length: 256 }, (_, i) => {
+  let c = i;
+  for (let bit = 0; bit < 8; bit++) c = c & 1 ? (c >>> 1) ^ 0xedb8_8320 : c >>> 1;
+  return c >>> 0;
+});
+
+/**
+ * `FCrc::Strihash_DEPRECATED` - the case-insensitive hash `FNameEntrySerialized` stores first.
+ * One byte per character (all FNames in these packages are ASCII, which `assertAscii` enforces).
+ */
+const strihash = (name: string) => {
+  let hash = 0;
+  for (const ch of name.toUpperCase())
+    hash = (((hash >>> 8) & 0x00ff_ffff) ^ STRIHASH_TABLE[(hash ^ ch.charCodeAt(0)) & 0xff]) >>> 0;
+  return hash & 0xffff;
+};
+
+/** `FCrc::StrCrc32` - the case-preserving hash, four bytes per character. */
+const strCrc32 = (name: string) => {
+  let crc = 0xffff_ffff;
+  for (const ch of name) {
+    let v = ch.charCodeAt(0);
+    for (let byte = 0; byte < 4; byte++) {
+      crc = ((crc >>> 8) ^ CRC32_TABLE[(crc ^ v) & 0xff]) >>> 0;
+      v >>>= 8;
+    }
+  }
+  return ~crc & 0xffff;
+};
+
+/**
+ * How the editor orders the export-data half of the name table: case-insensitively, with case as
+ * the tiebreak. Only the order has to match - nothing reads the names positionally - but matching
+ * it keeps a rewritten asset byte-identical to one the editor saved.
+ */
+const compareNames = (a: string, b: string) =>
+  a.toLowerCase() < b.toLowerCase()
+    ? -1
+    : a.toLowerCase() > b.toLowerCase()
+      ? 1
+      : a < b
+        ? -1
+        : a > b
+          ? 1
+          : 0;
+
+/** FName index positions inside an import record, relative to the record's start. */
+const IMPORT_NAME_FIELDS_AT = [0, 8, 20, 28];
+/** ...and inside an export record: `ObjectName`. */
+const EXPORT_OBJECT_NAME_AT = 16;
+/** `PackageMetaData`'s payload is not tagged properties; its two FName fields sit at these bytes. */
+const METADATA_NAME_FIELDS_AT = [1, 21];
+
+/**
+ * The names referenced by every export's data *except* the localization payload - i.e. the part of
+ * `NamesReferencedFromExportData` a rewrite has to preserve without knowing what the old payload
+ * used. Only `PackageMetaData` has any in this package shape.
+ */
+const metadataNames = (original: Buffer, parsed: Uasset): string[] =>
+  parsed.exports
+    .filter((e) => e.className === "MetaData")
+    .flatMap((e) =>
+      METADATA_NAME_FIELDS_AT.map((at) => parsed.names[original.readInt32LE(e.serialOffset + at)]),
+    )
+    .filter((name) => name !== undefined);
+
+/** An `FNameEntrySerialized`: the string, then its non-case-preserving and case-preserving hash. */
+const serializeNameEntries = (names: string[]) => {
+  const w = new Writer();
+  for (const name of names) {
+    if (!/^[\x00-\x7f]*$/.test(name)) throw new Error(`cannot hash non-ASCII FName "${name}"`);
+    w.fstring(name);
+    const hashes = Buffer.alloc(4);
+    hashes.writeUInt16LE(strihash(name), 0);
+    hashes.writeUInt16LE(strCrc32(name), 2);
+    w.raw(hashes);
+  }
+  return w.toBuffer();
 };
 
 const writeName = (w: Writer, names: string[], name: string) =>
@@ -620,6 +796,11 @@ const writeTag = (
   w.i32(value.length).u8(0).raw(value);
 };
 
+/**
+ * Serialises the `LocalizedTexts` export's bytes. `names` is the package name table and is
+ * **mutated**: any FName the payload needs and the table lacks is appended, so the caller can
+ * splice the new entries into the table afterwards (see `writeLocalizedTexts`).
+ */
 export function serializeLocalizedTexts(names: string[], entries: LocalizedTextEntry[]): Buffer {
   const elements = new Writer();
   elements.i32(entries.length);
@@ -674,42 +855,308 @@ export function serializeLocalizedTexts(names: string[], entries: LocalizedTextE
   return out.toBuffer();
 }
 
-/** Rewrite `file` in place with `entries` as its complete `LocalizedTexts` array. */
-export function writeLocalizedTexts(file: string, entries: LocalizedTextEntry[]) {
+/** An `FString` as the summary and the asset registry store it: length prefix, bytes, NUL. */
+const fstringBytes = (value: string) => {
+  if (/[^\x20-\x7e]/.test(value)) throw new Error(`${value}: package names must be ASCII`);
+  const out = Buffer.alloc(4 + value.length + 1);
+  out.writeInt32LE(value.length + 1, 0);
+  out.write(value, 4, "latin1");
+  return out;
+};
+
+/** Replace `[at, at + length)` with `bytes`. */
+type ByteEdit = { at: number; length: number; bytes: Buffer };
+
+/**
+ * Splice non-overlapping `edits` into `original` and hand back a `shift()` that maps any byte
+ * position in the original to where it ended up. Every offset stored in the package - in the
+ * summary, in the export table, inside the asset registry section - is patched through it, so a
+ * rename does not have to know which of its edits sits in front of which offset.
+ */
+function applyEdits(original: Buffer, edits: ByteEdit[]) {
+  const sorted = [...edits].sort((a, b) => a.at - b.at);
+  const parts: Buffer[] = [];
+  let at = 0;
+  for (const edit of sorted) {
+    if (edit.at < at) throw new Error(`overlapping edit at ${edit.at}`);
+    parts.push(original.subarray(at, edit.at), edit.bytes);
+    at = edit.at + edit.length;
+  }
+  parts.push(original.subarray(at));
+  const shift = (pos: number) =>
+    pos +
+    sorted
+      .filter((edit) => edit.at < pos)
+      .reduce((delta, edit) => delta + edit.bytes.length - edit.length, 0);
+  return { out: Buffer.concat(parts), shift };
+}
+
+/**
+ * Write `file` out as `dest` under a new package name, i.e. mint a new text asset from an existing
+ * one. This is what lets a mod's first localization asset be generated instead of created by hand
+ * in the Mod Editor: the fixture in `fixtures/empty-localization.uasset` is some other mod's
+ * package, and this rewrites every place its identity is spelled.
+ *
+ * `packageName` is the mount path the cooker will address the asset by: `/<SdkModName>/<AssetName>`
+ * for a package sitting at the root of the SDK mod's `Content/`.
+ *
+ * The identity is in four kinds of places, and the last one is the reason this cannot be a string
+ * replace: the summary's `PackageName` and the asset registry's `ObjectPath`/asset-name strings are
+ * length-prefixed `FString`s, the name table holds both the full path and the short name as
+ * `FName`s (hashed, and the export-data half is sorted, so a rename can reorder it), and
+ * `LocalizationId` namespaces the package's gathered text - two mods must not share one, so it is
+ * derived from the new name rather than inherited.
+ */
+export function renameLocalizationPackage(file: string, packageName: string, dest: string) {
   const original = readFileSync(file);
   const parsed = parseUasset(file);
-  const { summary, exportStride } = parsed;
+  const { summary } = parsed;
+  if (summary.bulkDataStartOffsetAt === null)
+    throw new Error(`${file}: summary tail did not decode, refusing to write`);
+  if (summary.packageName === packageName) {
+    if (dest !== file) writeFileSync(dest, original);
+    return original.length;
+  }
+
+  const shortOf = (name: string) => name.slice(name.lastIndexOf("/") + 1);
+  const spellings: [string, string][] = [
+    [summary.packageName, packageName],
+    [shortOf(summary.packageName), shortOf(packageName)],
+  ];
+  const rename = (name: string) => spellings.find(([from]) => from === name)?.[1] ?? name;
+
+  // The name table: substitute, then re-sort the export-data half the way the editor keeps it.
+  const nrefAt = summary.namesReferencedFromExportDataCountAt;
+  const oldRef = nrefAt === null ? parsed.names.length : original.readInt32LE(nrefAt);
+  const names = [
+    ...parsed.names.slice(0, oldRef).map(rename).sort(compareNames),
+    ...parsed.names.slice(oldRef).map(rename),
+  ];
+  if (new Set(names).size !== names.length)
+    throw new Error(
+      `${file}: renaming to ${packageName} collides with a name already in the table`,
+    );
+  const remap = new Map(parsed.names.map((name, i) => [i, names.indexOf(rename(name))]));
+
+  const edits: ByteEdit[] = [
+    {
+      at: summary.packageNameAt,
+      length: fstringBytes(summary.packageName).length,
+      bytes: fstringBytes(packageName),
+    },
+    {
+      at: summary.nameOffset,
+      length: parsed.nameTableEnd - summary.nameOffset,
+      bytes: serializeNameEntries(names),
+    },
+  ];
+
+  // The localization id, in the summary and again in PackageMetaData's
+  // PackageLocalizationNamespace. Same length, so this shifts nothing.
+  const localizationId = createHash("md5").update(packageName).digest("hex").toUpperCase();
+  if (localizationId.length !== summary.localizationId.length)
+    throw new Error(`${file}: unexpected localization id ${summary.localizationId}`);
+  for (
+    let at = original.indexOf(summary.localizationId, 0, "latin1");
+    at !== -1;
+    at = original.indexOf(summary.localizationId, at + 1, "latin1")
+  )
+    edits.push({
+      at,
+      length: localizationId.length,
+      bytes: Buffer.from(localizationId, "latin1"),
+    });
+
+  // The asset registry section spells the asset out again, as plain FStrings. They sit between the
+  // depends table and the end of the header; anything matching a spelling *and* carrying the right
+  // length prefix is one of them.
+  for (const [from, to] of spellings)
+    for (
+      let at = original.indexOf(`${from}\0`, summary.dependsOffset, "latin1");
+      at !== -1 && at < summary.totalHeaderSize;
+      at = original.indexOf(`${from}\0`, at + 1, "latin1")
+    ) {
+      if (original.readInt32LE(at - 4) !== from.length + 1) continue;
+      edits.push({ at: at - 4, length: from.length + 5, bytes: fstringBytes(to) });
+    }
+
+  const { out, shift } = applyEdits(original, edits);
+
+  /** Patch a stored file offset: both the field's own position and its value have moved. */
+  const shiftStoredOffset = (at: number, bytes: 4 | 8) => {
+    const to = shift(at);
+    const value = bytes === 4 ? out.readInt32LE(to) : Number(out.readBigInt64LE(to));
+    if (value <= 0) return; // absent tables store 0 or INDEX_NONE; shifting one invents an offset
+    if (bytes === 4) out.writeInt32LE(shift(value), to);
+    else out.writeBigInt64LE(BigInt(shift(value)), to);
+  };
+
+  shiftStoredOffset(summary.nameOffsetAt, 4);
+  for (const { at, bytes } of summary.postNameOffsetFieldsAt) shiftStoredOffset(at, bytes);
+  for (const at of [summary.bulkDataStartOffsetAt, summary.payloadTocOffsetAt]) {
+    if (at !== null) shiftStoredOffset(at, 8);
+  }
+  for (let i = 0; i < parsed.exports.length; i++) {
+    shiftStoredOffset(summary.exportOffset + i * parsed.exportStride + EXPORT_SERIAL_OFFSET_AT, 8);
+  }
+  // The asset registry section opens with a file offset to its dependency data, and the four bytes
+  // in front of the section are one too.
+  const sectionAt = original.readInt32LE(summary.assetRegistryDataOffsetAt!);
+  if (sectionAt > 0) {
+    shiftStoredOffset(sectionAt - 4, 4);
+    shiftStoredOffset(sectionAt, 8);
+  }
+
+  // Every FName index outside the name table points into the old ordering.
+  const remapAt = (at: number) => {
+    const to = shift(at);
+    const index = remap.get(out.readInt32LE(to));
+    if (index === undefined || index < 0) throw new Error(`${file}: name index at ${at} is bad`);
+    out.writeInt32LE(index, to);
+  };
+  const importStride =
+    summary.importCount > 0
+      ? (summary.exportOffset - summary.importOffset) / summary.importCount
+      : 0;
+  for (let i = 0; i < summary.importCount; i++)
+    for (const at of IMPORT_NAME_FIELDS_AT) remapAt(summary.importOffset + i * importStride + at);
+  for (let i = 0; i < parsed.exports.length; i++)
+    remapAt(summary.exportOffset + i * parsed.exportStride + EXPORT_OBJECT_NAME_AT);
+  for (const e of parsed.exports)
+    if (e.className === "MetaData")
+      for (const field of METADATA_NAME_FIELDS_AT) remapAt(e.serialOffset + field);
+
+  writeFileSync(dest, out);
+  return out.length;
+}
+
+/**
+ * Write `entries` as the complete `LocalizedTexts` array of `file`, into `dest` (`file` itself by
+ * default). `file` is only ever read, so a mod can keep a template package as the input and put
+ * the result somewhere else - see `writeModLocalization` in `text.mts`.
+ */
+export function writeLocalizedTexts(
+  file: string,
+  entries: LocalizedTextEntry[],
+  dest: string = file,
+) {
+  const original = readFileSync(file);
+  const parsed = parseUasset(file);
+  const { summary, exportStride, nameTableEnd } = parsed;
   if (summary.bulkDataStartOffsetAt === null)
     throw new Error(`${file}: summary tail did not decode, refusing to write`);
   const index = parsed.exports.findIndex((e) => e.className === "LocalizationModTextToolAsset");
   if (index === -1) throw new Error(`${file} has no LocalizationModTextToolAsset export`);
   const target = parsed.exports[index];
 
-  const payload = serializeLocalizedTexts(parsed.names, entries);
+  // The editor lays the name table out in two parts: the names the export data references, sorted,
+  // then the rest (package name, import and export object names) in load order.
+  // `NamesReferencedFromExportDataCount` is the length of that first part, so a writer cannot just
+  // append new names at the end - the count would have to cover the header names too, and the
+  // editor errors on the mismatch. Rebuild both parts instead and remap every index that pointed
+  // into the old table.
+  const nrefAt = summary.namesReferencedFromExportDataCountAt;
+  const oldRef = nrefAt === null ? parsed.names.length : original.readInt32LE(nrefAt);
+  // What the payload alone references: serialising against an empty table collects exactly that.
+  const payloadNames: string[] = [];
+  serializeLocalizedTexts(payloadNames, entries);
+  // The other exports' export data references names too (`MetaData` uses two) and those have to
+  // stay. Take exactly those rather than the whole old prefix: keeping the prefix would carry
+  // every name the *previous* entries used into the new table, so rewriting an asset with fewer
+  // texts would leave orphans behind and the bytes would depend on what the file held before.
+  const head = [...new Set([...metadataNames(original, parsed), ...payloadNames])].sort(
+    compareNames,
+  );
+  const headSet = new Set(head);
+  // A name can move from the tail into the prefix - `/Script/ModKitEditor` does, once export data
+  // names it - and must not then appear twice.
+  const names = [...head, ...parsed.names.slice(oldRef).filter((n) => !headSet.has(n))];
+  const nameIndexBefore = names.length;
+  const payload = serializeLocalizedTexts(names, entries);
+  if (names.length !== nameIndexBefore) throw new Error(`${file}: name table grew while writing`);
+  const newTable = serializeNameEntries(names);
+  const nameDelta = newTable.length - (nameTableEnd - summary.nameOffset);
+  const remap = new Map(parsed.names.map((name, i) => [i, names.indexOf(name)]));
   const delta = payload.length - target.serialSize;
   const out = Buffer.concat([
-    original.subarray(0, target.serialOffset),
+    original.subarray(0, summary.nameOffset),
+    newTable,
+    original.subarray(nameTableEnd, target.serialOffset),
     payload,
     original.subarray(target.serialOffset + target.serialSize),
   ]);
 
-  // Everything after this export shifts by `delta`: the later exports' payloads, plus the two
-  // summary offsets that point past the export data. Every other offset in the package lives
-  // inside the header, which we do not touch.
-  const exportField = (i: number, at: number) => summary.exportOffset + i * exportStride + at;
-  out.writeBigInt64LE(BigInt(payload.length), exportField(index, EXPORT_SERIAL_SIZE_AT));
-  for (let i = index + 1; i < parsed.exports.length; i++) {
-    const at = exportField(i, EXPORT_SERIAL_OFFSET_AT);
-    out.writeBigInt64LE(BigInt(parsed.exports[i].serialOffset + delta), at);
+  out.writeInt32LE(names.length, summary.nameCountAt);
+  for (const at of summary.generationNameCountsAt) out.writeInt32LE(names.length, at);
+  if (nrefAt !== null) out.writeInt32LE(head.length, nrefAt);
+
+  // Everything behind the name table shifts by `nameDelta`, and everything behind the rewritten
+  // export by `delta` as well: the later exports' payloads, plus the two summary offsets that
+  // point past the export data. Every other offset lives in the summary, which we walked to find.
+  for (const { at, bytes } of summary.postNameOffsetFieldsAt) {
+    const value = bytes === 4 ? out.readInt32LE(at) : Number(out.readBigInt64LE(at));
+    // Absent tables use 0 or INDEX_NONE; shifting a sentinel would turn it into an offset.
+    if (value <= 0) continue;
+    if (bytes === 4) out.writeInt32LE(value + nameDelta, at);
+    else out.writeBigInt64LE(BigInt(value + nameDelta), at);
   }
+
+  const exportField = (i: number, at: number) =>
+    summary.exportOffset + nameDelta + i * exportStride + at;
+  out.writeBigInt64LE(BigInt(payload.length), exportField(index, EXPORT_SERIAL_SIZE_AT));
+  const scriptEndAt = exportField(index, EXPORT_SCRIPT_SERIALIZATION_END_AT);
+  out.writeInt32LE(out.readInt32LE(scriptEndAt) + delta, scriptEndAt);
+  for (let i = 0; i < parsed.exports.length; i++) {
+    const at = exportField(i, EXPORT_SERIAL_OFFSET_AT);
+    const shift = nameDelta + (i > index ? delta : 0);
+    out.writeBigInt64LE(BigInt(parsed.exports[i].serialOffset + shift), at);
+  }
+  // Every FName index outside the payload we just rebuilt points into the old table, so move them
+  // all onto the new one. These are the only places this package shape stores one.
+  const remapAt = (at: number) => {
+    const to = remap.get(out.readInt32LE(at));
+    if (to === undefined || to < 0) throw new Error(`${file}: name index at ${at} is out of range`);
+    out.writeInt32LE(to, at);
+  };
+  const importStride =
+    summary.importCount > 0
+      ? (summary.exportOffset - summary.importOffset) / summary.importCount
+      : 0;
+  for (let i = 0; i < summary.importCount; i++)
+    for (const at of IMPORT_NAME_FIELDS_AT)
+      remapAt(summary.importOffset + nameDelta + i * importStride + at);
+  for (let i = 0; i < parsed.exports.length; i++) remapAt(exportField(i, EXPORT_OBJECT_NAME_AT));
+  for (let i = 0; i < parsed.exports.length; i++) {
+    if (i === index || parsed.exports[i].className !== "MetaData") continue;
+    const at = parsed.exports[i].serialOffset + nameDelta + (i > index ? delta : 0);
+    for (const field of METADATA_NAME_FIELDS_AT) remapAt(at + field);
+  }
+
+  // The asset registry section is not just a blob: its first field is an `int64` file offset to
+  // the package's dependency data, which sits at the end of the same section. It moves with the
+  // name table like every other header offset, and leaving it stale makes the editor seek into the
+  // name table and read garbage counts ("SerializeAssetRegistryDependencyData").
+  if (summary.assetRegistryDataOffsetAt !== null) {
+    const sectionAt = out.readInt32LE(summary.assetRegistryDataOffsetAt);
+    if (sectionAt > 0) {
+      // The four bytes in front of the section are a file offset too (`DependsOffset + 12` in every
+      // asset the editor has written here), and nothing in the summary points at them.
+      const before = out.readInt32LE(sectionAt - 4);
+      if (before > 0 && before < summary.totalHeaderSize)
+        out.writeInt32LE(before + nameDelta, sectionAt - 4);
+      const dependencyDataOffset = Number(out.readBigInt64LE(sectionAt));
+      if (dependencyDataOffset > 0)
+        out.writeBigInt64LE(BigInt(dependencyDataOffset + nameDelta), sectionAt);
+    }
+  }
+
   for (const at of [summary.bulkDataStartOffsetAt, summary.payloadTocOffsetAt]) {
     if (at === null) continue; // PayloadTocOffset predates this package's engine version
     const value = Number(out.readBigInt64LE(at));
-    // Both fields use INDEX_NONE when absent; shifting a sentinel would turn it into an offset.
-    if (value > 0) out.writeBigInt64LE(BigInt(value + delta), at);
+    if (value > 0) out.writeBigInt64LE(BigInt(value + nameDelta + delta), at);
   }
 
-  writeFileSync(file, out);
+  writeFileSync(dest, out);
   return out.length;
 }
 
@@ -717,7 +1164,7 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 if (isMain) {
   const [file] = process.argv.slice(2);
   if (!file) {
-    logger.error("usage: localization-uasset.mts <file.uasset>");
+    logger.error("usage: localization/uasset.mts <file.uasset>");
     process.exit(1);
   }
   const { summary, imports, exports } = parseUasset(file);

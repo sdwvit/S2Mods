@@ -3,7 +3,7 @@
 Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines):
 
 `Modified or added assets`:
- - `DecoupledRanks-localization`
+ - `DecoupledRanks-Localization2`
  - `DecoupledRanks`
  - `T_inv_BanditsPatch`
  - `T_inv_CorpusPatch`
