@@ -58,7 +58,9 @@ XP table:[h1][/h1]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote:
-    "Fixes the rank and level items showing raw placeholder text (SID_ITEMS_RANK LEVEL_NAME and the like) instead of their names and descriptions, and gives the quest-only mutant parts and faction patches their own \"+N XP\" text - the generated config files had fallen behind the mod's own item definitions.",
+    "Rank and level items no longer show raw placeholder text (SID_ITEMS_RANK LEVEL_NAME and the like) - they now carry their proper names and descriptions in every language. " +
+    "The quest-only pickups also say what they are worth: a faction patch taken off a body and a part cut from a mutant show \"+N XP\" with a line explaining it counts the moment you pick it up, instead of borrowing the patch's or the vanilla mutant part's name. " +
+    "The patch you actually keep is unchanged - it still carries its faction's name and description.",
   structTransformers: [
     transformQuestNodePrototypes,
     transformQuestRegistration,
