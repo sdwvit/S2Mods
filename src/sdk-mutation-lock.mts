@@ -20,7 +20,7 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function tryAcquireLock(label: string) {
+export async function tryAcquireLock(label: string) {
   try {
     await fs.mkdir(SDK_MUTATION_LOCK_DIR);
     await fs.writeFile(SDK_MUTATION_LOCK_INFO, JSON.stringify({ pid: process.pid, label, startedAt: new Date().toISOString() }, null, 2), "utf8");
