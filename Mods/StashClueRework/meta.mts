@@ -20,7 +20,8 @@ bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Updated for 2.0: patches regenerated against 2.0 game data.",
+  changenote:
+    "Fixed NPCs still generating vanilla stash clues — the game ignores inherited patches, so every human NPC prototype now has stash clue generation disabled directly instead of only the base prototypes.",
   structTransformers: [
     transformObjPrototypes,
     transformSpawnActorPrototypes,

@@ -6,7 +6,15 @@ Here is a list of extended files (this mod bPatches files, so it is compatible w
  - `CluePrototypes`
 
 `ObjPrototypes`:
+ - `Faust`
  - `GeneralNPCObjPrototypes`
+ - `Granit`
+ - `Korshunov`
+ - `QuestObjPrototypes`
+ - `Scar`
+ - `Strelok`
+ - `Supersoldier`
+ - `TestNPCObjPrototypes`
 
 `GameData`:
  - `ObjPrototypes`
