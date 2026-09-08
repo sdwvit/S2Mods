@@ -27,8 +27,23 @@ async function awaitTierMap(): Promise<void> {
   }
 }
 
+// Caliber conversions carry a DurabilityPerShot side effect, so a naive "mentions
+// durability" test matches them (e.g. GunDnipro_Upgrade_Body_2). Worse, they sit
+// downstream of the real durability upgrade, which then stops looking like a leaf —
+// the tree ends up with extra caliber conversions and no extra durability tiers.
+function isCaliberConversion(struct: UpgradePrototype): boolean {
+  if (!struct.EffectPrototypeSIDs) return false;
+  for (const [, value] of struct.EffectPrototypeSIDs.entries()) {
+    if (typeof value === "string" && (value.includes("ChangeCaliber") || value.includes("ChangeAmmoTypes"))) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function isDurabilityUpgrade(struct: UpgradePrototype): boolean {
   if (!struct.EffectPrototypeSIDs) return false;
+  if (isCaliberConversion(struct)) return false;
   for (const [, value] of struct.EffectPrototypeSIDs.entries()) {
     if (typeof value === "string" && (value.includes("Durability") || value.includes("_wearing"))) {
       return true;
@@ -194,7 +209,7 @@ bPatches:
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Updated for 2.0: patches regenerated against 2.0 game data. Price scaling changed to 2x per tier with caps (10k for tier 2, 100k overall).",
+  changenote: "Fixed weapon upgrade trees (Dnipro, Fora-230, Kharod) getting duplicated caliber conversions instead of extra durability tiers — caliber conversions carry a durability side effect and were mistaken for durability upgrades. The real body durability upgrades on Dnipro and Fora-230 now get their extra tiers.",
   structTransformers: [transformUpgrades, transformWeaponsAndArmors, transformTechnicians] as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
