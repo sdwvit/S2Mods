@@ -1,0 +1,95 @@
+Source,File,LairPrototypeSID,RefUrl,RefKey,InitialInhabitantFaction,IsALifePoint,FactionCount,Factions,PlayerRanksCovered,ArchetypeCount,OtherPresetFields,PlacedActorCount
+base,GameLite/GameData/LairPrototypes.cfg,empty,,,Duty,true,1,Duty,Newbie Experienced Veteran Master,4,(root)ID=0,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Militaries,,,Militaries,true,1,Militaries,Newbie Experienced Veteran Master,17,,17
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,NeutralMSOP,,,NeutralMSOP,true,1,NeutralMSOP,Newbie Experienced Veteran Master,17,,4
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Neutrals,,,Neutrals,true,1,Neutrals,Newbie Experienced Veteran Master,16,,17
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Diggers,,,Diggers,true,1,Diggers,Newbie Experienced Veteran Master,16,,1
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Varta,,,Varta,true,1,Varta,Newbie Experienced Veteran Master,20,,8
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,IkarVarta,,,IkarVarta,true,1,IkarVarta,Newbie Experienced Veteran Master,20,,1
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,EnemyVarta,,,EnemyVarta,true,1,EnemyVarta,Newbie Experienced Veteran Master,17,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Mercenaries,,,Mercenaries,true,1,Mercenaries,Newbie Experienced Veteran Master,16,,6
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Freedom,,,Freedom,true,1,Freedom,Newbie Experienced Veteran Master,16,,5
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Bandits,,,Bandits,true,1,Bandits,Newbie Experienced Veteran Master,16,,5
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,SultanBandits,,,SultanBandits,true,1,SultanBandits,Newbie Experienced Veteran Master,16,,1
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,NeutralBandits,,,NeutralBandits,true,1,NeutralBandits,Newbie Experienced Veteran Master,16,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Monolith,,,Monolith,true,1,Monolith,Newbie Experienced Veteran Master,16,,29
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Duty,,,Duty,true,1,Duty,Newbie Experienced Veteran Master,20,,4
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Noon,,,Noon,true,1,Noon,Newbie Experienced Veteran Master,12,,5
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Scientists,,,Scientists,true,1,Scientists,Newbie Experienced Veteran Master,8,,1
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Spark,,,Spark,true,1,Spark,Newbie Experienced Veteran Master,16,,2
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Corpus,,,Corpus,true,1,Corpus,Newbie Experienced Veteran Master,20,,1
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardNeutrals,,,Neutrals,false,1,Neutrals,Newbie Experienced Veteran Master,12,,10
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardNeutrals_Sniper,,,Neutrals,false,1,Neutrals,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardDiggers,,,Diggers,false,1,Diggers,Newbie Experienced Veteran Master,12,,2
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardDiggers_Sniper,,,Diggers,false,1,Diggers,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardVarta,,,Varta,false,1,Varta,Newbie Experienced Veteran Master,16,,7
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardVarta_Sniper,,,Varta,false,1,Varta,Newbie Experienced Veteran Master,4,,1
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardNoon,,,Noon,false,1,Noon,Newbie Experienced Veteran Master,12,,4
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardFreedom,,,Freedom,false,1,Freedom,Newbie Experienced Veteran Master,12,,9
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardFreedom_Sniper,,,Freedom,false,1,Freedom,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardDuty,,,Duty,false,1,Duty,Newbie Experienced Veteran Master,16,,8
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardDuty_Sniper,,,Duty,false,1,Duty,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardCorpus,,,Corpus,false,1,Corpus,Newbie Experienced Veteran Master,16,,4
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardCorpus_Sniper,,,Corpus,false,1,Corpus,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardMonolith,,,Monolith,false,1,Monolith,Newbie Experienced Veteran Master,12,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardMonolith_Sniper,,,Monolith,false,1,Monolith,Newbie Experienced Veteran Master,4,,1
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GuardSultanBandits,,,SultanBandits,false,1,SultanBandits,Newbie Experienced Veteran Master,16,,2
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,DutyZombies,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,20,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,FreedomZombies,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,16,,1
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,BanditZombies,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,16,,3
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,NeutralZombies,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,16,,6
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,CorpusZombie,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,20,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Blinddog,,,Blinddog,true,1,Blinddog,Newbie Experienced Veteran Master,4,,8
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Bloodsucker,,,Bloodsucker,true,1,Bloodsucker,Newbie Experienced Veteran Master,4,,13
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Boar,,,Boar,true,1,Boar,Newbie Experienced Veteran Master,4,,5
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Flesh,,,Flesh,true,1,Flesh,Newbie Experienced Veteran Master,4,,7
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Controller,,,Controller,true,1,Controller,Newbie Experienced Veteran Master,4,,5
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Poltergeist,,,Poltergeist,false,1,Poltergeist,Newbie Experienced Veteran Master,4,,9
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Poltergeist_Electro,,,Poltergeist,false,1,Poltergeist,Newbie Experienced Veteran Master,4,,4
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Poltergeist_Toxic,,,Poltergeist,false,1,Poltergeist,Newbie Experienced Veteran Master,4,,2
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Poltergeist_Fire,,,Poltergeist,false,1,Poltergeist,Newbie Experienced Veteran Master,4,,3
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Chimera,,,Chimera,true,1,Chimera,Newbie Experienced Veteran Master,4,,3
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Burer,,,Burer,true,1,Burer,Newbie Experienced Veteran Master,4,,9
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Pseudogiant,,,Pseudogiant,true,1,Pseudogiant,Newbie Experienced Veteran Master,4,,4
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Snork,,,Snork,true,1,Snork,Newbie Experienced Veteran Master,4,,5
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Pseudodog,,,Pseudodog,true,1,Pseudodog,Newbie Experienced Veteran Master,4,,4
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Deer,,,Deer,true,1,Deer,Newbie Experienced Veteran Master,4,,2
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Bayun,,,Bayun,true,1,Bayun,Newbie Experienced Veteran Master,4,,3
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Rat,,,Rat,true,1,Rat,Newbie Experienced Veteran Master,4,,12
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,RatSwarm_75,,,Rat,true,1,Rat,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,RatSwarm_150,,,Rat,true,1,Rat,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,RatSwarm_225,,,Rat,true,1,Rat,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,RatSwarm_300,,,Rat,true,1,Rat,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,Tushkan,,,Tushkan,true,1,Tushkan,Newbie Experienced Veteran Master,4,,2
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,MoldyBlinddog,,,MoldyBlinddog,true,1,MoldyBlinddog,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GenericMutantsOnly,,,Blinddog,true,11,Blinddog Bloodsucker Boar Flesh Zombie Snork Pseudodog Bayun Tushkan Controller Deer,Newbie Experienced Veteran Master,128,,1
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GenericHumansOnly,,,Neutrals,true,12,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus,Newbie Experienced Veteran Master,193,,13
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,GenericHumansAndMutants,,,Neutrals,true,23,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus Blinddog Bloodsucker Boar Flesh Zombie Snork Pseudodog Bayun Tushkan Controller Deer,Newbie Experienced Veteran Master,321,,33
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,SmallLivingSpace,,,Neutrals,true,16,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus Bloodsucker Zombie Bayun Tushkan,Newbie Experienced Veteran Master,293,,40
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,BigLivingSpace,,,Neutrals,true,21,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus Blinddog Bloodsucker Boar Flesh Zombie Snork Pseudodog Bayun Tushkan,Newbie Experienced Veteran Master,313,,42
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,WildUnderground,,,Tushkan,true,5,Bloodsucker Zombie Snork Bayun Tushkan,Newbie Experienced Veteran Master,104,,19
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,LivingUnderground,,,Neutrals,true,17,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus Bloodsucker Zombie Snork Bayun Tushkan,Newbie Experienced Veteran Master,297,,6
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,WildField,,,Blinddog,true,7,Blinddog MoldyBlinddog Boar Flesh Zombie Pseudodog Tushkan,Newbie Experienced Veteran Master,112,,33
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,WildForest,,,Blinddog,true,8,Blinddog Bloodsucker Boar Flesh Zombie Pseudodog Bayun Tushkan,Newbie Experienced Veteran Master,116,,2
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,SIRCAA_Scientists,,,SIRCAA_Scientist,true,1,SIRCAA_Scientist,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,MALACHITE_Scientists,,,MALACHITE_Scientist,true,1,MALACHITE_Scientist,Newbie Experienced Veteran Master,4,,0
+base,GameLite/GameData/LairPrototypes/GenericLairPrototypes.cfg,RestingLairDefault,,,,true,12,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus,Newbie Experienced Veteran Master,193,LairType=ELairType::RestingLair;RestingLairInstantSpawnScenarioChance=0.4;RestingLairShortDelayedSpawnScenarioChance=0.4;RestingLairMinNPCCount=1;RestingLairMaxNPCCount=5;RestingLairShortDelaySpawnMin=60.0;RestingLairShortDelaySpawnMax=120.0;RestingLairLongDelaySpawnMin=600.0;RestingLairLongDelaySpawnMax=1200.0;ALifeLairsSearchRadius=65000.0;GameTimeOfflineToRerollLairData=14400.0,35
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,DutyCNPPZombies,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,20,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,FreedomCNPPZombies,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,16,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,BanditCNPPZombies,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,16,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,NeutralCNPPZombies,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,16,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CorpusCNPPZombie,,,Zombie,true,1,Zombie,Newbie Experienced Veteran Master,20,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,FW_Duty,,,FW_Duty,true,1,FW_Duty,Newbie Experienced Veteran Master,20,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,FW_Freedom,,,FW_Freedom,true,1,FW_Freedom,Newbie Experienced Veteran Master,16,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,FW_HumansOnly,,,FW_Duty,true,2,FW_Freedom FW_Duty,Newbie Experienced Veteran Master,36,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,FW_HumansAndMutants,,,Neutrals,true,13,FW_Freedom FW_Duty Blinddog Bloodsucker Boar Flesh Zombie Snork Pseudodog Bayun Tushkan Controller Deer,Newbie Experienced Veteran Master,164,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CNPPGenericMutantsOnly,,,Blinddog,true,11,Blinddog Bloodsucker Boar Flesh Zombie Snork Pseudodog Bayun Tushkan Controller Deer,Newbie Experienced Veteran Master,128,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CNPPGenericHumansOnly,,,Neutrals,true,12,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus,Newbie Experienced Veteran Master,193,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CNPPGenericHumansAndMutants,,,Neutrals,true,23,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus Blinddog Bloodsucker Boar Flesh Zombie Snork Pseudodog Bayun Tushkan Controller Deer,Newbie Experienced Veteran Master,321,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CNPPSmallLivingSpace,,,Neutrals,true,16,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus Bloodsucker Zombie Bayun Tushkan,Newbie Experienced Veteran Master,293,,16
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CNPPBigLivingSpace,,,Neutrals,true,21,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus Blinddog Bloodsucker Boar Flesh Zombie Snork Pseudodog Bayun Tushkan,Newbie Experienced Veteran Master,313,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CNPPWildUnderground,,,Tushkan,true,5,Bloodsucker Zombie Snork Bayun Tushkan,Newbie Experienced Veteran Master,104,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CNPPLivingUnderground,,,Neutrals,true,17,Militaries Neutrals Varta Mercenaries Freedom Bandits Monolith Duty Noon Scientists Spark Corpus Bloodsucker Zombie Snork Bayun Tushkan,Newbie Experienced Veteran Master,297,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CNPPWildField,,,Blinddog,true,6,Blinddog Boar Flesh Zombie Pseudodog Tushkan,Newbie Experienced Veteran Master,108,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,CNPPWildForest,,,Blinddog,true,8,Blinddog Bloodsucker Boar Flesh Zombie Pseudodog Bayun Tushkan,Newbie Experienced Veteran Master,116,,0
+DLC1,DLCGameData/DLC1/LairPrototypes.cfg,Object68,,,Object68,true,1,Object68,Newbie Experienced Veteran Master,4,,1

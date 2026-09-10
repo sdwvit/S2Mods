@@ -1,0 +1,13 @@
+Preset,SpawnLairMarkers,Faction,MinTimerForAttack,MaxTimerForAttack,MinSpawnCooldown,MaxSpawnCooldown,MinReinforceCooldown,MaxReinforceCooldown,MinAttackSquadSize,MaxAttackSquadSize,bRefillEnabled
+Off,false,FW_Duty,0,0,0,0,45,30,3,6,false
+Off,false,FW_Freedom,0,0,0,0,45,30,3,6,false
+War_ForDuty,true,FW_Duty,30,45,20,30,45,30,3,6,false
+War_ForDuty,true,FW_Freedom,60,90,30,40,45,30,3,6,false
+War_ForFreedom,true,FW_Duty,60,90,30,40,45,30,3,6,false
+War_ForFreedom,true,FW_Freedom,30,45,20,30,45,30,3,6,false
+War_BeyondTheHorizon,true,FW_Duty,200,400,200,400,45,30,3,6,false
+War_BeyondTheHorizon,true,FW_Freedom,200,400,200,400,45,30,3,6,false
+War_LastStage_ForDuty,true,FW_Duty,30,45,15,25,45,30,3,6,false
+War_LastStage_ForDuty,true,FW_Freedom,60,90,45,80,45,30,3,6,false
+War_LastStage_ForFreedom,true,FW_Duty,60,90,45,80,45,30,3,6,false
+War_LastStage_ForFreedom,true,FW_Freedom,30,45,25,35,45,30,3,6,false
