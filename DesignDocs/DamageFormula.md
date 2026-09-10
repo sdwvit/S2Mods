@@ -1,6 +1,6 @@
 # STALKER 2 damage resolution (retail 1.7-era binary, RE'd)
 
-Source: `Stalker2-Win64-Shipping.exe` (retail, `Binaries/Win64/`, 174 MB, mtime 2025-08-28).
+Source: `Stalker2-Win64-Shipping.exe` (retail, `Binaries/Win64/`, 174,730,288 bytes, mtime 2026-08-28).
 All addresses are default-image-base VAs. Constants labelled **[bin]** were read from the
 binary, **[cfg]** from `GameLite/GameData`, **[inferred]** where noted.
 
