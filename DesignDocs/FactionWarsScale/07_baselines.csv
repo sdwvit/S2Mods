@@ -1,0 +1,107 @@
+Metric,Value,Unit,Method,SourcePath
+total root quest nodes - Base,84028,nodes,python3: count lines matching ^(SID) : struct.begin at column 0 in each QuestNodePrototypes cfg (scratchpad/parse.py),GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+total root quest nodes - DLC1,28225,nodes,python3: count lines matching ^(SID) : struct.begin at column 0 in each QuestNodePrototypes cfg (scratchpad/parse.py),DLCGameData/DLC1/QuestNodePrototypes.cfg
+total root quest nodes - Deluxe,642,nodes,python3: count lines matching ^(SID) : struct.begin at column 0 in each QuestNodePrototypes cfg (scratchpad/parse.py),DLCGameData/Deluxe/QuestNodePrototypes.cfg
+total root quest nodes - Ultimate,209,nodes,python3: count lines matching ^(SID) : struct.begin at column 0 in each QuestNodePrototypes cfg (scratchpad/parse.py),DLCGameData/Ultimate/QuestNodePrototypes.cfg
+total root quest nodes - PreOrder,93,nodes,python3: count lines matching ^(SID) : struct.begin at column 0 in each QuestNodePrototypes cfg (scratchpad/parse.py),DLCGameData/PreOrder/QuestNodePrototypes.cfg
+total root quest nodes - whole game,113197,nodes,python3: count lines matching ^(SID) : struct.begin at column 0 in each QuestNodePrototypes cfg (scratchpad/parse.py),all of the above
+quest node data bytes - Base,70068436,bytes,python3: sum(os.path.getsize) over the cfg files,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+quest node data lines - Base,2360364,lines,"python3: len(text.decode(""utf-8-sig"").split(""\n"")) minus trailing empty, per file, summed",GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+quest node cfg files - Base,1296,files,python3: len(list of .cfg files parsed),GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+quest node data bytes - DLC1,26839580,bytes,python3: sum(os.path.getsize) over the cfg files,DLCGameData/DLC1/QuestNodePrototypes.cfg
+quest node data lines - DLC1,782135,lines,"python3: len(text.decode(""utf-8-sig"").split(""\n"")) minus trailing empty, per file, summed",DLCGameData/DLC1/QuestNodePrototypes.cfg
+quest node cfg files - DLC1,1,files,python3: len(list of .cfg files parsed),DLCGameData/DLC1/QuestNodePrototypes.cfg
+quest node data bytes - Deluxe,574666,bytes,python3: sum(os.path.getsize) over the cfg files,DLCGameData/Deluxe/QuestNodePrototypes.cfg
+quest node data lines - Deluxe,17373,lines,"python3: len(text.decode(""utf-8-sig"").split(""\n"")) minus trailing empty, per file, summed",DLCGameData/Deluxe/QuestNodePrototypes.cfg
+quest node cfg files - Deluxe,1,files,python3: len(list of .cfg files parsed),DLCGameData/Deluxe/QuestNodePrototypes.cfg
+quest node data bytes - Ultimate,194050,bytes,python3: sum(os.path.getsize) over the cfg files,DLCGameData/Ultimate/QuestNodePrototypes.cfg
+quest node data lines - Ultimate,5648,lines,"python3: len(text.decode(""utf-8-sig"").split(""\n"")) minus trailing empty, per file, summed",DLCGameData/Ultimate/QuestNodePrototypes.cfg
+quest node cfg files - Ultimate,1,files,python3: len(list of .cfg files parsed),DLCGameData/Ultimate/QuestNodePrototypes.cfg
+quest node data bytes - PreOrder,86197,bytes,python3: sum(os.path.getsize) over the cfg files,DLCGameData/PreOrder/QuestNodePrototypes.cfg
+quest node data lines - PreOrder,2482,lines,"python3: len(text.decode(""utf-8-sig"").split(""\n"")) minus trailing empty, per file, summed",DLCGameData/PreOrder/QuestNodePrototypes.cfg
+quest node cfg files - PreOrder,1,files,python3: len(list of .cfg files parsed),DLCGameData/PreOrder/QuestNodePrototypes.cfg
+quest node data bytes - whole game,97762929,bytes,sum of the per-source byte rows,all QuestNodePrototypes cfg
+quest node data lines - whole game,3168002,lines,sum of the per-source line rows,all QuestNodePrototypes cfg
+average bytes per quest node - whole game,863.63,bytes/node,"python3 statistics.mean over per-node byte spans (node header line through its closing struct.end, CRLF counted as 2)",all QuestNodePrototypes cfg
+median bytes per quest node - whole game,706,bytes/node,python3 statistics.median over the same per-node byte spans,all QuestNodePrototypes cfg
+average bytes per quest node - Base,833.84,bytes/node,python3 statistics.mean over per-node byte spans,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+median bytes per quest node - Base,683.0,bytes/node,python3 statistics.median over per-node byte spans,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+average bytes per quest node - DLC1,950.91,bytes/node,python3 statistics.mean over per-node byte spans,DLCGameData/DLC1/QuestNodePrototypes.cfg
+median bytes per quest node - DLC1,782,bytes/node,python3 statistics.median over per-node byte spans,DLCGameData/DLC1/QuestNodePrototypes.cfg
+average bytes per quest node - Deluxe,895.12,bytes/node,python3 statistics.mean over per-node byte spans,DLCGameData/Deluxe/QuestNodePrototypes.cfg
+median bytes per quest node - Deluxe,699.0,bytes/node,python3 statistics.median over per-node byte spans,DLCGameData/Deluxe/QuestNodePrototypes.cfg
+average bytes per quest node - Ultimate,928.48,bytes/node,python3 statistics.mean over per-node byte spans,DLCGameData/Ultimate/QuestNodePrototypes.cfg
+median bytes per quest node - Ultimate,720,bytes/node,python3 statistics.median over per-node byte spans,DLCGameData/Ultimate/QuestNodePrototypes.cfg
+average bytes per quest node - PreOrder,926.87,bytes/node,python3 statistics.mean over per-node byte spans,DLCGameData/PreOrder/QuestNodePrototypes.cfg
+median bytes per quest node - PreOrder,690,bytes/node,python3 statistics.median over per-node byte spans,DLCGameData/PreOrder/QuestNodePrototypes.cfg
+spawn-actor cfg files under GameLite/GameData/SpawnActorPrototypes,130524,files,find GameLite/GameData/SpawnActorPrototypes -type f -name '*.cfg' | wc -l,GameLite/GameData/SpawnActorPrototypes
+all files (any extension) under GameLite/GameData/SpawnActorPrototypes,130524,files,find GameLite/GameData/SpawnActorPrototypes -type f | wc -l,GameLite/GameData/SpawnActorPrototypes
+ESpawnType::FactionWar actors - base game,0,actors,grep -rh 'SpawnType = ESpawnType::FactionWar' GameLite/GameData/SpawnActorPrototypes/ | wc -l,GameLite/GameData/SpawnActorPrototypes
+ESpawnType::FactionWar actors - DLC1,1,actors,grep -hc 'SpawnType = ESpawnType::FactionWar' DLCGameData/DLC1/SpawnActorPrototypes.cfg,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+ESpawnType::FactionWar actors - Deluxe,0,actors,grep -hc 'SpawnType = ESpawnType::FactionWar' DLCGameData/Deluxe/SpawnActorPrototypes.cfg,DLCGameData/Deluxe/SpawnActorPrototypes.cfg
+ESpawnType::FactionWar actors - Ultimate,0,actors,grep -hc 'SpawnType = ESpawnType::FactionWar' DLCGameData/Ultimate/SpawnActorPrototypes.cfg,DLCGameData/Ultimate/SpawnActorPrototypes.cfg
+ESpawnType::FactionWar actors - PreOrder,0,actors,grep -hc 'SpawnType = ESpawnType::FactionWar' DLCGameData/PreOrder/SpawnActorPrototypes.cfg,DLCGameData/PreOrder/SpawnActorPrototypes.cfg
+ESpawnType::FactionWar actors - whole game,1,actors,grep -rh 'SpawnType = ESpawnType::FactionWar' GameLite/GameData/SpawnActorPrototypes/ DLCGameData/*/SpawnActorPrototypes.cfg | wc -l,base + all DLC SpawnActorPrototypes
+the only ESpawnType::FactionWar actor GUID,6C7D96DC42856ACB0662B6A247720DC1,guid,grep -B20 'ESpawnType::FactionWar' then read the enclosing root struct SID,DLCGameData/DLC1/SpawnActorPrototypes.cfg line 362818
+level of the only ESpawnType::FactionWar actor,WorldMap_WP,level name,LevelName field of struct 6C7D96DC42856ACB0662B6A247720DC1,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+FactionsPresets on the FactionWar actor,6,presets,python3: count depth-1 sub-structs of FactionsPresets in struct 6C7D96DC42856ACB0662B6A247720DC1,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"FactionsParams array length - preset ""Off""",2,entries,python3: count [N] : struct.begin under FactionsPresets.<preset>.FactionsParams,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"bSpawnLairMarkers - preset ""Off""",false,bool,python3: read bSpawnLairMarkers under FactionsPresets.<preset>,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"FactionsParams array length - preset ""War_ForDuty""",2,entries,python3: count [N] : struct.begin under FactionsPresets.<preset>.FactionsParams,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"bSpawnLairMarkers - preset ""War_ForDuty""",true,bool,python3: read bSpawnLairMarkers under FactionsPresets.<preset>,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"FactionsParams array length - preset ""War_ForFreedom""",2,entries,python3: count [N] : struct.begin under FactionsPresets.<preset>.FactionsParams,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"bSpawnLairMarkers - preset ""War_ForFreedom""",true,bool,python3: read bSpawnLairMarkers under FactionsPresets.<preset>,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"FactionsParams array length - preset ""War_BeyondTheHorizon""",2,entries,python3: count [N] : struct.begin under FactionsPresets.<preset>.FactionsParams,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"bSpawnLairMarkers - preset ""War_BeyondTheHorizon""",true,bool,python3: read bSpawnLairMarkers under FactionsPresets.<preset>,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"FactionsParams array length - preset ""War_LastStage_ForDuty""",2,entries,python3: count [N] : struct.begin under FactionsPresets.<preset>.FactionsParams,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"bSpawnLairMarkers - preset ""War_LastStage_ForDuty""",true,bool,python3: read bSpawnLairMarkers under FactionsPresets.<preset>,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"FactionsParams array length - preset ""War_LastStage_ForFreedom""",2,entries,python3: count [N] : struct.begin under FactionsPresets.<preset>.FactionsParams,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+"bSpawnLairMarkers - preset ""War_LastStage_ForFreedom""",true,bool,python3: read bSpawnLairMarkers under FactionsPresets.<preset>,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+UnitSpawners on the FactionWar actor,19,entries,python3: count [N] = <guid> entries in the UnitSpawners struct of 6C7D96DC42856ACB0662B6A247720DC1,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+Reinforcers on the FactionWar actor,30,entries,python3: count [N] = <guid> entries in the Reinforcers struct of 6C7D96DC42856ACB0662B6A247720DC1,DLCGameData/DLC1/SpawnActorPrototypes.cfg
+EQuestNodeType::ToggleLairActivity - base game,481,occurrences,python3: regex E[A-Za-z0-9_]+::([A-Za-z0-9_]+) over field values in base QuestNodePrototypes,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+EQuestNodeType::ToggleLairActivity - all DLC combined,140,occurrences,same regex over the four DLC QuestNodePrototypes.cfg,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestNodeType::ToggleLairActivity - per-DLC breakdown,DLC1=136;Deluxe=4,occurrences,same,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestNodeType::ProtectLairNPCSquadItem - base game,113,occurrences,python3: regex E[A-Za-z0-9_]+::([A-Za-z0-9_]+) over field values in base QuestNodePrototypes,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+EQuestNodeType::ProtectLairNPCSquadItem - all DLC combined,4,occurrences,same regex over the four DLC QuestNodePrototypes.cfg,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestNodeType::ProtectLairNPCSquadItem - per-DLC breakdown,DLC1=3;Deluxe=1,occurrences,same,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestNodeType::SpawnLair - base game,1,occurrences,python3: regex E[A-Za-z0-9_]+::([A-Za-z0-9_]+) over field values in base QuestNodePrototypes,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+EQuestNodeType::SpawnLair - all DLC combined,0,occurrences,same regex over the four DLC QuestNodePrototypes.cfg,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestNodeType::SpawnLair - per-DLC breakdown,none,occurrences,same,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestNodeType::OnLairOwnershipHasChangedEvent - base game,0,occurrences,python3: regex E[A-Za-z0-9_]+::([A-Za-z0-9_]+) over field values in base QuestNodePrototypes,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+EQuestNodeType::OnLairOwnershipHasChangedEvent - all DLC combined,26,occurrences,same regex over the four DLC QuestNodePrototypes.cfg,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestNodeType::OnLairOwnershipHasChangedEvent - per-DLC breakdown,DLC1=26,occurrences,same,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestNodeType::FWChangePreset - base game,0,occurrences,python3: regex E[A-Za-z0-9_]+::([A-Za-z0-9_]+) over field values in base QuestNodePrototypes,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+EQuestNodeType::FWChangePreset - all DLC combined,11,occurrences,same regex over the four DLC QuestNodePrototypes.cfg,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestNodeType::FWChangePreset - per-DLC breakdown,DLC1=11,occurrences,same,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestConditionType::IsLairOwnedByFaction - base game,0,occurrences,python3: regex E[A-Za-z0-9_]+::([A-Za-z0-9_]+) over field values in base QuestNodePrototypes,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+EQuestConditionType::IsLairOwnedByFaction - all DLC combined,26,occurrences,same regex over the four DLC QuestNodePrototypes.cfg,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestConditionType::IsLairOwnedByFaction - per-DLC breakdown,DLC1=26,occurrences,same,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestEventType::OnLairOwnershipHasChanged - base game,0,occurrences,python3: regex E[A-Za-z0-9_]+::([A-Za-z0-9_]+) over field values in base QuestNodePrototypes,GameLite/GameData/QuestNodePrototypes/ + GameLite/GameData/QuestNodePrototypes.cfg
+EQuestEventType::OnLairOwnershipHasChanged - all DLC combined,26,occurrences,same regex over the four DLC QuestNodePrototypes.cfg,DLCGameData/*/QuestNodePrototypes.cfg
+EQuestEventType::OnLairOwnershipHasChanged - per-DLC breakdown,DLC1=26,occurrences,same,DLCGameData/*/QuestNodePrototypes.cfg
+total ESpawnType::LairSpawner actor placeholders - whole game,513,actors,grep -rh 'SpawnType = ESpawnType::LairSpawner' GameLite/GameData/SpawnActorPrototypes/ DLCGameData/*/SpawnActorPrototypes.cfg | wc -l,base + all DLC SpawnActorPrototypes
+ESpawnType::LairSpawner placeholders - level WorldMap_WP (Base),381,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+ESpawnType::LairSpawner placeholders - level WorldMap_WP (DLC1),64,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+ESpawnType::LairSpawner placeholders - level ALifeGym_WP (Base),31,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+ESpawnType::LairSpawner placeholders - level AITestMap (Base),10,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+ESpawnType::LairSpawner placeholders - level AITestMap_VFX (Base),10,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+ESpawnType::LairSpawner placeholders - level AITestMap_Light (Base),9,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+ESpawnType::LairSpawner placeholders - level (no LevelName) (Base),4,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+ESpawnType::LairSpawner placeholders - level WorldMap_WP/Terricon_Hub_LogicLevel_WP (Base),2,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+ESpawnType::LairSpawner placeholders - level QuestToolCombatTestMap_Deprecated (Base),1,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+ESpawnType::LairSpawner placeholders - level QuestToolCombatTestMap_WP (Base),1,actors,"python3: walk each root struct, count those whose SpawnType is LairSpawner, grouped by their LevelName field",GameLite/GameData/SpawnActorPrototypes + DLCGameData/*/SpawnActorPrototypes.cfg
+distinct GUIDs referenced by lair/FW quest nodes,411,guids,python3: distinct 32-hex values in TargetQuestGuid/TargetLairPlaceholder/FactionWarPlaceholder of 12_lair_node_usage.csv,DesignDocs/FactionWarsScale/12_lair_node_usage.csv
+"of those, resolved to a SpawnActorPrototypes root struct",384,guids,grep -rn -F -f <guid list with ' : struct.begin' suffix> GameLite/GameData/SpawnActorPrototypes/ DLCGameData/*/SpawnActorPrototypes.cfg,base + all DLC SpawnActorPrototypes
+"of those, NOT resolved (map-only / not cfg-visible)",27,guids,set difference of the two rows above,n/a
+lair/faction-war quest nodes total (base + all DLC),796,nodes,python3: nodes whose NodeType/ConditionType/EventType (including nested Conditions/Events) matches /lair|factionwar|\bfw/i,all QuestNodePrototypes cfg
+distinct node/condition/event enum values matching lair|factionwar|fw,7,enum values,python3 over 11_node_type_census.csv rows,DesignDocs/FactionWarsScale/11_node_type_census.csv
+distinct enum families seen in quest node data,44,families,python3: distinct family part of regex E[A-Za-z0-9_]+::[A-Za-z0-9_]+ over all quest node field values,all QuestNodePrototypes cfg
+distinct EQuestNodeType values in use,130,enum values,python3 count of EQuestNodeType rows in 11_node_type_census.csv,all QuestNodePrototypes cfg
+distinct EQuestConditionType values in use,40,enum values,same,all QuestNodePrototypes cfg
+distinct EQuestEventType values in use,39,enum values,same,all QuestNodePrototypes cfg
+quest nodes lacking a NodeType field,0,nodes,python3: root structs parsed with no NodeType key,all QuestNodePrototypes cfg
+lair/FW quest nodes whose every GUID target resolves,733,nodes,python3 over 12_lair_node_usage.csv: rows with a non-empty TargetResolvedIn,DesignDocs/FactionWarsScale/12_lair_node_usage.csv
+lair/FW quest nodes with a GUID target that resolves in NO cfg,61,nodes,python3 over 12_lair_node_usage.csv: rows with GUIDs but empty TargetResolvedIn,DesignDocs/FactionWarsScale/12_lair_node_usage.csv
+lair/FW quest nodes carrying no GUID target at all,2,nodes,python3 over 12_lair_node_usage.csv: rows where all three GUID columns are empty,DesignDocs/FactionWarsScale/12_lair_node_usage.csv
+malformed cfg lines needing a newline fixup before parsing,1,lines,grep -rn 'struct\.end[A-Za-z0-9_]' over all QuestNodePrototypes cfg - only rootgraph.cfg:2335 'struct.endrootgraph_OnTickEvent_5 : struct.begin',GameLite/GameData/QuestNodePrototypes/rootgraph.cfg

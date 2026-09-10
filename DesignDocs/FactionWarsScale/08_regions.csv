@@ -1,0 +1,40 @@
+Source,SID,Name,X,Y,Z,Yaw,RequiredGlobalVariables,Notes
+base,empty,Default,0.0,0.0,0.0,0.0,empty=0,Blocking:empty=0; struct_key=[0]
+base,terricon,hub_terricon,421180.0,412370.0,2120.0,-160.0,Terricon_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[1]
+base,asylum,hub_asulym,478540.0,526470.0,340.0,0.0,Asulym_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[2]
+base,sultansk,hub_sultansk,665202.0,617990.0,252.0,150.0,Sultansk_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[3]
+base,rookievillage,hub_rookievillage,445964.0,657845.0,-2349.0,-130.0,RookieVillage_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[4]
+base,concreteplant,hub_concreteplant,498260.0,379420.0,849.0,-360.0,ConcretePlant_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[5]
+base,rostok,region_rostok,321267.0,412054.0,360.0,-190.0,Rostok_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[6]
+base,yanov,region_yanov,215900.0,270210.0,946.0,300.0,Yanov_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[7]
+base,malahit,region_malachite,107594.0,471669.0,424.0,150.0,Malahit_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[8]
+base,himzavod,hub_chemplant,318986.0,526376.0,613.0,-50.0,Himzavod_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[9]
+base,zalesie,hub_zalesie,398700.0,545500.0,990.0,-270.0,Zalesje_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[10]
+base,pripyat,region_prypiat,232150.0,159790.0,1114.0,-120.0,Pripyat_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[11]
+base,kazkovy,supack_Kazkovy_Hub2,259517.0,599445.0,568.0,0.0,Kazkovy_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[12]
+base,purification_facility,DLC01_hub_water_purification_facility,409220.0,258260.0,1040.0,180.0,DLC01_CNPP_Guideway=1,refkey=[0]; Blocking:empty=0; struct_key=[13]
+base,bunker,DLC01_loc_31_chiefs_bunker,384673.0,341937.0,565.0,-115.0,AllowTravelIF=1,refkey=[0]; Blocking:empty=0; struct_key=[14]
+base-regionmusic,empty,Zone,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Zone; MusicState=EMusicState::Region; RegionSIDGlobalVariable=MUS_Default_Region_Mood
+base-regionmusic,MalayaZona,MalayaZona,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::MalayaZona; MusicState=; refkey=[0]; RegionSIDGlobalVariable=MUS_MalayaZona_Region_Mood
+base-regionmusic,Svalka,Svalka,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Svalka; MusicState=; refkey=[0]
+base-regionmusic,ChemZavod,ChemZavod,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::ChemZavod; MusicState=; refkey=[0]
+base-regionmusic,DickyOstrov,DickyOstrov,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::DickyOstrov; MusicState=; refkey=[0]; RegionSIDGlobalVariable=MUS_DickyOstrov_Region_Mood
+base-regionmusic,Zaton,Zaton,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Zaton; MusicState=; refkey=[0]
+base-regionmusic,Bolota,Bolota,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Bolota; MusicState=; refkey=[0]
+base-regionmusic,NIICHAZ,NIICHAZ,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::NIICHAZ; MusicState=; refkey=[0]; RegionSIDGlobalVariable=MUS_Sircaa_Region_Mood
+base-regionmusic,Gradirni,Gradirni,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Gradirni; MusicState=; refkey=[0]
+base-regionmusic,Malahit,Malahit,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Malahit; MusicState=; refkey=[0]
+base-regionmusic,Duga,Duga,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Duga; MusicState=; refkey=[0]; RegionSIDGlobalVariable=MUS_Duga_Region_Mood
+base-regionmusic,Rostock,Rostock,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Rostock; MusicState=; refkey=[0]
+base-regionmusic,Yantar,Yantar,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Yantar; MusicState=; refkey=[0]
+base-regionmusic,GoreliyLes,GoreliyLes,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::GoreliyLes; MusicState=; refkey=[0]
+base-regionmusic,Kordon,Kordon,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Kordon; MusicState=; refkey=[0]
+base-regionmusic,RizhyLes,RizhyLes,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::RizhyLes; MusicState=; refkey=[0]
+base-regionmusic,Yanov,Yanov,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Yanov; MusicState=; refkey=[0]
+base-regionmusic,Jupiter,Jupiter,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Jupiter; MusicState=; refkey=[0]
+base-regionmusic,Pripyat,Pripyat,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Pripyat; MusicState=; refkey=[0]
+base-regionmusic,ZheleznyLes,ZheleznyLes,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::ZheleznyLes; MusicState=; refkey=[0]
+base-regionmusic,CHAES,CHAES,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::CHAES; MusicState=; refkey=[0]; RegionSIDGlobalVariable=MUS_CNPP_Hub_Location_Mood
+base-regionmusic,Generatory,Generatory,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Generatory; MusicState=; refkey=[0]
+base-regionmusic,ZementniyZavod,ZementniyZavod,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::ZementniyZavod; MusicState=; refkey=[0]
+DLC1-regionmusic,DLC1_Default,Zone,,,,,,from RegionMusicPrototypes (no world coords in file); Region=ERegion::Zone; MusicState=EMusicState::Region; refkey=[0]; RegionSIDGlobalVariable=MUS_Default_Region_Mood
