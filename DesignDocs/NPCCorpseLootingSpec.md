@@ -5,7 +5,7 @@ take, what "better gun" means to it, and what it categorically cannot do.
 
 All findings below were read out of the **retail** shipping binary
 (`<STALKER2_FOLDER>/Stalker2/Binaries/Win64/Stalker2-Win64-Shipping.exe`,
-175 MB, dated 2025-08-28) unless a line says otherwise. Addresses are virtual
+174,730,288 bytes, mtime 2026-08-28) unless a line says otherwise. Addresses are virtual
 addresses in that build and will not survive a patch — the *names* and the
 *mechanism* will.
 
