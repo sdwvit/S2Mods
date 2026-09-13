@@ -7,6 +7,10 @@ const EXTRA_TIERS = 3;
 const COST_SCALE = 2;
 const MAX_TIER1_COST = 10_000;
 const MAX_COST = 100_000;
+// Vanilla index arrays we append to top out around [26] (weapons/armors) and [1360]
+// (technician Upgrades); start well above so appended entries never overwrite one.
+const ARRAY_INDEX_BASE = 500;
+const TECHNICIAN_INDEX_BASE = 9000;
 
 // Map from leaf durability upgrade SID to array of new tier SIDs
 const tierMap = new Map<string, string[]>();
@@ -151,8 +155,12 @@ const transformWeaponsAndArmors: StructTransformer<WeaponGeneralSetupPrototype |
 
   const fork = struct.fork();
   fork.UpgradePrototypeSIDs = struct.UpgradePrototypeSIDs.fork();
+  // UpgradePrototypeSIDs is an indexed array ([0] = SID). Appending SID-named keys
+  // instead of indices corrupts the array on merge, which wipes the weapon/armor's
+  // whole upgrade list in game. Append numeric indices above anything vanilla uses.
+  let index = ARRAY_INDEX_BASE;
   for (const sid of newSIDs) {
-    fork.UpgradePrototypeSIDs.addNode(sid, sid);
+    fork.UpgradePrototypeSIDs.addNode(sid, index++);
   }
   return fork;
 };
@@ -178,10 +186,14 @@ const transformTechnicians: StructTransformer<any> = async (struct, context) => 
   const fork = struct.fork();
   fork.Upgrades = struct.Upgrades?.fork() ?? new Struct();
   fork.Upgrades.__internal__.bpatch = true;
+  fork.Upgrades.__internal__.isArray = true;
+  // Same as above: the technician's Upgrades is an indexed array ([0] : struct.begin).
+  // SID-named keys corrupted it and left every technician with no upgrades at all.
+  let index = TECHNICIAN_INDEX_BASE;
   for (const sid of allNewTierSIDs) {
     fork.Upgrades.addNode(
       new Struct({ UpgradePrototypeSID: sid, Enabled: true }),
-      sid,
+      index++,
     );
   }
   return fork;
@@ -209,7 +221,7 @@ bPatches:
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Fixed weapon upgrade trees (Dnipro, Fora-230, Kharod) getting duplicated caliber conversions instead of extra durability tiers — caliber conversions carry a durability side effect and were mistaken for durability upgrades. The real body durability upgrades on Dnipro and Fora-230 now get their extra tiers.",
+  changenote: "Fixed the mod disabling all upgrades at every technician. Weapon/armor UpgradePrototypeSIDs and the technician Upgrades list are indexed arrays; the extra tiers were appended under SID-named keys instead of indices, which corrupted those arrays on merge and left technicians with an empty upgrade list. They are now appended as numeric indices.",
   structTransformers: [transformUpgrades, transformWeaponsAndArmors, transformTechnicians] as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
