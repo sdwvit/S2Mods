@@ -42,8 +42,8 @@ type FireModeUpgrade = {
 
 const upgradeImage = (path: string) => `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/PDA/Upgrades/Weapons/${path}'`;
 
-// Each sits in a cell the vanilla tree leaves empty. Costs are pitched at the weapon's own tier
-// prices for that column.
+// Each sits in a cell the vanilla tree leaves empty. A new fire mode changes how the gun plays, so
+// costs sit with the weapon's own attachment-modification prices (roughly 30-50% of the gun's price).
 export const FIRE_MODE_UPGRADES: FireModeUpgrade[] = [
   {
     // G36-pattern rifle: vanilla V2 is semi + burst, the plain GP37 already has auto.
@@ -51,7 +51,7 @@ export const FIRE_MODE_UPGRADES: FireModeUpgrade[] = [
     weapons: ["GunG37V2_ST"],
     anchor: "GunG37_Upgrade_Body_1_2",
     effect: "ChangeFireTypeAddAutoToSemiBurstEffect",
-    cost: 3200,
+    cost: 5500,
     part: "Body",
     horizontal: 1,
     vertical: "Top",
@@ -64,7 +64,7 @@ export const FIRE_MODE_UPGRADES: FireModeUpgrade[] = [
     weapons: ["GunAPB_HG", "Gun_Encourage_HG_GS"],
     anchor: "GunAPB_Upgrade_Body_1_1",
     effect: "ChangeFireTypeAddSemiToBurstEffect",
-    cost: 2100,
+    cost: 4800,
     part: "Body",
     horizontal: 0,
     vertical: "Down",
@@ -76,7 +76,7 @@ export const FIRE_MODE_UPGRADES: FireModeUpgrade[] = [
     weapons: ["GunM10_HG", "Gun_GStreet_HG_GS"],
     anchor: "GunM10_Upgrade_Grip_1",
     effect: "ChangeFireTypeAddSemiToAutoEffect",
-    cost: 1300,
+    cost: 2900,
     part: "PistolGrip",
     horizontal: 0,
     vertical: "Down",
@@ -88,7 +88,7 @@ export const FIRE_MODE_UPGRADES: FireModeUpgrade[] = [
     weapons: ["GunSVU_SP", "Gun_Whip_SR_GS"],
     anchor: "GunSVU_Upgrade_Grip_1_1",
     effect: "ChangeFireTypeSemiAutoEffect", // vanilla: [SemiAutomatic, Automatic]
-    cost: 7000,
+    cost: 16500,
     part: "Body",
     horizontal: 0,
     vertical: "Top",
@@ -208,10 +208,10 @@ export const meta: MetaType<any> = {
 Adds technician upgrades that unlock the fire modes these guns have in real life but lack in game. Existing fire modes are never removed.
 [hr][/hr]
 [list]
- [*] GP37 V2: Full-Auto Trigger Group - adds automatic fire to single/burst. Body, tier 2. 3200 coupons.
- [*] APSB and Encourage: Fire Selector Restoration - adds single fire to burst. Body. 2100 coupons.
- [*] M10 Gordon and Gangster: Semi-Auto Sear - adds single fire to automatic. Grip. 1300 coupons.
- [*] SVU-MK S-3 and Whip: Automatic Trigger Mechanism - adds automatic fire to single. Body. 7000 coupons.
+ [*] GP37 V2: Full-Auto Trigger Group - adds automatic fire to single/burst. Body, tier 2. 5500 coupons.
+ [*] APSB and Encourage: Fire Selector Restoration - adds single fire to burst. Body. 4800 coupons.
+ [*] M10 Gordon and Gangster: Semi-Auto Sear - adds single fire to automatic. Grip. 2900 coupons.
+ [*] SVU-MK S-3 and Whip: Automatic Trigger Mechanism - adds automatic fire to single. Body. 16500 coupons.
 [/list]
 Available at every technician that sells that weapon's other upgrades, including the ones unlocked by delivering toolboxes.
 [hr][/hr]
@@ -226,7 +226,7 @@ bPatches:
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Initial release: fire mode upgrades for GP37 V2 (auto), APSB and Encourage (single), M10 Gordon and Gangster (single), SVU-MK S-3 and Whip (auto).",
+  changenote: "Raised upgrade prices to match each weapon's modification upgrades: GP37 V2 5500, APSB/Encourage 4800, M10 Gordon/Gangster 2900, SVU-MK S-3/Whip 16500.",
   structTransformers: [
     transformEffectPrototypes,
     transformUpgradePrototypes,
