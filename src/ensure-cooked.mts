@@ -55,6 +55,38 @@ function filesOwnedBy(target: SdkModTarget): string[] {
 /** Sits beside the staged output, not inside Windows/, so pull-staged never ships it. */
 export const hashFileFor = (staged: string) => path.join(path.dirname(staged), ".raw-hash");
 
+function hasContainer(dir: string): boolean {
+  if (!existsSync(dir)) return false;
+  return readdirSync(dir, { withFileTypes: true }).some((entry) =>
+    entry.isDirectory()
+      ? hasContainer(path.join(dir, entry.name))
+      : /\.(pak|utoc|ucas)$/i.test(entry.name),
+  );
+}
+
+/**
+ * A cook stages one container per variant, but only for a variant whose PackageClassifier list
+ * names packages: most mods have no new packages and legitimately stage no NewContent container.
+ * So a staged tree is complete when every variant with a non-empty list has a container. A cook
+ * killed between its two passes leaves OverrideContent staged and NewContent empty; adopting
+ * that installs the mod without its new packages (e.g. its localization asset, whose SIDs then
+ * show raw in game). With no lists to go by, fall back to "any container at all".
+ */
+function hasCompleteStagedCook(target: SdkModTarget): boolean {
+  const staged = target.stagedModFolder;
+  if (!hasContainer(staged)) return false;
+  const lists: [string, string][] = [
+    ["NewContent", "NewPackages.txt"],
+    ["OverrideContent", "OverridePackages.txt"],
+  ];
+  return lists.every(([variant, list]) => {
+    const listFile = path.join(target.packageClassifierFolder, list);
+    const listed = existsSync(listFile) && readFileSync(listFile, "utf8").trim().length > 0;
+    // stagedModFolder already ends in .../Staged/<Name>/Windows; the variants sit directly below it.
+    return !listed || hasContainer(path.join(staged, variant));
+  });
+}
+
 /**
  * Published mods always ship cooked paks - loose configs are a local-injection shortcut only.
  * Cooks only when raw/ has actually changed since the staged output was produced, so running
@@ -79,7 +111,10 @@ async function ensureCookedTarget(target: SdkModTarget) {
   // straight from the cfgs instead, whether or not anything is staged. See planCfgOnlyVariant.
   const staged = target.stagedModFolder;
   const hashFile = hashFileFor(staged);
-  const stagedExists = existsSync(staged) && readdirSync(staged).length > 0;
+  // A staged tree counts only if it holds a container for every variant it should. A cook that
+  // died or was cleaned up can leave an empty or half-filled Windows/<variant>/ skeleton behind,
+  // and adopting that installs nothing, or only half the mod.
+  const stagedExists = hasCompleteStagedCook(target);
   const owned = filesOwnedBy(target);
   const rawHash = hashRaw(owned);
 
