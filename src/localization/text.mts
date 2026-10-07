@@ -6,7 +6,7 @@
  * The bytes are written by `uasset.mts`; everything here is about the text itself, so
  * a mod's own `writeLocalization.mts` only has to hold its strings.
  */
-import { copyFileSync, existsSync, readdirSync, realpathSync, statSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, realpathSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -153,6 +153,8 @@ export function writeModLocalization(
   // repairs a copy someone made from another mod's asset by renaming the file.
   const packageName = `/${sdkModName}/${path.basename(assetName, ".uasset")}`;
   const template = existsSync(sdkAsset) ? sdkAsset : existsSync(asset) ? asset : EMPTY_TEMPLATE;
+  // A brand-new mod has no raw/Stalker2/Content yet.
+  mkdirSync(path.dirname(asset), { recursive: true });
   if (parseUasset(template).summary.packageName === packageName) {
     writeLocalizedTexts(template, entries, asset);
   } else {
