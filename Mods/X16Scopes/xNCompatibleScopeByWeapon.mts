@@ -88,7 +88,7 @@ export const xNCompatibleScopeByWeapon: Record<
   GunGvintar_ST: {
     8: {
       family: "UA",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'`,
     },
     16: {
       family: "UA",
@@ -98,7 +98,7 @@ export const xNCompatibleScopeByWeapon: Record<
   Gun_Merc_AR_GS: {
     8: {
       family: "UA",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'`,
     },
     16: {
       family: "UA",
@@ -108,7 +108,7 @@ export const xNCompatibleScopeByWeapon: Record<
   GunLavina_ST: {
     8: {
       family: "UA",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'`,
     },
     16: {
       family: "UA",
@@ -118,7 +118,7 @@ export const xNCompatibleScopeByWeapon: Record<
   Gun_Trophy_AR_GS: {
     8: {
       family: "UA",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/Gvintar/T_inv_w_gvintar_ru_x8scope_1.T_inv_w_gvintar_ru_x8scope_1'`,
     },
     16: {
       family: "UA",
@@ -128,7 +128,7 @@ export const xNCompatibleScopeByWeapon: Record<
   Gun_Whip_SR_GS: {
     8: {
       family: "UA",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_svu_ru_x8scope_1.T_inv_w_svu_ru_x8scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_svu_ru_x8scope_1.T_inv_w_svu_ru_x8scope_1'`,
     },
     16: {
       family: "UA",
@@ -136,6 +136,10 @@ export const xNCompatibleScopeByWeapon: Record<
     },
   },
   GunSVU_SP: {
+    8: {
+      family: "UA",
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_svu_ru_x8scope_1.T_inv_w_svu_ru_x8scope_1'`,
+    },
     16: {
       family: "UA",
       WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVU/T_inv_w_svu_ua_x16scope_1.T_inv_w_svu_ua_x16scope_1'`,
@@ -148,7 +152,7 @@ export const xNCompatibleScopeByWeapon: Record<
     },
     16: {
       family: "UA",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVDM/T_inv_w_lynx_ua_x16scope_1.T_inv_w_lynx_ua_x16scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/SVDM/T_inv_w_svdm_ua_x16scope_1.T_inv_w_svdm_ua_x16scope_1'`,
     },
   },
   GunSVDM_SP: {
@@ -164,7 +168,7 @@ export const xNCompatibleScopeByWeapon: Record<
   Gun_Sharpshooter_AR_GS: {
     8: {
       family: "EN",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/M16/T_inv_w_sharpshooter_en_x8scope_1.T_inv_w_sharpshooter_en_x8scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/M16/T_inv_w_sharpshooter_en_x8scope_1.T_inv_w_sharpshooter_en_x8scope_1'`,
     },
     16: {
       family: "EN",
@@ -174,7 +178,7 @@ export const xNCompatibleScopeByWeapon: Record<
   Gun_Unknown_AR_GS: {
     8: {
       family: "EN",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/M16/T_inv_w_sharpshooter_en_x8scope_1.T_inv_w_sharpshooter_en_x8scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/M16/T_inv_w_sharpshooter_en_x8scope_1.T_inv_w_sharpshooter_en_x8scope_1'`,
     },
     16: {
       family: "EN",
@@ -184,7 +188,7 @@ export const xNCompatibleScopeByWeapon: Record<
   GunM16_ST: {
     8: {
       family: "EN",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/M16/T_inv_w_sharpshooter_en_x8scope_1.T_inv_w_sharpshooter_en_x8scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/M16/T_inv_w_sharpshooter_en_x8scope_1.T_inv_w_sharpshooter_en_x8scope_1'`,
     },
     16: {
       family: "EN",
@@ -194,7 +198,7 @@ export const xNCompatibleScopeByWeapon: Record<
   Gun_SOFMOD_AR_GS: {
     8: {
       family: "EN",
-      WeaponSpecificIcon: `Texture2D'/${modName}/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/M16/T_inv_w_sharpshooter_en_x8scope_1.T_inv_w_sharpshooter_en_x8scope_1'`,
+      WeaponSpecificIcon: `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/M16/T_inv_w_sharpshooter_en_x8scope_1.T_inv_w_sharpshooter_en_x8scope_1'`,
     },
     16: {
       family: "EN",
