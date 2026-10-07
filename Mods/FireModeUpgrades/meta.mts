@@ -33,65 +33,65 @@ type FireModeUpgrade = {
   anchor: string;
   effect: string;
   cost: number;
-  part: "Body" | "PistolGrip";
-  horizontal: number;
+  part: "Stock" | "PistolGrip";
   vertical: "Top" | "Down";
-  required?: string[];
+  required: string[];
   image: string;
 };
 
 const upgradeImage = (path: string) => `Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/PDA/Upgrades/Weapons/${path}'`;
 
-// Each sits in a cell the vanilla tree leaves empty. A new fire mode changes how the gun plays, so
+// Use an existing weapon part with a free tier-3 cell and real tier-2 prerequisites.
+// Body is not exposed by the SVU upgrade UI; its grip tier 3 is already full.
+// A new fire mode changes how the gun plays, so
 // costs sit with the weapon's own attachment-modification prices (roughly 30-50% of the gun's price).
 export const FIRE_MODE_UPGRADES: FireModeUpgrade[] = [
   {
     // G36-pattern rifle: vanilla V2 is semi + burst, the plain GP37 already has auto.
     sid: "GunG37V2_Upgrade_FireMode_Auto",
     weapons: ["GunG37V2_ST"],
-    anchor: "GunG37_Upgrade_Body_1_2",
+    anchor: "GunG37_Upgrade_Stock_2_1",
     effect: "ChangeFireTypeAddAutoToSemiBurstEffect",
     cost: 5500,
-    part: "Body",
-    horizontal: 1,
+    part: "Stock",
     vertical: "Top",
-    required: ["GunG37_Upgrade_Body_1_1", "GunG37_Upgrade_Body_1_2"],
+    required: ["GunG37_Upgrade_Stock_2_1", "GunG37_Upgrade_Stock_2_2"],
     image: upgradeImage("Assault/G37/Body/Upgrade/T_GP_upgr_2.T_GP_upgr_2"),
   },
   {
     // Stechkin APB: real selector is single/auto, vanilla only bursts.
     sid: "GunAPB_Upgrade_FireMode_Semi",
     weapons: ["GunAPB_HG", "Gun_Encourage_HG_GS"],
-    anchor: "GunAPB_Upgrade_Body_1_1",
+    anchor: "GunAPB_Upgrade_Grip_3",
     effect: "ChangeFireTypeAddSemiToBurstEffect",
     cost: 4800,
-    part: "Body",
-    horizontal: 0,
+    part: "PistolGrip",
     vertical: "Down",
+    required: ["GunAPB_Upgrade_Grip_2_1", "GunAPB_Upgrade_Grip_2_2"],
     image: upgradeImage("Handgun/APB/Body/Upgrade/T_APBU_b_2.T_APBU_b_2"),
   },
   {
     // MAC-10: real gun has a semi/auto selector, vanilla is auto only.
     sid: "GunM10_Upgrade_FireMode_Semi",
     weapons: ["GunM10_HG", "Gun_GStreet_HG_GS"],
-    anchor: "GunM10_Upgrade_Grip_1",
+    anchor: "GunM10_Upgrade_Grip_2_1",
     effect: "ChangeFireTypeAddSemiToAutoEffect",
     cost: 2900,
     part: "PistolGrip",
-    horizontal: 0,
     vertical: "Down",
+    required: ["GunM10_Upgrade_Grip_2_1", "GunM10_Upgrade_Grip_2_2"],
     image: upgradeImage("Handgun/M10/Grip/Upgrade/T_M10U_b_1.T_M10U_b_1"),
   },
   {
     // SVU-AS is select-fire, and the game's own SVU magazine text calls it an automatic sniper rifle.
     sid: "GunSVU_Upgrade_FireMode_Auto",
     weapons: ["GunSVU_SP", "Gun_Whip_SR_GS"],
-    anchor: "GunSVU_Upgrade_Grip_1_1",
+    anchor: "GunSVU_Upgrade_Stock_3",
     effect: "ChangeFireTypeSemiAutoEffect", // vanilla: [SemiAutomatic, Automatic]
     cost: 16500,
-    part: "Body",
-    horizontal: 0,
+    part: "Stock",
     vertical: "Top",
+    required: ["GunSVU_Upgrade_Stock_2_1", "GunSVU_Upgrade_Stock_2_2"],
     image: upgradeImage("Sniper/SVU/Grip/Upgrade/T_SVUU_c_1.T_SVUU_c_1"),
   },
 ];
@@ -144,11 +144,13 @@ const transformUpgradePrototypes: StructTransformer<UpgradePrototype> = () => {
       Image: u.image,
       Icon: UPGRADE_ICON,
       BaseCost: u.cost,
-      ...(u.horizontal ? { HorizontalPosition: u.horizontal } : {}),
+      HorizontalPosition: 2, // zero-based: tier 3
       VerticalPosition: `EUpgradeVerticalPosition::${u.vertical}`,
       UpgradeTargetPart: `EUpgradeTargetPartType::${u.part}`,
       EffectPrototypeSIDs: listStruct([u.effect]),
-      ...(u.required ? { RequiredUpgradePrototypeSIDs: listStruct(u.required) } : {}),
+      // Vanilla lists both mutually exclusive predecessors: either one unlocks the next tier.
+      RequiredUpgradePrototypeSIDs: listStruct(u.required),
+      ConnectionLines: listStruct([`EConnectionLineState::${u.vertical === "Top" ? "Down" : "Top"}`]),
     }),
   );
 };
@@ -203,17 +205,16 @@ transformKazkovyHubQuestNodePrototypes.files = ["/Kazkovy_Hub.cfg"];
 
 export const meta: MetaType<any> = {
   description: `
-[b]This mod is alpha version.[/b]
 [hr][/hr]
 Adds technician upgrades that unlock the fire modes these guns have in real life but lack in game. Existing fire modes are never removed.
 [hr][/hr]
 [list]
- [*] GP37 V2: Full-Auto Trigger Group - adds automatic fire to single/burst. Body, tier 2. 5500 coupons.
- [*] APSB and Encourage: Fire Selector Restoration - adds single fire to burst. Body. 4800 coupons.
- [*] M10 Gordon and Gangster: Semi-Auto Sear - adds single fire to automatic. Grip. 2900 coupons.
- [*] SVU-MK S-3 and Whip: Automatic Trigger Mechanism - adds automatic fire to single. Body. 16500 coupons.
+ [*] GP37 V2: Full-Auto Trigger Group - adds automatic fire to single/burst. Stock, tier 3. 5500 coupons.
+ [*] APSB and Encourage: Fire Selector Restoration - adds single fire to burst. Grip, tier 3. 4800 coupons.
+ [*] M10 Gordon and Gangster: Semi-Auto Sear - adds single fire to automatic. Grip, tier 3. 2900 coupons.
+ [*] SVU-MK S-3 and Whip: Automatic Trigger Mechanism - adds automatic fire to single. Stock, tier 3. 16500 coupons.
 [/list]
-Available at every technician that sells that weapon's other upgrades, including the ones unlocked by delivering toolboxes.
+Requires either tier-2 upgrade in the same part. Available at technicians that offer that branch's advanced upgrades, including the ones unlocked by delivering toolboxes. Existing tier-3 upgrades remain available alongside the fire-mode upgrade.
 [hr][/hr]
 bPatches:
 [list]
@@ -226,7 +227,7 @@ bPatches:
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Raised upgrade prices to match each weapon's modification upgrades: GP37 V2 5500, APSB/Encourage 4800, M10 Gordon/Gangster 2900, SVU-MK S-3/Whip 16500.",
+  changenote: "Fixed missing SVU/Whip fire-mode upgrade and upgrade-tree display/dependencies for every affected weapon. All fire-mode upgrades now occupy free tier-3 cells, require either same-part tier-2 upgrade, and follow advanced technician/toolbox availability. Prices and existing fire modes are unchanged.",
   structTransformers: [
     transformEffectPrototypes,
     transformUpgradePrototypes,
