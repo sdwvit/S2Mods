@@ -11,7 +11,7 @@ if (isCfgOnlyMod() && !process.env.COOK_CFG_MODS) {
   await injectRawIntoGame();
 } else {
   // Both halves of a split mod, so the install is never half of a mod. ensureCooked skips the
-  // ~22 min editor round-trip when raw/ is unchanged since the staged cook, and downgrades it to
+  // editor round-trip when raw/ is unchanged since the staged cook, and downgrades it to
   // the ~9s repack when only loose files moved - the common case for a cfg edit on a mod that
   // also ships assets.
   await ensureCooked();

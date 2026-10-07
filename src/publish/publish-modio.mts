@@ -7,7 +7,7 @@ import { ensureCooked } from "../ensure-cooked.mts";
 import { sanitize } from "../sanitize.mts";
 import { createModZip } from "./zip.mts";
 import { logger } from "../logger.mts";
-import { getModifiedFiles } from "../get-modified-files.mts";
+import { getModifiedFilesLink } from "../get-modified-files.mts";
 import { finalizePublish } from "./publish-tracker.mts";
 
 const meta = await modMeta;
@@ -45,7 +45,7 @@ function setNameSummaryDescription(form: FormData) {
           <hr/>
           Mod compatibility:
           <br/>
-          Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines): ${getModifiedFiles("html")}`,
+          This mod bPatches files, so it is compatible with other mods that don't modify the same lines. Modified files are listed on ${getModifiedFilesLink("html")}.`,
       ),
     ),
   );

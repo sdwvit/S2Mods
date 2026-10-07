@@ -49,7 +49,7 @@ export async function cookAllTargets() {
 
 export async function cookMod(target?: SdkModTarget) {
   const resolved = target ?? (await primarySdkModTarget);
-  // .cfg files never reach the cooker, so a cfg-only SDK mod has nothing to cook: the ~22 min
+  // .cfg files never reach the cooker, so a cfg-only SDK mod has nothing to cook: the
   // editor round-trip would hand back an empty IoStore container and the same cfgs it started
   // with. Pack those directly instead - ~10s, same output. See planCfgOnlyVariant.
   if (resolved.kind === "cfgs") {
@@ -87,9 +87,9 @@ export async function cookMod(target?: SdkModTarget) {
     const classifierDir = packageClassifierFolder;
     const { newPackages } = await writePackageClassifierLists(target);
 
-    // Each pass costs ~21 min almost entirely in `Refreshing mounted config path 'BaseGame'` -
-    // parsing the 151k .cfg files of the base GameData tree - regardless of how much the mod
-    // actually ships. With no new packages the NewContent pass has nothing to cook: its output
+    // Each pass starts the editor and discovers base assets before cooking. Timings vary; see
+    // DesignDocs/CookSpeedupLearnings.md for dated measurements. With no new packages the
+    // NewContent pass has nothing to cook: its output
     // is the .uplugin plus a stub AssetRegistry.bin, identical for every mod. So run only the
     // OverrideContent child, exactly as the SDK's own PakPlainMod.bat does, and halve the cook.
     // Its pak is the one that carries the loose .cfg patches, so it always has to run.

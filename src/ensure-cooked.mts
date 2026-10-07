@@ -95,7 +95,7 @@ function hasCompleteStagedCook(target: SdkModTarget): boolean {
  * Runs once per SDK mod: a mod holding both .cfg patches and cooked assets is two of them, and
  * they are fingerprinted independently - which is the whole point of the split. Editing a .cfg
  * of such a mod now touches only the cfg half's fingerprint, and that half has no cookable files
- * at all, so it is always served by the ~9s repack instead of a ~22 min cook.
+ * at all, so it is always served by a repack instead of an editor cook.
  */
 export async function ensureCooked() {
   // Before anything is fingerprinted: pull-assets copies the SDK mod folder over raw/, so raw/
@@ -107,7 +107,7 @@ export async function ensureCooked() {
 
 async function ensureCookedTarget(target: SdkModTarget) {
   // A cfg-only SDK mod has no cookable files at all, so the cooker has nothing to do for it and
-  // never will - its ~22 min would produce an empty IoStore container and nothing else. Pack it
+  // never will - an editor run would produce an empty IoStore container and nothing else. Pack it
   // straight from the cfgs instead, whether or not anything is staged. See planCfgOnlyVariant.
   const staged = target.stagedModFolder;
   const hashFile = hashFileFor(staged);
@@ -133,7 +133,7 @@ async function ensureCookedTarget(target: SdkModTarget) {
   if (stagedExists) {
     if (!existsSync(hashFile)) {
       // Pre-existing cook from before hashing, or one restored by hand. Trust it and record
-      // the fingerprint rather than burning 40 minutes to prove it is current.
+      // the fingerprint rather than repeating the editor cook to prove it is current.
       writeFileSync(hashFile, fingerprint);
       logger.log(`${label}Staged cook found with no fingerprint - adopting it (${hashFile}).`);
       return;
@@ -150,7 +150,8 @@ async function ensureCookedTarget(target: SdkModTarget) {
     }
     // The cooked .uasset/.uexp are still current and only loose files moved, so the cooker has
     // nothing to do - replay just the two UnrealPak calls that write the shipped containers.
-    // ~9s instead of ~43 min; see src/repack.mts for how that equivalence was verified.
+    // See src/repack.mts for how that equivalence was verified. Measured cook timings live in
+    // DesignDocs/CookSpeedupLearnings.md and vary with the SDK, assets and cache state.
     //
     // This is also what carries the 9 both-mods through their first split run: dropping the
     // cfgs out of the assets half changes its `raw` hash but not its `cookable` one, so the

@@ -42,7 +42,11 @@ export const copyStaged = async () => {
     );
   }
 
-  rmSync(destinationPath, { recursive: true, force: true });
+  // Wipe the whole payload folder, not just Windows/: every byte under steamworkshop/ is generated
+  // here, and stale siblings from older layouts (a top-level Stalker2/ from before the
+  // Windows/<variant> shape) would otherwise sit there forever and get published alongside the
+  // current cook.
+  rmSync(modFolderSteam, { recursive: true, force: true });
   mkdirSync(path.dirname(destinationPath), { recursive: true });
   for (const target of usable) {
     const label = modClassification.isSplit ? ` (${target.kind})` : "";

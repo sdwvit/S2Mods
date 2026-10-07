@@ -1,0 +1,8 @@
+{
+  "name": "@s2mods/amokbodydamagetest",
+  "private": true,
+  "scripts": {
+    "prepare-configs": "S2_MOD=AmokBodyDamageTest node ../../src/prepare-configs.mts",
+    "cook-inject": "S2_MOD=AmokBodyDamageTest node ../../src/cook-inject.mts"
+  }
+}
