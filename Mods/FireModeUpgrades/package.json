@@ -1,0 +1,12 @@
+{
+  "name": "@s2mods/firemodeupgrades",
+  "private": true,
+  "scripts": {
+    "prepare-configs": "S2_MOD=FireModeUpgrades node ../../src/prepare-configs.mts",
+    "update-readme": "S2_MOD=FireModeUpgrades node ../../src/update-readme.mts",
+    "cook-inject": "S2_MOD=FireModeUpgrades node ../../src/cook-inject.mts",
+    "publish-steam": "S2_MOD=FireModeUpgrades node ../../src/publish/publish-steam.mts",
+    "publish-modio": "S2_MOD=FireModeUpgrades node ../../src/publish/publish-modio.mts",
+    "zip-for-xbox": "S2_MOD=FireModeUpgrades node ../../src/publish/zip-for-xbox.mts"
+  }
+}
