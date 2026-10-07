@@ -9,7 +9,7 @@ import { modFolder, modFolderSteam, modName } from "../base-paths.mts";
 import { modMeta } from "../mod-meta-paths.mts";
 import { sanitize } from "../sanitize.mts";
 import { logger } from "../logger.mts";
-import { getModifiedFiles } from "../get-modified-files.mts";
+import { getModifiedFilesLink } from "../get-modified-files.mts";
 import { finalizePublish } from "./publish-tracker.mts";
 import { ensureCooked } from "../ensure-cooked.mts";
 const meta = await modMeta;
@@ -31,7 +31,7 @@ const cmd = () => {
       `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[hr][/hr]
       Mod compatibility:
 
-      Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines): ${getModifiedFiles("steam")} 
+      This mod bPatches files, so it is compatible with other mods that don't modify the same lines. Modified files are listed on ${getModifiedFilesLink("steam")}. 
       `,
   );
   vdfData.workshopitem.changenote = process.env.CHANGENOTE || sanitize(meta.changenote);

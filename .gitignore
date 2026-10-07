@@ -29,3 +29,7 @@ stalker_commands.txt
 
 # Cooker scratch packages: regenerated with a new id every cook, never authored content.
 __ModKitWwiseCookAnchor_*__.uasset
+
+# The game's own localized text, one file per language, extracted from the retail
+# Game.locres files - 119 MB, and regenerable from any install. See the s2-localization skill.
+locale/

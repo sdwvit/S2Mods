@@ -1,6 +1,23 @@
 # SDK cook speed-up: everything learned (2026-08-27)
 
-Untracked scratch notes. Measured on this machine, this SDK, Wine/Proton, and mods:
+Historical measurements below were collected on 2026-08-27 on this machine, SDK and Wine/Proton. They are not current default estimates.
+
+## Latest measurement: X16Scopes, 2026-10-07
+
+A full `GSCCookMod` asset cook with both variants completed in **386.649 seconds (6m 26.649s)**, measured by shell `time`. Both UAT passes returned exit code 0; X16ScopesCfg was then packed directly and both targets were injected successfully.
+
+| Pass | Editor process | Commandlet | UAT child process |
+|---|---:|---:|---:|
+| OverrideContent | 139.79 s | 56.84 s | 144.39 s |
+| NewContent | 235.13 s | 149.55 s | 239.27 s |
+
+Source: timestamped `Log.json` and child logs under `$WINEPREFIX/drive_c/users/steamuser/AppData/Roaming/Unreal Engine/AutomationTool/Logs/U+nvme+STALKER2ZoneKit/`. Parent log spans 21:11:40–21:18:04 UTC. The scope asset cook used 58 new and 35 override classifier entries. NewContent compiled 129 shader jobs. The full shell duration includes UAT startup and packaging, but excludes subsequent cfg packing and game injection.
+
+This is one measurement on the current 2.0 / UE 5.5 SDK with GE-Proton10-34; cache state was not controlled. Do not infer the cause of the improvement or treat 6m 27s as a guaranteed duration. Measure future runs using shell `time` and timestamped UAT logs. The older 21–22 min/pass and 40–43 min/full-cook comments describe the August runs only.
+
+## Historical setup (2026-08-27)
+
+Mods measured:
 
 - `AnomaliesHitAllMutants`
 - `FasterLootAnimation2x/4x`

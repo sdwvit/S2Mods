@@ -17,7 +17,7 @@ Copy `.env.sample` to `.env` and fill paths/secrets. Common vars:
 - `REPAK_PATH`: path to `repak` binary.
 - `STEAMCMD_PATH`, `STEAM_USER`, `STEAM_PASS`: Steam publish credentials.
 - `MODIO_API`, `MODIO_API_SECRET`: mod.io publish credentials.
-- `NODE_TS_TRANSFORMER`: path to TypeScript loader.
+- `NODE_PATH`: optional path to a Node.js 24+ executable. External TypeScript loaders are not supported.
 - `NEXUSMODS_API_KEY`, `NEXUSMODS_CATEGORY_ID`: Nexus Mods publishing.
 - `ALLOW_MERGED_STRUCTS`, `DRY`: optional behavior flags.
 
@@ -56,15 +56,13 @@ The following are git-ignored and should not be committed unless explicitly requ
 ## Development notes
 - Scripts are ESM and `.mts`; follow the existing import style and path conventions.
 - When running `.mts` directly under modern Node with native type stripping, use `import type` for type-only imports from local modules. A plain `import { Foo }` will still be treated as a runtime export request and can fail on Node 24+ if `Foo` is type-only.
-- Even on Node 22.18+ native `.mts` execution is not sufficient for this repo today, because `s2cfgtojson` currently ships `.mts` sources from `node_modules/` and Node refuses type-stripping there. Keep using `NODE_TS_TRANSFORMER` until that dependency ships JS or is vendored locally.
+- Use native Node.js 24+ for `.mts` scripts. The installed `s2cfgtojson` 9.0.1 ships compiled JavaScript. Do not use `NODE_TS_TRANSFORMER` or the IntelliJ/JetBrains tsx loader: it caused recursive esbuild spawning and exhausted memory on 2026-10-07. `src/ensure-env.mts` rejects legacy loader configuration. If a command stalls, inspect its process tree and stop surviving children before retrying.
 - Prefer `rg` for searching and avoid wide refactors unless asked.
 - When touching scripts that integrate external tools (SDK, SteamCMD, repak), keep path/credential handling intact.
 - Many scripts read from environment variables; do not hardcode local paths.
 - `SDK_PATH` is expected to point at the STALKER2ZoneKit root; cfg source data is under `Stalker2/Content/GameLite` (see `src/base-paths.mts`).
 - For opening files in IntelliJ at a specific line, use: `"$IDEA_PATH" --line <line> <path-to-file>` (set `IDEA_PATH` in `.env`).
-- To run `.mts` scripts manually with the `.env` loader paths (for example `src/quest-nodes-to-js.mts`), use:
-  - `PATH="$(dirname "$NODE_PATH"):$PATH" "$NODE_PATH" --import "file:$NODE_TS_TRANSFORMER" ./src/quest-nodes-to-js.mts`
-  - Use `--import` (not `--loader`) with modern Node (v20.6+ / v22+), because `tsx` loader rejects `--loader`.
+- To run `.mts` scripts manually, use Node.js 24+ directly (for example `node ./src/quest-nodes-to-js.mts`). If using the executable from `.env`, use `PATH="$(dirname "$NODE_PATH"):$PATH" "$NODE_PATH" ./src/quest-nodes-to-js.mts`; no `--import` or `--loader` is needed.
 
 ## How to analyze `.cfg` files
 - Source of truth is the SDK GameLite tree at `SDK_PATH/Stalker2/Content/GameLite` (this is what `src/base-paths.mts` calls `baseCfgDir`).
@@ -78,7 +76,7 @@ The following are git-ignored and should not be committed unless explicitly requ
 - Keep `.cfg` analysis read‑only unless explicitly asked to generate patch files via `src/get-cfg-file-processor.mts`.
 
 ## How to create `.cfg` mods
-- Create a new folder under `Mods/<ModName>/` and run command `npm run create-git-branches`, you can use `NODE_PATH` and `NODE_TS_TRANSFORMER` from `.env` file if node refuses to launch. 
+- Create a new folder under `Mods/<ModName>/` and run command `npm run create-git-branches`, you can use the Node.js 24+ executable specified by `NODE_PATH` in `.env` if node refuses to launch.
 - Switch to a newly added git branch called same `<ModName>` from previous step, and run `npm run prepare-configs` once. This command should create `meta.mts` for you.
 - Define one or more struct transformers; follow the pattern in `Mods/NoFallDamage/meta.mts` and `Mods/NoQuestCooldown/meta.mts`.
 - Try to name struct transformers as `transform%File%Prototypes` (for example, `transformWeaponGeneralSetupPrototypes`) so file intent is obvious from the function name.
@@ -106,6 +104,8 @@ The following are git-ignored and should not be committed unless explicitly requ
 - **Publish**: set `.env` credentials, then `npm run publish-steam` or `npm run publish-modio`.
 - **Sync assets**: `npm run pull-assets` or `npm run pull-staged`.
 
+- Cook timing: measure the current run with shell `time` and timestamped UAT `Log.json`; do not use old 21–22 min/pass comments as current estimates. X16Scopes full two-pass asset cook on 2026-10-07 took 6m 26.649s. See `DesignDocs/CookSpeedupLearnings.md` for context; cache state and mod content affect duration.
+
 ## Testing
 No dedicated test command is defined. Test by running `npm run prepare-configs`.
 
@@ -116,4 +116,4 @@ No dedicated test command is defined. Test by running `npm run prepare-configs`.
 
 ## Updating Agents.md
 - Do not hesitate to update this file, if you find general mechanics that can be memorised for future agentic work.
-- Do not hesitate to add DesignDocs, if you find specific cfg mechanics that can be memorised for future agentic work. 
+- Do not hesitate to add DesignDocs, if you find specific cfg mechanics that can be memorised for future agentic work.
