@@ -501,6 +501,8 @@ function readTaggedProperties(
       r.pos = valueEnd;
     }
     out[name] = value;
+    // Opt-in: keep each tag's complete type name too, for writing a serialiser for a new shape.
+    if (process.env.UASSET_TYPES) out[`${name}@type`] = formatTypeName(type);
   }
   return out;
 }
@@ -776,6 +778,18 @@ const serializeNameEntries = (names: string[]) => {
 const writeName = (w: Writer, names: string[], name: string) =>
   w.i32(nameIndex(names, name)).i32(0);
 
+/**
+ * A *value* FName, split the way `FName` stores it: a trailing `_<digits>` (no leading zero, fits an
+ * int32) is the number part, kept out of the name table and written as number + 1. So `volk_1` is
+ * table entry `volk` with number 2 - the editor writes NameProperty values this way. Property and
+ * type names never end in a number, so `writeName` keeps writing those whole.
+ */
+const writeFName = (w: Writer, names: string[], name: string) => {
+  const m = /^(.*)_(0|[1-9]\d{0,9})$/.exec(name);
+  if (!m || Number(m[2]) > 0x7fff_ffff) return writeName(w, names, name);
+  return w.i32(nameIndex(names, m[1])).i32(Number(m[2]) + 1);
+};
+
 /** `FPropertyTypeName`: an FName followed by its parameter list. */
 const writeTypeName = (w: Writer, names: string[], type: string, params: string[][] = []) => {
   writeName(w, names, type);
@@ -807,36 +821,44 @@ const writeTag = (
  * **mutated**: any FName the payload needs and the table lacks is appended, so the caller can
  * splice the new entries into the table afterwards (see `writeLocalizedTexts`).
  */
+/** A `StrProperty` tag. */
+const writeStrTag = (w: Writer, names: string[], name: string, value: string) =>
+  writeTag(w, names, name, () => writeTypeName(w, names, "StrProperty"), new Writer().fstring(value).toBuffer());
+
+/** The fields of one `ModTextToolLocalizedText` - `SID` and its language map - without the `None`. */
+const writeLocalizedTextFields = (w: Writer, names: string[], entry: LocalizedTextEntry) => {
+  writeStrTag(w, names, "SID", entry.SID);
+
+  const map = new Writer();
+  map.i32(0); // KeysToRemove
+  const langs = Object.entries(entry.LanguagesToLocalizedStrings);
+  map.i32(langs.length);
+  for (const [language, text] of langs) {
+    writeName(map, names, language);
+    map.fstring(text);
+  }
+  writeTag(
+    w,
+    names,
+    "LanguagesToLocalizedStrings",
+    () => {
+      writeName(w, names, "MapProperty");
+      w.i32(2);
+      writeTypeName(w, names, "EnumProperty", [
+        ["ELocalizationLanguage", "/Script/Stalker2"],
+        ["ByteProperty"],
+      ]);
+      writeTypeName(w, names, "StrProperty");
+    },
+    map.toBuffer(),
+  );
+};
+
 export function serializeLocalizedTexts(names: string[], entries: LocalizedTextEntry[]): Buffer {
   const elements = new Writer();
   elements.i32(entries.length);
   for (const entry of entries) {
-    const sid = new Writer().fstring(entry.SID).toBuffer();
-    writeTag(elements, names, "SID", () => writeTypeName(elements, names, "StrProperty"), sid);
-
-    const map = new Writer();
-    map.i32(0); // KeysToRemove
-    const langs = Object.entries(entry.LanguagesToLocalizedStrings);
-    map.i32(langs.length);
-    for (const [language, text] of langs) {
-      writeName(map, names, language);
-      map.fstring(text);
-    }
-    writeTag(
-      elements,
-      names,
-      "LanguagesToLocalizedStrings",
-      () => {
-        writeName(elements, names, "MapProperty");
-        elements.i32(2);
-        writeTypeName(elements, names, "EnumProperty", [
-          ["ELocalizationLanguage", "/Script/Stalker2"],
-          ["ByteProperty"],
-        ]);
-        writeTypeName(elements, names, "StrProperty");
-      },
-      map.toBuffer(),
-    );
+    writeLocalizedTextFields(elements, names, entry);
     writeName(elements, names, "None"); // end of struct element
   }
 
@@ -858,6 +880,129 @@ export function serializeLocalizedTexts(names: string[], entries: LocalizedTextE
   writeName(out, names, "None"); // end of export
   // Observed trailer on every export of this type, after the property list terminator.
   out.i32(0);
+  return out.toBuffer();
+}
+
+/** One spoken line: `SID` is `<label SID>_<NNN>`, its text `sid_phrase_<SID>`. */
+export type DialogPhraseText = {
+  SID: string;
+  PhraseText: LocalizedTextEntry;
+  /** Speaker, a character SID such as `volk_1`; `None` when unset. */
+  Character: string;
+};
+
+/**
+ * One reply option and the lines that follow it: `SID` is `<topic SID>_<TextToolLabelName>`, its
+ * option text `sid_label_<SID>`. This grouping is how the game finds a phrase's label - the phrase
+ * SID minus its `_<NNN>`.
+ */
+export type DialogLabelText = {
+  TextToolLabelName: string;
+  SID: string;
+  LabelWFR: LocalizedTextEntry;
+  Phrases: DialogPhraseText[];
+};
+
+/** One dialog topic: `SID` is `<ModName>_<TextToolTopicName>`, its menu text `sid_topic_<SID>`. */
+export type DialogTopicText = {
+  TextToolTopicName: string;
+  SID: string;
+  GlobalWFR: LocalizedTextEntry;
+  TopicCharacterSIDs: string[];
+  Labels: DialogLabelText[];
+};
+
+const MODKIT = "/Script/ModKitEditor";
+
+/** A `StructProperty` tag whose value is a tagged-property struct. */
+const writeStructTag = (
+  w: Writer,
+  names: string[],
+  name: string,
+  struct: string,
+  writeFields: (v: Writer) => void,
+) => {
+  const v = new Writer();
+  writeFields(v);
+  writeName(v, names, "None");
+  writeTag(w, names, name, () => writeTypeName(w, names, "StructProperty", [[struct, MODKIT]]), v.toBuffer());
+};
+
+/** An `ArrayProperty` of structs, each element its tagged fields and a `None`. */
+const writeStructArrayTag = <T,>(
+  w: Writer,
+  names: string[],
+  name: string,
+  struct: string,
+  items: T[],
+  writeFields: (v: Writer, item: T) => void,
+) => {
+  const v = new Writer();
+  v.i32(items.length);
+  for (const item of items) {
+    writeFields(v, item);
+    writeName(v, names, "None");
+  }
+  writeTag(
+    w,
+    names,
+    name,
+    () => {
+      writeName(w, names, "ArrayProperty");
+      w.i32(1);
+      writeTypeName(w, names, "StructProperty", [[struct, MODKIT]]);
+    },
+    v.toBuffer(),
+  );
+};
+
+const writeLocalizedTextTag = (w: Writer, names: string[], name: string, entry: LocalizedTextEntry) =>
+  writeStructTag(w, names, name, "ModTextToolLocalizedText", (v) => writeLocalizedTextFields(v, names, entry));
+
+/**
+ * Serialises a `DialogModTextToolAsset` export: the `Dialogs` array, field for field in the order
+ * the Mod Editor writes it. `names` is mutated as in `serializeLocalizedTexts`.
+ */
+export function serializeDialogs(names: string[], topics: DialogTopicText[]): Buffer {
+  const out = new Writer();
+  out.u8(0); // __SerializationControlExtensions
+  writeStructArrayTag(out, names, "Dialogs", "DialogTopicTextTool_ModEditor", topics, (t, topic) => {
+    writeStrTag(t, names, "TextToolTopicName", topic.TextToolTopicName);
+    writeStrTag(t, names, "SID", topic.SID);
+    writeLocalizedTextTag(t, names, "GlobalWFR", topic.GlobalWFR);
+    const characters = new Writer();
+    characters.i32(topic.TopicCharacterSIDs.length);
+    for (const c of topic.TopicCharacterSIDs) writeFName(characters, names, c);
+    writeTag(
+      t,
+      names,
+      "TopicCharacterSIDs",
+      () => {
+        writeName(t, names, "ArrayProperty");
+        t.i32(1);
+        writeTypeName(t, names, "NameProperty");
+      },
+      characters.toBuffer(),
+    );
+    writeStructArrayTag(t, names, "Labels", "DialogLabelTextTool_ModEditor", topic.Labels, (l, label) => {
+      writeStrTag(l, names, "TextToolLabelName", label.TextToolLabelName);
+      writeStrTag(l, names, "SID", label.SID);
+      writeLocalizedTextTag(l, names, "LabelWFR", label.LabelWFR);
+      writeStructArrayTag(l, names, "Phrases", "DialogPhraseTextTool_ModEditor", label.Phrases, (p, phrase) => {
+        writeStrTag(p, names, "SID", phrase.SID);
+        writeLocalizedTextTag(p, names, "PhraseText", phrase.PhraseText);
+        writeTag(
+          p,
+          names,
+          "Character",
+          () => writeTypeName(p, names, "NameProperty"),
+          writeFName(new Writer(), names, phrase.Character).toBuffer(),
+        );
+      });
+    });
+  });
+  writeName(out, names, "None"); // end of export
+  out.i32(0); // same trailer as the LocalizationModTextToolAsset export
   return out.toBuffer();
 }
 
@@ -1106,11 +1251,11 @@ export function renameLocalizationPackage(file: string, packageName: string, des
  * Both localization asset shapes go through here - they differ only in which export to replace and
  * how its payload serialises, which is what `serialize` supplies.
  */
-function rewriteTextExport(
+function rewriteTextExport<T>(
   file: string,
   className: string,
-  serialize: (names: string[], entries: LocalizedTextEntry[]) => Buffer,
-  entries: LocalizedTextEntry[],
+  serialize: (names: string[], entries: T[]) => Buffer,
+  entries: T[],
   dest: string,
 ) {
   const original = readFileSync(file);
@@ -1244,6 +1389,14 @@ export const writeLocalizedTexts = (
   dest: string = file,
 ) =>
   rewriteTextExport(file, "LocalizationModTextToolAsset", serializeLocalizedTexts, entries, dest);
+
+/**
+ * Write `topics` as the complete `Dialogs` array of the `DialogModTextToolAsset` in `file`, into
+ * `dest` (`file` itself by default) - the Mod Editor's dialog text asset, whose topics, labels and
+ * phrases name their own `sid_topic_` / `sid_label_` / `sid_phrase_` keys.
+ */
+export const writeDialogTexts = (file: string, topics: DialogTopicText[], dest: string = file) =>
+  rewriteTextExport(file, "DialogModTextToolAsset", serializeDialogs, topics, dest);
 
 /**
  * Write `entries` as the complete `LocalizationDatabase` map of `file`, into `dest`. This is the

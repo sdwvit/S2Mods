@@ -12,7 +12,13 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { parseUasset } from "./uasset.mts";
-import { writeModLocalization, writeModLocalizationDatabase } from "./text.mts";
+import {
+  dialogTopic,
+  phraseSID,
+  writeModDialogs,
+  writeModLocalization,
+  writeModLocalizationDatabase,
+} from "./text.mts";
 
 /** A mod folder as `writeModLocalization` expects to find one: `raw/Stalker2/Content` under it. */
 const scratchMod = (name: string) => {
@@ -167,5 +173,49 @@ describe("writeModLocalizationDatabase", () => {
 
     expect(databaseAsset(modDir)).toBe(asset);
     expect(readFileSync(asset)).toEqual(first);
+  });
+});
+
+describe("writeModDialogs", () => {
+  const topic = dialogTopic("DialogMod", "Job", { English: "Got any work?" }, ["volk_1"], [
+    {
+      name: "Accept",
+      text: { English: "I'll do it.", Ukrainian: "Зроблю." },
+      phrases: [
+        { character: "None", text: { English: "Fine, I'll do it." } },
+        { character: "volk_1", text: { English: "Good." } },
+      ],
+    },
+  ]);
+
+  it("names topics, labels and phrases the way the Mod Editor does", () => {
+    expect(topic.SID).toBe("DialogMod_Job");
+    expect(topic.GlobalWFR.SID).toBe("sid_topic_DialogMod_Job");
+    expect(topic.Labels[0].LabelWFR.SID).toBe("sid_label_DialogMod_Job_Accept");
+    expect(topic.Labels[0].Phrases.map((p) => p.PhraseText.SID)).toEqual([
+      "sid_phrase_DialogMod_Job_Accept_000",
+      "sid_phrase_DialogMod_Job_Accept_001",
+    ]);
+    expect(phraseSID("DialogMod", "Job", "Accept", 1)).toBe(topic.Labels[0].Phrases[1].SID);
+  });
+
+  it("creates the mod's dialog asset and gathers its text into the database", () => {
+    const { modDir, moduleUrl } = scratchMod("DialogMod");
+    writeModDialogs(moduleUrl, [topic]);
+
+    const content = path.join(modDir, "raw/Stalker2/Content");
+    const asset = parseUasset(path.join(content, "DialogMod-dialogs.uasset"));
+    expect(asset.summary.packageName).toBe("/DialogMod/DialogMod-dialogs");
+    expect(asset.exports[0].properties).toEqual({ Dialogs: [topic] });
+
+    const sids = Object.keys(
+      parseUasset(databaseAsset(modDir)).exports.at(-1)?.properties?.LocalizationDatabase as object,
+    );
+    expect(sids).toEqual([
+      "sid_topic_DialogMod_Job",
+      "sid_label_DialogMod_Job_Accept",
+      "sid_phrase_DialogMod_Job_Accept_000",
+      "sid_phrase_DialogMod_Job_Accept_001",
+    ]);
   });
 });

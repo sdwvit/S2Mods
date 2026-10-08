@@ -6,8 +6,10 @@ import path from "node:path";
 import {
   parseUasset,
   renameLocalizationPackage,
+  writeDialogTexts,
   writeLocalizationDatabase,
   writeLocalizedTexts,
+  type DialogTopicText,
   type LocalizedTextEntry,
 } from "./uasset.mts";
 
@@ -44,6 +46,15 @@ const AUTHORED_DATABASE_FIXTURE = path.join(
   import.meta.dirname,
   "fixtures/authored-localization-database.uasset",
 );
+
+/**
+ * A `DialogModTextToolAsset` the Mod Editor saved: two topics, one with a label holding one phrase.
+ * WolfArmorFetch's by birth (`/WolfArmorFetch/NewDialogModTextToolAsset`), placeholder text.
+ */
+const AUTHORED_DIALOG_FIXTURE = path.join(import.meta.dirname, "fixtures/authored-dialog.uasset");
+
+/** The same package with an empty `Dialogs` array, written by `writeDialogTexts`. */
+const EMPTY_DIALOG_FIXTURE = path.join(import.meta.dirname, "fixtures/empty-dialog.uasset");
 
 /** `AssetRegistryDataOffset` is a summary field; the section it names opens with an int64. */
 const dependencyDataOffset = (file: string) => {
@@ -399,5 +410,49 @@ describe("writeLocalizationDatabase", () => {
     expect(() => writeLocalizationDatabase(EMPTY_FIXTURE, [])).toThrow(
       /no ModLocalizationDatabaseDataAsset export/,
     );
+  });
+});
+
+describe("writeDialogTexts", () => {
+  const topicsOf = (file: string) =>
+    parseUasset(file).exports[0].properties?.Dialogs as DialogTopicText[];
+
+  it("reproduces the editor's own bytes when rewriting what the editor wrote", () => {
+    const file = scratchCopy(AUTHORED_DIALOG_FIXTURE);
+    const topics = topicsOf(file);
+    expect(topics[0].Labels[0].Phrases).toHaveLength(1);
+    writeDialogTexts(file, topics);
+    expect(readFileSync(file).equals(readFileSync(AUTHORED_DIALOG_FIXTURE))).toBe(true);
+  });
+
+  it("fills the empty asset with topics, labels and phrases that parse back", () => {
+    const file = scratchCopy(EMPTY_DIALOG_FIXTURE);
+    expect(topicsOf(file)).toEqual([]);
+    const text = (SID: string, English: string) => ({
+      SID,
+      LanguagesToLocalizedStrings: { "ELocalizationLanguage::English": English },
+    });
+    const topics: DialogTopicText[] = [
+      {
+        TextToolTopicName: "Job",
+        SID: "Mod_Job",
+        GlobalWFR: text("sid_topic_Mod_Job", "Got any work?"),
+        TopicCharacterSIDs: ["volk_1"],
+        Labels: [
+          {
+            TextToolLabelName: "Accept",
+            SID: "Mod_Job_Accept",
+            LabelWFR: text("sid_label_Mod_Job_Accept", "I'll do it."),
+            Phrases: [
+              { SID: "Mod_Job_Accept_000", PhraseText: text("sid_phrase_Mod_Job_Accept_000", "Fine."), Character: "None" },
+              // A speaker SID ending in a number is stored in FName's number part, and must come back whole.
+              { SID: "Mod_Job_Accept_001", PhraseText: text("sid_phrase_Mod_Job_Accept_001", "Good."), Character: "volk_1" },
+            ],
+          },
+        ],
+      },
+    ];
+    writeDialogTexts(file, topics);
+    expect(topicsOf(file)).toEqual(topics);
   });
 });

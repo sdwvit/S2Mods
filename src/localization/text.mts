@@ -13,8 +13,10 @@ import { fileURLToPath } from "node:url";
 import {
   parseUasset,
   renameLocalizationPackage,
+  writeDialogTexts,
   writeLocalizationDatabase,
   writeLocalizedTexts,
+  type DialogTopicText,
   type LocalizedTextEntry,
 } from "./uasset.mts";
 import { logger } from "../logger.mts";
@@ -35,6 +37,12 @@ const EMPTY_DATABASE_TEMPLATE = path.join(
   import.meta.dirname,
   "fixtures/empty-localization-database.uasset",
 );
+
+/**
+ * An empty `DialogModTextToolAsset` package: WolfArmorFetch's editor-created asset with its
+ * `Dialogs` emptied. `renameLocalizationPackage` mints every other mod's dialog asset from it.
+ */
+const EMPTY_DIALOG_TEMPLATE = path.join(import.meta.dirname, "fixtures/empty-dialog.uasset");
 
 /** `ELocalizationLanguage` members, as they appear in a text asset's name table. */
 export const LANGUAGES = [
@@ -133,6 +141,88 @@ export function writeModLocalization(
   entries: LocalizedTextEntry[],
   fileName?: string,
 ) {
+  writeModTextAsset(moduleUrl, "localization", EMPTY_TEMPLATE, writeLocalizedTexts, entries, fileName);
+  logger.info(`${path.basename(path.dirname(fileURLToPath(moduleUrl)))}: wrote ${entries.length} localization entries`);
+  writeModLocalizationDatabase(moduleUrl);
+  return entries;
+}
+
+/**
+ * Generates `<mod>/raw/Stalker2/Content/<ModName>-dialogs.uasset`, the mod's `DialogModTextToolAsset`,
+ * from `topics` - exactly as `writeModLocalization` does for plain text, and then regenerates the
+ * localization database, which gathers dialog text too.
+ *
+ * The SIDs follow the Mod Editor's own scheme, and the game depends on it: a topic is
+ * `<ModName>_<TopicName>` (text `sid_topic_<SID>`), a label `<topic SID>_<LabelName>` (text
+ * `sid_label_<SID>`), and a phrase `<label SID>_<NNN>` (text `sid_phrase_<SID>`). The game finds a
+ * phrase's reply label by dropping its `_<NNN>`, so a phrase's SID has to be its label's plus an
+ * index - use `dialogTopic()` to build them.
+ */
+export function writeModDialogs(moduleUrl: string, topics: DialogTopicText[], fileName?: string) {
+  writeModTextAsset(moduleUrl, "dialogs", EMPTY_DIALOG_TEMPLATE, writeDialogTexts, topics, fileName);
+  logger.info(`${path.basename(path.dirname(fileURLToPath(moduleUrl)))}: wrote ${topics.length} dialog topics`);
+  writeModLocalizationDatabase(moduleUrl);
+  return topics;
+}
+
+/** One phrase of a `dialogTopic` label: its speaker and per-language text. */
+export type DialogPhraseTemplate = { character: string; text: TemplateByLanguage };
+
+/**
+ * Builds a `DialogTopicText` with the Mod Editor's SID scheme from names and text alone. Phrases are
+ * numbered `_000`, `_001`... in each label, in the order given; `phraseSID(topic, label, i)` gives the
+ * same SID for wiring `DialogPrototypes` (their `SID`/`TextToolPhraseSID`) to it.
+ */
+export const dialogTopic = (
+  modName: string,
+  topicName: string,
+  text: TemplateByLanguage,
+  characters: string[],
+  labels: { name: string; text: TemplateByLanguage; phrases: DialogPhraseTemplate[] }[],
+  vars: TemplateVars = {},
+): DialogTopicText => {
+  const SID = `${modName}_${topicName}`;
+  return {
+    TextToolTopicName: topicName,
+    SID,
+    GlobalWFR: { SID: `sid_topic_${SID}`, LanguagesToLocalizedStrings: localized(text, vars) },
+    TopicCharacterSIDs: characters,
+    Labels: labels.map((label) => {
+      const labelSID = `${SID}_${label.name}`;
+      return {
+        TextToolLabelName: label.name,
+        SID: labelSID,
+        LabelWFR: { SID: `sid_label_${labelSID}`, LanguagesToLocalizedStrings: localized(label.text, vars) },
+        Phrases: label.phrases.map((phrase, i) => {
+          const phraseSID = `${labelSID}_${String(i).padStart(3, "0")}`;
+          return {
+            SID: phraseSID,
+            PhraseText: { SID: `sid_phrase_${phraseSID}`, LanguagesToLocalizedStrings: localized(phrase.text, vars) },
+            Character: phrase.character,
+          };
+        }),
+      };
+    }),
+  };
+};
+
+/** The SID `dialogTopic` gives phrase `index` of a label - also the phrase's `TextToolPhraseSID`. */
+export const phraseSID = (modName: string, topicName: string, labelName: string, index: number) =>
+  `${modName}_${topicName}_${labelName}_${String(index).padStart(3, "0")}`;
+
+/**
+ * Writes one of the mod's Mod Editor text assets (`<ModName>-<suffix>.uasset`, or `fileName`) into
+ * `raw/Stalker2/Content` and the SDK mod. See `writeModLocalization` for why the SDK copy is the
+ * template and how the package is (re)named.
+ */
+function writeModTextAsset<T>(
+  moduleUrl: string,
+  suffix: string,
+  emptyTemplate: string,
+  write: (file: string, entries: T[], dest?: string) => number,
+  entries: T[],
+  fileName?: string,
+) {
   const modDir = path.dirname(fileURLToPath(moduleUrl));
   const modName = path.basename(modDir);
   const sdkLink = path.join(modDir, "sdk");
@@ -140,7 +230,7 @@ export function writeModLocalization(
     ? fileName.endsWith(".uasset")
       ? fileName
       : `${fileName}.uasset`
-    : `${modName}-localization.uasset`;
+    : `${modName}-${suffix}.uasset`;
   const asset = path.join(modDir, "raw/Stalker2/Content", assetName);
   const sdkAsset = path.join(modDir, "sdk", "Content", assetName);
   // The SDK mod's own name, which the package path has to spell: the `sdk` symlink points at it,
@@ -149,28 +239,24 @@ export function writeModLocalization(
   const sdkModName = existsSync(sdkLink) ? path.basename(realpathSync(sdkLink)) : modName;
   // Where the asset lives *is* its name: `/<SdkModName>/<AssetName>`, the path the cooker
   // addresses the package by. Deriving it rather than trusting the template's own is what lets the
-  // fixture - FactionPatches' package by birth - stand in for a mod that has no asset yet, and it
+  // fixture - another mod's package by birth - stand in for a mod that has no asset yet, and it
   // repairs a copy someone made from another mod's asset by renaming the file.
   const packageName = `/${sdkModName}/${path.basename(assetName, ".uasset")}`;
-  const template = existsSync(sdkAsset) ? sdkAsset : existsSync(asset) ? asset : EMPTY_TEMPLATE;
+  const template = existsSync(sdkAsset) ? sdkAsset : existsSync(asset) ? asset : emptyTemplate;
   // A brand-new mod has no raw/Stalker2/Content yet.
   mkdirSync(path.dirname(asset), { recursive: true });
   if (parseUasset(template).summary.packageName === packageName) {
-    writeLocalizedTexts(template, entries, asset);
+    write(template, entries, asset);
   } else {
     logger.info(`${modName}: naming ${path.relative(modDir, template)} as ${packageName}`);
     renameLocalizationPackage(template, packageName, asset);
-    writeLocalizedTexts(asset, entries, asset);
+    write(asset, entries, asset);
   }
-  const size = statSync(asset).size;
   // The asset has to be in the SDK mod for the cook to pick it up, and pull-assets copies the SDK
   // folder over raw/ at the start of every cook, so a raw-only copy would be clobbered by the
   // stub. Both copies identical also makes that pull a no-op for this file.
   if (existsSync(path.dirname(sdkAsset))) copyFileSync(asset, sdkAsset);
-
-  logger.info(`${modName}: wrote ${entries.length} localization entries (${size} bytes)`);
-  writeModLocalizationDatabase(moduleUrl);
-  return entries;
+  logger.info(`${modName}: ${assetName} is ${statSync(asset).size} bytes`);
 }
 
 /**
@@ -189,7 +275,10 @@ const databaseOrder = (map: Record<string, string>) => {
   );
 };
 
-/** Every `LocalizationModTextToolAsset` in the mod's `raw/Stalker2/Content`, in load order. */
+/** The classes whose text the database gathers: plain text assets and dialog text assets. */
+const TEXT_ASSET_CLASSES = ["LocalizationModTextToolAsset", "DialogModTextToolAsset"];
+
+/** Every text asset (see `TEXT_ASSET_CLASSES`) in the mod's `raw/Stalker2/Content`, in load order. */
 const modTextAssets = (contentDir: string) =>
   existsSync(contentDir)
     ? readdirSync(contentDir)
@@ -197,7 +286,7 @@ const modTextAssets = (contentDir: string) =>
         .sort()
         .map((f) => path.join(contentDir, f))
         .filter((f) =>
-          parseUasset(f).exports.some((e) => e.className === "LocalizationModTextToolAsset"),
+          parseUasset(f).exports.some((e) => TEXT_ASSET_CLASSES.includes(e.className)),
         )
     : [];
 
@@ -222,6 +311,13 @@ function databaseIn(dir: string) {
     : undefined;
 }
 
+/** Every text a dialog asset carries, flattened: each topic's, then its labels' and their phrases'. */
+const dialogEntries = (topics: DialogTopicText[]): LocalizedTextEntry[] =>
+  topics.flatMap((topic) => [
+    topic.GlobalWFR,
+    ...topic.Labels.flatMap((label) => [label.LabelWFR, ...label.Phrases.map((p) => p.PhraseText)]),
+  ]);
+
 export function writeModLocalizationDatabase(moduleUrl: string) {
   const modDir = path.dirname(fileURLToPath(moduleUrl));
   const modName = path.basename(modDir);
@@ -230,8 +326,13 @@ export function writeModLocalizationDatabase(moduleUrl: string) {
   if (!sources.length) return [];
   const entries: LocalizedTextEntry[] = sources.flatMap((file) =>
     parseUasset(file)
-      .exports.filter((e) => e.className === "LocalizationModTextToolAsset")
-      .flatMap((e) => (e.properties?.LocalizedTexts ?? []) as LocalizedTextEntry[])
+      .exports.flatMap((e) =>
+        e.className === "LocalizationModTextToolAsset"
+          ? ((e.properties?.LocalizedTexts ?? []) as LocalizedTextEntry[])
+          : e.className === "DialogModTextToolAsset"
+            ? dialogEntries((e.properties?.Dialogs ?? []) as DialogTopicText[])
+            : [],
+      )
       .map(({ SID, LanguagesToLocalizedStrings }) => ({
         SID,
         LanguagesToLocalizedStrings: databaseOrder(LanguagesToLocalizedStrings),
