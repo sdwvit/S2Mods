@@ -6,11 +6,11 @@ const interestingSIDs = new Set<string>([
   "EnergeticLimitedStamina",
   "EnergeticSleepiness",
   "EnergeticStaminaPerAction1",
+  "EnergeticStaminaPerAction2",
   "WaterStamina2",
   "WaterStaminaPerAction1",
   "BeerAntirad1",
   "VodkaAntirad3",
-  "AnomalyVodkaRadiation",
   "MagicVodkaPSYProtection",
 ]);
 
@@ -83,19 +83,18 @@ export const meta: MetaType<EffectPrototype | ConsumablePrototype | QuestItemPro
   description: `
   [h3]Makes food & drink consumables last longer, with the same value (antirad remove radiation slowly), and shows their effects as numeric values instead of bars.[/h3]
     [list]
-  [*] 🔋 Limited Edition Energy Drink: Stamina buff duration increased from 30 seconds to 300 seconds
-  [*] 🔋 Energy Drink: Reduced Cost of Stamina Per Action duration increased from 30 seconds to 300 seconds
   [*] 🔋 Energy Drink: Stamina buff duration increased from 45 seconds to 450 seconds
+  [*] 🔋 Energy Drink: Reduced Cost of Stamina Per Action durations increased from 15 and 5 seconds to 150 and 50 seconds
   [*] 😴 Energy Drink: Sleepiness reduction duration increased from 3 seconds to 30 seconds
+  [*] 🔋 Limited Edition Energy Drink: Stamina buff duration increased from 45 seconds to 450 seconds
   [*] 🔋 Water: Stamina buff duration increased from 5 seconds to 50 seconds
   [*] 🔋 Water: Reduced Cost of Stamina Per Action duration increased from 30 seconds to 300 seconds
   [*] ☢️ Beer: Radiation reduction duration increased from 2 seconds to 20 seconds
   [*] ☢️ Vodka: Radiation reduction duration increased from 2 seconds to 20 seconds
-  [*] ☢️ Dvupalov Vodka: Radiation reduction duration increased from 10 seconds to 100 seconds
   [*] 🧠 Dvupalov Vodka: PSY Protection duration increased from 90 seconds to 900 seconds
   [*] 🔢 Each item shows its main effect as a numeric value + time (other effects unchanged)
   [/list]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Initial release",
+  changenote: "Energy Drink: the second Reduced Cost of Stamina Per Action effect now also lasts 10x longer (5s to 50s). Description fixes: Limited Edition Energy Drink stamina buff is 45s to 450s, and the Dvupalov Vodka radiation line is gone because the game never applies that effect.",
 };
