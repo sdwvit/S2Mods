@@ -1,42 +1,63 @@
 import type { MetaContext, MetaType } from "../../src/meta-type.mts";
 import { Struct } from "s2cfgtojson";
-import type { AttachPrototype, UpgradePrototype, WeaponGeneralSetupPrototype } from "s2cfgtojson";
+import { modName } from "../../src/base-paths.mts";
+import { writeUberTozLocalization } from "./writeLocalization.mts";
+import { slugEffects, slugUpgrades } from "./slugUpgrades.mts";
+import type {
+  AttachPrototype,
+  ItemGeneratorPrototype,
+  QuestNodePrototypeSetItemGenerator,
+  UpgradePrototype,
+  WeaponGeneralSetupPrototype,
+} from "s2cfgtojson";
 
 export const meta: MetaType<WeaponGeneralSetupPrototype> = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
+Turns the TOZ-34 into a scoped slug sniper.
 [hr][/hr]
-Adds various attachments to TOZ 
+[h2]Attachments[/h2]
+[list]
+[*] Three-Line Rifle PU 3.5X scope: now a detachable item that fits the TOZ-34 and the Three-Line Rifle. Base cost 9500, weight 0.6 kg.
+[*] PAO 2X scope and open collimator sight fit the TOZ-34 once the top rail is installed.
+[*] Top rail: installable at technicians as a modification. Base cost 1700.
+[/list]
+All three scopes have attach animations. They are simple placeholders built on the TOZ's own animations.
 [hr][/hr]
- Makes Three Line Rifle scope detachable and compatible with TOZ. Base cost 9500, weight 0.6 kg.[h1][/h1]
- Makes soviet collimator scope compatible with TOZ[h1][/h1]
- Makes soviet x2 scope compatible with TOZ[h1][/h1]
- Makes AKU top rail compatible with TOZ. Installable at technicians as a mod. Base cost 1700.
+[h2]Slug sniper upgrades[/h2]
+Three new technician upgrades bring the TOZ-34 close to the Three-Line Rifle with slugs:
+[list]
+[*] Extended Slug Barrels (after the slug choke): +80% effective range, longer damage drop-off, keeps far more damage at range. Base cost 3000.
+[*] Rifled Barrel Liners (after the slug choke): faster and flatter slugs. Base cost 2500.
+[*] Polished Action (after the lighter body): draws and holsters 30% faster. Base cost 1200.
+[/list]
 [hr][/hr]
-bPatches:
- [list]
-  [*] WeaponGeneralSetupPrototypes.cfg
-  [*] UpgradePrototypes.cfg
-  [*] AttachPrototypes.cfg
-  [*] NPCPrototypes.cfg
- [/list]
+To get a TOZ-34 with the top rail installed and all three scopes in Skif's inventory, use the console command:
+[u]XStartQuestNodeBySID Skif_UberToz[/u]
+[hr][/hr]
+Known issue: during the reload animation a mounted scope can clip through the gun.
+[hr][/hr]
+bPatches WeaponGeneralSetupPrototypes, UpgradePrototypes, AttachPrototypes, NPCPrototypes, EffectPrototypes, ItemGeneratorPrototypes and A-life_interrupts quest nodes.
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Initial release",
-  structTransformers: [structTransformer],
+  changenote: `Ported to 2.0. Scopes and the top rail work again, with attach animations, icons, and names and descriptions in all languages. New slug sniper upgrades: Extended Slug Barrels, Rifled Barrel Liners and Polished Action. Added console command XStartQuestNodeBySID Skif_UberToz to get a scoped TOZ-34 and all three scopes.`,
+  structTransformers: [structTransformer, transformEffectPrototypes, transformItemGeneratorPrototypes, transformQuestNodePrototypes],
 };
 
 const tozRailUpgrade = new Struct({
   SID: "GunTOZ_Upgrade_Attachment_Attachment_Rail",
-  Text: "sid_upgrades_GunTOZ_Upgrade_Stock_2_name", // todo when they release localization tools
-  Hint: "sid_upgrades_GunTOZ_Upgrade_Stock_2_description", // todo when they release localization tools
+  // vanilla "Scope Mount" text, shipped in every language
+  Text: "sid_upgrades_GunAKU_Upgrade_Attachment_Rail_name",
+  Hint: "sid_upgrades_GunAKU_Upgrade_Attachment_Rail_description",
 
-  Image: `Texture2D'/Game/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_top_rail_upgrade_icon.toz_top_rail_upgrade_icon'`,
+  Image: `Texture2D'/${modName}/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_top_rail_upgrade_icon.toz_top_rail_upgrade_icon'`,
   BaseCost: 1700,
-  VerticalPosition: "EUpgradeVerticalPosition::Top",
+  // Body Top 0 is vanilla GunTOZ_Upgrade_Body_1; the modification goes below it
+  VerticalPosition: "EUpgradeVerticalPosition::Down",
+  // vanilla upgrades inherit these from UpgradePrototypes.cfg's [0]; a new root struct must set them
+  HorizontalPosition: 0,
+  DiscountCoefficient: "0.f",
+  RepairCostModifier: "0.2f",
   UpgradeTargetPart: "EUpgradeTargetPartType::Body",
   IsModification: true,
   AttachPrototypeSIDs: new Struct({ 0: "TopRailAKU" }),
@@ -67,7 +88,7 @@ const GunThreeLine_Scope = new Struct({
   IconPosY: 0,
   AimMuzzleVFXSocket: "X4ScopeMuzzle",
   AimShellShutterVFXSocket: "X4ScopeShells",
-  WeaponSpecificIcon: `Texture2D'/Game/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_threeline_scope.toz_threeline_scope'`,
+  WeaponSpecificIcon: `Texture2D'/${modName}/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_threeline_scope.toz_threeline_scope'`,
 });
 
 const RU_X2Scope_1 = new Struct({
@@ -78,7 +99,7 @@ const RU_X2Scope_1 = new Struct({
   AimMuzzleVFXSocket: "X2ScopeMuzzle",
   AimShellShutterVFXSocket: "X2ScopeShells",
   RequiredUpgradeIDs: new Struct({ 0: tozRailUpgrade.SID }),
-  WeaponSpecificIcon: `Texture2D'/Game/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_x2_scope.toz_x2_scope'`,
+  WeaponSpecificIcon: `Texture2D'/${modName}/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_x2_scope.toz_x2_scope'`,
 });
 
 const RU_ColimScope_1 = new Struct({
@@ -89,7 +110,7 @@ const RU_ColimScope_1 = new Struct({
   AimMuzzleVFXSocket: "ColimScopeMuzzle",
   AimShellShutterVFXSocket: "X2ScopeShells",
   RequiredUpgradeIDs: new Struct({ 0: tozRailUpgrade.SID }),
-  WeaponSpecificIcon: `Texture2D'/Game/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_colim_scope.toz_colim_scope'`,
+  WeaponSpecificIcon: `Texture2D'/${modName}/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_colim_scope.toz_colim_scope'`,
 });
 
 const TopRailAKU = new Struct({
@@ -98,7 +119,7 @@ const TopRailAKU = new Struct({
   IconPosX: 0,
   IconPosY: 0,
   RequiredUpgradeIDs: new Struct({ 0: tozRailUpgrade.SID }),
-  WeaponSpecificIcon: `Texture2D'/Game/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_top_rail.toz_top_rail'`,
+  WeaponSpecificIcon: `Texture2D'/${modName}/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/toz_top_rail.toz_top_rail'`,
 });
 
 const fittingAttachments = new Set([
@@ -114,7 +135,7 @@ function structTransformer(
   context: MetaContext<WeaponGeneralSetupPrototype | UpgradePrototype | AttachPrototype>,
 ) {
   if (context.filePath.endsWith("/UpgradePrototypes.cfg") && struct.SID === "GunD12_Upgrade_Attachment_Rail") {
-    context.extraStructs.push(tozRailUpgrade);
+    context.extraStructs.push(tozRailUpgrade, ...slugUpgrades);
   }
 
   if (context.filePath.endsWith("/WeaponGeneralSetupPrototypes.cfg")) {
@@ -122,7 +143,9 @@ function structTransformer(
     if (structT.SID === "GunTOZ_SG") {
       const fork = structT.fork();
       fork.UpgradePrototypeSIDs = structT.UpgradePrototypeSIDs.fork();
-      fork.UpgradePrototypeSIDs.addNode(tozRailUpgrade.SID, tozRailUpgrade.SID);
+      for (const { SID } of [tozRailUpgrade, ...slugUpgrades]) {
+        fork.UpgradePrototypeSIDs.addNode(SID, SID);
+      }
       fork.CompatibleAttachments = new Struct() as any;
       fork.CompatibleAttachments.__internal__.bpatch = true;
       fork.CompatibleAttachments.addNode(GunThreeLine_Scope, "GunThreeLine_Scope");
@@ -144,7 +167,8 @@ function structTransformer(
     const structT = struct as AttachPrototype;
     const fork = structT.fork();
     if (struct.SID === "GunThreeLine_Scope") {
-      fork.Icon = `Texture2D'/Game/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/threeline_scope_icon.threeline_scope_icon'`;
+      writeUberTozLocalization();
+      fork.Icon = `Texture2D'/${modName}/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/threeline_scope_icon.threeline_scope_icon'`;
       fork.Cost = 9500.0;
       fork.Weight = 0.6;
     }
@@ -162,7 +186,9 @@ function structTransformer(
       const fork = structT.fork();
       fork.Upgrades = structT.Upgrades?.fork() ?? new Struct();
       fork.Upgrades.__internal__.bpatch = true;
-      fork.Upgrades.addNode(new Struct({ UpgradePrototypeSID: tozRailUpgrade.SID, Enabled: true }), tozRailUpgrade.SID);
+      for (const { SID } of [tozRailUpgrade, ...slugUpgrades]) {
+        fork.Upgrades.addNode(new Struct({ UpgradePrototypeSID: SID, Enabled: true }), SID);
+      }
       return fork;
     }
   }
@@ -171,3 +197,92 @@ function structTransformer(
 }
 
 structTransformer.files = ["/WeaponGeneralSetupPrototypes.cfg", "/UpgradePrototypes.cfg", "/AttachPrototypes.cfg", "/NPCPrototypes.cfg"];
+
+const SKIF_QUEST_GUID = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+const SKIF_ITEM_GENERATOR_SID = "ItemGen_Skif_UberToz";
+const SKIF_QUEST_NODE_SID = "Skif_UberToz";
+
+let transformItemGeneratorPrototypesOnce = false;
+
+/**
+ * Adds a generator holding a TOZ with the top rail upgrade and rail installed, plus every scope
+ * this mod makes compatible, for the Skif debug quest node below.
+ */
+function transformItemGeneratorPrototypes() {
+  if (transformItemGeneratorPrototypesOnce) {
+    return;
+  }
+  transformItemGeneratorPrototypesOnce = true;
+  const ItemGenerator = new Struct({}) as ItemGeneratorPrototype["ItemGenerator"];
+  ItemGenerator.addNode(
+    new Struct({
+      Category: "EItemGenerationCategory::WeaponPrimary",
+      bAllowSameCategoryGeneration: true,
+      PossibleItems: new Struct({
+        GunTOZ_SG: new Struct({
+          ItemPrototypeSID: "GunTOZ_SG",
+          Chance: 1,
+          MinDurability: 1,
+          MaxDurability: 1,
+          Upgrades: new Struct({ MinCount: 1, MaxCount: 1, Chance: 1, PossibleItems: tozRailUpgrade.SID }),
+          Attaches: new Struct({ MinCount: 1, MaxCount: 1, Chance: 1, PossibleItems: "TopRailAKU" }),
+        }),
+      }),
+    }),
+    "GunTOZ_SG",
+  );
+  for (const sid of fittingAttachments) {
+    ItemGenerator.addNode(
+      new Struct({
+        Category: "EItemGenerationCategory::Attach",
+        bAllowSameCategoryGeneration: true,
+        PossibleItems: new Struct({ [sid]: new Struct({ ItemPrototypeSID: sid, Chance: 1 }) }),
+      }),
+      sid,
+    );
+  }
+  return new Struct({
+    __internal__: { rawName: SKIF_ITEM_GENERATOR_SID, isRoot: true },
+    SID: SKIF_ITEM_GENERATOR_SID,
+    ItemGenerator,
+  }) as ItemGeneratorPrototype;
+}
+transformItemGeneratorPrototypes.files = ["/ItemGeneratorPrototypes.cfg"];
+
+let transformQuestNodePrototypesOnce = false;
+
+/**
+ * Debug quest node that gives Skif everything from the generator above.
+ * Use with console: XStartQuestNodeBySID Skif_UberToz
+ */
+function transformQuestNodePrototypes(struct: QuestNodePrototypeSetItemGenerator) {
+  if (transformQuestNodePrototypesOnce) {
+    return;
+  }
+  transformQuestNodePrototypesOnce = true;
+  const node = new Struct() as QuestNodePrototypeSetItemGenerator;
+  node.SID = SKIF_QUEST_NODE_SID;
+  node.QuestSID = struct.QuestSID;
+  node.NodeType = "EQuestNodeType::SetItemGenerator";
+  node.TargetQuestGuid = SKIF_QUEST_GUID;
+  node.ReplaceInventory = false;
+  node.EquipItems = false;
+  node.Repeatable = true;
+  node.ItemGeneratorSID = SKIF_ITEM_GENERATOR_SID;
+  node.__internal__.isRoot = true;
+  node.__internal__.rawName = SKIF_QUEST_NODE_SID;
+  return node;
+}
+transformQuestNodePrototypes.files = ["/QuestNodePrototypes/A-life_interrupts.cfg"];
+
+let transformEffectPrototypesOnce = false;
+
+/** Stat effects for the slug sniper upgrades in slugUpgrades.mts. */
+function transformEffectPrototypes() {
+  if (transformEffectPrototypesOnce) {
+    return;
+  }
+  transformEffectPrototypesOnce = true;
+  return slugEffects;
+}
+transformEffectPrototypes.files = ["/EffectPrototypes.cfg"];
