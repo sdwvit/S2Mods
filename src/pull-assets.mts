@@ -7,6 +7,7 @@ import { modFolderRaw } from "./base-paths.mts";
 import { primarySdkModTarget } from "./mod-meta-paths.mts";
 import { isTransientCookArtifact } from "./mod-kinds.mts";
 import { cpSync } from "node:fs";
+import { writeModWorldSubsystemData } from "./world-subsystem-data.mts";
 
 /**
  * Copy the SDK mod folder back over raw/. This MUTATES raw/, so anything that fingerprints raw/
@@ -17,7 +18,8 @@ export async function pullAssets() {
   // Only the half that owns the mod's own SDK name: it is the one the Mod Editor authors assets
   // in, and the one whose .uplugin belongs in raw/. Pulling the cfg half back would copy its
   // <Mod>Cfg.uplugin into raw/ and its own .cfgs over the generated ones.
-  const sourcePath = (await primarySdkModTarget).modFolder;
+  const target = await primarySdkModTarget;
+  const sourcePath = target.modFolder;
   const destinationPath = path.join(modFolderRaw, "Stalker2");
   logger.log(`Pulling mod assets from ${sourcePath}...`);
   if (!fs.existsSync(sourcePath) || fs.readdirSync(sourcePath).length === 0) {
@@ -47,6 +49,15 @@ export async function pullAssets() {
     logger.log(`Removing stale cook artifact from raw/: ${path.relative(modFolderRaw, stale)}`);
     fs.rmSync(stale, { force: true });
   }
+
+  // The Mod Editor generates this list when it packages a mod; the CLI cook never does. Here,
+  // after the pull and before anything fingerprints raw/, so a new ModWorldSubsystem blueprint
+  // ships on the next cook-inject.
+  writeModWorldSubsystemData(
+    path.join(destinationPath, "Content"),
+    path.join(sourcePath, "Content"),
+    target.name,
+  );
 }
 
 function findTransientCookArtifacts(dir: string): string[] {
