@@ -8,7 +8,9 @@ export const transformRootgraph: StructTransformer<Struct> = () => {
   if (once) return;
   once = true;
 
-  const SID = "WolfArmorFetch_Launch";
+  // Same shape as DecoupledRanks' launcher, so the quest also starts on saves made before install: the SID
+  // carries the owning quest's prefix (`rootgraph_`), and the quest is registered in rootgraph.cfg.
+  const SID = "rootgraph_run_WolfArmorFetch";
 
   return [
     new Struct({

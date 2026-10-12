@@ -14,4 +14,4 @@ export const transformQuestRegistration: StructTransformer<QuestPrototype> = () 
     DLC: "None",
   }) as QuestPrototype;
 };
-transformQuestRegistration.files = ["/QuestPrototypes/SQ86.cfg"];
+transformQuestRegistration.files = ["/QuestPrototypes/rootgraph.cfg"];

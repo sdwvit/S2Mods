@@ -39,17 +39,29 @@ export function getDialogPhrase(
   }) as DialogPrototype;
 }
 
-export function getWaitForReply(SID: string, chain: string, options: { sid: string; conditions?: any }[]) {
+/**
+ * A reply picker. An option with `mainReply: false` is an informational one, drawn white the way
+ * vanilla draws side questions (SQ86_Dialog_Genij_FirstMeet's "Buy a new one."); `excludeBy` hides it
+ * once any of those phrases has been played - vanilla lists the option's own first line, so it can be
+ * asked once.
+ */
+export function getWaitForReply(
+  SID: string,
+  chain: string,
+  options: { sid: string; conditions?: any; mainReply?: boolean; excludeBy?: string[] }[],
+) {
   const NextDialogOptions = new Struct();
-  options.forEach(({ sid, conditions }) => {
+  options.forEach(({ sid, conditions, mainReply = true, excludeBy }) => {
+    const ExcludeBy = new Struct();
+    excludeBy?.forEach((phrase) => ExcludeBy.addNode(phrase));
     const opt: any = {
       NextDialogSID: sid,
       AvailableFromStart: true,
       VisibleOnFailedCondition: !conditions, // always visible if no conditions, hidden if condition fails
-      MainReply: true,
+      MainReply: mainReply,
       AnswerTo: -1,
       IncludeBy: "",
-      ExcludeBy: "",
+      ExcludeBy: excludeBy?.length ? ExcludeBy : "",
     };
     if (conditions) opt.Conditions = conditions;
     NextDialogOptions.addNode(new Struct(opt));
