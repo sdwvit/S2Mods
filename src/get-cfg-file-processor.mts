@@ -67,12 +67,8 @@ export function getCfgFileProcessor<T extends Struct>(transformer: StructTransfo
     }
 
     const processedStructs = (await Promise.all(promises))
-      .map((pss) => {
-        if (pss) {
-          return (Array.isArray(pss) ? pss : [pss]).flat().concat(extraStructs).filter(Boolean);
-        }
-      })
-      .flat()
+      .flat(2)
+      .concat(extraStructs)
       .filter(Boolean) as Struct[];
 
     if (processedStructs.length) {
