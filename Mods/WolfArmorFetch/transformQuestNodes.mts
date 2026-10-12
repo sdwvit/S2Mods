@@ -14,7 +14,7 @@ import {
   FALCON_OFFER_DELAY_HOURS,
   TURNIN,
 } from "./dialog.mts";
-import { INSTALLED_GLOBAL_VARIABLE_SID as HEADLESS_ARMORS_INSTALLED } from "../HeadlessArmors/transformGlobalVariablePrototypes.mts";
+import { INSTALLED_EFFECT_SID as HEADLESS_ARMORS_INSTALLED } from "../HeadlessArmors/transformEffectPrototypes.mts";
 import { PLAYER_GUID as PLAYER, Q, WOLF_GUID, hasRun, onDialogEnding, questNode } from "./nodes.mts";
 
 const STASH_GUID = "1DFF64AA468013EBAE934D8F3B8F980B";
@@ -254,9 +254,9 @@ export const transformQuestNodes: StructTransformer<Struct> = () => {
     }),
 
     // 12. Populate stash with an exo: HeadlessArmors' headless one when that mod is installed, the
-    // full suit otherwise. Without HeadlessArmors the variable doesn't exist, and an If on it fires True
-    // (seen in game). So the If asks "is it false?": True (missing or false) gives the full suit, False
-    // (HeadlessArmors sets it true) the headless one.
+    // full suit otherwise. HeadlessArmors puts its flag effect on the player on every world load, so the
+    // If checks the player for it: True gives the headless one, False the full suit
+    // (see DesignDocs/DetectInstalledModSpec.md).
     // A moment after the stash is revealed, so it has spawned before it is filled.
     node(`${Q}_StashFillDelay`, {
       NodeType: "EQuestNodeType::Technical",
@@ -270,18 +270,18 @@ export const transformQuestNodes: StructTransformer<Struct> = () => {
       Conditions: new Struct({
         0: new Struct({
           0: new Struct({
-            ConditionType: "EQuestConditionType::GlobalVariable",
+            ConditionType: "EQuestConditionType::Effect",
             ConditionComparance: "EConditionComparance::Equal",
-            GlobalVariablePrototypeSID: HEADLESS_ARMORS_INSTALLED,
-            ChangeValueMode: "EChangeValueMode::Set",
-            VariableValue: false,
+            TargetCharacter: PLAYER,
+            EffectPrototypeSID: HEADLESS_ARMORS_INSTALLED,
+            RequiredSquadMembers: "ERequiredSquadMembers::AllMembers",
           }),
         }),
       }),
     }),
     node(`${Q}_PopulateStash`, {
       NodeType: "EQuestNodeType::SetItemGenerator",
-      Launchers: getLaunchers([{ SID: `${Q}_If_HeadlessArmors`, Name: "True" }]),
+      Launchers: getLaunchers([{ SID: `${Q}_If_HeadlessArmors`, Name: "False" }]),
       TargetQuestGuid: STASH_GUID,
       ReplaceInventory: false,
       EquipItems: false,
@@ -289,7 +289,7 @@ export const transformQuestNodes: StructTransformer<Struct> = () => {
     }),
     node(`${Q}_PopulateStashHeadless`, {
       NodeType: "EQuestNodeType::SetItemGenerator",
-      Launchers: getLaunchers([{ SID: `${Q}_If_HeadlessArmors`, Name: "False" }]),
+      Launchers: getLaunchers([{ SID: `${Q}_If_HeadlessArmors`, Name: "True" }]),
       TargetQuestGuid: STASH_GUID,
       ReplaceInventory: false,
       EquipItems: false,
