@@ -30,7 +30,7 @@ import { getGdocsArmorData } from "./gdocs-armors.mts";
 import { backfillDef } from "../../src/backfill-def.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { getDropChance, maxDropChance } from "./calculateArmorScore.mts";
-import { transformGlobalVariablePrototypes } from "./transformGlobalVariablePrototypes.mts";
+import { transformEffectPrototypes } from "./transformEffectPrototypes.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 const finishedTransformers = new Set<string>();
@@ -50,10 +50,10 @@ export const meta: MetaType = {
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
 
-  changenote: `Added a global bool variable HeadlessArmorsInstalled (default true) so other mods and quests can detect that HeadlessArmors is installed.`,
+  changenote: `Other mods can now detect HeadlessArmors through a HeadlessArmorsInstalled flag effect on the player. It replaces the HeadlessArmorsInstalled global variable.`,
   structTransformers: [
     transformArmorPrototypes,
-    transformGlobalVariablePrototypes,
+    transformEffectPrototypes,
     transformItemGenerators,
     transformMeshPrototypes,
     transformSkifItemGeneratorQuestNodes,
