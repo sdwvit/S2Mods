@@ -10,6 +10,23 @@ Source cfgs:
 
 Example: HeadlessArmors (provider) and WolfArmorFetch (consumer).
 
+## Every mod is a provider
+
+Steps 1-3 are automatic. `src/announce-installed.mts` gives every mod the flag effect and the
+blueprint when its `prepare-configs` runs, except the repacks, NodeBridge and the test mods
+(`NOT_ANNOUNCED`). Mods pick it up on their next build; nothing is recooked in bulk.
+
+- `src/announce-installed-raw.mts` writes the blueprint into `raw/` before `mod-meta-paths.mts`
+  classifies `raw/`, so a cfg-only mod becomes a split mod (`<Mod>` assets, `<Mod>Cfg` cfgs) on that
+  same run. From then on it needs `cook-inject`; `pack-inject` no longer covers it.
+- `pullAssets()` writes the SDK copy, renamed to `/<SdkMod>/announce_mod_is_active`, then the
+  subsystem list picks it up (step 3).
+- The template is `src/localization/fixtures/announce-mod-is-active.uasset`, a copy of HeadlessArmors'
+  blueprint. HeadlessArmors itself is never overwritten: edit the blueprint there in the Mod
+  Editor, then copy it over the fixture.
+- The renamer (`renameLocalizationPackage`) also rewrites the asset registry's
+  `GeneratedClass` tag, which spells the package inside an object path.
+
 ## Step 1: the provider declares a flag effect
 
 Add a permanent `FlagEffect` named `<ProviderMod>Installed` to `EffectPrototypes.cfg`. Vanilla
@@ -29,10 +46,11 @@ struct.end
 - `bIsPermanent = true`: the flag never expires.
 - `DuplicationType = KeepOld`: the blueprint applies the effect on every world load. The `[0]`
   default is `KeepAll`, which would stack a copy per load.
-- In TypeScript, export the SID (`INSTALLED_EFFECT_SID`) so consumers can import it.
-- One transformer per cfg: if the provider already patches `EffectPrototypes.cfg`, add the effect
-  there. Inject it once per file as a root struct (see
-  `Mods/HeadlessArmors/transformEffectPrototypes.mts`).
+- It goes in its own file, `EffectPrototypes_patch_<SdkMod>Installed.cfg`, written by
+  `writeInstalledEffectCfg` after the transformers. A transformer of the mod's own that patches
+  `EffectPrototypes.cfg` writes `EffectPrototypes_patch_<Mod>.cfg`, so the two never collide.
+- In TypeScript, export the SID so consumers can import it: `installedEffectSid("<SdkMod>")`, as in
+  `Mods/HeadlessArmors/installed.mts` (`INSTALLED_EFFECT_SID`).
 
 ## Step 2: the provider applies it with a blueprint
 
@@ -44,17 +62,32 @@ Graph:
 ```
 Event OnWorldBeginPlay (World)
   └─ Branch: GetDisplayName(World) != "MainMenuMap"
-       True ─► Delay 0.5 s ─► IsValid(GetPlayerCharacter(0))
-                  ▲               ├─ Is Valid ─► Execute Console Command
-                  │               │                "XApplyEffectOnPlayer HeadlessArmorsInstalled"
+       True ─► Delay 1.0 s ─► IsValid(GetPlayerCharacter(0))
+                  ▲               ├─ Is Valid ─► Execute Console Command (Command = SID string below)
                   └───────────────┴─ Is Not Valid (retry)
+
+SID string:
+  Self ─► Get Class ─► Get Soft Class Reference ─► To String (Soft Class Reference)
+       ─► Get Path ─► Right Chop (Count = 1)
+       ─► Append("XApplyEffectOnPlayer ", <that>, "Installed")
 ```
 
-- The main menu has no player, so it is skipped.
-- The player character spawns after `OnWorldBeginPlay`. The Delay/IsValid loop retries every 0.5 s
-  until the player exists.
+- Every world except the main menu passes the branch. This includes the open world
+  (`WorldMap_WP`) and the playable logic levels a save can load into. Gating on `== "WorldMap_WP"`
+  would leave the flag off in those levels.
+- The player character spawns after `OnWorldBeginPlay`. The Delay/IsValid loop retries every 1 s
+  until the player exists. A world without a player just keeps polling.
+- The blueprint derives the SID from its own class path:
+  `/HeadlessArmors/announce_mod_is_active.announce_mod_is_active_C` → `Get Path` →
+  `/HeadlessArmors` → `Right Chop 1` → `HeadlessArmors` → `XApplyEffectOnPlayer HeadlessArmorsInstalled`.
+  So one blueprint works in any mod: a copy renamed into `/<SdkMod>/` announces `<SdkMod>Installed`
+  with no graph edits. For a split mod the blueprint sits in the assets half, which keeps the plain
+  mod name, so the flag never gets a `Cfg` suffix. A mod with `sdkModNameOverride` announces under
+  its SDK name.
+- `Get Path Name` isn't offered on the `Class` pin in this SDK; the soft class reference route gives
+  the same string.
 - `XApplyEffectOnPlayer <EffectPrototypeSID>` is a stock console command (see
-  `stalker_commands.txt`). The command string must name the SID from step 1.
+  `stalker_commands.txt`). The SID it builds must match the effect from step 1.
 
 ## Step 3: the blueprint gets registered
 
@@ -136,6 +169,12 @@ struct.end
 - **Keep provider-only SIDs on the provider branch.** WolfArmorFetch's
   `WolfArmorFetch_StashRewardHeadless` generator names `Exoskeleton_Neutral_Armor_headless`, which
   only exists with HeadlessArmors. That's harmless, because only the provider branch uses it.
+- **Never check the flag and a provider-only SID in the same node.** An `ItemInInventory` (or any
+  condition) naming an item that doesn't exist nulls the whole node when the provider is absent,
+  so the `Effect` check in it is lost too. Put the provider-only check in its own node, launched
+  from the flag check's `True` pin. Without the provider, only that unreachable node is lost. If a
+  dialog option depends on it, have the nodes set one of your own global variables and gate the
+  option on that variable.
 - **Don't check right at load.** The flag lands at least 0.5 s after the world begins play. Check at
   a point in the quest the player reaches later (a dialog, a pickup), never on a node that fires as
   the save loads.
