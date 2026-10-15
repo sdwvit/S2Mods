@@ -75,9 +75,13 @@ dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
  *    by the SDK cook, so this does not pack them either.
  *  - dest for OverrideContent remaps Stalker2/Mods/<Mod>/Content/X -> Stalker2/Content/X;
  *    for NewContent dest is simply the path relative to COOKED.
- *  - .uasset/.umap are primary packages -> PakListIoStore.txt.
- *    .uexp/.ubulk/.uptnl are listed nowhere - IoStore picks the segments up from the primary
- *    package. Everything else (.cfg, .uplugin, AssetRegistry.bin) -> PakList.txt.
+ *  - .uasset/.umap are primary packages -> PakListIoStore.txt, and so are their bulk-data
+ *    files (.ubulk/.uptnl), in walk order right after their .uasset. .uexp is listed nowhere -
+ *    IoStore picks it up from the primary package. Bulk data is not picked up that way: with
+ *    the .ubulk left out, IoStore writes the package with no bulk chunk (OGBarRadio's Wwise
+ *    events lost their streamed media, 7 MB -> 151 KB .ucas) while still exiting 0. The four
+ *    reference mods above had no bulk data, so they never exercised this.
+ *    Everything else (.cfg, .uplugin, AssetRegistry.bin) -> PakList.txt.
  *  - emission order is a walk that yields a directory's own files before its subdirectories,
  *    alphabetically within each level. That is not a plain sort of the dest strings, and the
  *    difference is observable: FasterLootAnimation4x's real list has Content/__ModKit....uasset
@@ -105,8 +109,10 @@ dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
  */
 
 const PACKAGE_EXTENSIONS = new Set([".uasset", ".umap"]);
-/** Segments of a primary package. IoStore finds them itself; listing them corrupts the container. */
-const SEGMENT_EXTENSIONS = new Set([".uexp", ".ubulk", ".uptnl"]);
+/** Bulk data of a primary package. IoStore only packs it when it is listed - see above. */
+const BULK_EXTENSIONS = new Set([".ubulk", ".uptnl"]);
+/** The export segment of a primary package. IoStore finds it itself; listing it corrupts the container. */
+const SEGMENT_EXTENSIONS = new Set([".uexp"]);
 const CONTAINER_SUFFIX = "Stalker2-Windows";
 const PAK_INTERNAL_ROOT = "../../../";
 
@@ -217,7 +223,8 @@ export function planVariant(variant: string, modName: string): VariantPlan | nul
   const push = (entry: RepackEntry) => {
     const extension = path.extname(entry.src).toLowerCase();
     if (SEGMENT_EXTENSIONS.has(extension)) return;
-    (PACKAGE_EXTENSIONS.has(extension) ? packageEntries : looseEntries).push(entry);
+    const isIoStore = PACKAGE_EXTENSIONS.has(extension) || BULK_EXTENSIONS.has(extension);
+    (isIoStore ? packageEntries : looseEntries).push(entry);
   };
 
   // OverrideContent's loose cfgs come first, exactly as the staging manifest orders them.
@@ -247,7 +254,8 @@ export function planVariant(variant: string, modName: string): VariantPlan | nul
   // Anything the cook left outside the plugin folder (the WorldMap_WP stub) is not shipped.
   for (const src of walkFilesBeforeDirs(cookedDir)) {
     if (src.startsWith(pluginCookedDir + path.sep)) continue;
-    if (SEGMENT_EXTENSIONS.has(path.extname(src).toLowerCase())) continue;
+    const extension = path.extname(src).toLowerCase();
+    if (SEGMENT_EXTENSIONS.has(extension) || BULK_EXTENSIONS.has(extension)) continue;
     logger.debug(`[repack] ${variant}: not below ${pluginRel}, excluded from pak files: ${src}`);
   }
 
@@ -363,8 +371,11 @@ function crossCheckAgainstManifest(
 
   // Compare on the pre-remap path: the manifest records where the cook wrote the package,
   // which is always below the plugin mount regardless of the remap applied to the dest.
+  // Bulk-data files ride along with their package and are not manifest entries themselves.
   const preRemap = new Set(
-    packageEntries.map(({ src }) => path.relative(cookedDir, src).split(path.sep).join("/")),
+    packageEntries
+      .filter(({ src }) => PACKAGE_EXTENSIONS.has(path.extname(src).toLowerCase()))
+      .map(({ src }) => path.relative(cookedDir, src).split(path.sep).join("/")),
   );
 
   for (const missing of [...preRemap].filter((entry) => !manifestPaths.includes(entry))) {
