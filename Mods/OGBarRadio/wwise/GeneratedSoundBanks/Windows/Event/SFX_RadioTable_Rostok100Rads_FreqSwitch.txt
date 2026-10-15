@@ -1,0 +1,23 @@
+Event	ID	Name			Wwise Object Path	Notes
+	177669177	SFX_RadioTable_Rostok100Rads_FreqSwitch			\S2 Live\Interactive Objects\IO_RadioTable\HubsBars\SFX_RadioTable_Rostok100Rads_FreqSwitch	
+
+Game Parameter	ID	Name			Wwise Object Path	Notes
+	262290038	RTPC_Distance			\S2 Live\World\RTPC_Distance	
+	1089293617	RTPC_SideChain_AV			\S2 Live\Sidechain\RTPC_SideChain_AV	
+	3743326763	RTPC_AuxObstructionLevel			\S2 Live\World\RTPC_AuxObstructionLevel	
+
+Modulator LFO	ID	Name			Wwise Object Path	Notes
+	413313929	Modulator LFO (Custom)				
+	560229023	Modulator LFO (Custom)				
+	602295263	Modulator LFO (Custom)				
+	1042372926	Modulator LFO (Custom)				
+
+Effect plug-ins	ID	Name	Type				Notes
+	803610548	RadioTable_Distortion	Wwise Guitar Distortion			
+	839465121	Parametric EQ (Custom)	Wwise Parametric EQ			
+	2506096908	RadioTable_Flanger	Wwise Flanger			
+	4047341555	RadioTable_EQ	Wwise Parametric EQ			
+
+Streamed Audio	ID	Name	Audio source file	Generated audio file	Wwise Object Path	Notes
+	1066800979	Addaraya - Gurza Dreaming	S:\S2_WwiseProject\.cache\70\{702CAA00-CF5A-AA15-E440-1D90316F6E26}.wem	1066800979.wem	\Actor-Mixer Hierarchy\S2 Live\Interactive Objects\IO_RadioTable\Radio_Music\Unique\Radio_100Rads\Addaraya - Gurza Dreaming	Sidorovych
+

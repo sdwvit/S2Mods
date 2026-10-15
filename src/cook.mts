@@ -8,6 +8,7 @@ import { projectRoot } from "./base-paths.mts";
 import { primarySdkModTarget, type SdkModTarget, sdkModTargets } from "./mod-meta-paths.mts";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
 import { writePackageClassifierLists } from "./package-classifier.mts";
+import { installModWwiseBanks } from "./mod-wwise.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 export const getNTPath = (p: string) => p.replaceAll("\\", "/").replaceAll("/media/", "U:/");
@@ -58,6 +59,9 @@ export async function cookMod(target?: SdkModTarget) {
   }
   const { name: sdkModName, modFolder, packageClassifierFolder } = resolved;
   return withSdkMutationLock("cookMod", async () => {
+    // The cook bundles AkAudioEvent banks/media out of the shared GeneratedSoundBanks folder,
+    // which other mods' Wwise projects overwrite - put this mod's copies back first.
+    installModWwiseBanks();
     const UAT_PATH = getNTPath(
       path.join(process.env.SDK_PATH, "Engine", "Build", "BatchFiles", "RunUAT.bat"),
     );

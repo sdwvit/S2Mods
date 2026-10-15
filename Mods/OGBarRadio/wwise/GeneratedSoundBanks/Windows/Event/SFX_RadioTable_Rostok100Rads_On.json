@@ -1,0 +1,144 @@
+{
+ "SoundBanksInfo": {
+  "Platform": "Windows",
+  "BasePlatform": "Windows",
+  "SchemaVersion": "16",
+  "SoundBankVersion": "154",
+  "SoundBanks": [
+   {
+    "Id": "3754877676",
+    "Type": "Event",
+    "GUID": "{6B1F0429-D881-4313-A59B-4DCA86162D7E}",
+    "Language": "SFX",
+    "Hash": "{E727FAE6-DB8A-18ED-8279-0610E1920945}",
+    "ObjectPath": "SFX_RadioTable_Rostok100Rads_On",
+    "ShortName": "SFX_RadioTable_Rostok100Rads_On",
+    "Path": "Event/SFX_RadioTable_Rostok100Rads_On.bnk",
+    "Media": [
+     {
+      "Id": "337194318",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_IO_RadioTable_On.wav",
+      "Path": "Media/337194318.wem",
+      "CachePath": "19/{19C13108-D1CE-05FC-B894-2E19A71E8656}.wem"
+     },
+     {
+      "Id": "1066800979",
+      "Language": "SFX",
+      "Streaming": "true",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\Addaraya - Gurza Dreaming.wav",
+      "Path": "Media/1066800979.wem",
+      "CachePath": "70/{702CAA00-CF5A-AA15-E440-1D90316F6E26}.wem"
+     }
+    ],
+    "Plugins": {
+     "Custom": [
+      {
+       "Id": "839465121",
+       "Name": "Parametric EQ (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\S2 Live\\Interactive Objects\\IO_RadioTable\\Radio_Music\\[Effect Slot [4]: (Parametric EQ)]\\Parametric EQ (Custom)",
+       "GUID": "{0BC9C331-5309-4B16-9239-0471BFECF4F7}",
+       "LibName": "Wwise Parametric EQ",
+       "LibId": "6881283"
+      }
+     ],
+     "ShareSets": [
+      {
+       "Id": "803610548",
+       "Name": "RadioTable_Distortion",
+       "ObjectPath": "\\Effects\\S2 Live\\Interactive Objects\\Interactable Radio\\RadioTable_Distortion",
+       "GUID": "{E67AD567-12E2-4720-ACA5-B75025BAF84E}",
+       "LibName": "Wwise Guitar Distortion",
+       "LibId": "8257539"
+      },
+      {
+       "Id": "2506096908",
+       "Name": "RadioTable_Flanger",
+       "ObjectPath": "\\Effects\\S2 Live\\Interactive Objects\\Interactable Radio\\RadioTable_Flanger",
+       "GUID": "{111DC8E4-73D9-4DB7-9F79-79139DF153B1}",
+       "LibName": "Wwise Flanger",
+       "LibId": "8192003"
+      },
+      {
+       "Id": "4047341555",
+       "Name": "RadioTable_EQ",
+       "ObjectPath": "\\Effects\\S2 Live\\Interactive Objects\\Interactable Radio\\RadioTable_EQ",
+       "GUID": "{97FD71C3-74A4-44CC-98B9-B5798F407291}",
+       "LibName": "Wwise Parametric EQ",
+       "LibId": "6881283"
+      }
+     ]
+    },
+    "Events": [
+     {
+      "Id": "3754877676",
+      "Name": "SFX_RadioTable_Rostok100Rads_On",
+      "ObjectPath": "\\Events\\S2 Live\\Interactive Objects\\IO_RadioTable\\HubsBars\\SFX_RadioTable_Rostok100Rads_On",
+      "GUID": "{6B1F0429-D881-4313-A59B-4DCA86162D7E}",
+      "MaxAttenuation": "6220",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "337194318"
+       },
+       {
+        "Id": "1066800979"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "839465121"
+        }
+       ],
+       "ShareSets": [
+        {
+         "Id": "803610548"
+        },
+        {
+         "Id": "2506096908"
+        },
+        {
+         "Id": "4047341555"
+        }
+       ]
+      },
+      "AuxBusRefs": [
+       {
+        "Id": "3166933757",
+        "Name": "AUX_Motion_PlayerInteraction_Right",
+        "ObjectPath": "\\Master-Mixer Hierarchy\\Motion\\Motion Master Bus\\Motion_PlayerInteraction\\AUX_Motion_PlayerInteraction\\AUX_Motion_PlayerInteraction_Right",
+        "GUID": "{DA294A10-E4CE-4614-82C6-93CEE3E7A04C}",
+        "Color": "14"
+       }
+      ]
+     }
+    ],
+    "GameParameters": [
+     {
+      "Id": "262290038",
+      "Name": "RTPC_Distance",
+      "ObjectPath": "\\Game Parameters\\S2 Live\\World\\RTPC_Distance",
+      "GUID": "{C00EE1A1-EF0A-48C9-865C-10F332CD78E3}"
+     },
+     {
+      "Id": "1089293617",
+      "Name": "RTPC_SideChain_AV",
+      "ObjectPath": "\\Game Parameters\\S2 Live\\Sidechain\\RTPC_SideChain_AV",
+      "GUID": "{33ECE6CF-C665-491A-95F1-02A7D18BBB46}"
+     },
+     {
+      "Id": "3743326763",
+      "Name": "RTPC_AuxObstructionLevel",
+      "ObjectPath": "\\Game Parameters\\S2 Live\\World\\RTPC_AuxObstructionLevel",
+      "GUID": "{33DC5C75-5E7B-4BAC-A3FE-C519A12FC361}"
+     }
+    ]
+   }
+  ],
+  "FileHash": "{96DC9B94-F114-D2AB-0EA8-4965AA02BF3E}"
+ }
+}
