@@ -40,7 +40,9 @@ export async function pullAssets() {
     recursive: true,
     force: true,
     preserveTimestamps: true,
-    filter: (source) => !isTransientCookArtifact(source),
+    // The per-mod Wwise project is a 256 MB copy of the whole S2 project: authored in place in the
+    // SDK, never cooked from raw/, so it stays out of raw/ (and git).
+    filter: (source) => !isTransientCookArtifact(source) && path.basename(source) !== "S2_WwiseProject",
   });
 
   // Earlier pulls (and the commits they produced) may already have left one in raw/. Drop it, or

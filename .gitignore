@@ -37,3 +37,6 @@ locale/
 # check-comments watermarks (see src/comments/check-comments.mts)
 .comments-seen.json
 .comments-pending.json
+
+# Per-mod Wwise project copies (authored in the SDK, 256 MB each)
+Mods/*/raw/Stalker2/S2_WwiseProject/
