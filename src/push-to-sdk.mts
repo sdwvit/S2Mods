@@ -14,6 +14,7 @@ import { mkdirSync, cpSync, existsSync, readdirSync, rmSync, symlinkSync } from 
 import { createMod } from "./cook.mts";
 import { recursiveCfgFind } from "./recursive-cfg-find.mts";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
+import { installModWwiseBanks, installModWwiseProject } from "./mod-wwise.mts";
 
 /** Exported so the SDK-mod creation and cfg routing can be tested without the Mod Editor. */
 export async function pushToSdk() {
@@ -37,6 +38,9 @@ export async function pushToSdk() {
       logger.log(`SDK mod ${t.name} doesn't exist, creating...`);
       await createMod(t);
     }
+    // Wwise inputs live outside raw/ (see mod-wwise.mts) and go in before the cfg early-out.
+    installModWwiseBanks();
+    await installModWwiseProject();
     if (readdirSync(sourcePath).length === 0) {
       console.error(`No files found in source path: ${sourcePath}`);
       return;

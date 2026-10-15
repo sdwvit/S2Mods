@@ -20,6 +20,10 @@ vi.mock("child_process", () => ({ default: { execSync, spawnSync }, execSync, sp
 vi.mock("./repack.mts", () => ({ repackMod }));
 vi.mock("./package-classifier.mts", () => ({ writePackageClassifierLists }));
 vi.mock("./logger.mts", () => ({ logger: { log: () => {} } }));
+vi.mock("./mod-wwise.mts", () => ({
+  installModWwiseBanks: () => {},
+  installModWwiseProject: async () => {},
+}));
 vi.mock("./sdk-mutation-lock.mts", () => ({
   withSdkMutationLock: (_name: string, fn: () => unknown) => fn(),
 }));

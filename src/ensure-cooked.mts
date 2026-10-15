@@ -7,6 +7,7 @@ import { modClassification, sdkModTargets, type SdkModTarget } from "./mod-meta-
 import { COOKABLE_EXTENSIONS, isCfgFile, walkRaw } from "./mod-kinds.mts";
 import { cookMod } from "./cook.mts";
 import { pullAssets } from "./pull-assets.mts";
+import { modWwiseBankFiles, modWwiseFolder } from "./mod-wwise.mts";
 
 /**
  * Fingerprint of raw/ by content, not by mtime: the publish pipeline itself rewrites raw/
@@ -33,7 +34,12 @@ export function hashRawSplit(files: string[] = walkRaw(modFolderRaw)): {
 } {
   const hashes = { cookable: createHash("sha1"), loose: createHash("sha1") };
   for (const file of files) {
-    const half = COOKABLE_EXTENSIONS.has(path.extname(file).toLowerCase()) ? "cookable" : "loose";
+    // Wwise banks/media (Mods/<Mod>/wwise/) are baked into the cooked AkAudioEvents, so changing
+    // them needs the cooker, not just a repack.
+    const cookable =
+      COOKABLE_EXTENSIONS.has(path.extname(file).toLowerCase()) ||
+      file.startsWith(modWwiseFolder + path.sep);
+    const half = cookable ? "cookable" : "loose";
     hashes[half].update(path.relative(modFolderRaw, file));
     hashes[half].update(readFileSync(file));
   }
@@ -47,7 +53,8 @@ export function hashRawSplit(files: string[] = walkRaw(modFolderRaw)): {
  * owns everything else.
  */
 function filesOwnedBy(target: SdkModTarget): string[] {
-  const files = walkRaw(modFolderRaw);
+  // A mod without wwise/ adds nothing here, so its fingerprint is unchanged.
+  const files = [...walkRaw(modFolderRaw), ...modWwiseBankFiles()];
   if (!modClassification.isSplit) return files;
   return files.filter((file) => (target.kind === "cfgs") === isCfgFile(file));
 }

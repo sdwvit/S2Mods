@@ -1,0 +1,3908 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{0731EC05-2011-4419-B330-12EA73BA235B}" SchemaVersion="123">
+	<Events>
+		<WorkUnit Name="IO_RadioTable" ID="{0731EC05-2011-4419-B330-12EA73BA235B}" PersistMode="Standalone">
+			<ChildrenList>
+				<Folder Name="HubsBars" ID="{A735DFD5-3C5E-4F4A-82B6-110319DAB02E}" ShortID="370540556">
+					<ChildrenList>
+						<Event Name="SFX_RadioTable_CementPlant_On" ID="{9C6653AC-9D78-4705-B503-C36C7C8A0B45}">
+							<ChildrenList>
+								<Action Name="" ID="{7479B0B6-956A-490F-84F6-80FB389FFD15}" ShortID="750155972">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{5388ECA5-8C0A-4E66-82A0-BAF1B672F9B3}" ShortID="184640810">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{BAB4E6E2-6C83-4201-BAD6-E498C128AB08}" ShortID="938210385">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{4D333CCA-FA21-414D-8B5F-B36D6EC516F5}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_CementPlant_Off" ID="{5AFCE583-2DC8-402F-9099-E894EEFED324}">
+							<ChildrenList>
+								<Action Name="" ID="{B59126C0-D420-420C-A68B-CF25C900761C}" ShortID="470033176">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{3EC43B36-4716-46AA-BC65-7FB86456F0C7}" ShortID="518852159">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_CementPlant_FreqSwitch" ID="{BD960C2C-55C8-4C04-85A7-9215F79896F4}">
+							<ChildrenList>
+								<Action Name="" ID="{4E8E6F06-6670-421F-B3BE-77111D983D56}" ShortID="169485284">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{A3BFCAF9-60C2-4C73-82A8-E340911C2DB4}" ShortID="627170397">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{2953710C-B13B-4EBC-8125-A37E1A26D485}" ShortID="920822330">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{8BD6A2BF-A103-4D2F-8D3F-67140254F4C8}" ShortID="115182728">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{F9D48D19-B88E-473D-8EFB-B6286DC016C7}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Rostok100Rads_FreqSwitch" ID="{D25CAAB6-B752-4764-9E50-1A27711E4934}">
+							<ChildrenList>
+								<Action Name="" ID="{1950F69D-45A5-4FC1-8511-1EA7343378D5}" ShortID="641287366">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{16AD52B6-85A9-4327-BA0B-C6E968C2E8D1}" ShortID="94654043">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_100Rads" ID="{4670CC37-76E2-4183-968A-B477A8B09DDC}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{15854842-7247-460C-BE33-21D8F65A1EEA}" ShortID="257478005">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_100Rads" ID="{4670CC37-76E2-4183-968A-B477A8B09DDC}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{76D54E80-BE28-467A-8264-94750F04927C}" ShortID="366476562">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{6478B3BB-B8CB-4215-823F-C0618C54DE54}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_100Rads" ID="{4670CC37-76E2-4183-968A-B477A8B09DDC}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Rostok100Rads_Off" ID="{0E5567E7-44E4-4451-8C81-A5F9C0E73475}">
+							<ChildrenList>
+								<Action Name="" ID="{94F5A6C6-6F22-4CC5-8736-C3A9BE80E003}" ShortID="452353265">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{A82C214A-1CD2-4114-80FA-2D9E713F27A1}" ShortID="412590109">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_100Rads" ID="{4670CC37-76E2-4183-968A-B477A8B09DDC}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Rostok100Rads_On" ID="{6B1F0429-D881-4313-A59B-4DCA86162D7E}">
+							<ChildrenList>
+								<Action Name="" ID="{AF5CA42F-7099-46A1-B0EB-E2D88BBCB89E}" ShortID="583887278">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{63AECCC6-AA69-4F7B-9A86-E21359404561}" ShortID="997363589">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_100Rads" ID="{4670CC37-76E2-4183-968A-B477A8B09DDC}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{4AB16161-1494-4E45-854E-4D8772E58906}" ShortID="707389433">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{EC7F9909-BD70-40C1-89A2-942F2A0EAC01}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_100Rads" ID="{4670CC37-76E2-4183-968A-B477A8B09DDC}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_RostokArena_FreqSwitch" ID="{74288224-9E47-490B-90F2-666394315BFD}">
+							<ChildrenList>
+								<Action Name="" ID="{DC1DC498-B270-4773-9361-82AA8A0146D3}" ShortID="1000417923">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{18A99A17-D029-46DB-8609-50786B011F4C}" ShortID="353684709">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{2BF8705E-4E8D-4472-B9C7-5074876A0123}" ShortID="919457621">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{94ABFDCE-360E-4CCB-89CA-3664C6EDDEA5}" ShortID="302733631">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{90F29AFE-E765-4359-80C4-8CFCD1656470}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_RostokArena_Off" ID="{38C581F8-E30C-4754-B400-63B10B524304}">
+							<ChildrenList>
+								<Action Name="" ID="{DE19E62A-02DB-4868-B3B0-EF9B7191BBA4}" ShortID="684887519">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{8967E6FC-33F6-41F0-8252-6D8DF40953C2}" ShortID="1005703631">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_RostokArena_On" ID="{878E704C-EF5E-4D40-9B7B-8B8F153B5289}">
+							<ChildrenList>
+								<Action Name="" ID="{D2B689FD-4F1C-4936-AEAE-5CCFC76A7777}" ShortID="258579273">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{C9F1C6EF-13E8-4C1C-82BD-A44EE3D8D80E}" ShortID="558846758">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{51A7DDEE-03B6-4409-86F1-335EDCA0AF12}" ShortID="454251344">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{D8E754A7-A6D0-437E-A0FD-C08304CD4BA3}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Zalisya_FreqSwitch" ID="{7E020E76-C0BF-4ECC-B2AB-67E9E340AD56}">
+							<ChildrenList>
+								<Action Name="" ID="{53D1C706-D4D2-4488-B486-71BFAFBD5930}" ShortID="183521357">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{0453C376-DC6E-41F6-9E2A-7D4711A487BD}" ShortID="615164987">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{48AB904B-8041-4F6B-9CD7-EC3701972244}" ShortID="63188711">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{468F7B1D-79E5-4C11-A0A8-D010B844BE53}" ShortID="922997937">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{F1A90FAC-9A08-4248-8C5C-850D1C580B5D}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Zalisya_Off" ID="{1BD8A608-202C-45BC-BB68-323143925355}">
+							<ChildrenList>
+								<Action Name="" ID="{2B8BC19D-E6D4-4E55-B41B-CF67AECFF21C}" ShortID="41295095">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{EA67CA55-83F7-4D79-878A-A1A70739A924}" ShortID="176906502">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Zalisya_On" ID="{91857EAC-BED5-41C3-90F1-6076A0475CD2}">
+							<ChildrenList>
+								<Action Name="" ID="{047B35CD-4269-45A9-9139-B813CE6E4C46}" ShortID="971251930">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{A9E81F20-40A5-4F20-8C6B-B4F75CB6D12D}" ShortID="494818749">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{4FCF6422-2838-4FDE-83F1-EFB9430FD74E}" ShortID="844298994">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{4BA0E9C0-9411-49BC-AAC9-7CE2BBAF3C06}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Terricone_FreqSwitch" ID="{8FCEDC8A-9B44-43EE-8DC2-0CDD38CE4BE0}">
+							<ChildrenList>
+								<Action Name="" ID="{290E48F4-80C1-4235-BB4B-5F617AC191D6}" ShortID="140555861">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{8887DFCE-452D-40AE-BAB9-70ABA932DA8A}" ShortID="72890210">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{2B3F581C-197E-4E38-B087-8068662A4D49}" ShortID="966962716">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{8FBEF28F-1204-42C8-9E32-7955A765DC76}" ShortID="266220416">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{884F2A58-D6A7-4EE2-A216-0ECBBB8DCBD5}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Terricone_Off" ID="{8ABE856F-848E-456E-ADE6-3A240B34B198}">
+							<ChildrenList>
+								<Action Name="" ID="{FBF8E3B3-6A21-4011-B35B-65F374261F0A}" ShortID="857977801">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{28F0A057-45EC-447B-920E-06A1567A82EE}" ShortID="792496494">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Terricone_On" ID="{EB91E73F-3AC3-4B42-814A-DAA5E9372323}">
+							<ChildrenList>
+								<Action Name="" ID="{B6DA5AAF-C391-4CAA-BDB2-2ECABAD706C2}" ShortID="551416650">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{698D92DE-8790-40F7-B694-876897D95F49}" ShortID="300821625">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F348AC47-239A-4BBA-8B3B-EB0FA187B5E4}" ShortID="234300052">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{7308C945-4F24-49F6-9466-70E8772A17C2}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Sultansk_FreqSwitch" ID="{6A99564D-62B7-4F54-8F6C-B06CEC93CDFD}">
+							<ChildrenList>
+								<Action Name="" ID="{14E56CF7-8E1B-440E-B12F-A5FDDA234F83}" ShortID="863399749">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{3D1979D7-4E4D-4A38-A97C-BB3E0E8FABA6}" ShortID="28239894">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{118B76DE-0FF6-473F-AAC3-D3DF76014CFA}" ShortID="540785249">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{37B2AB03-D72A-43C5-A757-278CF447832B}" ShortID="358610453">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{641C0B00-0B22-4EC0-BAB9-08576D62606C}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Sultansk_Off" ID="{A713174A-AAC1-4B2C-93AA-416132C1E2FD}">
+							<ChildrenList>
+								<Action Name="" ID="{40B88798-C6FC-4E9D-8B0A-08D7FE9FE87B}" ShortID="728166717">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F1F5F486-65DD-40F8-9B1B-BC0D27CB52AE}" ShortID="16152501">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Sultansk_On" ID="{82D16373-9E64-4977-85E8-2319462FFB63}">
+							<ChildrenList>
+								<Action Name="" ID="{A3FD4B28-9AA9-4E5E-A933-DB5FE341246E}" ShortID="290567536">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{3B934E01-36FF-4465-88F2-9D40B6CEBF12}" ShortID="599463802">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{C6BD434A-C28E-4E01-93A4-BF7A6848DFC5}" ShortID="50509998">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{F353CB3D-7E81-4C6D-AE58-7422437BF56E}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Yanov_FreqSwitch" ID="{D4420484-6481-400E-A0FB-B4D51284458A}">
+							<ChildrenList>
+								<Action Name="" ID="{B118BC3E-D8D0-4E97-88F0-35D666F7C64E}" ShortID="43693227">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F7122AD5-3DB2-4159-B5E7-BD5BEF5E8B31}" ShortID="110749372">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_CorpusDiogtya" ID="{A1F679BC-20C4-4481-9E06-688005894F3B}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B52423D1-8DFB-4B4E-A6A6-3E9ADE7BBFB5}" ShortID="905321215">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_CorpusDiogtya" ID="{A1F679BC-20C4-4481-9E06-688005894F3B}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{5FB84731-5E9A-410C-9FE1-F9A4B5BBDC22}" ShortID="452066235">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{96AF0A84-BC8C-4040-B80F-8D9824199352}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_CorpusDiogtya" ID="{A1F679BC-20C4-4481-9E06-688005894F3B}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Yanov_Off" ID="{B9F2C817-E032-40FA-A319-58F90CA01D71}">
+							<ChildrenList>
+								<Action Name="" ID="{CE8A5F75-2583-4A60-B66C-ACEF370B3C60}" ShortID="648432767">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{07956E22-90D0-43A1-AA87-6CA8B90C13F0}" ShortID="888671594">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_CorpusDiogtya" ID="{A1F679BC-20C4-4481-9E06-688005894F3B}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Yanov_On" ID="{30AA7833-82E6-49D7-A43A-A0201BAFF478}">
+							<ChildrenList>
+								<Action Name="" ID="{B7F9F49D-590F-4180-B91B-10DF39CE9D38}" ShortID="112834465">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{84352A20-3A47-40F0-8E8F-C1F8B8090497}" ShortID="675868598">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_CorpusDiogtya" ID="{A1F679BC-20C4-4481-9E06-688005894F3B}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{DCB4E42E-3D98-45CF-9F3F-882644CE91D2}" ShortID="850250535">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{452BBA95-1784-40ED-966A-8D4672D02DA6}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_CorpusDiogtya" ID="{A1F679BC-20C4-4481-9E06-688005894F3B}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Malachite_FreqSwitch" ID="{5BAD4220-7354-4733-A59D-20157B3E81E0}">
+							<ChildrenList>
+								<Action Name="" ID="{D90C9237-9287-4845-AD6A-FEAD959E2D3D}" ShortID="1069895287">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{90C6BCC4-6E25-43CA-A420-06D89EC255B0}" ShortID="998655322">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{E3B03705-2979-498C-B513-914CEA1DE4FA}" ShortID="1054414919">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{E064E3BA-EC95-4A4A-961B-1A25E5B273AC}" ShortID="440122339">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{1BE19015-359C-48BD-8EC4-6D97A688DF48}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Malachite_Off" ID="{159DB2B5-440B-4980-A4E6-6C927E7CE188}">
+							<ChildrenList>
+								<Action Name="" ID="{0CE867BC-9AD4-45EA-A33E-E4BF31DCCAE0}" ShortID="282706965">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{99516E5B-3021-429E-A3F9-1B2A015C8E30}" ShortID="257271330">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Malachite_On" ID="{42822BA6-BC77-4AF5-8DE7-C0E3A1C97228}">
+							<ChildrenList>
+								<Action Name="" ID="{E9FA52A0-78CF-4B37-AE73-4695098F2994}" ShortID="1041819300">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{31213B89-3ACB-411A-9C0D-9BD50E7ED040}" ShortID="89957042">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{5ABF537F-54D6-4E07-AC19-47B7C9ED48AB}" ShortID="622286229">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{C92A2286-62F6-42AE-8D2A-5A0C783FD861}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_ShevchenkoDefault_FreqSwitch" ID="{C326918E-8B0B-4AA0-AD03-B7A96F1E55FA}">
+							<ChildrenList>
+								<Action Name="" ID="{4F7202E6-F98A-41AC-BA8D-C059E8390A93}" ShortID="228216558">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{12C15F0C-43D3-49DE-A5E4-63F85C74E8CF}" ShortID="142213064">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{85CDCCE8-CFC6-487E-9364-187E198FF7F2}" ShortID="307142906">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{CED4FD72-06B0-4D27-B108-8AA22CE15E36}" ShortID="988187031">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{784E5158-EC0C-41BE-BFC7-3BEE48197E81}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_ShevchenkoDefault_Off" ID="{576C6B47-D603-447B-8D27-E18ADF6CC659}">
+							<ChildrenList>
+								<Action Name="" ID="{99BB936F-EBAF-43A4-AED6-B26214792B30}" ShortID="297244881">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B6AF03CF-0F94-486B-8212-B166E648F6D9}" ShortID="941626119">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_ShevchenkoDefault_On" ID="{3F833D6D-97F2-4CDE-B8ED-B74CC40DD7F9}">
+							<ChildrenList>
+								<Action Name="" ID="{872CCA5D-C69B-4333-9163-B31CFE203564}" ShortID="896602026">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{1FDB17FC-57F4-425F-84B7-60887753E046}" ShortID="168606937">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{9BFFFA32-68D5-4EC5-AE30-0602D1FB5407}" ShortID="405096743">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{C191104C-07CF-42EA-8BD8-F2D4A99F52E7}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_ShevchenkoAbandoned_FreqSwitch" ID="{EB67241B-8160-4FE0-AA1F-B519FB410F77}">
+							<ChildrenList>
+								<Action Name="" ID="{51CDE58D-07BA-42C9-80C0-050060B808EF}" ShortID="1027940764">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{361C350C-E01E-45C4-8ABC-B1218AF034A7}" ShortID="25295843">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{4CC0D889-C7C3-4FC6-A85A-E918C1EAE46D}" ShortID="385193970">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{88CF6720-F16D-4C8A-8184-95111BBC0510}" ShortID="489720972">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{BA9A40A4-E4BF-41F1-978D-FD2536E883D2}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_ShevchenkoAbandoned_Off" ID="{7DA8C333-2ABD-4597-83A4-6DB39DD49282}">
+							<ChildrenList>
+								<Action Name="" ID="{540E3AA0-907A-453F-B8DF-7FDB8378448E}" ShortID="285858183">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{A9A784E5-1355-4F26-B692-099A8116713A}" ShortID="890371345">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_ShevchenkoAbandoned_On" ID="{6353930A-BD09-4AFC-A3D8-4D67CCB7A434}">
+							<ChildrenList>
+								<Action Name="" ID="{938498CA-6AAD-4076-BEAC-52E0A7A21B55}" ShortID="687757589">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{BBACDC41-FC12-47E3-8F46-130863A4C4AB}" ShortID="68637703">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{8630B685-D7FB-405D-8B68-A82E8A7623EA}" ShortID="725089651">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{57808233-1093-433A-84EC-93E5986F261F}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_ChemicalFactory_FreqSwitch" ID="{6960B6E4-FC23-4684-B20B-4DD4728E0F24}">
+							<ChildrenList>
+								<Action Name="" ID="{D7E973A8-754B-4527-92C1-299F82FCDEB6}" ShortID="1012833419">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{6182DCA5-34DD-4F8A-BF3F-5EC701856550}" ShortID="798648738">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{3FAA844B-464C-44CF-A03F-6313A5E8AC25}" ShortID="243219847">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B5B0066C-B26C-43F6-95B4-2237E8DB9E76}" ShortID="345255076">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{265D6E37-0D28-42C3-BC46-DF0FD97DA23F}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_ChemicalFactory_Off" ID="{10EF0057-69C4-472A-A1F6-D3683744F828}">
+							<ChildrenList>
+								<Action Name="" ID="{DDC221BC-C05F-44B4-A714-10F5392BD3D9}" ShortID="409319536">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{15EF0C77-A581-4F72-8BA8-AA922B4D1537}" ShortID="745631119">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_ChemicalFactory_On" ID="{25BBBA01-4263-444F-838E-9C34E0312EFD}">
+							<ChildrenList>
+								<Action Name="" ID="{F914A489-2C61-4F0A-ADC5-912067594BCD}" ShortID="842990730">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{9D58D846-874B-4E46-8C28-70999B113A15}" ShortID="382267507">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{2205EA3C-7780-42D9-AD18-97A6D8D320E6}" ShortID="1014299513">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{6C7F5486-34FD-4F4A-B394-D57BFE0078D3}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Obochina_FreqSwitch" ID="{EA48AC81-B8F1-4B28-9A22-7B90F7B70F53}">
+							<ChildrenList>
+								<Action Name="" ID="{D6C5A453-474A-4737-9EFA-5F4C0DBFFCE4}" ShortID="684524923">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{BF02FD17-E021-48AE-839D-13F83ED57F90}" ShortID="260957638">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{1753875D-5A67-41B2-9FA9-30EC126E6F99}" ShortID="678447784">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{A34724DB-0017-48CD-9CB9-188FAA8A0D5E}" ShortID="729395035">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{225F821D-B1EF-467B-82C7-C58DE76B40EB}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Obochina_Off" ID="{084D3DAF-EABD-41E4-9986-D1F5E7C1864C}">
+							<ChildrenList>
+								<Action Name="" ID="{941C78FB-6344-474E-8524-746286A7FE7D}" ShortID="827047662">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{8C1A9DEC-1720-4C81-B9B7-81E7B468B63B}" ShortID="340948500">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Obochina_On" ID="{21F08034-B463-43E1-A435-77EDE4387031}">
+							<ChildrenList>
+								<Action Name="" ID="{FBA7FC2A-0177-41EC-A1D6-7020B59ED4AA}" ShortID="607551485">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{11690DCE-9C39-4484-9B53-6CDD31378D94}" ShortID="895894357">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{C83B27E0-AE08-4891-8976-A6C6CA1D3653}" ShortID="978508187">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{7EF3EEB4-25D7-4F92-9699-F2FACC49FA83}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Icarus_FreqSwitch" ID="{AF7CE8F4-7A26-4CBC-80BE-AF364725121C}">
+							<ChildrenList>
+								<Action Name="" ID="{E087904C-2AD8-480E-9805-0E40EAD30804}" ShortID="983866592">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{88E5C727-1059-41CB-8E1D-F8B54C36B750}" ShortID="797874616">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{23228A1F-3BED-46DE-B675-7507F4BAD384}" ShortID="695612855">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{47A4EB44-BDB7-4F2B-A507-E44A2F923033}" ShortID="1005626565">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{92AEC524-1802-44AC-8A2C-25299379D615}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Icarus_Off" ID="{40DE2E68-8302-4CBE-91F9-61058093576E}">
+							<ChildrenList>
+								<Action Name="" ID="{F3A9E510-1393-465A-BADF-A957894899B7}" ShortID="838741971">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{6F628F76-391E-49FB-9AF7-6E031098689E}" ShortID="1026470581">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Icarus_On" ID="{81E52A31-0A5A-49B2-B586-D6E600A140BC}">
+							<ChildrenList>
+								<Action Name="" ID="{E8224C9E-AB7D-45F1-A95B-553C097592D2}" ShortID="183882853">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{59B74870-0DF5-4485-A69C-CF4CBEC9D95D}" ShortID="914502661">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{EFBB2B31-7197-4D10-BF74-E1AE804232A6}" ShortID="889472104">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{875B0492-3C87-4544-B17A-5020CF867BA7}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
+				<Folder Name="Factions" ID="{0AC0854E-1186-45D3-91D0-89E13FB54FA2}" ShortID="717484473">
+					<ChildrenList>
+						<Event Name="SFX_RadioTable_Faction_Bandits_On" ID="{D49BAEAF-46A9-408D-9D4C-20AFA5BA28F5}">
+							<ChildrenList>
+								<Action Name="" ID="{06752556-F94A-44CD-8F87-DDED1C3D8E6E}" ShortID="254072967">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{943B847F-0EA2-4143-9057-7A68105DC4F7}" ShortID="1000157842">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{305EDAA7-BC12-4089-980D-90751FADE6A5}" ShortID="273739781">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{1C0BE155-C78F-4D2F-B42E-20F78174EAB3}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Bandits_Off" ID="{0C30F697-8CD5-4713-94B4-43E50E779305}">
+							<ChildrenList>
+								<Action Name="" ID="{38F7F33A-2B52-4944-AE0E-B1345999621D}" ShortID="632186584">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{E60E754D-E969-4693-BB82-4C0363B8D20F}" ShortID="745051436">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Bandits_FreqSwitch" ID="{0EB2891A-147D-434D-BCBF-20CBC812BD2A}">
+							<ChildrenList>
+								<Action Name="" ID="{232E4382-9008-4773-941F-6E7AFCDA3B87}" ShortID="519882924">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{2DF9DC6B-0947-454E-82DF-F0E2C1339E90}" ShortID="706225850">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{EA9C0326-5E3B-4863-8434-B03EAD564445}" ShortID="289449549">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{E75C5419-9F27-4E36-A4F1-2C0C19DBA888}" ShortID="901925215">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{10F1EF2C-5A33-4F19-AA75-8D0591794BD2}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Mix_FreqSwitch" ID="{8030B543-0ABB-4A5E-8CFA-90FFAFCAE7EC}">
+							<ChildrenList>
+								<Action Name="" ID="{02D0911C-A3E4-4B34-B227-F6CA3E482B0D}" ShortID="717569892">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{AEEBDC72-DAAD-4191-89CC-6FDE1AB8D572}" ShortID="538553445">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{17C48A7A-CA41-476C-A29A-D511A4BD1298}" ShortID="674927626">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{484F001E-786F-4038-91D1-ACA66E150FFD}" ShortID="530112586">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{425369E3-0A2D-4AB0-8ED6-B851D3B2FB6B}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Mix_Off" ID="{46B35A3C-0B49-4B1B-8EED-0DF536C2CA31}">
+							<ChildrenList>
+								<Action Name="" ID="{FCE43941-8253-4533-99C1-17DD85E6EBB0}" ShortID="742187231">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F6321217-E2DA-4877-BE68-EC774B086A5E}" ShortID="779833146">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Mix_On" ID="{BC6EECFE-B8C4-478E-8955-B462DDB19DC5}">
+							<ChildrenList>
+								<Action Name="" ID="{67B828A8-3981-486E-A351-25AAEB3E1913}" ShortID="1047622875">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B08AEAAB-7921-4465-A6A5-C3F80D2FEA73}" ShortID="685490050">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{2A65E0E5-A1DA-4A0C-8F2A-9C4CFB3B543D}" ShortID="840490105">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{9AC51FDB-DDE9-4E96-9269-9CA79F7EBF87}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Loners_FreqSwitch" ID="{05670143-2F8C-4FFE-B4B6-E76CEDF6345E}">
+							<ChildrenList>
+								<Action Name="" ID="{E19013F5-CC42-488A-99C3-5DB7B58EC5F5}" ShortID="10133343">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{9BD2F639-7D35-4226-801D-D8D30F576B80}" ShortID="527899024">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{695EB768-A522-49EC-93C6-1811C5C0F798}" ShortID="540100425">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{EFA04BAA-3FC9-43C2-BA50-6E77EDD28F3E}" ShortID="432643623">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{7727A75A-DCC0-4EFD-9530-5A1547CF3FB2}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Loners_Off" ID="{403D7960-20F3-46D5-B170-ADEB053D1A5F}">
+							<ChildrenList>
+								<Action Name="" ID="{0587BA67-4EEF-4773-8DD7-E55AA5C2D3C7}" ShortID="961319144">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{143DD061-AFC2-4AC5-9A98-F90E65329C3A}" ShortID="755369205">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Loners_On" ID="{DEF45D09-5B8B-4609-A9D9-603050C2AAB2}">
+							<ChildrenList>
+								<Action Name="" ID="{89281C24-D2BF-4472-81B1-4D84297234B1}" ShortID="681044660">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{6B849193-BD35-4716-9020-428DF372F33C}" ShortID="348117580">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{0CE27FFC-7611-4F22-9948-461F0535759C}" ShortID="92999921">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{407B428C-64D4-46B3-A0FC-93535FF733AC}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Duty_FreqSwitch" ID="{20A9244D-4481-493D-B584-922E24226884}">
+							<ChildrenList>
+								<Action Name="" ID="{65B6B983-65D1-4A1B-A7D8-086AE4C5A85E}" ShortID="988317435">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{80E5CBBE-D550-4C70-ABFD-A9E5B64E1DF6}" ShortID="687479250">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{0BDF6771-E3E2-4C54-8BEF-7AB55486D191}" ShortID="171855711">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{5C2BEE30-8EE8-4D2C-B094-6A1123B14646}" ShortID="32541827">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{1E386EB1-BDB4-4E38-95EE-78DD01174941}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Duty_Off" ID="{E2E1265A-445B-492F-8EA4-EB9060A1F641}">
+							<ChildrenList>
+								<Action Name="" ID="{0F68CEB9-8C46-4C4C-9C44-1F26E9EC24AB}" ShortID="322613214">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{AD5DC3B7-4C93-435A-80D7-ADF2DA7D5BA0}" ShortID="564250370">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Duty_On" ID="{1443B99A-06AF-496D-A11E-9176F43110A2}">
+							<ChildrenList>
+								<Action Name="" ID="{12D74765-BA8E-4CA6-A82A-901870845818}" ShortID="985650724">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B7F5F5FB-6E3A-4188-8ED5-F4825C349E37}" ShortID="840348985">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{3784444F-2CE2-456D-BB41-CAA8EFA91230}" ShortID="114925324">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{AEB3BCD8-57BA-4BC5-9701-CBB23AD4065A}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Freedom_FreqSwitch" ID="{63EF8B41-F480-42A1-957A-FEC9CCBC8D84}">
+							<ChildrenList>
+								<Action Name="" ID="{37A90C8D-CA5A-472E-BF39-6083035126DE}" ShortID="320185917">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{2788CA47-C768-4963-B9E6-2F7CB79E2E8B}" ShortID="904108379">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{7588A9B9-103B-4792-85ED-B70CBE6F7E5A}" ShortID="464534856">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{E83DE25E-85AE-4853-82BA-18806309679A}" ShortID="837221767">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{8D176960-8C97-4EBE-8EB1-AA3F2F754815}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Freedom_Off" ID="{05F71DDB-D192-491E-A947-A44F8B8CFB78}">
+							<ChildrenList>
+								<Action Name="" ID="{8B92282E-498B-4ADB-B9B3-D30B8FE1DEDF}" ShortID="861994316">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{6F2A708B-46C3-45FC-8485-2961FB89F804}" ShortID="573258432">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Freedom_On" ID="{0D2A248A-DBE7-4449-8CA5-63A215833F74}">
+							<ChildrenList>
+								<Action Name="" ID="{0ED3B5C5-4817-4FAC-9A31-45E203AB67E4}" ShortID="231303260">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{490E2C77-5F95-43AB-B4B8-533807E95090}" ShortID="427505827">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{FAC394F0-A6DD-4CC3-B25B-A842ED7B51E4}" ShortID="629329635">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{14C4A626-BDB9-433C-9055-45883D6D3F6A}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Army_FreqSwitch" ID="{3C617317-91FB-4427-B39D-C6CF89FC1F4C}">
+							<ChildrenList>
+								<Action Name="" ID="{4532EBE4-CA01-4C0F-AAA0-C14A014993E1}" ShortID="661733290">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{A2052FE6-A86E-4560-8056-DAE66E32724C}" ShortID="529488780">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Army" ID="{8846CAB2-6703-4DD1-917C-8144DD2336C4}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{FAED8EEB-0B5B-4BC1-B6C3-339FE51071F3}" ShortID="848577028">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Army" ID="{8846CAB2-6703-4DD1-917C-8144DD2336C4}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{97D6A116-60F3-48C6-A9A3-3C44D5C29A3C}" ShortID="1003221906">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{0B90CFB7-F2E3-4BF2-A0CF-796650F375A0}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Army" ID="{8846CAB2-6703-4DD1-917C-8144DD2336C4}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Army_Off" ID="{1603BA63-8A68-4FE3-8DFE-CF9B938FDA70}">
+							<ChildrenList>
+								<Action Name="" ID="{4AB56141-3D62-4C0C-88DA-0A3DA199087C}" ShortID="1052643167">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{095F313A-4DDE-458C-BF1A-C1F3E679D3B7}" ShortID="812442836">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Army" ID="{8846CAB2-6703-4DD1-917C-8144DD2336C4}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Army_On" ID="{34C2C75E-DF65-47F5-BC71-C3583AEA4489}">
+							<ChildrenList>
+								<Action Name="" ID="{9AD40A1A-8300-4941-A942-AC2DE0F9619E}" ShortID="671765435">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{998D32F3-49DD-4AB6-A2F1-778AE8B65323}" ShortID="65865148">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Army" ID="{8846CAB2-6703-4DD1-917C-8144DD2336C4}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{0C277F42-41CD-4735-BD1B-06A767400FC5}" ShortID="456526464">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{E2C2F114-6B7D-4B52-8730-065C8F65FD23}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Army" ID="{8846CAB2-6703-4DD1-917C-8144DD2336C4}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Voentorg_FreqSwitch" ID="{F1429A49-1672-47DE-8F82-C1E69D7E8B6C}">
+							<ChildrenList>
+								<Action Name="" ID="{5FBF942B-B38D-44C9-9430-FDE5883DEB40}" ShortID="178964963">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{AF91F006-5727-4E33-9A79-34407670E1BE}" ShortID="978890895">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Voentorg" ID="{397EB032-F208-4D07-B4F1-B79ACE4E2732}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{011B80D6-B6BA-4D36-A135-F3703820722E}" ShortID="843299516">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Voentorg" ID="{397EB032-F208-4D07-B4F1-B79ACE4E2732}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{52D19725-00CC-4C3B-9590-9B71A24C7C69}" ShortID="630327950">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{C2387D7C-7EA1-4FC8-BBEE-525490A7C049}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Voentorg" ID="{397EB032-F208-4D07-B4F1-B79ACE4E2732}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Voentorg_Off" ID="{50DE3EF7-AFBC-4941-8AD7-C2A95B626EDD}">
+							<ChildrenList>
+								<Action Name="" ID="{5431816C-0383-4330-B361-5FAAB83EF6E0}" ShortID="80192244">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B9568FC5-BEA3-499A-ACA3-717FC18663ED}" ShortID="190451486">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Voentorg" ID="{397EB032-F208-4D07-B4F1-B79ACE4E2732}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Voentorg_On" ID="{B1033013-9D72-4249-A6B6-2BFF0FC9C25F}">
+							<ChildrenList>
+								<Action Name="" ID="{2D911C49-D944-4AE9-AE4B-314EC8CB9FF3}" ShortID="833262189">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F45296B1-EF21-47A5-947C-AF6FA74A8CA6}" ShortID="808187240">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Voentorg" ID="{397EB032-F208-4D07-B4F1-B79ACE4E2732}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{D0C57263-619F-4534-A75D-73BFE3AE7937}" ShortID="516493557">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{ACBD3E7A-72C6-468E-8C47-6B8A6830DFF4}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Voentorg" ID="{397EB032-F208-4D07-B4F1-B79ACE4E2732}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Svora_FreqSwitch" ID="{5D094C5F-9E4F-43C8-9675-250CDD9750BD}">
+							<ChildrenList>
+								<Action Name="" ID="{7D3EB08C-CFD8-4E54-BCB0-48782D975424}" ShortID="381872992">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{0B7043CE-136D-4B5C-BF48-A3D060D18238}" ShortID="835479629">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Svora" ID="{F8DFB71E-0F6D-4F1A-A943-32372573A269}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{21803102-FF5F-453D-A4DD-FD3D3EC8A065}" ShortID="332975510">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Svora" ID="{F8DFB71E-0F6D-4F1A-A943-32372573A269}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{053313BE-EA90-446F-B785-86E4037BD613}" ShortID="996899633">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{82B7FA82-A75D-4312-A43C-984F3181CB54}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Svora" ID="{F8DFB71E-0F6D-4F1A-A943-32372573A269}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Svora_Off" ID="{85BE8A3E-D6C1-474A-9D1A-2A2F83C964DD}">
+							<ChildrenList>
+								<Action Name="" ID="{CA61421B-EADE-4CEF-8FB4-E7FCEF64866D}" ShortID="745235965">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{4CE42A16-968E-4192-8B79-03DD793E8CD2}" ShortID="404165194">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Svora" ID="{F8DFB71E-0F6D-4F1A-A943-32372573A269}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Svora_On" ID="{D1565A14-A09E-4C16-9885-1CCEBF398EBB}">
+							<ChildrenList>
+								<Action Name="" ID="{CFC02A51-1184-4423-B848-D0B4B4F86DC4}" ShortID="679920178">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{A6B3BEBA-5DD8-490E-B096-676DAF7BD375}" ShortID="909982224">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Svora" ID="{F8DFB71E-0F6D-4F1A-A943-32372573A269}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B700F195-9019-474F-A000-89B9C9F3D1A7}" ShortID="531725909">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{7983C789-AF70-47E0-96FE-B889D4BA8F97}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Svora" ID="{F8DFB71E-0F6D-4F1A-A943-32372573A269}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Mercenaries_FreqSwitch" ID="{3C12A3C1-3E3E-457B-9B6B-D8D5851D6D6D}">
+							<ChildrenList>
+								<Action Name="" ID="{D40BDFB8-E09E-4631-A9CE-D545D472D089}" ShortID="699841217">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{E365A24B-BFDA-4F0A-931C-75E43BD97282}" ShortID="312075397">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{A6DF88A8-1CB7-4B7B-A54F-8F6006329E60}" ShortID="970017887">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{1280695D-85BA-43F6-8E12-68D9A4AA326D}" ShortID="127628866">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{659C3B59-2D7F-4D9E-B0A1-81D6EA50F30F}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Mercenaries_Off" ID="{39C6B5C7-94AA-411F-A32C-6B12E16E44E9}">
+							<ChildrenList>
+								<Action Name="" ID="{5C810680-6F89-450D-B53D-6EC163A63C8B}" ShortID="582805232">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{78AAA15B-896A-47E0-A887-4D289129BFD6}" ShortID="969813971">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_Mercenaries_On" ID="{B740D912-B59F-4262-B6F2-62F2566308A4}">
+							<ChildrenList>
+								<Action Name="" ID="{40F91F5F-49D4-4CCB-AA76-3BC0DCD66688}" ShortID="145970912">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B8623FB2-C23E-4A6B-ACC5-9AA971821B31}" ShortID="49540217">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{397375CF-A3A9-4407-8EC0-71A94D1AA239}" ShortID="977756163">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{FA0D0FB2-4CD0-4074-B958-A3D7D9D26357}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_AbandonedLocation_FreqSwitch" ID="{77226A12-ACEC-4348-B896-2FA33EF43CC6}">
+							<ChildrenList>
+								<Action Name="" ID="{CB33B7F3-FD8C-4E51-9245-44010031CA63}" ShortID="771951542">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{5B51626B-AE49-4805-B7D4-7A6CEE9DC6B6}" ShortID="376201391">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{AAF3520B-73D2-4E5D-A017-F614FDAB58FA}" ShortID="47214485">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F971C64B-7302-4E2D-A42D-BBBB851D0CE0}" ShortID="509192155">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{A3A362B5-138C-4E9B-B4C0-BADEAC7AB551}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{54FFC7B3-6A2B-468B-B396-621C560A8BF8}" ShortID="108274081">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Interferences" ID="{D47E7919-8D1B-42AC-B6FE-F81102D6F760}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{726E2FC0-3AE8-4C92-BB7C-A1DBF139DF0D}" ShortID="475505011">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Interferences" ID="{D47E7919-8D1B-42AC-B6FE-F81102D6F760}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{DD08FFBA-3A79-4CB9-A33E-B91C89315C4D}" ShortID="856798835">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Low" ID="{E674498F-48C4-497F-B3C6-5B9B72A1D3AB}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F0204422-4B43-4614-85CA-3FEA032EA074}" ShortID="323288904">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Low" ID="{E674498F-48C4-497F-B3C6-5B9B72A1D3AB}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_AbandonedLocation_Off" ID="{5BB70DB1-1EE4-419E-9070-3A462EF8F125}">
+							<ChildrenList>
+								<Action Name="" ID="{583357A4-FF86-486A-BEC6-BF7C1AE89EDA}" ShortID="933049597">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{14E5A935-6273-4FE5-B11D-8825AF6E778A}" ShortID="214340303">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{04FB9574-1763-48D7-8640-0FD4352D2C90}" ShortID="830714773">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Interferences" ID="{D47E7919-8D1B-42AC-B6FE-F81102D6F760}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{3DEA8F89-8D1A-4551-9CD1-51C4EA609912}" ShortID="116604239">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Low" ID="{E674498F-48C4-497F-B3C6-5B9B72A1D3AB}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Faction_AbandonedLocation_On" ID="{18A71E85-FBE3-4423-9FD2-D9E894462E3B}">
+							<ChildrenList>
+								<Action Name="" ID="{18AE149C-808C-4F71-A42A-B11DF58A0B01}" ShortID="654270476">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{09DC911C-5F9A-4D4D-8D0C-419795EFCEC1}" ShortID="445129934">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F36B9DCC-301F-4C1F-B665-9378250B6EBB}" ShortID="547864938">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{DFBEF2AA-9519-4530-9BDF-B3EE4BDCCDDA}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="80"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B29DF69B-30F3-4EFD-ABEA-5F605E4502D0}" ShortID="105035727">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Interferences" ID="{D47E7919-8D1B-42AC-B6FE-F81102D6F760}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{4C93B065-1A85-4043-AC32-2C772808092C}" ShortID="887876482">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Low" ID="{E674498F-48C4-497F-B3C6-5B9B72A1D3AB}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
+				<Folder Name="Unique" ID="{5815573E-4737-46E2-95E3-E7951E90C9BC}" ShortID="34075481">
+					<ChildrenList>
+						<Event Name="SFX_RadioTable_Sidorovich_On" ID="{D44890A1-1A9C-4972-8F2D-07E0CE5E0FA7}">
+							<ChildrenList>
+								<Action Name="" ID="{B9E6C247-86A2-4438-A607-9CAE6DEBB85F}" ShortID="56332814">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{5A84F3DF-93D6-4615-AE0C-1EB0CE1F408A}" ShortID="762582292">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Sidorovich" ID="{012608A9-8637-4207-AA26-52EC72E2FA07}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{19581DC5-B7C4-4DC3-B443-E7D6CC25CA52}" ShortID="270457562">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{EF9B78AC-C89A-46A3-9E0B-6F178485EFBF}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Sidorovich" ID="{012608A9-8637-4207-AA26-52EC72E2FA07}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Sidorovich_FreqSwitch" ID="{1A1189C9-6C45-432A-B842-1B1E647F3B62}">
+							<ChildrenList>
+								<Action Name="" ID="{9FEE51AC-E769-4E1F-9873-E5122BEF340D}" ShortID="631673074">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{1EE450F0-4C3E-4889-989D-F524F729CB4B}" ShortID="854215632">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Sidorovich" ID="{012608A9-8637-4207-AA26-52EC72E2FA07}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{6B71E67F-5D53-4CFB-B288-EBED5AA35E66}" ShortID="1044789225">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Sidorovich" ID="{012608A9-8637-4207-AA26-52EC72E2FA07}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{448A05FC-764B-4EAC-92E5-AADED6724FF1}" ShortID="495146431">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{89C7F45B-382F-4816-B093-94296A649267}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Sidorovich" ID="{012608A9-8637-4207-AA26-52EC72E2FA07}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Sidorovich_Off" ID="{92D892EE-1F19-47C1-8EA2-FEE6058FA2F8}">
+							<ChildrenList>
+								<Action Name="" ID="{0E061C45-2992-4426-B083-EE98579F3BC6}" ShortID="355391848">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F3521363-5830-4F7D-818D-4CDC4C7B4E7D}" ShortID="186897150">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Sidorovich" ID="{012608A9-8637-4207-AA26-52EC72E2FA07}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_TihijRoom_FreqSwitch" ID="{9289EAAD-68E5-4B82-8FDD-61DA2FF77E1B}">
+							<ChildrenList>
+								<Action Name="" ID="{9A9BB66E-BF4B-4523-9B02-629693D1CFB7}" ShortID="388029134">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{60C8F938-0E6B-432D-ACA2-71828EAF2C68}" ShortID="1004995893">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{3A43B9BA-B817-424F-A246-7C8EB23191A7}" ShortID="594977964">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{056A60D4-38CD-40AB-848F-0D69D401BD88}" ShortID="568659848">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{AF5BC666-BA29-4C8E-991F-13A359170959}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_TihijRoom_Off" ID="{2D676C9E-84A3-4F4C-98BA-65F39F7BF08A}">
+							<ChildrenList>
+								<Action Name="" ID="{33156151-54D6-489C-973B-1E98D9B141B3}" ShortID="104796063">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{69A98C35-905C-416E-B231-386EA061455D}" ShortID="39112004">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_TihijRoom_On" ID="{2EDBFA44-FCDE-4B35-AEDF-7437A94B6653}">
+							<ChildrenList>
+								<Action Name="" ID="{20077654-A73E-4AEE-B2D6-3041A1C150A5}" ShortID="487533233">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{10BF1A67-C192-42BA-9178-6B6270F5BE11}" ShortID="134074801">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{8634855B-0F7A-48C6-95D2-3A1A9956BB02}" ShortID="280686761">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{7CF79E9C-9CCB-400B-A953-9CE1760E880A}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_E01_MQ01_Barge_FreqSwitch" ID="{1B8FC83A-A135-4229-B02E-376FA20E7496}">
+							<ChildrenList>
+								<Action Name="" ID="{E1FB4937-E943-457A-BA6F-9BB193C89033}" ShortID="549326693">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{58EDD6B5-96B1-4BB8-A853-2145C5A22034}" ShortID="763185144">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Barge" ID="{652BB105-7C1E-48B0-8330-12D229629C27}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{40D1B64B-3E5B-47A1-854B-76BAB0442074}" ShortID="194869344">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Barge" ID="{652BB105-7C1E-48B0-8330-12D229629C27}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{240D87A3-B0F0-45B2-AC53-1D8DAD80A884}" ShortID="753661330">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{282AAE39-5D76-4DCD-9602-3F3FBC928F04}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Barge" ID="{652BB105-7C1E-48B0-8330-12D229629C27}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_E01_MQ01_Barge_Off" ID="{2DD09611-871E-403B-BC3F-91452554A2B4}">
+							<ChildrenList>
+								<Action Name="" ID="{82235B70-FC2A-42F8-B2BE-B6FF862A22E2}" ShortID="142119621">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{B8391848-9843-41F7-91D5-2AEE099205B7}" ShortID="856621763">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Barge" ID="{652BB105-7C1E-48B0-8330-12D229629C27}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_E01_MQ01_Barge_On" ID="{20BCE29D-9758-4271-A7D5-03D17DE6945A}">
+							<ChildrenList>
+								<Action Name="" ID="{EDC13AA3-A67A-44E9-87C6-19CA37F2F444}" ShortID="700031298">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{55DEFFD4-BAD1-4B11-94C4-F349E2755CF2}" ShortID="877422642">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Barge" ID="{652BB105-7C1E-48B0-8330-12D229629C27}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F7DF8BB8-F9C0-42D3-A03E-6E46A6508C3A}" ShortID="361669916">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{23D807B0-1866-4851-A4DE-37774388C8E3}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Barge" ID="{652BB105-7C1E-48B0-8330-12D229629C27}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Horror_FreqSwitch" ID="{1FF8B498-8A92-4ED8-BC25-AAF95BDB3F86}">
+							<ChildrenList>
+								<Action Name="" ID="{2F89916E-8EB2-4FE8-898C-41BD6702E5B3}" ShortID="125327982">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{5609B78E-405A-4E4C-ADA0-C785895B7189}" ShortID="1050421421">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{5743B7D4-1F2D-4151-8927-721B578B4082}" ShortID="212231675">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{71C2991D-BD63-4043-BA1A-0266E1EEB10C}" ShortID="225841466">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{9BAF15EF-1653-4DAD-B01C-33680E9D31F8}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{C52B7F7A-206F-4658-B578-5B6A57ED7840}" ShortID="297858156">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Interferences" ID="{D47E7919-8D1B-42AC-B6FE-F81102D6F760}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{FA694937-B5A0-4F2B-8D18-04E544533C74}" ShortID="620432070">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Low" ID="{E674498F-48C4-497F-B3C6-5B9B72A1D3AB}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{59F5C08A-C348-4C3C-BD12-5ABFD86BE8AA}" ShortID="32790460">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Interferences" ID="{D47E7919-8D1B-42AC-B6FE-F81102D6F760}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{D0EF70A2-5AB5-4709-8704-6C641791E7CD}" ShortID="354195609">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Low" ID="{E674498F-48C4-497F-B3C6-5B9B72A1D3AB}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Horror_Off" ID="{2933A899-5C60-4052-82A1-E21269782D7D}">
+							<ChildrenList>
+								<Action Name="" ID="{67EB66C9-8DCA-4BFE-8B99-6C07FF93945C}" ShortID="973409021">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{F2F28969-DDFA-44D5-B562-1F23372442AF}" ShortID="892526197">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{464B8D12-8BEE-4BD7-ABE4-24F830DC897B}" ShortID="46325610">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Low" ID="{E674498F-48C4-497F-B3C6-5B9B72A1D3AB}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{839B4FA6-65DB-4CEE-993E-6B2EFBDF2CE7}" ShortID="85584698">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Interferences" ID="{D47E7919-8D1B-42AC-B6FE-F81102D6F760}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Horror_On" ID="{84433378-5BF3-4441-A5B9-4664BC2A7F5F}">
+							<ChildrenList>
+								<Action Name="" ID="{E658462D-F2B2-4640-B9E5-63D32852180A}" ShortID="239476150">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{979FC4B3-275B-4A5A-A489-FD6E36EF808E}" ShortID="300307534">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{ED313343-1554-4078-8F2A-7F0D88FB6E4E}" ShortID="611242260">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{72C17D96-1B07-4542-B49A-11E7C63C73EB}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{C1902145-855B-4C45-BA77-0BC47DFA37CA}" ShortID="926640551">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Interferences" ID="{D47E7919-8D1B-42AC-B6FE-F81102D6F760}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{7FF30365-9463-4099-B0F3-6CEA8D0059A1}" ShortID="612989086">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioSupressor_Loop_Low" ID="{E674498F-48C4-497F-B3C6-5B9B72A1D3AB}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Kazkovy_FreqSwitch" ID="{DEC40992-E653-4832-94D4-F24BEDA8A90E}">
+							<ChildrenList>
+								<Action Name="" ID="{5CD2F720-BB6F-4B98-B207-0CA5B779DD23}" ShortID="685048782">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{7606DF62-7329-4317-95A9-69F4038E5847}" ShortID="640587274">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="FadeOutCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.8"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Kazkovy" ID="{63AE2B83-0379-4F3F-8449-C433F98462F2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{EBA6B937-7AEF-49E3-8C46-965896FA7934}" ShortID="917072011">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeInCurve" Type="int16" Value="0"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.7"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Kazkovy" ID="{63AE2B83-0379-4F3F-8449-C433F98462F2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{03667E09-DB2E-4D5B-998C-FF05F9A3ECC5}" ShortID="724396733">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{618B5E7E-10D4-4330-A72F-F1B972FE9AF6}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Kazkovy" ID="{63AE2B83-0379-4F3F-8449-C433F98462F2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Kazkovy_Off" ID="{ACC1ED40-48DA-4931-83D8-E87E267B88BA}">
+							<ChildrenList>
+								<Action Name="" ID="{47E891C8-1FFA-4CDA-A862-EA0C5DB997CE}" ShortID="357895">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{464ADAFB-1D64-4EC1-BD9D-4EFC3636DAB0}" ShortID="694448504">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="2"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Kazkovy" ID="{63AE2B83-0379-4F3F-8449-C433F98462F2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="SFX_RadioTable_Kazkovy_On" ID="{4A38A56E-497D-49C3-BBF1-0B014BE0F657}">
+							<ChildrenList>
+								<Action Name="" ID="{F430E1DB-309C-4F52-87E5-6824DCB2FD71}" ShortID="874331275">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{9DE9D196-7E5E-48D7-9C6E-65E87413FD53}" ShortID="269378252">
+									<PropertyList>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Kazkovy" ID="{63AE2B83-0379-4F3F-8449-C433F98462F2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+								<Action Name="" ID="{422CEBCF-5B83-4725-A7A0-BD5046E02714}" ShortID="565967860">
+									<PropertyList>
+										<Property Name="ActionType" Type="int16" Value="36"/>
+										<Property Name="Delay" Type="Real64" Value="1"/>
+										<Property Name="SeekPercent" Type="Real64">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{2CBCA646-C627-48F8-A7E0-C5EA0E5C1C5E}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="100"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Radio_Kazkovy" ID="{63AE2B83-0379-4F3F-8449-C433F98462F2}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
+				<Event Name="SFX_RadioTable_Destruct" ID="{5D1C4544-0F5E-4160-BB58-5B7F90B8C554}">
+					<ChildrenList>
+						<Action Name="" ID="{B50ABE41-8194-4880-8060-911D5A1F9F75}" ShortID="728131041">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="S_IO_RadioTable_Destruct" ID="{80D66457-0CE5-4E15-BEF0-3D0CB54991CA}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+						<Action Name="" ID="{F3282E93-93D7-44B9-AA60-CD75EB2FDEC9}" ShortID="656418988">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="2"/>
+								<Property Name="FadeOutCurve" Type="int16" Value="6"/>
+								<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="Radio_Music" ID="{FF050592-AD26-4DD7-81A0-80150CCF5D6C}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+						<Action Name="" ID="{58C17C05-2D36-4B5F-A892-9E46C368F16F}" ShortID="1034647130">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="2"/>
+								<Property Name="FadeOutCurve" Type="int16" Value="6"/>
+								<Property Name="FadeTime" Type="Real64" Value="0.1"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" WorkUnitID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+			</ChildrenList>
+		</WorkUnit>
+	</Events>
+</WwiseDocument>

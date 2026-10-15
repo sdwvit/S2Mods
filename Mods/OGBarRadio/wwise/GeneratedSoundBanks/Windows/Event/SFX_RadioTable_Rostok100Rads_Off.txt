@@ -1,0 +1,14 @@
+Event	ID	Name			Wwise Object Path	Notes
+	917449866	SFX_RadioTable_Rostok100Rads_Off			\S2 Live\Interactive Objects\IO_RadioTable\HubsBars\SFX_RadioTable_Rostok100Rads_Off	
+
+State Group	ID	Name			Wwise Object Path	Notes
+	3866368167	ST_Motion_State			\S2 Live\Motion\ST_Motion_State	
+
+State	ID	Name	State Group			Notes
+	748895195	None	ST_Motion_State			
+	930712164	Off	ST_Motion_State			
+	1651971902	On	ST_Motion_State			
+
+Game Parameter	ID	Name			Wwise Object Path	Notes
+	3743326763	RTPC_AuxObstructionLevel			\S2 Live\World\RTPC_AuxObstructionLevel	
+

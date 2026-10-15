@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SoundBanksInfo Platform="Windows" BasePlatform="Windows" SchemaVersion="16" SoundBankVersion="154">
+	<SoundBanks>
+		<SoundBank Id="177669177" Type="Event" GUID="{D25CAAB6-B752-4764-9E50-1A27711E4934}" Language="SFX" Hash="{ADBC6B93-B1A1-98BC-2E4A-E871650717E5}">
+			<ObjectPath>SFX_RadioTable_Rostok100Rads_FreqSwitch</ObjectPath>
+			<ShortName>SFX_RadioTable_Rostok100Rads_FreqSwitch</ShortName>
+			<Path>Event/SFX_RadioTable_Rostok100Rads_FreqSwitch.bnk</Path>
+			<Media>
+				<File Id="207867893" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_IO_RadioTable_FreqSwitch_01.wav</ShortName>
+					<Path>Media/207867893.wem</Path>
+					<CachePath>5A/{5ACEDB11-D3A7-6323-A3D4-4E5BFCD87D3C}.wem</CachePath>
+				</File>
+				<File Id="405275862" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_IO_RadioTable_FreqSwitch_08.wav</ShortName>
+					<Path>Media/405275862.wem</Path>
+					<CachePath>78/{78FD5884-3873-2E34-F8B1-4240908107B5}.wem</CachePath>
+				</File>
+				<File Id="481835217" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_IO_RadioTable_FreqSwitch_04.wav</ShortName>
+					<Path>Media/481835217.wem</Path>
+					<CachePath>3A/{3A3E5E9E-AC94-7E42-C90F-4A4AA7E7B7ED}.wem</CachePath>
+				</File>
+				<File Id="486685352" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_IO_RadioTable_FreqSwitch_06.wav</ShortName>
+					<Path>Media/486685352.wem</Path>
+					<CachePath>2F/{2FE71E07-DB44-0E91-D46F-46E16EDAF5E9}.wem</CachePath>
+				</File>
+				<File Id="720874598" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_IO_RadioTable_FreqSwitch_03.wav</ShortName>
+					<Path>Media/720874598.wem</Path>
+					<CachePath>AF/{AF9AAA51-7EA6-A1E3-2EE6-B056FBE38A13}.wem</CachePath>
+				</File>
+				<File Id="748205754" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_IO_RadioTable_FreqSwitch_05.wav</ShortName>
+					<Path>Media/748205754.wem</Path>
+					<CachePath>C4/{C47FC1D3-EA02-8AF4-65A0-CF0F22979A68}.wem</CachePath>
+				</File>
+				<File Id="766726920" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_IO_RadioTable_FreqSwitch_07.wav</ShortName>
+					<Path>Media/766726920.wem</Path>
+					<CachePath>C2/{C2E55635-B14F-1E9E-C980-CB859B8A1707}.wem</CachePath>
+				</File>
+				<File Id="853956610" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_IO_RadioTable_FreqSwitch_02.wav</ShortName>
+					<Path>Media/853956610.wem</Path>
+					<CachePath>D3/{D3633CD9-8EE2-B18A-85C7-39DCAAA67CF8}.wem</CachePath>
+				</File>
+				<File Id="1066800979" Language="SFX" Streaming="true" Location="Loose">
+					<ShortName>S2_Live\Addaraya - Gurza Dreaming.wav</ShortName>
+					<Path>Media/1066800979.wem</Path>
+					<CachePath>70/{702CAA00-CF5A-AA15-E440-1D90316F6E26}.wem</CachePath>
+				</File>
+			</Media>
+			<Plugins>
+				<Custom>
+					<Plugin Id="839465121" Name="Parametric EQ (Custom)" ObjectPath="\Actor-Mixer Hierarchy\S2 Live\Interactive Objects\IO_RadioTable\Radio_Music\[Effect Slot [4]: (Parametric EQ)]\Parametric EQ (Custom)" GUID="{0BC9C331-5309-4B16-9239-0471BFECF4F7}" LibName="Wwise Parametric EQ" LibId="6881283"/>
+				</Custom>
+				<ShareSets>
+					<Plugin Id="803610548" Name="RadioTable_Distortion" ObjectPath="\Effects\S2 Live\Interactive Objects\Interactable Radio\RadioTable_Distortion" GUID="{E67AD567-12E2-4720-ACA5-B75025BAF84E}" LibName="Wwise Guitar Distortion" LibId="8257539"/>
+					<Plugin Id="2506096908" Name="RadioTable_Flanger" ObjectPath="\Effects\S2 Live\Interactive Objects\Interactable Radio\RadioTable_Flanger" GUID="{111DC8E4-73D9-4DB7-9F79-79139DF153B1}" LibName="Wwise Flanger" LibId="8192003"/>
+					<Plugin Id="4047341555" Name="RadioTable_EQ" ObjectPath="\Effects\S2 Live\Interactive Objects\Interactable Radio\RadioTable_EQ" GUID="{97FD71C3-74A4-44CC-98B9-B5798F407291}" LibName="Wwise Parametric EQ" LibId="6881283"/>
+				</ShareSets>
+			</Plugins>
+			<Events>
+				<Event Id="177669177" Name="SFX_RadioTable_Rostok100Rads_FreqSwitch" ObjectPath="\Events\S2 Live\Interactive Objects\IO_RadioTable\HubsBars\SFX_RadioTable_Rostok100Rads_FreqSwitch" GUID="{D25CAAB6-B752-4764-9E50-1A27711E4934}" MaxAttenuation="6220" DurationType="Infinite">
+					<MediaRefs>
+						<MediaRef Id="207867893"/>
+						<MediaRef Id="405275862"/>
+						<MediaRef Id="481835217"/>
+						<MediaRef Id="486685352"/>
+						<MediaRef Id="720874598"/>
+						<MediaRef Id="748205754"/>
+						<MediaRef Id="766726920"/>
+						<MediaRef Id="853956610"/>
+						<MediaRef Id="1066800979"/>
+					</MediaRefs>
+					<PluginRefs>
+						<Custom>
+							<PluginRef Id="839465121"/>
+						</Custom>
+						<ShareSets>
+							<PluginRef Id="803610548"/>
+							<PluginRef Id="2506096908"/>
+							<PluginRef Id="4047341555"/>
+						</ShareSets>
+					</PluginRefs>
+				</Event>
+			</Events>
+			<GameParameters>
+				<GameParameter Id="262290038" Name="RTPC_Distance" ObjectPath="\Game Parameters\S2 Live\World\RTPC_Distance" GUID="{C00EE1A1-EF0A-48C9-865C-10F332CD78E3}"/>
+				<GameParameter Id="1089293617" Name="RTPC_SideChain_AV" ObjectPath="\Game Parameters\S2 Live\Sidechain\RTPC_SideChain_AV" GUID="{33ECE6CF-C665-491A-95F1-02A7D18BBB46}"/>
+				<GameParameter Id="3743326763" Name="RTPC_AuxObstructionLevel" ObjectPath="\Game Parameters\S2 Live\World\RTPC_AuxObstructionLevel" GUID="{33DC5C75-5E7B-4BAC-A3FE-C519A12FC361}"/>
+			</GameParameters>
+		</SoundBank>
+	</SoundBanks>
+	<FileHash>{B55E8B5D-7AB2-7C19-285B-3CE18FE37E1E}</FileHash>
+</SoundBanksInfo>

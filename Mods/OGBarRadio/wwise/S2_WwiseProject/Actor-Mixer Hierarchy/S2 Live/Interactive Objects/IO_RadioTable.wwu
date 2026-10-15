@@ -1,0 +1,3799 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}" SchemaVersion="123">
+	<AudioObjects>
+		<WorkUnit Name="IO_RadioTable" ID="{2A0C5BC4-80F3-46C5-94D7-86823F06B3B9}" PersistMode="Standalone">
+			<ChildrenList>
+				<ActorMixer Name="Radio_SFX" ID="{86781E66-4D92-4437-BA99-DB5E08685CB3}" ShortID="680242344">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+						<Property Name="Lowpass" Type="int16">
+							<ValueList>
+								<Value>25</Value>
+							</ValueList>
+						</Property>
+						<Property Name="MakeUpGain" Type="Real64">
+							<ValueList>
+								<Value>-16</Value>
+							</ValueList>
+						</Property>
+						<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="60"/>
+						<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Attenuation">
+							<Custom CreatedFrom="{DE746080-B687-4444-850D-F2DF987218CA}">
+								<Attenuation Name="IO_Radio_SFX (Custom)" ID="{114DE37E-C081-4883-A88E-746778705B0A}" ShortID="894907670">
+									<PropertyList>
+										<Property Name="RadiusMax" Type="Real64" Value="1500"/>
+									</PropertyList>
+									<CurveUsageInfoList>
+										<VolumeDryUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
+												<Curve Name="VolumeDry" ID="{23E3B7BA-B123-46B5-83E5-694E6EFAC205}">
+													<PropertyList>
+														<Property Name="Flags" Type="int32" Value="3"/>
+													</PropertyList>
+													<PointList>
+														<Point>
+															<XPos>0</XPos>
+															<YPos>0</YPos>
+															<Flags>5</Flags>
+															<SegmentShape>Log1</SegmentShape>
+														</Point>
+														<Point>
+															<XPos>1500</XPos>
+															<YPos>-200</YPos>
+															<Flags>37</Flags>
+														</Point>
+													</PointList>
+												</Curve>
+											</CurveUsageInfo>
+										</VolumeDryUsage>
+										<VolumeWetGameUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseVolumeDry"/>
+										</VolumeWetGameUsage>
+										<VolumeWetUserUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseVolumeDry"/>
+										</VolumeWetUserUsage>
+										<LowPassFilterUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+										</LowPassFilterUsage>
+										<HighPassFilterUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+										</HighPassFilterUsage>
+										<SpreadUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+										</SpreadUsage>
+										<FocusUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+										</FocusUsage>
+										<ObstructionVolumeUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</ObstructionVolumeUsage>
+										<ObstructionLPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</ObstructionLPFUsage>
+										<ObstructionHPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</ObstructionHPFUsage>
+										<OcclusionVolumeUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</OcclusionVolumeUsage>
+										<OcclusionLPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</OcclusionLPFUsage>
+										<OcclusionHPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</OcclusionHPFUsage>
+										<DiffractionVolumeUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</DiffractionVolumeUsage>
+										<DiffractionLPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</DiffractionLPFUsage>
+										<DiffractionHPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</DiffractionHPFUsage>
+										<TransmissionVolumeUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</TransmissionVolumeUsage>
+										<TransmissionLPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</TransmissionLPFUsage>
+										<TransmissionHPFUsage>
+											<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+										</TransmissionHPFUsage>
+									</CurveUsageInfoList>
+								</Attenuation>
+							</Custom>
+						</Reference>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="IO_Radio_SFX" ID="{FE055144-AF88-4B10-AEF7-68B81A38E7FE}" WorkUnitID="{1015EEA1-93DA-4504-83E7-DCED9F9399EE}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<RandomSequenceContainer Name="S_IO_RadioTable_Destruct" ID="{80D66457-0CE5-4E15-BEF0-3D0CB54991CA}" ShortID="1014023784">
+							<PropertyList>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>6</Value>
+									</ValueList>
+								</Property>
+								<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="2"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="S_IO_RadioTable_Destruct_01" ID="{49B97CF0-C099-4F18-BA41-62791CE32E9F}" ShortID="12746781">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_Destruct_01" ID="{F8244421-94F3-4579-8F29-0EA4F35527B6}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_Destruct_01.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="752659319"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_Destruct_01" ID="{F8244421-94F3-4579-8F29-0EA4F35527B6}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_Destruct_02" ID="{A68220AD-B1FA-49A9-8CDF-DC717677A1AD}" ShortID="97502477">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_Destruct_02" ID="{39DF87FE-F720-44FE-9035-0F095A831801}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_Destruct_02.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="293555291"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_Destruct_02" ID="{39DF87FE-F720-44FE-9035-0F095A831801}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_Destruct_03" ID="{57A4C738-90B2-4CC3-A31E-13E679BAFF1D}" ShortID="296675238">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_Destruct_03" ID="{33AF4385-11A8-4D8D-9B40-979F965959A3}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_Destruct_03.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="331732585"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_Destruct_03" ID="{33AF4385-11A8-4D8D-9B40-979F965959A3}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_Destruct_04" ID="{02E2040A-0BCD-4E4B-8172-6794139D1FAC}" ShortID="300601217">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_Destruct_04" ID="{35E71953-237C-482B-BBB3-9208A9CEC6B0}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_Destruct_04.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="541906166"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_Destruct_04" ID="{35E71953-237C-482B-BBB3-9208A9CEC6B0}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+						</RandomSequenceContainer>
+						<RandomSequenceContainer Name="S_IO_RadioTable_FreqSwitch" ID="{1C6E3677-6284-45B0-A236-C3C0CF0A7720}" ShortID="428538791">
+							<PropertyList>
+								<Property Name="InitialDelay" Type="Real64">
+									<ValueList>
+										<Value>0.05</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>8</Value>
+									</ValueList>
+								</Property>
+								<Property Name="OverrideOutput" Type="bool" Value="True"/>
+								<Property Name="Pitch" Type="int32">
+									<ModifierList>
+										<ModifierInfo>
+											<Modifier Name="" ID="{11EE687C-CAD9-41DE-B19A-5A1F5A94BE3B}">
+												<PropertyList>
+													<Property Name="Max" Type="Real64" Value="400"/>
+													<Property Name="Min" Type="Real64" Value="-300"/>
+												</PropertyList>
+											</Modifier>
+										</ModifierInfo>
+									</ModifierList>
+								</Property>
+								<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="IO_Radio_SFX" ID="{FE055144-AF88-4B10-AEF7-68B81A38E7FE}" WorkUnitID="{1015EEA1-93DA-4504-83E7-DCED9F9399EE}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="S_IO_RadioTable_FreqSwitch_01" ID="{3785BA81-0D1F-40E9-A525-702E35FE41DA}" ShortID="1017227112">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_FreqSwitch_01" ID="{DD90782E-3FB3-4594-A061-84B5C0A910F9}">
+											<PropertyList>
+												<Property Name="LoopBegin" Type="Real64" Value="0.0222469410456062"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0222469410456062"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_FreqSwitch_01.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="207867893"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_FreqSwitch_01" ID="{DD90782E-3FB3-4594-A061-84B5C0A910F9}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_FreqSwitch_02" ID="{DB04536A-6305-4DDE-846A-BFE44469A4BE}" ShortID="58919563">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_FreqSwitch_02" ID="{B8DB4611-3A6D-4DB6-9AEE-D6FE433212AC}">
+											<PropertyList>
+												<Property Name="LoopBegin" Type="Real64" Value="0.0155728587319244"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0155728587319244"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_FreqSwitch_02.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="853956610"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_FreqSwitch_02" ID="{B8DB4611-3A6D-4DB6-9AEE-D6FE433212AC}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_FreqSwitch_03" ID="{415B6453-80DB-4F5D-8CD5-1FB3986B2161}" ShortID="1045211270">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_FreqSwitch_03" ID="{F53A12DD-4C33-4407-B036-A16E98097092}">
+											<PropertyList>
+												<Property Name="LoopBegin" Type="Real64" Value="0.0222469410456062"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0222469410456062"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_FreqSwitch_03.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="720874598"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_FreqSwitch_03" ID="{F53A12DD-4C33-4407-B036-A16E98097092}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_FreqSwitch_04" ID="{ADEEBA00-1974-4D1A-A432-D539CF517FF4}" ShortID="806409418">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_FreqSwitch_04" ID="{C9C7AAD8-CA9B-41AA-B2CC-F169ADDE809C}">
+											<PropertyList>
+												<Property Name="LoopBegin" Type="Real64" Value="0.0289210233592881"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0289210233592881"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_FreqSwitch_04.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="481835217"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_FreqSwitch_04" ID="{C9C7AAD8-CA9B-41AA-B2CC-F169ADDE809C}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_FreqSwitch_05" ID="{10C2A318-D09B-44FE-8EE2-9714699D069C}" ShortID="373344959">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_FreqSwitch_05" ID="{AB165CE3-3FC2-47FA-A265-2215A5BBDDC9}">
+											<PropertyList>
+												<Property Name="LoopBegin" Type="Real64" Value="0.0200222469410456"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0200222469410456"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_FreqSwitch_05.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="748205754"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_FreqSwitch_05" ID="{AB165CE3-3FC2-47FA-A265-2215A5BBDDC9}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_FreqSwitch_06" ID="{41779704-CD2C-46C1-9837-028227A97291}" ShortID="1042711994">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_FreqSwitch_06" ID="{3CB36390-D89D-4D9F-A246-ECA6F953845E}">
+											<PropertyList>
+												<Property Name="LoopBegin" Type="Real64" Value="0.0222469410456062"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0222469410456062"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_FreqSwitch_06.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="486685352"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_FreqSwitch_06" ID="{3CB36390-D89D-4D9F-A246-ECA6F953845E}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_FreqSwitch_07" ID="{248340DD-33A8-403B-B28A-70C67262041B}" ShortID="84519084">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_FreqSwitch_07" ID="{65C78211-E53C-4920-AC47-0D343D804314}">
+											<PropertyList>
+												<Property Name="LoopBegin" Type="Real64" Value="0.0289210233592881"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0289210233592881"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_FreqSwitch_07.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="766726920"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_FreqSwitch_07" ID="{65C78211-E53C-4920-AC47-0D343D804314}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_IO_RadioTable_FreqSwitch_08" ID="{C4F7EBFF-F490-4033-970B-0CECB1641092}" ShortID="277223887">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_FreqSwitch_08" ID="{E6972BA9-258B-4A1B-A510-29F933106E62}">
+											<PropertyList>
+												<Property Name="LoopBegin" Type="Real64" Value="0.0222469410456062"/>
+												<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+												<Property Name="TrimBegin" Type="Real64" Value="0.0222469410456062"/>
+											</PropertyList>
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_FreqSwitch_08.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="405275862"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_FreqSwitch_08" ID="{E6972BA9-258B-4A1B-A510-29F933106E62}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+							<StateInfo>
+								<StatePropertyList>
+									<Property Name="Highpass"/>
+									<Property Name="Lowpass"/>
+									<Property Name="MakeUpGain"/>
+									<Property Name="OutputBusVolume"/>
+									<Property Name="Pitch"/>
+									<Property Name="UserAuxSendVolume0"/>
+									<Property Name="Volume"/>
+								</StatePropertyList>
+							</StateInfo>
+							<ObjectLists>
+								<ObjectList Name="Effects">
+									<Reference>
+										<Local>
+											<EffectSlot Name="" ID="{422A4135-AD8E-4081-BDE7-4770313AAE9D}" ShortID="117104538"/>
+										</Local>
+									</Reference>
+								</ObjectList>
+							</ObjectLists>
+						</RandomSequenceContainer>
+						<RandomSequenceContainer Name="S_IO_RadioTable_Off" ID="{F4D8B9D3-D587-4326-86DA-4B90BF305C31}" ShortID="1034171852">
+							<PropertyList>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>20</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>-3</Value>
+									</ValueList>
+								</Property>
+								<Property Name="OverrideOutput" Type="bool" Value="True"/>
+								<Property Name="OverrideUserAuxSends" Type="bool" Value="True"/>
+								<Property Name="UserAuxSendVolume0" Type="Real64">
+									<ValueList>
+										<Value>12</Value>
+										<Value Platform="XboxSeriesX">-96</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="IO_Radio_SFX" ID="{FE055144-AF88-4B10-AEF7-68B81A38E7FE}" WorkUnitID="{1015EEA1-93DA-4504-83E7-DCED9F9399EE}"/>
+								</Reference>
+								<Reference Name="UserAuxSend0">
+									<ObjectRef Name="AUX_Motion_PlayerInteraction_Right" ID="{DA294A10-E4CE-4614-82C6-93CEE3E7A04C}" WorkUnitID="{7230FD43-9ADE-4C34-805E-AC6E1D10F1E2}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="S_IO_RadioTable_Off" ID="{4FB686BE-1D5A-4295-B988-A670DC415B96}" ShortID="936590596">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_Off" ID="{6FB4614E-824E-4D62-A1D5-CB1D06E36A3F}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_Off.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="447821505"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_Off" ID="{6FB4614E-824E-4D62-A1D5-CB1D06E36A3F}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+							<StateInfo>
+								<StatePropertyList>
+									<Property Name="Highpass"/>
+									<Property Name="Lowpass"/>
+									<Property Name="MakeUpGain"/>
+									<Property Name="OutputBusVolume"/>
+									<Property Name="Pitch"/>
+									<Property Name="UserAuxSendVolume0"/>
+									<Property Name="Volume"/>
+								</StatePropertyList>
+								<StateGroupList>
+									<StateGroupInfo>
+										<StateGroupRef Name="ST_Motion_State" ID="{CF360020-983F-4B50-A5F7-8974FD31D024}"/>
+									</StateGroupInfo>
+								</StateGroupList>
+								<CustomStateList>
+									<CustomState>
+										<StateRef Name="None" ID="{DE69DCF3-9FB8-4127-BD2E-41DF8D2E1511}"/>
+										<CustomState Name="" ID="{6102175F-B779-4FDD-8CBD-CCBE83C45698}" ShortID="649440296"/>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="On" ID="{2A51CB4D-DC9B-48AF-A35D-752D7D76F8AE}"/>
+										<CustomState Name="" ID="{A0CD6DB3-A734-49B9-B9B8-8EEFFCF7E1EB}" ShortID="445305349"/>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="Off" ID="{25DC8AF2-C690-4CA3-A317-3F8A6740F0F9}"/>
+										<CustomState Name="" ID="{22134201-5C95-4FAF-9819-F89CF980C93E}" ShortID="701700131">
+											<PropertyList>
+												<Property Name="UserAuxSendVolume0" Type="Real64" Value="-108"/>
+											</PropertyList>
+										</CustomState>
+									</CustomState>
+								</CustomStateList>
+							</StateInfo>
+						</RandomSequenceContainer>
+						<RandomSequenceContainer Name="S_IO_RadioTable_On" ID="{E29B9352-6930-4574-A373-1FEC19C4C80F}" ShortID="690091467">
+							<PropertyList>
+								<Property Name="InitialDelay" Type="Real64">
+									<ValueList>
+										<Value>0.05</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>-3</Value>
+									</ValueList>
+								</Property>
+								<Property Name="OverrideOutput" Type="bool" Value="True"/>
+								<Property Name="OverrideUserAuxSends" Type="bool" Value="True"/>
+								<Property Name="UserAuxSendVolume0" Type="Real64">
+									<ValueList>
+										<Value>12</Value>
+										<Value Platform="XboxSeriesX">-96</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="IO_Radio_SFX" ID="{FE055144-AF88-4B10-AEF7-68B81A38E7FE}" WorkUnitID="{1015EEA1-93DA-4504-83E7-DCED9F9399EE}"/>
+								</Reference>
+								<Reference Name="UserAuxSend0">
+									<ObjectRef Name="AUX_Motion_PlayerInteraction_Right" ID="{DA294A10-E4CE-4614-82C6-93CEE3E7A04C}" WorkUnitID="{7230FD43-9ADE-4C34-805E-AC6E1D10F1E2}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="S_IO_RadioTable_On" ID="{29261FEE-58AD-4B17-806A-CC27639890F3}" ShortID="432099731">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_IO_RadioTable_On" ID="{60B2F128-8A4F-487A-B009-CA5F6122B87F}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_IO_RadioTable_On.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="337194318"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_IO_RadioTable_On" ID="{60B2F128-8A4F-487A-B009-CA5F6122B87F}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+							<StateInfo>
+								<StatePropertyList>
+									<Property Name="Highpass"/>
+									<Property Name="Lowpass"/>
+									<Property Name="MakeUpGain"/>
+									<Property Name="OutputBusVolume"/>
+									<Property Name="Pitch"/>
+									<Property Name="UserAuxSendVolume0"/>
+									<Property Name="Volume"/>
+								</StatePropertyList>
+								<StateGroupList>
+									<StateGroupInfo>
+										<StateGroupRef Name="ST_Motion_State" ID="{CF360020-983F-4B50-A5F7-8974FD31D024}"/>
+									</StateGroupInfo>
+								</StateGroupList>
+								<CustomStateList>
+									<CustomState>
+										<StateRef Name="None" ID="{DE69DCF3-9FB8-4127-BD2E-41DF8D2E1511}"/>
+										<CustomState Name="" ID="{C7656DE2-0F6C-4F9E-8E80-7F88CC296BFA}" ShortID="204685886"/>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="On" ID="{2A51CB4D-DC9B-48AF-A35D-752D7D76F8AE}"/>
+										<CustomState Name="" ID="{701B57E2-89D0-47CB-819C-2CADE520612E}" ShortID="12861836"/>
+									</CustomState>
+									<CustomState>
+										<StateRef Name="Off" ID="{25DC8AF2-C690-4CA3-A317-3F8A6740F0F9}"/>
+										<CustomState Name="" ID="{4948CA3E-6FDC-4DD6-9986-DE1B915C0B24}" ShortID="802642396">
+											<PropertyList>
+												<Property Name="UserAuxSendVolume0" Type="Real64" Value="-108"/>
+											</PropertyList>
+										</CustomState>
+									</CustomState>
+								</CustomStateList>
+							</StateInfo>
+						</RandomSequenceContainer>
+					</ChildrenList>
+					<ObjectLists>
+						<ObjectList Name="RTPC">
+							<Reference>
+								<Local>
+									<RTPC Name="" ID="{28AF9B28-5B4D-44C8-B330-B655B558624B}" ShortID="260272856">
+										<PropertyList>
+											<Property Name="PropertyName" Type="string" Value="GameAuxSendLPF"/>
+										</PropertyList>
+										<ReferenceList>
+											<Reference Name="ControlInput">
+												<ObjectRef Name="RTPC_AuxObstructionLevel" ID="{33DC5C75-5E7B-4BAC-A3FE-C519A12FC361}" WorkUnitID="{DB89E76A-2392-418F-A3ED-98EEA376E5BF}"/>
+											</Reference>
+											<Reference Name="Curve">
+												<Custom>
+													<Curve Name="" ID="{D83CF9BA-C440-4B9D-B921-E18121682CE7}">
+														<PropertyList>
+															<Property Name="Flags" Type="int32" Value="65537"/>
+														</PropertyList>
+														<PointList>
+															<Point>
+																<XPos>0</XPos>
+																<YPos>0</YPos>
+																<Flags>5</Flags>
+															</Point>
+															<Point>
+																<XPos>100</XPos>
+																<YPos>100</YPos>
+																<Flags>37</Flags>
+															</Point>
+														</PointList>
+													</Curve>
+												</Custom>
+											</Reference>
+										</ReferenceList>
+									</RTPC>
+								</Local>
+							</Reference>
+						</ObjectList>
+					</ObjectLists>
+				</ActorMixer>
+				<ActorMixer Name="Radio_Music" ID="{FF050592-AD26-4DD7-81A0-80150CCF5D6C}" ShortID="785565307">
+					<PropertyList>
+						<Property Name="3DSpatialization" Type="int16" Value="1"/>
+						<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+						<Property Name="CenterPercentage" Type="int32">
+							<ValueList>
+								<Value>48</Value>
+							</ValueList>
+						</Property>
+						<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+						<Property Name="GameAuxSendVolume" Type="Real64">
+							<ValueList>
+								<Value>2</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Highpass" Type="int16">
+							<ValueList>
+								<Value>20</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Lowpass" Type="int16">
+							<ValueList>
+								<Value>10</Value>
+							</ValueList>
+						</Property>
+						<Property Name="MakeUpGain" Type="Real64">
+							<ValueList>
+								<Value>3</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Pitch" Type="int32">
+							<ModifierList>
+								<ModifierInfo>
+									<Modifier Name="" ID="{DDB1098B-F8B1-4BDA-BF14-74C62CA48E17}"/>
+								</ModifierInfo>
+							</ModifierList>
+						</Property>
+						<Property Name="Priority" Type="int16">
+							<ValueList>
+								<Value>30</Value>
+							</ValueList>
+						</Property>
+						<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Attenuation">
+							<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+						</Reference>
+						<Reference Name="Conversion">
+							<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<Folder Name="Unique" ID="{36D2FFCE-D3C7-46DB-A02C-E3DBDA834084}" ShortID="119597200">
+							<ChildrenList>
+								<RandomSequenceContainer Name="Radio_Sidorovich" ID="{012608A9-8637-4207-AA26-52EC72E2FA07}" ShortID="952238414">
+									<PropertyList>
+										<Property Name="Color" Type="int16" Value="20"/>
+										<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{A87E1EDC-4C24-4AF6-B277-670A40A34F3C}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="Firelake - Dirge For The Planet" ID="{6C32F171-8296-42BA-B7AF-5582BF5B2E77}" ShortID="901000234">
+											<Comment>Sidorovych</Comment>
+											<PropertyList>
+												<Property Name="3DSpatialization" Type="int16" Value="1"/>
+												<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+												<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+												<Property Name="IsNonCachable" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="IsStreamingEnabled" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="PreFetchLength" Type="int16">
+													<ValueList>
+														<Value>0</Value>
+													</ValueList>
+												</Property>
+												<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+												<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Attenuation">
+													<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+												</Reference>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{752D1671-49AA-4B8B-AE19-816F03B35912}">
+													<PropertyList>
+														<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="476908093"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="Firelake - Dirge For The Planet" ID="{752D1671-49AA-4B8B-AE19-816F03B35912}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<Folder Name="Unique_Effects" ID="{5B46BC5C-2004-4F8D-A564-99C5B222DF9E}" ShortID="162908531">
+									<ChildrenList>
+										<RandomSequenceContainer Name="S_IO_RadioSupressor_Loop_Interferences" ID="{D47E7919-8D1B-42AC-B6FE-F81102D6F760}" ShortID="113291753">
+											<PropertyList>
+												<Property Name="Highpass" Type="int16">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{15D1ED57-9AE5-48F8-80FF-312090D323C0}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="50"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>-10</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Pitch" Type="int32">
+													<ValueList>
+														<Value>-1060</Value>
+													</ValueList>
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{83BE953E-FA06-4E99-B706-1289FB98BDF1}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="200"/>
+																	<Property Name="Min" Type="Real64" Value="-200"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{A9F078DC-E0B2-4756-93D1-63EAFBF986AF}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="4"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="S_IO_RadioSupressor_Loop_Interferences_01" ID="{E19AF5EA-0AD2-4518-AA0B-1A5F0BD1F00D}" ShortID="755039790">
+													<PropertyList>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Conversion">
+															<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="S_IO_RadioSupressor_Loop_Interferences_01" ID="{CD2879E7-50C9-4DEC-80CE-E4295975C865}">
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\S_IO_RadioSupressor_Loop_Interferences_01.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="6293048"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="S_IO_RadioSupressor_Loop_Interferences_01" ID="{CD2879E7-50C9-4DEC-80CE-E4295975C865}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+												<Sound Name="S_IO_RadioSupressor_Loop_Interferences_02" ID="{E6ACE7BE-2E7C-45CB-9085-6D6C8CA74F8D}" ShortID="299512858">
+													<PropertyList>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Conversion">
+															<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="S_IO_RadioSupressor_Loop_Interferences_02" ID="{6D0C9F94-F261-4EE8-9021-5391A5034BBE}">
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\S_IO_RadioSupressor_Loop_Interferences_02.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="563726960"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="S_IO_RadioSupressor_Loop_Interferences_02" ID="{6D0C9F94-F261-4EE8-9021-5391A5034BBE}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+												<Sound Name="S_IO_RadioSupressor_Loop_Interferences_03" ID="{BE84A047-B86E-4FB5-82A8-EDA2611194FF}" ShortID="349559071">
+													<PropertyList>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Conversion">
+															<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="S_IO_RadioSupressor_Loop_Interferences_03" ID="{0C4C8A32-4035-4BFA-9DF1-F52A7F76E5A2}">
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\S_IO_RadioSupressor_Loop_Interferences_03.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="1034403859"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="S_IO_RadioSupressor_Loop_Interferences_03" ID="{0C4C8A32-4035-4BFA-9DF1-F52A7F76E5A2}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+												<Sound Name="S_IO_RadioSupressor_Loop_Interferences_04" ID="{85D33929-6FA4-46CB-85E5-2C0257508AAD}" ShortID="905438032">
+													<PropertyList>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Conversion">
+															<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="S_IO_RadioSupressor_Loop_Interferences_04" ID="{4A633AA2-FAB0-4163-AB66-0A20E328D3BA}">
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\S_IO_RadioSupressor_Loop_Interferences_04.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="797901842"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="S_IO_RadioSupressor_Loop_Interferences_04" ID="{4A633AA2-FAB0-4163-AB66-0A20E328D3BA}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+												<Sound Name="S_IO_RadioSupressor_Loop_Interferences_05" ID="{2F7A643B-3CCD-48DB-A2CD-7B74473F31C8}" ShortID="436722864">
+													<PropertyList>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Conversion">
+															<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="S_IO_RadioSupressor_Loop_Interferences_05" ID="{0C5DE79C-8C0E-4C6A-B6F1-B087B715554A}">
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\S_IO_RadioSupressor_Loop_Interferences_05.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="685140886"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="S_IO_RadioSupressor_Loop_Interferences_05" ID="{0C5DE79C-8C0E-4C6A-B6F1-B087B715554A}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+												<Sound Name="S_IO_RadioSupressor_Loop_Interferences_06" ID="{700E8B05-95E5-4130-B6DE-9D6A4416BD19}" ShortID="866562223">
+													<PropertyList>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Conversion">
+															<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="S_IO_RadioSupressor_Loop_Interferences_06" ID="{0D5E973E-F2D6-4F01-BA36-0EA596C58983}">
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\S_IO_RadioSupressor_Loop_Interferences_06.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="79576295"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="S_IO_RadioSupressor_Loop_Interferences_06" ID="{0D5E973E-F2D6-4F01-BA36-0EA596C58983}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+												<Sound Name="S_IO_RadioSupressor_Loop_Interferences_07" ID="{F3C40F8C-24CE-452D-9401-1AA6C1B252AA}" ShortID="100608612">
+													<PropertyList>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Conversion">
+															<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="S_IO_RadioSupressor_Loop_Interferences_07" ID="{3B3E2238-75A9-44D1-B30F-8D710C28246F}">
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\S_IO_RadioSupressor_Loop_Interferences_07.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="642140067"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="S_IO_RadioSupressor_Loop_Interferences_07" ID="{3B3E2238-75A9-44D1-B30F-8D710C28246F}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+												<Sound Name="S_IO_RadioSupressor_Loop_Interferences_08" ID="{DF56C8A1-277C-4CB1-8F4C-B46FFB82F165}" ShortID="757246302">
+													<PropertyList>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Conversion">
+															<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="S_IO_RadioSupressor_Loop_Interferences_08" ID="{9660CCB0-AE15-4752-A7D7-7679C2C799CC}">
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\S_IO_RadioSupressor_Loop_Interferences_08.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="833101706"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="S_IO_RadioSupressor_Loop_Interferences_08" ID="{9660CCB0-AE15-4752-A7D7-7679C2C799CC}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+										<Sound Name="S_IO_RadioSupressor_Loop_Low" ID="{E674498F-48C4-497F-B3C6-5B9B72A1D3AB}" ShortID="171667539">
+											<PropertyList>
+												<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
+												<Property Name="IsNonCachable" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="IsStreamingEnabled" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="Lowpass" Type="int16">
+													<ValueList>
+														<Value>52</Value>
+													</ValueList>
+												</Property>
+												<Property Name="MakeUpGain" Type="Real64">
+													<ValueList>
+														<Value>-18</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="S_IO_RadioSupressor_Loop_Low" ID="{40ADF558-9716-4DE3-91C0-1CA11E2B9191}">
+													<PropertyList>
+														<Property Name="CrossfadeDuration" Type="Real64" Value="0.3"/>
+														<Property Name="LoopBegin" Type="Real64" Value="0.136"/>
+														<Property Name="LoopEnd" Type="Real64" Value="12.932"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>S2_Live\S_IO_RadioSupressor_Loop_Low.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="1048978914"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ObjectLists>
+												<ObjectList Name="Effects">
+													<Reference>
+														<Local>
+															<EffectSlot Name="" ID="{112E59B6-7D72-4B84-B9FE-771F256B4B9C}" ShortID="211252202">
+																<ReferenceList>
+																	<Reference Name="Effect" PluginName="Wwise Guitar Distortion" CompanyID="0" PluginID="126" PluginType="3">
+																		<ObjectRef Name="RadioTable_Distortion" ID="{E67AD567-12E2-4720-ACA5-B75025BAF84E}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+																	</Reference>
+																</ReferenceList>
+															</EffectSlot>
+														</Local>
+													</Reference>
+													<Reference>
+														<Local>
+															<EffectSlot Name="" ID="{E513DDBF-B491-498D-96A5-B21B2EBEF559}" ShortID="44840321">
+																<ReferenceList>
+																	<Reference Name="Effect" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
+																		<ObjectRef Name="RadioTable_Flanger" ID="{111DC8E4-73D9-4DB7-9F79-79139DF153B1}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+																	</Reference>
+																</ReferenceList>
+															</EffectSlot>
+														</Local>
+													</Reference>
+													<Reference>
+														<Local>
+															<EffectSlot Name="" ID="{2302E2CA-487C-4D36-986E-CD863B5ABBB0}" ShortID="332225144">
+																<ReferenceList>
+																	<Reference Name="Effect" PluginName="Wwise Convolution Reverb" CompanyID="0" PluginID="127" PluginType="3">
+																		<ObjectRef Name="RadioTable_Reverb" ID="{2BE54107-37E7-4D05-B28E-7E76722CCEE4}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+																	</Reference>
+																</ReferenceList>
+															</EffectSlot>
+														</Local>
+													</Reference>
+													<Reference>
+														<Local>
+															<EffectSlot Name="" ID="{3A2472D3-AD7A-438F-BCC6-4DA8477D793D}" ShortID="1051394921">
+																<ReferenceList>
+																	<Reference Name="Effect" PluginName="Wwise Parametric EQ" CompanyID="0" PluginID="105" PluginType="3">
+																		<ObjectRef Name="RadioTable_EQ" ID="{97FD71C3-74A4-44CC-98B9-B5798F407291}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+																	</Reference>
+																</ReferenceList>
+															</EffectSlot>
+														</Local>
+													</Reference>
+													<Reference>
+														<Local>
+															<EffectSlot Name="" ID="{A7DF80DA-FDC1-47E0-AA5F-F2C4CE38D7FE}" ShortID="307621623">
+																<ReferenceList>
+																	<Reference Name="Effect">
+																		<Custom>
+																			<Effect Name="Parametric EQ (Custom)" ID="{BEFC2AB9-2739-4750-B26E-49F2E4A76146}" ShortID="2402345" PluginName="Wwise Parametric EQ" CompanyID="0" PluginID="105" PluginType="3">
+																				<PropertyList>
+																					<Property Name="FrequencyBand2" Type="Real32" Value="4590"/>
+																					<Property Name="GainBand2" Type="Real32" Value="-24"/>
+																					<Property Name="OnOffBand1" Type="bool" Value="False"/>
+																					<Property Name="OnOffBand3" Type="bool" Value="False"/>
+																					<Property Name="QFactorBand2" Type="Real32" Value="6.2"/>
+																				</PropertyList>
+																			</Effect>
+																		</Custom>
+																	</Reference>
+																</ReferenceList>
+															</EffectSlot>
+														</Local>
+													</Reference>
+													<Reference>
+														<Local>
+															<EffectSlot Name="" ID="{FFACE166-1AFE-4652-8A29-C415ECF1696A}" ShortID="923597072">
+																<ReferenceList>
+																	<Reference Name="Effect">
+																		<Custom>
+																			<Effect Name="Flanger (Custom)" ID="{7863D6A6-8E84-4AF2-A441-18366DED3586}" ShortID="974318558" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
+																				<PropertyList>
+																					<Property Name="DelayTime" Type="Real32" Value="0.2"/>
+																					<Property Name="ModDepth" Type="Real32" Value="100"/>
+																					<Property Name="ModFrequency" Type="Real32" Value="0.28"/>
+																					<Property Name="ModPWM" Type="Real32" Value="100"/>
+																				</PropertyList>
+																			</Effect>
+																		</Custom>
+																	</Reference>
+																</ReferenceList>
+															</EffectSlot>
+														</Local>
+													</Reference>
+												</ObjectList>
+											</ObjectLists>
+											<ActiveSourceList>
+												<ActiveSource Name="S_IO_RadioSupressor_Loop_Low" ID="{40ADF558-9716-4DE3-91C0-1CA11E2B9191}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+								</Folder>
+								<RandomSequenceContainer Name="Radio_Barge" ID="{652BB105-7C1E-48B0-8330-12D229629C27}" ShortID="444966787">
+									<PropertyList>
+										<Property Name="3DSpatialization" Type="int16" Value="1"/>
+										<Property Name="Color" Type="int16" Value="13"/>
+										<Property Name="GameAuxSendVolume" Type="Real64">
+											<ValueList>
+												<Value>12</Value>
+											</ValueList>
+										</Property>
+										<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+										<Property Name="OverrideColor" Type="bool" Value="True"/>
+										<Property Name="OverrideGameAuxSends" Type="bool" Value="True"/>
+										<Property Name="OverridePositioning" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{A68B8322-A35C-4246-AF9F-BEC34B49A7DA}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+										<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Attenuation">
+											<Custom>
+												<Attenuation Name="Attenuation (Custom)" ID="{DECF51B5-C0B1-4868-92EA-B069E426CDD6}" ShortID="295159786">
+													<PropertyList>
+														<Property Name="RadiusMax" Type="Real64" Value="10000"/>
+													</PropertyList>
+													<CurveUsageInfoList>
+														<VolumeDryUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
+																<Curve Name="VolumeDry" ID="{CD48FE16-1E22-4B57-B7BA-D50F99DFDC70}">
+																	<PropertyList>
+																		<Property Name="Flags" Type="int32" Value="3"/>
+																	</PropertyList>
+																	<PointList>
+																		<Point>
+																			<XPos>0</XPos>
+																			<YPos>0</YPos>
+																			<Flags>5</Flags>
+																			<SegmentShape>Log2</SegmentShape>
+																		</Point>
+																		<Point>
+																			<XPos>1077.18894285714</XPos>
+																			<YPos>-4.808</YPos>
+																			<Flags>0</Flags>
+																			<SegmentShape>Log3</SegmentShape>
+																		</Point>
+																		<Point>
+																			<XPos>7816.59389</XPos>
+																			<YPos>0</YPos>
+																			<Flags>0</Flags>
+																			<SegmentShape>Exp3</SegmentShape>
+																		</Point>
+																		<Point>
+																			<XPos>10000</XPos>
+																			<YPos>-200</YPos>
+																			<Flags>37</Flags>
+																		</Point>
+																	</PointList>
+																</Curve>
+															</CurveUsageInfo>
+														</VolumeDryUsage>
+														<VolumeWetGameUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
+																<Curve Name="VolumeWetGame" ID="{9D53BA2C-279F-42D4-9BD5-C4166297F07D}">
+																	<PropertyList>
+																		<Property Name="Flags" Type="int32" Value="3"/>
+																	</PropertyList>
+																	<PointList>
+																		<Point>
+																			<XPos>0</XPos>
+																			<YPos>0</YPos>
+																			<Flags>5</Flags>
+																			<SegmentShape>Log3</SegmentShape>
+																		</Point>
+																		<Point>
+																			<XPos>2867.54002758621</XPos>
+																			<YPos>-0.93322</YPos>
+																			<Flags>0</Flags>
+																			<SegmentShape>Exp3</SegmentShape>
+																		</Point>
+																		<Point>
+																			<XPos>7816.59389</XPos>
+																			<YPos>-0.38826</YPos>
+																			<Flags>0</Flags>
+																			<SegmentShape>Exp3</SegmentShape>
+																		</Point>
+																		<Point>
+																			<XPos>10000</XPos>
+																			<YPos>-200</YPos>
+																			<Flags>37</Flags>
+																		</Point>
+																	</PointList>
+																</Curve>
+															</CurveUsageInfo>
+														</VolumeWetGameUsage>
+														<VolumeWetUserUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseVolumeDry"/>
+														</VolumeWetUserUsage>
+														<LowPassFilterUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
+																<Curve Name="LowPassFilter" ID="{BD2CA0C9-8D56-4921-AEBE-233A64A60D50}">
+																	<PropertyList>
+																		<Property Name="Flags" Type="int32" Value="65537"/>
+																	</PropertyList>
+																	<PointList>
+																		<Point>
+																			<XPos>0</XPos>
+																			<YPos>0</YPos>
+																			<Flags>5</Flags>
+																			<SegmentShape>Log3</SegmentShape>
+																		</Point>
+																		<Point>
+																			<XPos>10000</XPos>
+																			<YPos>58</YPos>
+																			<Flags>37</Flags>
+																		</Point>
+																	</PointList>
+																</Curve>
+															</CurveUsageInfo>
+														</LowPassFilterUsage>
+														<HighPassFilterUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="Custom">
+																<Curve Name="HighPassFilter" ID="{754A3849-201C-47B8-973B-B02BA2A42CCA}">
+																	<PropertyList>
+																		<Property Name="Flags" Type="int32" Value="65537"/>
+																	</PropertyList>
+																	<PointList>
+																		<Point>
+																			<XPos>0</XPos>
+																			<YPos>0</YPos>
+																			<Flags>5</Flags>
+																			<SegmentShape>SCurve</SegmentShape>
+																		</Point>
+																		<Point>
+																			<XPos>2065.99713103448</XPos>
+																			<YPos>34</YPos>
+																			<Flags>0</Flags>
+																			<SegmentShape>Log2</SegmentShape>
+																		</Point>
+																		<Point>
+																			<XPos>10000</XPos>
+																			<YPos>60</YPos>
+																			<Flags>37</Flags>
+																		</Point>
+																	</PointList>
+																</Curve>
+															</CurveUsageInfo>
+														</HighPassFilterUsage>
+														<SpreadUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+														</SpreadUsage>
+														<FocusUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="None"/>
+														</FocusUsage>
+														<ObstructionVolumeUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject">
+																<Curve Name="ObstructionVolume" ID="{8D54CB28-424C-4A70-A019-E7D3523B73F0}">
+																	<PropertyList>
+																		<Property Name="Flags" Type="int32" Value="3"/>
+																	</PropertyList>
+																	<PointList>
+																		<Point>
+																			<XPos>0</XPos>
+																			<YPos>0</YPos>
+																			<Flags>5</Flags>
+																		</Point>
+																		<Point>
+																			<XPos>100</XPos>
+																			<YPos>0</YPos>
+																			<Flags>37</Flags>
+																		</Point>
+																	</PointList>
+																</Curve>
+															</CurveUsageInfo>
+														</ObstructionVolumeUsage>
+														<ObstructionLPFUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject">
+																<Curve Name="ObstructionLPF" ID="{73C12C46-F970-4A0C-AC71-9C69572DF628}">
+																	<PropertyList>
+																		<Property Name="Flags" Type="int32" Value="65537"/>
+																	</PropertyList>
+																	<PointList>
+																		<Point>
+																			<XPos>0</XPos>
+																			<YPos>0</YPos>
+																			<Flags>5</Flags>
+																		</Point>
+																		<Point>
+																			<XPos>90</XPos>
+																			<YPos>0</YPos>
+																			<Flags>0</Flags>
+																		</Point>
+																		<Point>
+																			<XPos>100</XPos>
+																			<YPos>0</YPos>
+																			<Flags>37</Flags>
+																		</Point>
+																	</PointList>
+																</Curve>
+															</CurveUsageInfo>
+														</ObstructionLPFUsage>
+														<ObstructionHPFUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</ObstructionHPFUsage>
+														<OcclusionVolumeUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</OcclusionVolumeUsage>
+														<OcclusionLPFUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</OcclusionLPFUsage>
+														<OcclusionHPFUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</OcclusionHPFUsage>
+														<DiffractionVolumeUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</DiffractionVolumeUsage>
+														<DiffractionLPFUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</DiffractionLPFUsage>
+														<DiffractionHPFUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</DiffractionHPFUsage>
+														<TransmissionVolumeUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</TransmissionVolumeUsage>
+														<TransmissionLPFUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</TransmissionLPFUsage>
+														<TransmissionHPFUsage>
+															<CurveUsageInfo Platform="Linked" CurveToUse="UseProject"/>
+														</TransmissionHPFUsage>
+													</CurveUsageInfoList>
+												</Attenuation>
+											</Custom>
+										</Reference>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="Firelake - Dirge For The Planet" ID="{CE7D3739-BE43-4A6C-B1E8-66EB45DBE39F}" ShortID="402949050">
+											<Comment>Sidorovych</Comment>
+											<PropertyList>
+												<Property Name="3DSpatialization" Type="int16" Value="1"/>
+												<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+												<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+												<Property Name="IsNonCachable" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="IsStreamingEnabled" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="PreFetchLength" Type="int16">
+													<ValueList>
+														<Value>0</Value>
+													</ValueList>
+												</Property>
+												<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+												<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Attenuation">
+													<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+												</Reference>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{E572452B-E7EF-4ED8-8858-D6C5950A214F}">
+													<PropertyList>
+														<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="476908093"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="Firelake - Dirge For The Planet" ID="{E572452B-E7EF-4ED8-8858-D6C5950A214F}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_Kazkovy" ID="{63AE2B83-0379-4F3F-8449-C433F98462F2}" ShortID="265929650">
+									<PropertyList>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{F3BF3658-F8D0-4E9D-9DEE-EE4325AEC0CA}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="Firelake - Dirge For The Planet" ID="{07DB1EFE-3C0C-476F-92C3-54C70D0E7F67}" ShortID="582183608">
+											<Comment>Sidorovych</Comment>
+											<PropertyList>
+												<Property Name="3DSpatialization" Type="int16" Value="1"/>
+												<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+												<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+												<Property Name="IsNonCachable" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="IsStreamingEnabled" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="PreFetchLength" Type="int16">
+													<ValueList>
+														<Value>0</Value>
+													</ValueList>
+												</Property>
+												<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+												<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Attenuation">
+													<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+												</Reference>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{43058E15-0634-473A-945F-12B23893C8EE}">
+													<PropertyList>
+														<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="476908093"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="Firelake - Dirge For The Planet" ID="{43058E15-0634-473A-945F-12B23893C8EE}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_100Rads" ID="{4670CC37-76E2-4183-968A-B477A8B09DDC}" ShortID="170476136">
+									<PropertyList>
+										<Property Name="3DSpatialization" Type="int16" Value="1"/>
+										<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+										<Property Name="CenterPercentage" Type="int32">
+											<ValueList>
+												<Value>48</Value>
+											</ValueList>
+										</Property>
+										<Property Name="Color" Type="int16" Value="20"/>
+										<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+										<Property Name="GameAuxSendVolume" Type="Real64">
+											<ValueList>
+												<Value>2</Value>
+											</ValueList>
+										</Property>
+										<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{3CC366B3-D584-4CB2-B60B-540E2201CC84}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="Priority" Type="int16">
+											<ValueList>
+												<Value>30</Value>
+											</ValueList>
+										</Property>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+										<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Attenuation">
+											<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+										</Reference>
+										<Reference Name="Conversion">
+											<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="Addaraya - Gurza Dreaming" ID="{60CA951D-FEA0-48F5-90C8-23222BD83FF3}" ShortID="949419855">
+											<Comment>Sidorovych</Comment>
+											<PropertyList>
+												<Property Name="3DSpatialization" Type="int16" Value="1"/>
+												<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+												<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+												<Property Name="IsNonCachable" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="IsStreamingEnabled" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="PreFetchLength" Type="int16">
+													<ValueList>
+														<Value>0</Value>
+													</ValueList>
+												</Property>
+												<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+												<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Attenuation">
+													<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+												</Reference>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="Addaraya - Gurza Dreaming" ID="{507E5D5B-B45D-4F2D-8740-DA80B7D219F8}">
+													<Language>SFX</Language>
+													<AudioFile>S2_Live\Addaraya - Gurza Dreaming.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="1066800979"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="Addaraya - Gurza Dreaming" ID="{507E5D5B-B45D-4F2D-8740-DA80B7D219F8}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+								</RandomSequenceContainer>
+							</ChildrenList>
+						</Folder>
+						<Folder Name="Factions" ID="{E900902A-A42D-4342-A3BC-CA737D81D5ED}" ShortID="939050831">
+							<ChildrenList>
+								<RandomSequenceContainer Name="Radio_Bandits" ID="{97734CAC-5BE6-416E-8527-1A1BCE4E101E}" ShortID="428404258">
+									<PropertyList>
+										<Property Name="Color" Type="int16" Value="9"/>
+										<Property Name="OverrideColor" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{36C0DF58-F0BE-45ED-B7B1-51C04C6B81C8}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<RandomSequenceContainer Name="Podkasts" ID="{6FD92A98-C00F-4A67-98E4-4FDE3AFC9A9B}" ShortID="293175928">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="OverrideConversion" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{0BAB2F34-2A45-4EA8-A8BF-9E6D6DBC66DE}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="1"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio_WorstQuality" ID="{0FC166FE-F94F-4569-9CBB-3D18A2D1A3E1}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+										</RandomSequenceContainer>
+										<RandomSequenceContainer Name="Music" ID="{007132D8-C16B-4874-AF98-F7BCCCF9113B}" ShortID="635734831">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{0FE37A4A-F091-4F9C-92C7-AA9944EC98F1}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>80</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="Firelake - Dirge For The Planet" ID="{DB54E867-B930-48A1-AA12-61912B280257}" ShortID="89435441">
+													<Comment>Sidorovych</Comment>
+													<PropertyList>
+														<Property Name="3DSpatialization" Type="int16" Value="1"/>
+														<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+														<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="PreFetchLength" Type="int16">
+															<ValueList>
+																<Value>0</Value>
+															</ValueList>
+														</Property>
+														<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+														<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Attenuation">
+															<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+														</Reference>
+														<Reference Name="Conversion">
+															<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{359A8719-7838-407F-A89E-CD22C690695E}">
+															<PropertyList>
+																<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+																<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+															</PropertyList>
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="476908093"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="Firelake - Dirge For The Planet" ID="{359A8719-7838-407F-A89E-CD22C690695E}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_Loners" ID="{F1B5183A-2EDD-40A9-A68B-87617CFC925E}" ShortID="586756330">
+									<PropertyList>
+										<Property Name="Color" Type="int16" Value="2"/>
+										<Property Name="OverrideColor" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{D86542FE-75B4-4515-A4B2-5F4C55055DCA}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="4"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<RandomSequenceContainer Name="Podkasts" ID="{FBED34CE-6C45-40B9-8974-4E5C676BF496}" ShortID="328334232">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="OverrideConversion" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{5BB2FEB3-2C07-4B0B-A26B-C387B885B661}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="1"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio_WorstQuality" ID="{0FC166FE-F94F-4569-9CBB-3D18A2D1A3E1}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+										</RandomSequenceContainer>
+										<RandomSequenceContainer Name="Music" ID="{CF4849CA-3E0A-4242-B221-6339F2DE6CDB}" ShortID="797328606">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{F10EB055-4A06-430E-AA99-7A2505A2A7AB}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>80</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="Firelake - Dirge For The Planet" ID="{A2F5B3D8-B9A0-4FDF-A6D9-FD50953D72D7}" ShortID="713621727">
+													<Comment>Sidorovych</Comment>
+													<PropertyList>
+														<Property Name="3DSpatialization" Type="int16" Value="1"/>
+														<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+														<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="PreFetchLength" Type="int16">
+															<ValueList>
+																<Value>0</Value>
+															</ValueList>
+														</Property>
+														<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+														<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Attenuation">
+															<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+														</Reference>
+														<Reference Name="Conversion">
+															<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{43640E0D-61A6-4299-897D-85D5CD37D7AC}">
+															<PropertyList>
+																<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+																<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+															</PropertyList>
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="476908093"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="Firelake - Dirge For The Planet" ID="{43640E0D-61A6-4299-897D-85D5CD37D7AC}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_Duty" ID="{5317A146-7446-4920-ACD1-5E7EBC8B1C9E}" ShortID="698513912">
+									<PropertyList>
+										<Property Name="Color" Type="int16" Value="3"/>
+										<Property Name="OverrideColor" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{B06DF747-06FE-45D9-8B6E-4BC8D64AC961}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<RandomSequenceContainer Name="Podkasts" ID="{4FA82770-4245-496D-9B73-E237D6DB4A7B}" ShortID="164404711">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="OverrideConversion" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{D3CC33F2-8490-48CB-963D-955AEF0BC3B6}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="1"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio_WorstQuality" ID="{0FC166FE-F94F-4569-9CBB-3D18A2D1A3E1}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+										</RandomSequenceContainer>
+										<RandomSequenceContainer Name="Music" ID="{62D179B0-6131-47E3-A23E-C80F111B0E4F}" ShortID="77331842">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{17FD3F19-3AD4-4A61-9F86-EE148A3220B6}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>80</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="Firelake - Dirge For The Planet" ID="{26C64E6C-1EA8-4D08-933D-913ECF1648AE}" ShortID="48752368">
+													<Comment>Sidorovych</Comment>
+													<PropertyList>
+														<Property Name="3DSpatialization" Type="int16" Value="1"/>
+														<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+														<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="PreFetchLength" Type="int16">
+															<ValueList>
+																<Value>0</Value>
+															</ValueList>
+														</Property>
+														<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+														<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Attenuation">
+															<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+														</Reference>
+														<Reference Name="Conversion">
+															<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{2F1258DD-4B01-4DFE-93F1-B136495DC17C}">
+															<PropertyList>
+																<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+																<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+															</PropertyList>
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="476908093"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="Firelake - Dirge For The Planet" ID="{2F1258DD-4B01-4DFE-93F1-B136495DC17C}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_Freedom" ID="{7E8DA3F7-B1D0-48BD-9FA8-C8020ECF4C4E}" ShortID="608123648">
+									<PropertyList>
+										<Property Name="Color" Type="int16" Value="19"/>
+										<Property Name="OverrideColor" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{5ED26998-791C-47B2-AD30-621AAB7EBC3B}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<RandomSequenceContainer Name="Podkasts" ID="{CA098DFC-CC85-4ED7-BCA9-2AC17F4D595C}" ShortID="1020082813">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="OverrideConversion" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{187384F7-8A9B-4FA7-B125-7F9C9F7A8222}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="1"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio_WorstQuality" ID="{0FC166FE-F94F-4569-9CBB-3D18A2D1A3E1}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+										</RandomSequenceContainer>
+										<RandomSequenceContainer Name="Music" ID="{7575077B-8067-41DE-9466-B68F716A7246}" ShortID="19563801">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{2C3B7421-9B7D-4F2F-8CB5-48B06727BEC9}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>80</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="Firelake - Dirge For The Planet" ID="{D11D6084-B87D-46D1-ADFD-F2C656E0FB8D}" ShortID="131894577">
+													<Comment>Sidorovych</Comment>
+													<PropertyList>
+														<Property Name="3DSpatialization" Type="int16" Value="1"/>
+														<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+														<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="PreFetchLength" Type="int16">
+															<ValueList>
+																<Value>0</Value>
+															</ValueList>
+														</Property>
+														<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+														<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Attenuation">
+															<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+														</Reference>
+														<Reference Name="Conversion">
+															<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{7916A391-3279-4901-A801-4DE12F6A8040}">
+															<PropertyList>
+																<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+																<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+															</PropertyList>
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="476908093"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="Firelake - Dirge For The Planet" ID="{7916A391-3279-4901-A801-4DE12F6A8040}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_Voentorg" ID="{397EB032-F208-4D07-B4F1-B79ACE4E2732}" ShortID="738783752">
+									<PropertyList>
+										<Property Name="Color" Type="int16" Value="13"/>
+										<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+										<Property Name="OverrideColor" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{435FBB6D-A8EC-4374-B98D-37D10B48CDF5}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<RandomSequenceContainer Name="Podkasts" ID="{24C8FDD1-5572-4BAF-8A4E-4366CD4DCAC3}" ShortID="574258942">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="OverrideConversion" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{35CCC598-69F8-4B47-8C22-AE35C7398141}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="1"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio_WorstQuality" ID="{0FC166FE-F94F-4569-9CBB-3D18A2D1A3E1}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+										</RandomSequenceContainer>
+										<RandomSequenceContainer Name="Music" ID="{E8D79678-C9DF-41C0-9298-5B08430BB659}" ShortID="168778624">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{D7F60679-D394-49EA-B192-EC5E715D2B3D}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>80</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="Firelake - Dirge For The Planet" ID="{7A9354FB-428D-4801-A382-9788653DB7FF}" ShortID="639685123">
+													<Comment>Sidorovych</Comment>
+													<PropertyList>
+														<Property Name="3DSpatialization" Type="int16" Value="1"/>
+														<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+														<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="PreFetchLength" Type="int16">
+															<ValueList>
+																<Value>0</Value>
+															</ValueList>
+														</Property>
+														<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+														<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Attenuation">
+															<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+														</Reference>
+														<Reference Name="Conversion">
+															<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{152ACFA4-128F-42A0-8179-CE0AED97C41C}">
+															<PropertyList>
+																<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+																<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+															</PropertyList>
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="476908093"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="Firelake - Dirge For The Planet" ID="{152ACFA4-128F-42A0-8179-CE0AED97C41C}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_Svora" ID="{F8DFB71E-0F6D-4F1A-A943-32372573A269}" ShortID="75747266">
+									<PropertyList>
+										<Property Name="Color" Type="int16" Value="6"/>
+										<Property Name="OverrideColor" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{CD85089E-3C95-48D5-A728-27C6333BE3BD}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<RandomSequenceContainer Name="Podkasts" ID="{15323646-90BE-4382-BC10-B18D45CEBD18}" ShortID="747492770">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="OverrideConversion" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{5D29ED09-3D66-4997-A7A2-817DE638B373}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="1"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio_WorstQuality" ID="{0FC166FE-F94F-4569-9CBB-3D18A2D1A3E1}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+										</RandomSequenceContainer>
+										<RandomSequenceContainer Name="Music" ID="{4DBCE08C-D1AF-422B-89EA-7679039F103C}" ShortID="697925252">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{8AB592E5-F321-4C6E-9F6F-28E019559AF3}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>80</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="Firelake - Dirge For The Planet" ID="{9D73AA83-3FBC-4E9C-80D5-CDB1BA44341C}" ShortID="1024075561">
+													<Comment>Sidorovych</Comment>
+													<PropertyList>
+														<Property Name="3DSpatialization" Type="int16" Value="1"/>
+														<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+														<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="PreFetchLength" Type="int16">
+															<ValueList>
+																<Value>0</Value>
+															</ValueList>
+														</Property>
+														<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+														<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Attenuation">
+															<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+														</Reference>
+														<Reference Name="Conversion">
+															<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{B4043DCC-CF84-46D4-862C-6D9A188CF5C8}">
+															<PropertyList>
+																<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+																<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+															</PropertyList>
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="476908093"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="Firelake - Dirge For The Planet" ID="{B4043DCC-CF84-46D4-862C-6D9A188CF5C8}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_Mix" ID="{DD198704-5797-4F87-83F2-EDE8F9291DC2}" ShortID="230505501">
+									<PropertyList>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{36D4B056-C3B3-4FCA-8365-7EC139DBBC44}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<RandomSequenceContainer Name="Podkasts" ID="{2CDBE92C-E8B1-434C-A58F-F2062D13A2A4}" ShortID="152879377">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="OverrideConversion" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{02642D89-029C-401F-AE64-3C123F59F19E}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="1"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio_WorstQuality" ID="{0FC166FE-F94F-4569-9CBB-3D18A2D1A3E1}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+										</RandomSequenceContainer>
+										<RandomSequenceContainer Name="Music" ID="{74AA22CE-112A-4BDA-ADE1-0B4A0A26A753}" ShortID="870554408">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{2ABBD3CB-E06B-45CF-9C0A-5018AF5E67FD}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>80</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="Firelake - Dirge For The Planet" ID="{43EA1E05-F4E5-4CDF-90B6-EEA43ED4FEA6}" ShortID="1056547736">
+													<Comment>Sidorovych</Comment>
+													<PropertyList>
+														<Property Name="3DSpatialization" Type="int16" Value="1"/>
+														<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+														<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="PreFetchLength" Type="int16">
+															<ValueList>
+																<Value>0</Value>
+															</ValueList>
+														</Property>
+														<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+														<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Attenuation">
+															<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+														</Reference>
+														<Reference Name="Conversion">
+															<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{AC857FF7-61FD-434B-BC30-2901F42D1AE5}">
+															<PropertyList>
+																<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+																<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+															</PropertyList>
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="476908093"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="Firelake - Dirge For The Planet" ID="{AC857FF7-61FD-434B-BC30-2901F42D1AE5}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_Army" ID="{8846CAB2-6703-4DD1-917C-8144DD2336C4}" ShortID="364064621">
+									<PropertyList>
+										<Property Name="Color" Type="int16" Value="10"/>
+										<Property Name="OverrideColor" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{A5B8270A-D486-4345-8C77-5D933EB771A3}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<RandomSequenceContainer Name="Podkasts" ID="{540E4064-43BE-4014-827F-F47A53452534}" ShortID="487151116">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="OverrideConversion" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{CCE0F405-12FB-44D7-8F03-B2786DA7E24C}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="1"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio_WorstQuality" ID="{0FC166FE-F94F-4569-9CBB-3D18A2D1A3E1}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+										</RandomSequenceContainer>
+										<RandomSequenceContainer Name="Music" ID="{6B199C3B-9F83-4FF6-9E8E-1E9CF220BAE6}" ShortID="591991695">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{B419EB4F-B314-42EC-9A7C-997FB570B7BF}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>80</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="Firelake - Dirge For The Planet" ID="{B1EAAFF7-E228-4A73-ACA4-614DA2D93C15}" ShortID="680970880">
+													<Comment>Sidorovych</Comment>
+													<PropertyList>
+														<Property Name="3DSpatialization" Type="int16" Value="1"/>
+														<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+														<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="PreFetchLength" Type="int16">
+															<ValueList>
+																<Value>0</Value>
+															</ValueList>
+														</Property>
+														<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+														<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Attenuation">
+															<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+														</Reference>
+														<Reference Name="Conversion">
+															<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{9D26F5C8-4CDF-449E-A375-4D28D64B98E2}">
+															<PropertyList>
+																<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+																<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+															</PropertyList>
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="476908093"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="Firelake - Dirge For The Planet" ID="{9D26F5C8-4CDF-449E-A375-4D28D64B98E2}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+									</ChildrenList>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_AbandonedLocation" ID="{B0BBB5E9-E222-43DE-A08B-443B30D9E671}" ShortID="193397329">
+									<Comment>Mix
+
+</Comment>
+									<PropertyList>
+										<Property Name="Color" Type="int16" Value="20"/>
+										<Property Name="OverrideEffect" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{4AAF61E9-A19F-4E28-B7D9-BD1B7C25C451}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<RandomSequenceContainer Name="Podkasts" ID="{35D2E77A-1524-4AEA-8BBF-629E3D4F90FE}" ShortID="414363840">
+											<PropertyList>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="OverrideConversion" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{A575091C-F0A9-4ED0-9E43-4AAD9BAC31B2}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="1"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>10</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio_WorstQuality" ID="{0FC166FE-F94F-4569-9CBB-3D18A2D1A3E1}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+												</Reference>
+											</ReferenceList>
+										</RandomSequenceContainer>
+										<RandomSequenceContainer Name="Music" ID="{825A8A83-5DE6-4BF0-A493-1EFC643FEE8B}" ShortID="800562281">
+											<PropertyList>
+												<Property Name="3DSpatialization" Type="int16" Value="1"/>
+												<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+												<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+												<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+												<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+												<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+												<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+													<ModifierList>
+														<ModifierInfo>
+															<Modifier Name="" ID="{E115275F-253E-4828-BA3E-4046DDD05760}">
+																<PropertyList>
+																	<Property Name="Enabled" Type="bool" Value="True"/>
+																	<Property Name="Max" Type="Real64" Value="3"/>
+																</PropertyList>
+															</Modifier>
+														</ModifierInfo>
+													</ModifierList>
+												</Property>
+												<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+												<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+												<Property Name="Weight" Type="Real64">
+													<ValueList>
+														<Value>80</Value>
+													</ValueList>
+												</Property>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Attenuation">
+													<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+												</Reference>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<Sound Name="Firelake - Dirge For The Planet" ID="{61C4C3D6-C9EC-4BF4-9DCC-8F5157D181E1}" ShortID="1051090367">
+													<Comment>Sidorovych</Comment>
+													<PropertyList>
+														<Property Name="3DSpatialization" Type="int16" Value="1"/>
+														<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+														<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+														<Property Name="IsNonCachable" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="IsStreamingEnabled" Type="bool">
+															<ValueList>
+																<Value>True</Value>
+															</ValueList>
+														</Property>
+														<Property Name="PreFetchLength" Type="int16">
+															<ValueList>
+																<Value>0</Value>
+															</ValueList>
+														</Property>
+														<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+														<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+													</PropertyList>
+													<ReferenceList>
+														<Reference Name="Attenuation">
+															<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+														</Reference>
+														<Reference Name="Conversion">
+															<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+														</Reference>
+														<Reference Name="OutputBus">
+															<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+														</Reference>
+													</ReferenceList>
+													<ChildrenList>
+														<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{E13DADF2-39CA-45AD-ADD2-214673366324}">
+															<PropertyList>
+																<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+																<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+																<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+															</PropertyList>
+															<Language>SFX</Language>
+															<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+															<MediaIDList>
+																<MediaID ID="476908093"/>
+															</MediaIDList>
+														</AudioFileSource>
+													</ChildrenList>
+													<ActiveSourceList>
+														<ActiveSource Name="Firelake - Dirge For The Planet" ID="{E13DADF2-39CA-45AD-ADD2-214673366324}" Platform="Linked"/>
+													</ActiveSourceList>
+												</Sound>
+											</ChildrenList>
+										</RandomSequenceContainer>
+									</ChildrenList>
+									<ObjectLists>
+										<ObjectList Name="Effects">
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{31297C0E-2484-476E-B200-473216341C3E}" ShortID="64843563">
+														<ReferenceList>
+															<Reference Name="Effect">
+																<Custom>
+																	<Effect Name="Time Stretch (Custom)" ID="{C4DC4F5B-C993-4CCF-BA49-E2993F54A601}" ShortID="534451734" PluginName="Wwise Time Stretch" CompanyID="0" PluginID="130" PluginType="3">
+																		<PropertyList>
+																			<Property Name="PitchShiftRandom" Type="Real32" Value="1000"/>
+																			<Property Name="QualityEnable" Type="int16" Value="1"/>
+																			<Property Name="TimeStretch" Type="Real32" Value="359"/>
+																			<Property Name="WindowSize" Type="int32" Value="5120"/>
+																		</PropertyList>
+																	</Effect>
+																</Custom>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{1A7AD80E-364D-4E68-A122-19510BBFF0BB}" ShortID="474257403">
+														<ReferenceList>
+															<Reference Name="Effect">
+																<Custom CreatedFrom="{063B83D9-C0E2-4D14-B22B-59807A30C18B}">
+																	<Effect Name="E14_MQ03_The_Foundation_AI_Voice_Harmonize (Custom)" ID="{3EF6ECF9-6E3F-42C5-8360-2E9D038559EE}" ShortID="1015736158" PluginName="Wwise Harmonizer" CompanyID="0" PluginID="138" PluginType="3">
+																		<PropertyList>
+																			<Property Name="DryLevel" Type="Real32" Value="-96"/>
+																			<Property Name="ProcessLFE" Type="bool" Value="True"/>
+																			<Property Name="Voice1FilterFrequency" Type="Real32" Value="453"/>
+																			<Property Name="Voice1FilterType" Type="int32" Value="1"/>
+																			<Property Name="Voice1Gain" Type="Real32" Value="3"/>
+																			<Property Name="Voice1Pitch" Type="Real32" Value="-1554"/>
+																			<Property Name="Voice2Enable" Type="bool" Value="True"/>
+																			<Property Name="Voice2FilterFrequency" Type="Real32" Value="1572"/>
+																			<Property Name="Voice2FilterGain" Type="Real32" Value="1"/>
+																			<Property Name="Voice2FilterType" Type="int32" Value="1"/>
+																			<Property Name="Voice2Gain" Type="Real32" Value="-9"/>
+																			<Property Name="Voice2Pitch" Type="Real32" Value="-400"/>
+																			<Property Name="WindowSize" Type="int32" Value="2816"/>
+																		</PropertyList>
+																	</Effect>
+																</Custom>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{0A412777-4647-4623-9273-5C183409860D}" ShortID="492834612">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Matrix Reverb" CompanyID="0" PluginID="115" PluginType="3">
+																<ObjectRef Name="Large_Church1" ID="{9B6E8B78-EF8C-494C-AADA-D01CF51B5FAC}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{1F014ABF-6C5F-40B8-B413-A2F5149C286D}" ShortID="204598741">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
+																<ObjectRef Name="Chorus_Like" ID="{EEE0CC86-8CA5-4DBC-A6B7-568FCB26F290}" WorkUnitID="{E8613F7D-BAD3-45CD-A3ED-505576F31277}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{C8025987-0A05-45DC-8057-15D4FDDEA586}" ShortID="328911156">
+														<ReferenceList>
+															<Reference Name="Effect">
+																<Custom>
+																	<Effect Name="Parametric EQ (Custom)" ID="{A8D3A686-C371-4EF0-98DC-D5804AD5EAAD}" ShortID="893932763" PluginName="Wwise Parametric EQ" CompanyID="0" PluginID="105" PluginType="3">
+																		<PropertyList>
+																			<Property Name="FrequencyBand3" Type="Real32" Value="1037"/>
+																			<Property Name="GainBand3" Type="Real32" Value="-4"/>
+																			<Property Name="OnOffBand1" Type="bool" Value="False"/>
+																			<Property Name="OnOffBand2" Type="bool" Value="False"/>
+																		</PropertyList>
+																	</Effect>
+																</Custom>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{F8807C17-606E-4599-ADCA-1246C0B4E3E5}" ShortID="862622364">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Guitar Distortion" CompanyID="0" PluginID="126" PluginType="3">
+																<ObjectRef Name="RadioTable_Distortion" ID="{E67AD567-12E2-4720-ACA5-B75025BAF84E}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{0E433ED5-9223-4FCA-ADD6-5B82726779C8}" ShortID="725391260">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
+																<ObjectRef Name="RadioTable_Flanger" ID="{111DC8E4-73D9-4DB7-9F79-79139DF153B1}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{97D19F54-39A0-4F18-A448-218B6F0D7B88}" ShortID="674365574">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Convolution Reverb" CompanyID="0" PluginID="127" PluginType="3">
+																<ObjectRef Name="RadioTable_Reverb" ID="{2BE54107-37E7-4D05-B28E-7E76722CCEE4}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{4CA82C80-EF3F-4945-A938-B537A88E6AEE}" ShortID="614249271">
+														<ReferenceList>
+															<Reference Name="Effect" PluginName="Wwise Parametric EQ" CompanyID="0" PluginID="105" PluginType="3">
+																<ObjectRef Name="RadioTable_EQ" ID="{97FD71C3-74A4-44CC-98B9-B5798F407291}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+											<Reference>
+												<Local>
+													<EffectSlot Name="" ID="{EABB9011-1AF3-46D5-A667-CEF39B958DBA}" ShortID="97864268">
+														<ReferenceList>
+															<Reference Name="Effect">
+																<Custom>
+																	<Effect Name="Parametric EQ (Custom)" ID="{3997BC94-E857-484F-A4FC-0E2D1CA5FED6}" ShortID="415829216" PluginName="Wwise Parametric EQ" CompanyID="0" PluginID="105" PluginType="3">
+																		<PropertyList>
+																			<Property Name="FrequencyBand2" Type="Real32" Value="4590"/>
+																			<Property Name="GainBand2" Type="Real32" Value="-24"/>
+																			<Property Name="OnOffBand1" Type="bool" Value="False"/>
+																			<Property Name="OnOffBand3" Type="bool" Value="False"/>
+																			<Property Name="QFactorBand2" Type="Real32" Value="6.2"/>
+																		</PropertyList>
+																	</Effect>
+																</Custom>
+															</Reference>
+														</ReferenceList>
+													</EffectSlot>
+												</Local>
+											</Reference>
+										</ObjectList>
+									</ObjectLists>
+								</RandomSequenceContainer>
+								<RandomSequenceContainer Name="Radio_CorpusDiogtya" ID="{A1F679BC-20C4-4481-9E06-688005894F3B}" ShortID="160687800">
+									<PropertyList>
+										<Property Name="3DSpatialization" Type="int16" Value="1"/>
+										<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+										<Property Name="Color" Type="int16" Value="25"/>
+										<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+										<Property Name="NormalOrShuffle" Type="int16" Value="0"/>
+										<Property Name="OverrideColor" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+										<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+										<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="0">
+											<ModifierList>
+												<ModifierInfo>
+													<Modifier Name="" ID="{4630842D-3F00-4374-86F5-425C0B5317C9}">
+														<PropertyList>
+															<Property Name="Enabled" Type="bool" Value="True"/>
+															<Property Name="Max" Type="Real64" Value="3"/>
+														</PropertyList>
+													</Modifier>
+												</ModifierInfo>
+											</ModifierList>
+										</Property>
+										<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+										<Property Name="RandomAvoidRepeating" Type="bool" Value="False"/>
+										<Property Name="RandomAvoidRepeatingCount" Type="int32" Value="3"/>
+										<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+										<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Attenuation">
+											<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+										</Reference>
+										<Reference Name="Conversion">
+											<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<Sound Name="Firelake - Dirge For The Planet" ID="{EA27C6EA-E5C8-4EB5-936B-5C4F0BAF4F42}" ShortID="502541187">
+											<Comment>Sidorovych</Comment>
+											<PropertyList>
+												<Property Name="3DSpatialization" Type="int16" Value="1"/>
+												<Property Name="BelowThresholdBehavior" Type="int16" Value="2"/>
+												<Property Name="EnableLoudnessNormalization" Type="bool" Value="True"/>
+												<Property Name="IsNonCachable" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="IsStreamingEnabled" Type="bool">
+													<ValueList>
+														<Value>True</Value>
+													</ValueList>
+												</Property>
+												<Property Name="PreFetchLength" Type="int16">
+													<ValueList>
+														<Value>0</Value>
+													</ValueList>
+												</Property>
+												<Property Name="SpeakerPanning3DSpatializationMix" Type="int32" Value="89"/>
+												<Property Name="UseGameAuxSends" Type="bool" Value="True"/>
+											</PropertyList>
+											<ReferenceList>
+												<Reference Name="Attenuation">
+													<ObjectRef Name="IO_Radio_Music" ID="{17385BD0-5FAA-4A7F-BBD5-56F60709C75D}" WorkUnitID="{81212379-2D9F-4ABF-B5D7-FE0DF5EF9F9D}"/>
+												</Reference>
+												<Reference Name="Conversion">
+													<ObjectRef Name="CS_InteractiveRadio" ID="{945D26EA-5697-4CCF-AAAE-918160D1F94D}" WorkUnitID="{7A8D4EF1-AFDA-4725-80B1-BB776486B082}"/>
+												</Reference>
+												<Reference Name="OutputBus">
+													<ObjectRef Name="IO_Radio_Music" ID="{AD625BB0-A3F3-4625-BFE5-77490FC34D05}" WorkUnitID="{95B59B6C-B4E4-47E4-A0C7-AD649C6F9221}"/>
+												</Reference>
+											</ReferenceList>
+											<ChildrenList>
+												<AudioFileSource Name="Firelake - Dirge For The Planet" ID="{558F5C73-BFAC-4B6E-8B82-CD30D4ADA382}">
+													<PropertyList>
+														<Property Name="LoopBegin" Type="Real64" Value="1.18973858919038"/>
+														<Property Name="OverrideWavLoop" Type="bool" Value="True"/>
+														<Property Name="TrimBegin" Type="Real64" Value="1.18973858919038"/>
+													</PropertyList>
+													<Language>SFX</Language>
+													<AudioFile>S2_Live\Firelake - Dirge For The Planet.wav</AudioFile>
+													<MediaIDList>
+														<MediaID ID="476908093"/>
+													</MediaIDList>
+												</AudioFileSource>
+											</ChildrenList>
+											<ActiveSourceList>
+												<ActiveSource Name="Firelake - Dirge For The Planet" ID="{558F5C73-BFAC-4B6E-8B82-CD30D4ADA382}" Platform="Linked"/>
+											</ActiveSourceList>
+										</Sound>
+									</ChildrenList>
+								</RandomSequenceContainer>
+							</ChildrenList>
+						</Folder>
+					</ChildrenList>
+					<ObjectLists>
+						<ObjectList Name="Effects">
+							<Reference>
+								<Local>
+									<EffectSlot Name="" ID="{77723045-638B-4B6A-AF90-3948C08D3B70}" ShortID="506398306">
+										<ReferenceList>
+											<Reference Name="Effect" PluginName="Wwise Guitar Distortion" CompanyID="0" PluginID="126" PluginType="3">
+												<ObjectRef Name="RadioTable_Distortion" ID="{E67AD567-12E2-4720-ACA5-B75025BAF84E}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+											</Reference>
+										</ReferenceList>
+									</EffectSlot>
+								</Local>
+							</Reference>
+							<Reference>
+								<Local>
+									<EffectSlot Name="" ID="{70A0A0CB-5866-4F9E-AB27-FC761A56FCC9}" ShortID="682853155">
+										<ReferenceList>
+											<Reference Name="Effect" PluginName="Wwise Flanger" CompanyID="0" PluginID="125" PluginType="3">
+												<ObjectRef Name="RadioTable_Flanger" ID="{111DC8E4-73D9-4DB7-9F79-79139DF153B1}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+											</Reference>
+										</ReferenceList>
+									</EffectSlot>
+								</Local>
+							</Reference>
+							<Reference>
+								<Local>
+									<EffectSlot Name="" ID="{C0F914DC-E352-4BA7-9426-40F79DDE396F}" ShortID="107075050">
+										<ReferenceList>
+											<Reference Name="Effect" PluginName="Wwise Convolution Reverb" CompanyID="0" PluginID="127" PluginType="3">
+												<ObjectRef Name="RadioTable_Reverb" ID="{2BE54107-37E7-4D05-B28E-7E76722CCEE4}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+											</Reference>
+										</ReferenceList>
+									</EffectSlot>
+								</Local>
+							</Reference>
+							<Reference>
+								<Local>
+									<EffectSlot Name="" ID="{8A1F9F5A-81BF-4A75-B078-CB4B3CD153B8}" ShortID="634766490">
+										<ReferenceList>
+											<Reference Name="Effect" PluginName="Wwise Parametric EQ" CompanyID="0" PluginID="105" PluginType="3">
+												<ObjectRef Name="RadioTable_EQ" ID="{97FD71C3-74A4-44CC-98B9-B5798F407291}" WorkUnitID="{F0EB75C5-A2B6-413A-B18B-E45E894F3ADD}"/>
+											</Reference>
+										</ReferenceList>
+									</EffectSlot>
+								</Local>
+							</Reference>
+							<Reference>
+								<Local>
+									<EffectSlot Name="" ID="{001F2084-3724-4236-84E7-137962DBB539}" ShortID="994888973">
+										<ReferenceList>
+											<Reference Name="Effect">
+												<Custom>
+													<Effect Name="Parametric EQ (Custom)" ID="{0BC9C331-5309-4B16-9239-0471BFECF4F7}" ShortID="839465121" PluginName="Wwise Parametric EQ" CompanyID="0" PluginID="105" PluginType="3">
+														<PropertyList>
+															<Property Name="FrequencyBand2" Type="Real32" Value="4590"/>
+															<Property Name="GainBand2" Type="Real32" Value="-24"/>
+															<Property Name="OnOffBand1" Type="bool" Value="False"/>
+															<Property Name="OnOffBand3" Type="bool" Value="False"/>
+															<Property Name="QFactorBand2" Type="Real32" Value="6.2"/>
+														</PropertyList>
+													</Effect>
+												</Custom>
+											</Reference>
+										</ReferenceList>
+									</EffectSlot>
+								</Local>
+							</Reference>
+						</ObjectList>
+						<ObjectList Name="RTPC">
+							<Reference>
+								<Local>
+									<RTPC Name="" ID="{F67E2659-1E98-480F-9C67-463A725E787C}" ShortID="352634833">
+										<PropertyList>
+											<Property Name="PropertyName" Type="string" Value="GameAuxSendLPF"/>
+										</PropertyList>
+										<ReferenceList>
+											<Reference Name="ControlInput">
+												<ObjectRef Name="RTPC_AuxObstructionLevel" ID="{33DC5C75-5E7B-4BAC-A3FE-C519A12FC361}" WorkUnitID="{DB89E76A-2392-418F-A3ED-98EEA376E5BF}"/>
+											</Reference>
+											<Reference Name="Curve">
+												<Custom>
+													<Curve Name="" ID="{BA07B9D2-3D3A-4174-BA1B-7243CF295D1D}">
+														<PropertyList>
+															<Property Name="Flags" Type="int32" Value="65537"/>
+														</PropertyList>
+														<PointList>
+															<Point>
+																<XPos>0</XPos>
+																<YPos>0</YPos>
+																<Flags>5</Flags>
+																<SegmentShape>Exp3</SegmentShape>
+															</Point>
+															<Point>
+																<XPos>70</XPos>
+																<YPos>80</YPos>
+																<Flags>0</Flags>
+																<SegmentShape>Constant</SegmentShape>
+															</Point>
+															<Point>
+																<XPos>100</XPos>
+																<YPos>100</YPos>
+																<Flags>37</Flags>
+															</Point>
+														</PointList>
+													</Curve>
+												</Custom>
+											</Reference>
+										</ReferenceList>
+									</RTPC>
+								</Local>
+							</Reference>
+							<Reference>
+								<Local>
+									<RTPC Name="" ID="{B39CF6E1-AEA7-485E-958E-BE54075D1C40}" ShortID="831093269">
+										<PropertyList>
+											<Property Name="PropertyName" Type="string" Value="MakeUpGain"/>
+										</PropertyList>
+										<ReferenceList>
+											<Reference Name="ControlInput">
+												<ObjectRef Name="RTPC_AuxObstructionLevel" ID="{33DC5C75-5E7B-4BAC-A3FE-C519A12FC361}" WorkUnitID="{DB89E76A-2392-418F-A3ED-98EEA376E5BF}"/>
+											</Reference>
+											<Reference Name="Curve">
+												<Custom>
+													<Curve Name="" ID="{DABFD2F3-9141-4C32-899D-87EF419CAF2F}">
+														<PropertyList>
+															<Property Name="Flags" Type="int32" Value="3"/>
+														</PropertyList>
+														<PointList>
+															<Point>
+																<XPos>0</XPos>
+																<YPos>0</YPos>
+																<Flags>5</Flags>
+																<SegmentShape>Exp3</SegmentShape>
+															</Point>
+															<Point>
+																<XPos>70</XPos>
+																<YPos>20</YPos>
+																<Flags>0</Flags>
+															</Point>
+															<Point>
+																<XPos>100</XPos>
+																<YPos>0</YPos>
+																<Flags>37</Flags>
+															</Point>
+														</PointList>
+													</Curve>
+												</Custom>
+											</Reference>
+										</ReferenceList>
+									</RTPC>
+								</Local>
+							</Reference>
+							<Reference>
+								<Local>
+									<RTPC Name="" ID="{0C13CF11-72E8-45F9-AB34-038AF431115D}" ShortID="916165540">
+										<PropertyList>
+											<Property Name="PropertyName" Type="string" Value="GameAuxSendVolume"/>
+										</PropertyList>
+										<ReferenceList>
+											<Reference Name="ControlInput">
+												<ObjectRef Name="RTPC_AuxObstructionLevel" ID="{33DC5C75-5E7B-4BAC-A3FE-C519A12FC361}" WorkUnitID="{DB89E76A-2392-418F-A3ED-98EEA376E5BF}"/>
+											</Reference>
+											<Reference Name="Curve">
+												<Custom>
+													<Curve Name="" ID="{34419EFF-F1E8-40E2-BBF1-CB905D51D62F}">
+														<PropertyList>
+															<Property Name="Flags" Type="int32" Value="3"/>
+														</PropertyList>
+														<PointList>
+															<Point>
+																<XPos>0</XPos>
+																<YPos>0</YPos>
+																<Flags>5</Flags>
+															</Point>
+															<Point>
+																<XPos>70.08576</XPos>
+																<YPos>0</YPos>
+																<Flags>0</Flags>
+															</Point>
+															<Point>
+																<XPos>100</XPos>
+																<YPos>-200</YPos>
+																<Flags>37</Flags>
+															</Point>
+														</PointList>
+													</Curve>
+												</Custom>
+											</Reference>
+										</ReferenceList>
+									</RTPC>
+								</Local>
+							</Reference>
+							<Reference>
+								<Local>
+									<RTPC Name="" ID="{661D57A6-5D74-4D34-887B-EED8AC2288DD}" ShortID="852281462">
+										<PropertyList>
+											<Property Name="PropertyName" Type="string" Value="GameAuxSendVolume"/>
+										</PropertyList>
+										<ReferenceList>
+											<Reference Name="ControlInput">
+												<ObjectRef Name="RTPC_SideChain_AV" ID="{33ECE6CF-C665-491A-95F1-02A7D18BBB46}" WorkUnitID="{3A266E34-9D86-4137-8C66-21CCDA49A2ED}"/>
+											</Reference>
+											<Reference Name="Curve">
+												<Custom>
+													<Curve Name="" ID="{E812155B-57DA-40E2-8ADC-1DEE8D29A324}">
+														<PropertyList>
+															<Property Name="Flags" Type="int32" Value="3"/>
+														</PropertyList>
+														<PointList>
+															<Point>
+																<XPos>-48</XPos>
+																<YPos>-8</YPos>
+																<Flags>5</Flags>
+																<SegmentShape>SCurve</SegmentShape>
+															</Point>
+															<Point>
+																<XPos>-40</XPos>
+																<YPos>0</YPos>
+																<Flags>0</Flags>
+																<SegmentShape>Exp3</SegmentShape>
+															</Point>
+															<Point>
+																<XPos>0</XPos>
+																<YPos>0</YPos>
+																<Flags>37</Flags>
+															</Point>
+														</PointList>
+													</Curve>
+												</Custom>
+											</Reference>
+										</ReferenceList>
+									</RTPC>
+								</Local>
+							</Reference>
+							<Reference>
+								<Local>
+									<RTPC Name="" ID="{6EC30C42-D0F3-4003-9EC3-2F7696CC16D5}" ShortID="462384329">
+										<PropertyList>
+											<Property Name="PropertyName" Type="string" Value="SpeakerPanning3DSpatializationMix"/>
+										</PropertyList>
+										<ReferenceList>
+											<Reference Name="ControlInput">
+												<ObjectRef Name="RTPC_Distance" ID="{C00EE1A1-EF0A-48C9-865C-10F332CD78E3}" WorkUnitID="{DB89E76A-2392-418F-A3ED-98EEA376E5BF}"/>
+											</Reference>
+											<Reference Name="Curve">
+												<Custom>
+													<Curve Name="" ID="{A02B5F91-51ED-4829-B0BD-992907631B3F}">
+														<PropertyList>
+															<Property Name="Flags" Type="int32" Value="65537"/>
+														</PropertyList>
+														<PointList>
+															<Point>
+																<XPos>0</XPos>
+																<YPos>50</YPos>
+																<Flags>5</Flags>
+															</Point>
+															<Point>
+																<XPos>300</XPos>
+																<YPos>100</YPos>
+																<Flags>0</Flags>
+															</Point>
+															<Point>
+																<XPos>5220</XPos>
+																<YPos>100</YPos>
+																<Flags>0</Flags>
+															</Point>
+															<Point>
+																<XPos>10000</XPos>
+																<YPos>100</YPos>
+																<Flags>37</Flags>
+															</Point>
+														</PointList>
+													</Curve>
+												</Custom>
+											</Reference>
+										</ReferenceList>
+									</RTPC>
+								</Local>
+							</Reference>
+						</ObjectList>
+					</ObjectLists>
+				</ActorMixer>
+			</ChildrenList>
+		</WorkUnit>
+	</AudioObjects>
+</WwiseDocument>

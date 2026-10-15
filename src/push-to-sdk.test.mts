@@ -18,6 +18,10 @@ const state = vi.hoisted(() => ({
 const createMod = vi.hoisted(() => vi.fn());
 
 vi.mock("./logger.mts", () => ({ logger: { log: () => {} } }));
+vi.mock("./mod-wwise.mts", () => ({
+  installModWwiseBanks: () => {},
+  installModWwiseProject: async () => {},
+}));
 vi.mock("./sdk-mutation-lock.mts", () => ({
   withSdkMutationLock: (_name: string, fn: () => unknown) => fn(),
 }));
