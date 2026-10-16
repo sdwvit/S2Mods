@@ -1,0 +1,13 @@
+Event	ID	Name			Wwise Object Path	Notes
+	42735696	SFX_UI_IntroLoadingScreen			\S2 Live\UI\GameInitialization\SFX_UI_IntroLoadingScreen	
+
+Game Parameter	ID	Name			Wwise Object Path	Notes
+	2150532158	RTPC_SideChain_GameInitialization			\S2 Live\Sidechain\RTPC_SideChain_GameInitialization	
+
+Modulator LFO	ID	Name			Wwise Object Path	Notes
+	815174301	Modulator LFO (Custom)				
+	901680093	Modulator LFO (Custom)				
+
+Effect plug-ins	ID	Name	Type				Notes
+	478692964	Meter (Custom)	Wwise Meter			
+

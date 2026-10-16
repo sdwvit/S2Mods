@@ -1,0 +1,85 @@
+{
+ "SoundBanksInfo": {
+  "Platform": "Windows",
+  "BasePlatform": "Windows",
+  "SchemaVersion": "16",
+  "SoundBankVersion": "154",
+  "SoundBanks": [
+   {
+    "Id": "42735696",
+    "Type": "Event",
+    "GUID": "{C85C1423-F486-4AB8-BC93-9A91BFD5A1BF}",
+    "Language": "SFX",
+    "Hash": "{3167A331-E05A-D4E4-F155-9BAE5D812F99}",
+    "ObjectPath": "SFX_UI_IntroLoadingScreen",
+    "ShortName": "SFX_UI_IntroLoadingScreen",
+    "Path": "Event/SFX_UI_IntroLoadingScreen.bnk",
+    "Media": [
+     {
+      "Id": "243071579",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_UI_Logos_Linear.wav",
+      "Path": "Media/243071579.wem",
+      "CachePath": "A0/{A0AB18A0-2FCD-1667-6556-54B0FCEDAE3F}.wem"
+     },
+     {
+      "Id": "834678597",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_UI_IdleScreen_Loop_CP77.wav",
+      "Path": "Media/834678597.wem",
+      "CachePath": "63/{63EAC019-4E6E-ABCA-4658-E2DBAD5AABDE}.wem"
+     }
+    ],
+    "Plugins": {
+     "Custom": [
+      {
+       "Id": "478692964",
+       "Name": "Meter (Custom)",
+       "ObjectPath": "\\Actor-Mixer Hierarchy\\S2 Live\\UI\\GameInitialization\\IntroLoadingScreen\\S_UI_Logos_Linear\\[Effect Slot [0]: (Meter)]\\Meter (Custom)",
+       "GUID": "{83CF31C8-8B9B-4C2E-A5FB-64A8F7AE4546}",
+       "LibName": "Wwise Meter",
+       "LibId": "8454147"
+      }
+     ]
+    },
+    "Events": [
+     {
+      "Id": "42735696",
+      "Name": "SFX_UI_IntroLoadingScreen",
+      "ObjectPath": "\\Events\\S2 Live\\UI\\GameInitialization\\SFX_UI_IntroLoadingScreen",
+      "GUID": "{C85C1423-F486-4AB8-BC93-9A91BFD5A1BF}",
+      "DurationType": "Infinite",
+      "MediaRefs": [
+       {
+        "Id": "243071579"
+       },
+       {
+        "Id": "834678597"
+       }
+      ],
+      "PluginRefs": {
+       "Custom": [
+        {
+         "Id": "478692964"
+        }
+       ]
+      }
+     }
+    ],
+    "GameParameters": [
+     {
+      "Id": "2150532158",
+      "Name": "RTPC_SideChain_GameInitialization",
+      "ObjectPath": "\\Game Parameters\\S2 Live\\Sidechain\\RTPC_SideChain_GameInitialization",
+      "GUID": "{87125872-EEB9-4682-BC42-78E26164D76B}"
+     }
+    ]
+   }
+  ],
+  "FileHash": "{0EBC6D0A-3E04-4E5F-D7F4-B30FB8DD1728}"
+ }
+}

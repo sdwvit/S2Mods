@@ -1,0 +1,9 @@
+Event	ID	Name			Wwise Object Path	Notes
+	606761299	SFX_UI_PauseMenu_On			\S2 Live\UI\PauseMenu\SFX_UI_PauseMenu_On	Separate Pause without Fade for Voiceover to avoid desync.
+
+Streamed Audio	ID	Name	Audio source file	Generated audio file	Wwise Object Path	Notes
+	155020428	S_UI_PauseMenu_OneShot_Drone_01	U:\nvme\S2_WwiseProject\.cache\7A\{7ACAC027-9CE1-1D21-8C70-4F3911690620}.wem	155020428.wem	\Actor-Mixer Hierarchy\S2 Live\UI\PauseMenu\PauseMenu\S_UI_PauseMenu_OneShot_Drone\S_UI_PauseMenu_OneShot_Drone_01	
+	227327437	S_UI_PauseMenu_OneShot_Drone_02	U:\nvme\S2_WwiseProject\.cache\6B\{6B5335F7-061F-0600-5BCF-53AE6CABAA8F}.wem	227327437.wem	\Actor-Mixer Hierarchy\S2 Live\UI\PauseMenu\PauseMenu\S_UI_PauseMenu_OneShot_Drone\S_UI_PauseMenu_OneShot_Drone_02	
+	684732643	S_UI_PauseMenu_Loop	U:\nvme\S2_WwiseProject\.cache\AB\{AB3BE32D-F968-2402-86BD-DC678E644482}.wem	684732643.wem	\Actor-Mixer Hierarchy\S2 Live\UI\PauseMenu\PauseMenu\S_UI_PauseMenu_Loop	
+	954302213	S_UI_PauseMenu_OneShot_Drone_03	U:\nvme\S2_WwiseProject\.cache\08\{08A617A2-A019-00A6-2AFF-1D13A0BC7CC4}.wem	954302213.wem	\Actor-Mixer Hierarchy\S2 Live\UI\PauseMenu\PauseMenu\S_UI_PauseMenu_OneShot_Drone\S_UI_PauseMenu_OneShot_Drone_03	
+

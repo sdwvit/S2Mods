@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{35EE67DA-89ED-403F-A528-A720B81D7686}" SchemaVersion="123">
+	<AudioObjects>
+		<WorkUnit Name="PauseMenu" ID="{35EE67DA-89ED-403F-A528-A720B81D7686}" PersistMode="Standalone">
+			<ChildrenList>
+				<ActorMixer Name="PauseMenu" ID="{1F2FCB9D-CE5E-4F35-A8DD-4B505B461DB3}" ShortID="329964499">
+					<PropertyList>
+						<Property Name="EnableAttenuation" Type="bool" Value="False"/>
+						<Property Name="GameAuxSendVolume" Type="Real64">
+							<ValueList>
+								<Value>12</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Lowpass" Type="int16">
+							<ValueList>
+								<Value>35</Value>
+							</ValueList>
+						</Property>
+						<Property Name="MakeUpGain" Type="Real64">
+							<ValueList>
+								<Value>-19</Value>
+							</ValueList>
+						</Property>
+						<Property Name="Priority" Type="int16">
+							<ValueList>
+								<Value>100</Value>
+							</ValueList>
+						</Property>
+					</PropertyList>
+					<ReferenceList>
+						<Reference Name="Conversion">
+							<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+						</Reference>
+						<Reference Name="OutputBus">
+							<ObjectRef Name="UI_System" ID="{592A1EB5-9F9A-46D6-A0A1-52C370B22329}" WorkUnitID="{8AD4EF43-EBCD-4EEA-9F77-C7B13A4CF003}"/>
+						</Reference>
+					</ReferenceList>
+					<ChildrenList>
+						<RandomSequenceContainer Name="S_UI_PauseMenu_OneShot_WhooshFire" ID="{21A5B0B3-6A58-40E1-8BCF-12662D5C2CAF}" ShortID="554358873">
+							<PropertyList>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>-3</Value>
+									</ValueList>
+								</Property>
+								<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+								<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+								<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+								<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="S_UI_PauseMenu_OneShot_WhooshFire_04" ID="{EAF04378-1DB8-4A8A-AFF0-6B1ABAAE860C}" ShortID="1007220865">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_WhooshFire_04" ID="{E9C6B81B-7D1E-4242-980C-91233D3B538D}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_WhooshFire_04.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="82729870"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_WhooshFire_04" ID="{E9C6B81B-7D1E-4242-980C-91233D3B538D}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_WhooshFire_01" ID="{7C1C1268-DEE2-4454-A28E-D28C1E0EEA7B}" ShortID="62825296">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_WhooshFire_01" ID="{8B98228E-2768-4DDD-B288-1D0EB0C44409}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_WhooshFire_01.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="868227670"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_WhooshFire_01" ID="{8B98228E-2768-4DDD-B288-1D0EB0C44409}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_WhooshFire_02" ID="{F1E0B52C-8C2B-4E6A-A68D-C4A6FCF94D89}" ShortID="285452828">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_WhooshFire_02" ID="{EBF44B61-9230-4675-86F2-A2C2F5EB32FF}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_WhooshFire_02.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="117524832"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_WhooshFire_02" ID="{EBF44B61-9230-4675-86F2-A2C2F5EB32FF}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_WhooshFire_03" ID="{AF25FC0C-0C86-4F78-9074-77BE76307584}" ShortID="579848898">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_WhooshFire_03" ID="{E0C1E771-471B-41CC-885E-C83BD15A5733}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_WhooshFire_03.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="375234069"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_WhooshFire_03" ID="{E0C1E771-471B-41CC-885E-C83BD15A5733}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+						</RandomSequenceContainer>
+						<RandomSequenceContainer Name="S_UI_PauseMenu_OneShot_Stinger" ID="{2FCE1131-2086-433F-9392-ABE2F915FA1B}" ShortID="270544031">
+							<PropertyList>
+								<Property Name="Inclusion" Type="bool">
+									<ValueList>
+										<Value>False</Value>
+									</ValueList>
+								</Property>
+								<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="S_UI_PauseMenu_OneShot_Stinger_03" ID="{D78D0558-F0DE-436F-A1E8-011D84BDD1DF}" ShortID="793419129">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Stinger_03" ID="{A11DEE13-5395-455A-85BA-CDA5844CC0FA}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Stinger_03.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="896964022"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Stinger_03" ID="{A11DEE13-5395-455A-85BA-CDA5844CC0FA}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_Stinger_02" ID="{117B4B90-5DE4-4283-9D7F-16699FB7EB7F}" ShortID="112646366">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Stinger_02" ID="{A83B3F3B-7D32-4EDD-A45A-62915B65EA68}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Stinger_02.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="408463958"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Stinger_02" ID="{A83B3F3B-7D32-4EDD-A45A-62915B65EA68}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_Stinger_01" ID="{2B1A8D43-C6C0-4668-B84E-95695C31E9CB}" ShortID="8003279">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Stinger_01" ID="{2D992A81-4F3D-4E7E-85C8-02A45A8A02E8}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Stinger_01.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="82588785"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Stinger_01" ID="{2D992A81-4F3D-4E7E-85C8-02A45A8A02E8}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+						</RandomSequenceContainer>
+						<RandomSequenceContainer Name="S_UI_PauseMenu_OneShot_Drone" ID="{CA2CFB35-F28C-4D16-A66E-F3E305D69996}" ShortID="18262975">
+							<PropertyList>
+								<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+								<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+								<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+								<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="2"/>
+								<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="S_UI_PauseMenu_OneShot_Drone_01" ID="{B0FD465D-7662-48D5-88CB-CEBBE3458A3F}" ShortID="453172545">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Drone_01" ID="{C48AFCF1-E9E3-4128-932D-0D8C2A9831F0}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Drone_01.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="155020428"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Drone_01" ID="{C48AFCF1-E9E3-4128-932D-0D8C2A9831F0}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_Drone_02" ID="{29607D86-FB59-4B67-A620-02B91AD8727D}" ShortID="646296437">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Drone_02" ID="{FB1E558F-5514-48B1-A3A0-03BDA19B6FE6}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Drone_02.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="227327437"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Drone_02" ID="{FB1E558F-5514-48B1-A3A0-03BDA19B6FE6}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_Drone_03" ID="{99741A7A-2860-4AE5-AE77-B6F176F9854B}" ShortID="264807934">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Drone_03" ID="{72B2B379-D595-4D37-A0FC-F58A561C53C3}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Drone_03.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="954302213"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Drone_03" ID="{72B2B379-D595-4D37-A0FC-F58A561C53C3}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+						</RandomSequenceContainer>
+						<RandomSequenceContainer Name="S_UI_PauseMenu_OneShot_Whoosh" ID="{239EAD44-5B58-428E-B983-2E196EF0F567}" ShortID="751925127">
+							<PropertyList>
+								<Property Name="PlayMechanismLoop" Type="bool" Value="True"/>
+								<Property Name="PlayMechanismSpecialTransitions" Type="bool" Value="True"/>
+								<Property Name="PlayMechanismSpecialTransitionsType" Type="int16" Value="1"/>
+								<Property Name="PlayMechanismSpecialTransitionsValue" Type="Real64" Value="2"/>
+								<Property Name="PlayMechanismStepOrContinuous" Type="int16" Value="0"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<Sound Name="S_UI_PauseMenu_OneShot_Whoosh_01" ID="{04D641F6-902F-4FF7-8716-9ABF6A615F6C}" ShortID="652962896">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Whoosh_01" ID="{EA7EBD4A-8159-4927-944C-263BDA5DBF5E}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Whoosh_01.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="489037619"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Whoosh_01" ID="{EA7EBD4A-8159-4927-944C-263BDA5DBF5E}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_Whoosh_06" ID="{B0F8D208-79C1-468B-9F07-A99F9010C5FE}" ShortID="982267074">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Whoosh_06" ID="{ADE43196-0822-4B90-AD8F-3189AAAAAAD9}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Whoosh_06.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="116239324"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Whoosh_06" ID="{ADE43196-0822-4B90-AD8F-3189AAAAAAD9}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_Whoosh_05" ID="{ABE5A18C-C318-4C9A-B831-E330038703AD}" ShortID="658481655">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Whoosh_05" ID="{6742DC98-2DF6-43E5-9BBE-647D35D9CA56}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Whoosh_05.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="539018322"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Whoosh_05" ID="{6742DC98-2DF6-43E5-9BBE-647D35D9CA56}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_Whoosh_03" ID="{BCB4D261-EFB8-472A-B82A-5D6D09C053F6}" ShortID="737842994">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Whoosh_03" ID="{3970C0DB-462E-4220-9D23-5628BD884DB6}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Whoosh_03.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="324049058"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Whoosh_03" ID="{3970C0DB-462E-4220-9D23-5628BD884DB6}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_Whoosh_02" ID="{7237D03E-0E50-4322-B0DD-4050415E16B7}" ShortID="46161389">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Whoosh_02" ID="{7BC4C7AE-0CE3-4B94-9F55-9FF003C9110D}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Whoosh_02.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="518007608"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Whoosh_02" ID="{7BC4C7AE-0CE3-4B94-9F55-9FF003C9110D}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_UI_PauseMenu_OneShot_Whoosh_04" ID="{A4DB8E32-1CD4-4195-AEB9-2B92F6151DED}" ShortID="781513273">
+									<PropertyList>
+										<Property Name="IsStreamingEnabled" Type="bool">
+											<ValueList>
+												<Value>True</Value>
+											</ValueList>
+										</Property>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_UI_PauseMenu_OneShot_Whoosh_04" ID="{A319530A-3CC1-46AE-B80A-0534D976DCDD}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_UI_PauseMenu_OneShot_Whoosh_04.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="496772261"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_UI_PauseMenu_OneShot_Whoosh_04" ID="{A319530A-3CC1-46AE-B80A-0534D976DCDD}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+							</ChildrenList>
+						</RandomSequenceContainer>
+						<Sound Name="S_UI_PauseMenu_Start" ID="{AE66FDDC-A04A-44AB-9430-027388E8BD33}" ShortID="825545315">
+							<PropertyList>
+								<Property Name="Inclusion" Type="bool">
+									<ValueList>
+										<Value>False</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<AudioFileSource Name="S_UI_PauseMenu_Start" ID="{EEC4FD72-95BF-4877-A914-2736354E2701}">
+									<Language>SFX</Language>
+									<AudioFile>S2_Live\S_UI_PauseMenu_Start.wav</AudioFile>
+									<MediaIDList>
+										<MediaID ID="481440196"/>
+									</MediaIDList>
+								</AudioFileSource>
+							</ChildrenList>
+							<ActiveSourceList>
+								<ActiveSource Name="S_UI_PauseMenu_Start" ID="{EEC4FD72-95BF-4877-A914-2736354E2701}" Platform="Linked"/>
+							</ActiveSourceList>
+						</Sound>
+						<Sound Name="S_UI_PauseMenu_Loop" ID="{B17E11A6-37FB-499E-BAA9-780C9E07617B}" ShortID="557476133">
+							<PropertyList>
+								<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
+								<Property Name="IsStreamingEnabled" Type="bool">
+									<ValueList>
+										<Value>True</Value>
+									</ValueList>
+								</Property>
+								<Property Name="Lowpass" Type="int16">
+									<ValueList>
+										<Value>61</Value>
+									</ValueList>
+								</Property>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>-4</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<AudioFileSource Name="S_UI_PauseMenu_Loop_CP77" ID="{1CA4FB9A-0781-452B-AE3A-44FD9E81DE83}">
+									<Language>SFX</Language>
+									<AudioFile>S2_Live\S_UI_PauseMenu_Loop_CP77.wav</AudioFile>
+									<MediaIDList>
+										<MediaID ID="684732643"/>
+									</MediaIDList>
+								</AudioFileSource>
+							</ChildrenList>
+							<ActiveSourceList>
+								<ActiveSource Name="S_UI_PauseMenu_Loop_CP77" ID="{1CA4FB9A-0781-452B-AE3A-44FD9E81DE83}" Platform="Linked"/>
+							</ActiveSourceList>
+						</Sound>
+						<Sound Name="S_UI_PauseMenu_Beat" ID="{D6F3EB38-F5E2-4FF2-8CFA-FEDA2BACD434}" ShortID="603606060">
+							<PropertyList>
+								<Property Name="Inclusion" Type="bool">
+									<ValueList>
+										<Value>False</Value>
+									</ValueList>
+								</Property>
+								<Property Name="IsLoopingEnabled" Type="bool" Value="True"/>
+								<Property Name="MakeUpGain" Type="Real64">
+									<ValueList>
+										<Value>3</Value>
+									</ValueList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Conversion">
+									<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+								</Reference>
+								<Reference Name="OutputBus">
+									<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+								</Reference>
+							</ReferenceList>
+							<ChildrenList>
+								<AudioFileSource Name="S_UI_PauseMenu_Beat" ID="{ABF98291-7745-4BF8-91F9-76A9A1D96095}">
+									<Language>SFX</Language>
+									<AudioFile>S2_Live\S_UI_PauseMenu_Beat.wav</AudioFile>
+									<MediaIDList>
+										<MediaID ID="354718967"/>
+									</MediaIDList>
+								</AudioFileSource>
+							</ChildrenList>
+							<ActiveSourceList>
+								<ActiveSource Name="S_UI_PauseMenu_Beat" ID="{ABF98291-7745-4BF8-91F9-76A9A1D96095}" Platform="Linked"/>
+							</ActiveSourceList>
+						</Sound>
+					</ChildrenList>
+				</ActorMixer>
+			</ChildrenList>
+		</WorkUnit>
+	</AudioObjects>
+</WwiseDocument>

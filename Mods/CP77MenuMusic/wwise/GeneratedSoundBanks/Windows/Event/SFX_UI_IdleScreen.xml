@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SoundBanksInfo Platform="Windows" BasePlatform="Windows" SchemaVersion="16" SoundBankVersion="154">
+	<SoundBanks>
+		<SoundBank Id="3376698996" Type="Event" GUID="{316F5C2C-F0AD-47E6-B755-A7AA6EBC4CDA}" Language="SFX" Hash="{257CD1EE-E246-B62C-E7C2-78EBB67A140A}">
+			<ObjectPath>SFX_UI_IdleScreen</ObjectPath>
+			<ShortName>SFX_UI_IdleScreen</ShortName>
+			<Path>Event/SFX_UI_IdleScreen.bnk</Path>
+			<Media>
+				<File Id="834678597" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_UI_IdleScreen_Loop_CP77.wav</ShortName>
+					<Path>Media/834678597.wem</Path>
+					<CachePath>63/{63EAC019-4E6E-ABCA-4658-E2DBAD5AABDE}.wem</CachePath>
+				</File>
+			</Media>
+			<Events>
+				<Event Id="3376698996" Name="SFX_UI_IdleScreen" ObjectPath="\Events\S2 Live\UI\GameInitialization\SFX_UI_IdleScreen" GUID="{316F5C2C-F0AD-47E6-B755-A7AA6EBC4CDA}" Color="6" DurationType="Infinite">
+					<MediaRefs>
+						<MediaRef Id="834678597"/>
+					</MediaRefs>
+					<ActionSetState>
+						<ActionSetStateEntry GroupId="2554129376" Id="4030957765" Name="WaitingForInput" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\WaitingForInput" GUID="{0ADC8E68-5D36-4194-BA57-4AD555F26190}"/>
+					</ActionSetState>
+				</Event>
+			</Events>
+			<GameParameters>
+				<GameParameter Id="2150532158" Name="RTPC_SideChain_GameInitialization" ObjectPath="\Game Parameters\S2 Live\Sidechain\RTPC_SideChain_GameInitialization" GUID="{87125872-EEB9-4682-BC42-78E26164D76B}"/>
+			</GameParameters>
+			<StateGroups>
+				<StateGroup Id="2554129376" Name="ST_GameState" ObjectPath="\States\S2 Live\Gameplay\ST_GameState" GUID="{7FD3517C-D91B-4E3A-8A35-B0B722B1302B}">
+					<States>
+						<State Id="713907618" Name="Fastback" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\Fastback" GUID="{CA854DC4-BE43-4BC3-A909-6A1500AFB7CD}"/>
+						<State Id="748895195" Name="None" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\None" GUID="{715361C6-C6A7-41E3-B5D9-F960D68A6BCA}"/>
+						<State Id="782826392" Name="Default" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\Default" GUID="{B1E9388F-9B11-497B-BF15-6783933A1652}"/>
+						<State Id="935368109" Name="FirstTimeSettings" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\FirstTimeSettings" GUID="{C3BDB1CA-7511-4604-828C-C3E482AEB93E}"/>
+						<State Id="985442775" Name="LoadingScreen" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\LoadingScreen" GUID="{21FF66FB-9765-4607-ACD1-D9F1729233A3}"/>
+						<State Id="1656947812" Name="PlayerDeath" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\PlayerDeath" GUID="{4A796EE1-F809-44B4-9691-F9D70F273A84}"/>
+						<State Id="2877845072" Name="PrerenderCutscene" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\PrerenderCutscene" GUID="{44A5C822-34FA-42D8-AFBC-7547E4BE6F6F}"/>
+						<State Id="3604647259" Name="MainMenu" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\MainMenu" GUID="{B5065C83-E8E9-4A60-8D07-0A5F5360A03D}"/>
+						<State Id="4030957765" Name="WaitingForInput" ObjectPath="\States\S2 Live\Gameplay\ST_GameState\WaitingForInput" GUID="{0ADC8E68-5D36-4194-BA57-4AD555F26190}"/>
+					</States>
+				</StateGroup>
+			</StateGroups>
+		</SoundBank>
+	</SoundBanks>
+	<FileHash>{7F4343AC-602C-5CF4-4DD0-773718AB2EB7}</FileHash>
+</SoundBanksInfo>
