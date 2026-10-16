@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{D77AC8B4-7317-4E64-AAE9-4A7D7956A8A4}" SchemaVersion="123">
+	<Events>
+		<WorkUnit Name="PauseMenu" ID="{D77AC8B4-7317-4E64-AAE9-4A7D7956A8A4}" PersistMode="Standalone">
+			<ChildrenList>
+				<Event Name="SFX_UI_PauseMenu_On" ID="{17AB0256-C0F2-4B13-9AD8-3282BA617907}">
+					<Comment>Separate Pause without Fade for Voiceover to avoid desync.</Comment>
+					<ChildrenList>
+						<Action Name="" ID="{9006E28B-4DC5-4E73-9C0D-CDE4996C7622}" ShortID="811942915">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="8"/>
+								<Property Name="Scope" Type="int16" Value="1"/>
+							</PropertyList>
+							<ReferenceList/>
+							<ChildrenList>
+								<EventActionException Name="" ID="{FD2B1A3F-E83D-430D-B181-3F2EBC3B0242}">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="MainMenu" ID="{67A0A0B1-5E70-4872-AA1D-0FD25710B28F}" WorkUnitID="{E2B3192B-F5F7-4693-9A0B-C938B01BD558}"/>
+										</Reference>
+									</ReferenceList>
+								</EventActionException>
+								<EventActionException Name="" ID="{8FA48F21-9E9E-456B-A974-C4FA36053CD4}">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Settings" ID="{23754F48-2121-48BA-9EED-EA88B8E155C7}" WorkUnitID="{66588A98-818E-4177-AA06-786AECEC00EC}"/>
+										</Reference>
+									</ReferenceList>
+								</EventActionException>
+								<EventActionException Name="" ID="{862B2016-4FFF-4B53-B65F-A3510E2E62F8}">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="LoadingScreen" ID="{3890640C-9BA5-4827-9664-21E1ECBEF597}" WorkUnitID="{F3D3AEB8-8970-4D42-BA7B-9965519899BB}"/>
+										</Reference>
+									</ReferenceList>
+								</EventActionException>
+								<EventActionException Name="" ID="{9E00D7B3-51CB-4132-91EF-F0C34D0ADEA2}">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="M_MainMenu" ID="{062F37C5-0242-4034-AD43-1E542413576A}" WorkUnitID="{65C28DEF-C7B3-470D-9568-8DCC17B3AA84}"/>
+										</Reference>
+									</ReferenceList>
+								</EventActionException>
+								<EventActionException Name="" ID="{B993C52B-C61F-45C2-AB7F-D495771C2B7B}">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Voiceover" ID="{CAC5B5B9-82D8-4EE9-8662-956D5424941A}" WorkUnitID="{F176A536-D87B-451D-9547-8FD6C23513FA}"/>
+										</Reference>
+									</ReferenceList>
+								</EventActionException>
+							</ChildrenList>
+						</Action>
+						<Action Name="" ID="{D63C2916-C03D-4C22-AEC2-98F7AF68299C}" ShortID="796807901">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="7"/>
+								<Property Name="Scope" Type="int16" Value="1"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="Voiceover" ID="{CAC5B5B9-82D8-4EE9-8662-956D5424941A}" WorkUnitID="{F176A536-D87B-451D-9547-8FD6C23513FA}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+						<Action Name="" ID="{0D8B1647-4D77-4E0D-8128-E7C2D1B53878}" ShortID="788603095">
+							<PropertyList>
+								<Property Name="FadeInCurve" Type="int16" Value="6"/>
+								<Property Name="FadeTime" Type="Real64" Value="2"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="S_UI_PauseMenu_Loop" ID="{B17E11A6-37FB-499E-BAA9-780C9E07617B}" WorkUnitID="{35EE67DA-89ED-403F-A528-A720B81D7686}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+						<Action Name="" ID="{9BA8319B-6091-45FB-8286-F9B3B2DE0399}" ShortID="969015049">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="36"/>
+								<Property Name="SeekPercent" Type="Real64">
+									<ModifierList>
+										<ModifierInfo>
+											<Modifier Name="" ID="{E11AB801-220C-4A91-A5CB-2C12C072AD0D}">
+												<PropertyList>
+													<Property Name="Enabled" Type="bool" Value="True"/>
+													<Property Name="Max" Type="Real64" Value="100"/>
+												</PropertyList>
+											</Modifier>
+										</ModifierInfo>
+									</ModifierList>
+								</Property>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="S_UI_PauseMenu_Loop" ID="{B17E11A6-37FB-499E-BAA9-780C9E07617B}" WorkUnitID="{35EE67DA-89ED-403F-A528-A720B81D7686}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+						<Action Name="" ID="{291E3A39-1D4E-410F-AEBB-1D058E48B628}" ShortID="570579673">
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="S_UI_PauseMenu_OneShot_Drone" ID="{CA2CFB35-F28C-4D16-A66E-F3E305D69996}" WorkUnitID="{35EE67DA-89ED-403F-A528-A720B81D7686}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+				<Event Name="SFX_UI_PauseMenu_Off" ID="{237D24D8-75FB-43C1-9A0A-3C9E48845DBC}">
+					<Comment>Separate Resume without Fade for Voiceover to avoid desync.</Comment>
+					<ChildrenList>
+						<Action Name="" ID="{6F7C74D7-6E41-4763-A55D-E47A2A9EC812}" ShortID="260411462">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="10"/>
+								<Property Name="MasterResume" Type="bool" Value="True"/>
+								<Property Name="Scope" Type="int16" Value="1"/>
+							</PropertyList>
+							<ReferenceList/>
+							<ChildrenList>
+								<EventActionException Name="" ID="{DBC95B1F-8537-4F2A-83C1-0EDFADACBAF1}">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="Voiceover" ID="{CAC5B5B9-82D8-4EE9-8662-956D5424941A}" WorkUnitID="{F176A536-D87B-451D-9547-8FD6C23513FA}"/>
+										</Reference>
+									</ReferenceList>
+								</EventActionException>
+							</ChildrenList>
+						</Action>
+						<Action Name="" ID="{54B59140-D98A-4FD6-A43E-6632B9281770}" ShortID="985906505">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="9"/>
+								<Property Name="Scope" Type="int16" Value="1"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="Voiceover" ID="{CAC5B5B9-82D8-4EE9-8662-956D5424941A}" WorkUnitID="{F176A536-D87B-451D-9547-8FD6C23513FA}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+						<Action Name="" ID="{2046C51B-22A1-4D2D-81C0-6FF2252B958C}" ShortID="369177615">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="2"/>
+								<Property Name="FadeOutCurve" Type="int16" Value="5"/>
+								<Property Name="FadeTime" Type="Real64" Value="1"/>
+								<Property Name="Scope" Type="int16" Value="1"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="S_UI_PauseMenu_OneShot_Drone" ID="{CA2CFB35-F28C-4D16-A66E-F3E305D69996}" WorkUnitID="{35EE67DA-89ED-403F-A528-A720B81D7686}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+						<Action Name="" ID="{0DE9F93C-3EA0-41B5-B03B-504185058E18}" ShortID="67727540">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="2"/>
+								<Property Name="FadeOutCurve" Type="int16" Value="5"/>
+								<Property Name="FadeTime" Type="Real64" Value="1"/>
+								<Property Name="Scope" Type="int16" Value="1"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="S_UI_PauseMenu_OneShot_Whoosh" ID="{239EAD44-5B58-428E-B983-2E196EF0F567}" WorkUnitID="{35EE67DA-89ED-403F-A528-A720B81D7686}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+						<Action Name="" ID="{CD62B93A-A82E-4CBE-8475-126BDB2F8C5A}" ShortID="599346822">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="2"/>
+								<Property Name="FadeOutCurve" Type="int16" Value="5"/>
+								<Property Name="FadeTime" Type="Real64" Value="1"/>
+								<Property Name="Scope" Type="int16" Value="1"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="S_UI_PauseMenu_OneShot_WhooshFire" ID="{21A5B0B3-6A58-40E1-8BCF-12662D5C2CAF}" WorkUnitID="{35EE67DA-89ED-403F-A528-A720B81D7686}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+						<Action Name="" ID="{B1C2579C-F888-407D-A299-AEDB5B35DFC8}" ShortID="977294706">
+							<PropertyList>
+								<Property Name="ActionType" Type="int16" Value="2"/>
+								<Property Name="FadeOutCurve" Type="int16" Value="5"/>
+								<Property Name="FadeTime" Type="Real64" Value="1"/>
+								<Property Name="Scope" Type="int16" Value="1"/>
+							</PropertyList>
+							<ReferenceList>
+								<Reference Name="Target">
+									<ObjectRef Name="S_UI_PauseMenu_Loop" ID="{B17E11A6-37FB-499E-BAA9-780C9E07617B}" WorkUnitID="{35EE67DA-89ED-403F-A528-A720B81D7686}"/>
+								</Reference>
+							</ReferenceList>
+						</Action>
+					</ChildrenList>
+				</Event>
+			</ChildrenList>
+		</WorkUnit>
+	</Events>
+</WwiseDocument>

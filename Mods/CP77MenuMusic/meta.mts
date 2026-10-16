@@ -2,51 +2,24 @@ import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType = {
   description: `
-[h1]Deprecated in 2.0[/h1]
-[h1][/h1]
-With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
-[hr][/hr]
-Replaces pause menu music to a precarious one from CP77
+Brings a tense, uneasy track from Cyberpunk 2077 to the pause menu and the title screen.
 
+The whooshing sounds that play when you open the pause menu are gone, so the music comes through on its own.
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Initial release",
+  changenote: "Updated for game version 2.0",
   structTransformers: [],
 };
 
 /**
- * /Stalker2/Content/_STALKER2/Audio/WwiseAudio/Media/166444733.wem - pause menu loop
+ * Wwise audio mod, see the eng-wwise skill and src/mod-wwise.mts.
+ * The music heard in the pause menu is the Sound `S_UI_IdleScreen_Loop`
+ * ({480D3274-9FF9-48FA-A9E3-7A162B84C759}, `Actor-Mixer Hierarchy\S2 Live\UI\GameInitialization\IntroLoadingScreen`),
+ * played by `SFX_UI_IdleScreen` and `SFX_UI_IntroLoadingScreen` (EUISound::IdleScreen in
+ * BaseGame_UISounds). Its source is `O\SFX\S2_Live\S_UI_IdleScreen_Loop_CP77.wav` (the track
+ * +17 dB, about -24 LUFS like the vanilla loop).
+ * `SFX_UI_PauseMenu_On` also gets the track on its muffled `S_UI_PauseMenu_Loop` bed
+ * (`S_UI_PauseMenu_Loop_CP77.wav`, +13 dB, about -28 LUFS), and its Play actions for the
+ * OneShot_Whoosh and OneShot_WhooshFire containers are deleted (the drone one-shot stays).
+ * The Sounds keep their vanilla loop, lowpass and gain settings.
  */
-
-let b = {
-  Name: "SFX_UI_PauseMenu_On",
-  Value: [
-    { path: "Media/82729869.wem", name: "S_UI_PauseMenu_OneShot_WhooshFire_04.wav" },
-    { path: "Media/116239323.wem", name: "S_UI_PauseMenu_OneShot_Whoosh_06.wav" },
-    { path: "Media/117524831.wem", name: "S_UI_PauseMenu_OneShot_WhooshFire_02.wav" },
-    { path: "Media/155020427.wem", name: "S_UI_PauseMenu_OneShot_Drone_01.wav" },
-    { path: "Media/166444733.wem", name: "S_UI_PauseMenu_Loop.wav" },
-    { path: "Media/227327436.wem", name: "S_UI_PauseMenu_OneShot_Drone_02.wav" },
-    { path: "Media/324049057.wem", name: "S_UI_PauseMenu_OneShot_Whoosh_03.wav" },
-    { path: "Media/375234068.wem", name: "S_UI_PauseMenu_OneShot_WhooshFire_03.wav" },
-    { path: "Media/489037618.wem", name: "S_UI_PauseMenu_OneShot_Whoosh_01.wav" },
-    { path: "Media/496772260.wem", name: "S_UI_PauseMenu_OneShot_Whoosh_04.wav" },
-    { path: "Media/518007607.wem", name: "S_UI_PauseMenu_OneShot_Whoosh_02.wav" },
-    { path: "Media/539018321.wem", name: "S_UI_PauseMenu_OneShot_Whoosh_05.wav" },
-    { path: "Media/868227669.wem", name: "S_UI_PauseMenu_OneShot_WhooshFire_01.wav" },
-    { path: "Media/954302212.wem", name: "S_UI_PauseMenu_OneShot_Drone_03.wav" },
-  ],
-  MaximumDuration: 0.0,
-  MinimumDuration: 0.0,
-  IsInfinite: true,
-};
-let a = {
-  Name: "SFX_UI_IntroLoadingScreen",
-  Value: [
-    { path: "Media/243071578.wem", name: "S_UI_Logos_Linear.wav" },
-    { path: "Media/316627670.wem", name: "S_UI_IdleScreen_Loop.wav" },
-  ],
-  MaximumDuration: 0.0,
-  MinimumDuration: 0.0,
-  IsInfinite: true,
-};

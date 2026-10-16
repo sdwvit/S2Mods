@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SoundBanksInfo Platform="Windows" BasePlatform="Windows" SchemaVersion="16" SoundBankVersion="154">
+	<SoundBanks>
+		<SoundBank Id="606761299" Type="Event" GUID="{17AB0256-C0F2-4B13-9AD8-3282BA617907}" Language="SFX" Hash="{9C0DD6D8-0DB4-2CCA-FE77-6892DA3E7AD5}">
+			<ObjectPath>SFX_UI_PauseMenu_On</ObjectPath>
+			<ShortName>SFX_UI_PauseMenu_On</ShortName>
+			<Path>Event/SFX_UI_PauseMenu_On.bnk</Path>
+			<Media>
+				<File Id="155020428" Language="SFX" Streaming="true" Location="Loose">
+					<ShortName>S2_Live\S_UI_PauseMenu_OneShot_Drone_01.wav</ShortName>
+					<Path>Media/155020428.wem</Path>
+					<CachePath>7A/{7ACAC027-9CE1-1D21-8C70-4F3911690620}.wem</CachePath>
+				</File>
+				<File Id="227327437" Language="SFX" Streaming="true" Location="Loose">
+					<ShortName>S2_Live\S_UI_PauseMenu_OneShot_Drone_02.wav</ShortName>
+					<Path>Media/227327437.wem</Path>
+					<CachePath>6B/{6B5335F7-061F-0600-5BCF-53AE6CABAA8F}.wem</CachePath>
+				</File>
+				<File Id="684732643" Language="SFX" Streaming="true" Location="Loose">
+					<ShortName>S2_Live\S_UI_PauseMenu_Loop_CP77.wav</ShortName>
+					<Path>Media/684732643.wem</Path>
+					<CachePath>AB/{AB3BE32D-F968-2402-86BD-DC678E644482}.wem</CachePath>
+				</File>
+				<File Id="954302213" Language="SFX" Streaming="true" Location="Loose">
+					<ShortName>S2_Live\S_UI_PauseMenu_OneShot_Drone_03.wav</ShortName>
+					<Path>Media/954302213.wem</Path>
+					<CachePath>08/{08A617A2-A019-00A6-2AFF-1D13A0BC7CC4}.wem</CachePath>
+				</File>
+			</Media>
+			<Events>
+				<Event Id="606761299" Name="SFX_UI_PauseMenu_On" ObjectPath="\Events\S2 Live\UI\PauseMenu\SFX_UI_PauseMenu_On" GUID="{17AB0256-C0F2-4B13-9AD8-3282BA617907}" DurationType="Infinite">
+					<MediaRefs>
+						<MediaRef Id="155020428"/>
+						<MediaRef Id="227327437"/>
+						<MediaRef Id="684732643"/>
+						<MediaRef Id="954302213"/>
+					</MediaRefs>
+				</Event>
+			</Events>
+		</SoundBank>
+	</SoundBanks>
+	<FileHash>{1F6CB3B5-C4E8-5E61-A74F-FAB2DCDDDBB1}</FileHash>
+</SoundBanksInfo>

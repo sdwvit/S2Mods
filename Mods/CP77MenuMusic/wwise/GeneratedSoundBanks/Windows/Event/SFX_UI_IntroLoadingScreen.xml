@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SoundBanksInfo Platform="Windows" BasePlatform="Windows" SchemaVersion="16" SoundBankVersion="154">
+	<SoundBanks>
+		<SoundBank Id="42735696" Type="Event" GUID="{C85C1423-F486-4AB8-BC93-9A91BFD5A1BF}" Language="SFX" Hash="{3167A331-E05A-D4E4-F155-9BAE5D812F99}">
+			<ObjectPath>SFX_UI_IntroLoadingScreen</ObjectPath>
+			<ShortName>SFX_UI_IntroLoadingScreen</ShortName>
+			<Path>Event/SFX_UI_IntroLoadingScreen.bnk</Path>
+			<Media>
+				<File Id="243071579" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_UI_Logos_Linear.wav</ShortName>
+					<Path>Media/243071579.wem</Path>
+					<CachePath>A0/{A0AB18A0-2FCD-1667-6556-54B0FCEDAE3F}.wem</CachePath>
+				</File>
+				<File Id="834678597" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_UI_IdleScreen_Loop_CP77.wav</ShortName>
+					<Path>Media/834678597.wem</Path>
+					<CachePath>63/{63EAC019-4E6E-ABCA-4658-E2DBAD5AABDE}.wem</CachePath>
+				</File>
+			</Media>
+			<Plugins>
+				<Custom>
+					<Plugin Id="478692964" Name="Meter (Custom)" ObjectPath="\Actor-Mixer Hierarchy\S2 Live\UI\GameInitialization\IntroLoadingScreen\S_UI_Logos_Linear\[Effect Slot [0]: (Meter)]\Meter (Custom)" GUID="{83CF31C8-8B9B-4C2E-A5FB-64A8F7AE4546}" LibName="Wwise Meter" LibId="8454147"/>
+				</Custom>
+			</Plugins>
+			<Events>
+				<Event Id="42735696" Name="SFX_UI_IntroLoadingScreen" ObjectPath="\Events\S2 Live\UI\GameInitialization\SFX_UI_IntroLoadingScreen" GUID="{C85C1423-F486-4AB8-BC93-9A91BFD5A1BF}" DurationType="Infinite">
+					<MediaRefs>
+						<MediaRef Id="243071579"/>
+						<MediaRef Id="834678597"/>
+					</MediaRefs>
+					<PluginRefs>
+						<Custom>
+							<PluginRef Id="478692964"/>
+						</Custom>
+					</PluginRefs>
+				</Event>
+			</Events>
+			<GameParameters>
+				<GameParameter Id="2150532158" Name="RTPC_SideChain_GameInitialization" ObjectPath="\Game Parameters\S2 Live\Sidechain\RTPC_SideChain_GameInitialization" GUID="{87125872-EEB9-4682-BC42-78E26164D76B}"/>
+			</GameParameters>
+		</SoundBank>
+	</SoundBanks>
+	<FileHash>{6760A894-FDF1-2785-BE94-AD75D24FCF7A}</FileHash>
+</SoundBanksInfo>
