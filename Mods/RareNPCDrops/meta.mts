@@ -1,6 +1,7 @@
 import type { ItemGeneratorPrototype } from "s2cfgtojson";
 import type { MetaType } from "../../src/meta-type.mts";
 import { transformItemGenerators } from "./transformItemGenerators.mts";
+import { transformQuestItemPrototypes } from "./transformQuestItemPrototypes.mts";
 
 export const meta: MetaType<ItemGeneratorPrototype> = {
   description: `
@@ -23,9 +24,11 @@ Each NPC corpse has a 1% chance to drop a detector and a separate 1% chance to d
     [/list]
     [h2][/h2]
     Artifacts are also weighted by cost tier — cheaper artifacts drop more often than expensive ones.
+    [h2][/h2]
+    Ward soldiers also carry something of their own, very rarely.
   
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Updated for 2.0: patches regenerated against 2.0 game data.",
-  structTransformers: [transformItemGenerators],
+  changenote: "Adds an ultra-rare Ward soldier drop, and lets other mods detect that RareNPCDrops is installed.",
+  structTransformers: [transformItemGenerators, transformQuestItemPrototypes],
 };

@@ -10,6 +10,12 @@ import { precision } from "../../src/precision.mts";
 
 const SUB_GEN_CHANCE = 0.01;
 
+/** Non-quest copy of the Ward badge (see transformQuestItems.mts); generic Ward soldiers only. */
+export const WARD_BADGE_SID = "RareNPCDrops_VartaDogtag";
+const WARD_BADGE_CHANCE = 0.001;
+const WARD_BADGE_SUB_GEN_SID = "RareNPCDrops_WardBadge_SubItemGenerator";
+const isWardSoldierGenerator = (sid: string) => /^(GeneralNPC|GuardNPC)_Varta_\w+_ItemGenerator$/.test(sid);
+
 const RANKS = ["Newbie", "Experienced", "Veteran", "Master"] as const;
 type Rank = (typeof RANKS)[number];
 
@@ -120,10 +126,24 @@ function buildArtifactSubGen(rank: Rank): ItemGeneratorPrototype {
   }) as ItemGeneratorPrototype;
 }
 
-const subGenStructs = RANKS.flatMap((rank) => [
-  buildDetectorSubGen(rank),
-  buildArtifactSubGen(rank),
-]);
+function buildWardBadgeSubGen(): ItemGeneratorPrototype {
+  return new Struct({
+    __internal__: { isRoot: true, rawName: WARD_BADGE_SUB_GEN_SID },
+    SID: WARD_BADGE_SUB_GEN_SID,
+    ItemGenerator: new Struct({
+      0: new Struct({
+        Category: "EItemGenerationCategory::Junk" satisfies EItemGenerationCategory,
+        PossibleItems: new Struct({ 0: new Struct({ ItemPrototypeSID: WARD_BADGE_SID, Weight: 1 }) }),
+        bAllowSameCategoryGeneration: true,
+      }),
+    }),
+  }) as ItemGeneratorPrototype;
+}
+
+const subGenStructs = [
+  ...RANKS.flatMap((rank) => [buildDetectorSubGen(rank), buildArtifactSubGen(rank)]),
+  buildWardBadgeSubGen(),
+];
 
 function shouldProcessStruct(struct: ItemGeneratorPrototype) {
   if (!struct?.ItemGenerator) return false;
@@ -178,6 +198,18 @@ export const transformItemGenerators: StructTransformer<ItemGeneratorPrototype> 
         }),
       }),
       `RareNPCDrops_Artifacts_${rank}`,
+    );
+  }
+
+  if (isWardSoldierGenerator(struct.SID)) {
+    fork.ItemGenerator.addNode(
+      new Struct({
+        Category: "EItemGenerationCategory::SubItemGenerator" satisfies EItemGenerationCategory,
+        PossibleItems: new Struct({
+          0: new Struct({ ItemGeneratorPrototypeSID: WARD_BADGE_SUB_GEN_SID, Chance: WARD_BADGE_CHANCE }),
+        }),
+      }),
+      "RareNPCDrops_WardBadge",
     );
   }
 
