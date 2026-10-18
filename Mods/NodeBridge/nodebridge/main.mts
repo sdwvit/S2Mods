@@ -5,6 +5,8 @@ import type { ModInit } from "@nodebridge/runtime";
 import { waitForReflection, parseHex, readU32LE, readU64LE } from "@nodebridge/runtime";
 
 const FNAME_CTOR_RVA = 0xd26be8; // patternsleuth offline scan 2026-05-01
+// The RVA above predates the 2026-09-29 game build; calling it now would jump into unrelated code.
+const EWEATHER_ENABLED = false;
 
 // New weather variants to append after the original 12 entries (values 12–21).
 const NEW_WEATHERS = [
@@ -33,6 +35,7 @@ function toLE64(n: number): string {
 }
 
 const init: ModInit = async (bridge) => {
+  if (!EWEATHER_ENABLED) { bridge.log("EWeather extend: disabled (stale FName ctor RVA)"); return; }
   bridge.log("EWeather extend: start");
   await waitForReflection(bridge);
 
