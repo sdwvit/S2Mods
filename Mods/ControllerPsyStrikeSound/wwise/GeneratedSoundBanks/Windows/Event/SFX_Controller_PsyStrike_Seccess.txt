@@ -1,0 +1,11 @@
+Event	ID	Name			Wwise Object Path	Notes
+	2875594258	SFX_Controller_PsyStrike_Seccess			\S2 Live\Mutants\Controller\Controller Voice\SFX_Controller_PsyStrike_Seccess	
+
+State Group	ID	Name			Wwise Object Path	Notes
+	3866368167	ST_Motion_State			\S2 Live\Motion\ST_Motion_State	
+
+State	ID	Name	State Group			Notes
+	748895195	None	ST_Motion_State			
+	930712164	Off	ST_Motion_State			
+	1651971902	On	ST_Motion_State			
+
