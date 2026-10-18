@@ -2,7 +2,8 @@
 // stream of file changes. It also acts on mechanical feedback by itself (picks, unpicks, comment-less text edits);
 // records with a hand-written comment are left for an agent (see /api/pending).
 // Usage: node src/voiceover-server/server.mts [port]   (env VOICEOVER_ROOT = voice workspace, REVIEW_PORT = port)
-import "../ensure-env.mts";
+import "../../ensure-env.mts";
+import { createAgent } from "./agent.mts";
 import { spawn } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -21,6 +22,11 @@ const TEST = path.join(ROOT, "higgs_test");
 const FEEDBACK = path.join(REVIEW, "feedback.jsonl");
 const EVENTS = path.join(REVIEW, "agent_events.jsonl");
 const JOBS = path.join(REVIEW, "jobs");
+const RUNS = path.join(REVIEW, "agent_runs.jsonl");
+// generation scripts (src/voiceover/pipeline); tests point this at stubs
+const PIPELINE = path.resolve(
+  process.env.VOICEOVER_PIPELINE_DIR || path.join(import.meta.dirname, "..", "pipeline"),
+);
 const RUNLOG = path.join(HIGGS, "run.log");
 const INDEX = path.join(import.meta.dirname, "index.html");
 const PORT = Number(process.argv[2] || process.env.REVIEW_PORT || 8765);
@@ -215,15 +221,41 @@ function batchGroup(name: string) {
       if (!lines.has(k)) lines.set(k, { ...log.get(k), n: Number(m[1]), sid: m[2] });
     }
   }
+  // lines the other language's script has and this one lacks: listed with no takes, so the gap shows
+  const lang = /^(.+)_(en|uk)$/.exec(name);
+  if (lang && scriptName === name + ".json") {
+    const other = `${lang[1]}_${lang[2] === "en" ? "uk" : "en"}`;
+    const have = new Set([...lines.values()].map((l) => l.sid));
+    for (const l of loadJson<Rec>(path.join(HIGGS, other + ".json"), {}).lines || []) {
+      if (have.has(l.sid)) continue;
+      lines.set(key(l.n, l.sid), {
+        n: l.n,
+        sid: l.sid,
+        speaker: l.speaker,
+        same_as: l.same_as,
+        missing: other,
+        missing_text: l.text,
+      });
+    }
+  }
+  const finalOf = (n: number, sid: string) =>
+    path.join(HIGGS, "final", name, `${String(n).padStart(2, "0")}_${sid}.wav`);
   const sorted = [...lines.values()].sort(
     (a, b) => a.n - b.n || (a.sid < b.sid ? -1 : a.sid > b.sid ? 1 : 0),
   );
   const out = sorted.map((l) => {
     const k = key(l.n, l.sid);
-    const fin = path.join(HIGGS, "final", name, `${String(l.n).padStart(2, "0")}_${l.sid}.wav`);
+    const fin = finalOf(l.n, l.sid);
     const fh = fs.existsSync(fin) ? cached(fin, "md5", md5) : null;
     const takes = wavs(dirs.get(k) || "").map((p) => take(p, undefined, fh));
     if (fh && !takes.some((t) => t.final)) takes.push({ ...take(fin, "final"), final: true });
+    // same words as another line: its final take is reused for this one (backup_finals.sh copies it)
+    const src = l.same_as && [...lines.values()].find((x) => x.sid === l.same_as);
+    if (src && !takes.length && fs.existsSync(finalOf(src.n, src.sid)))
+      takes.push({
+        ...take(finalOf(src.n, src.sid), `same as ${String(src.n).padStart(2, "0")}`),
+        final: true,
+      });
     const lg = log.get(k);
     return {
       n: l.n,
@@ -233,6 +265,8 @@ function batchGroup(name: string) {
       expected: lg ? (lg.expected ?? null) : null,
       tries: lg ? (lg.tries ?? null) : null,
       takes,
+      ...(l.same_as && { same_as: l.same_as }),
+      ...(l.missing && { missing: l.missing, missing_text: l.missing_text || "" }),
     };
   });
   return {
@@ -444,7 +478,7 @@ function lineStates(fb: Rec[], ev: Rec[]) {
   return out;
 }
 
-/** Line jobs (scripts/line_job.sh, alt_jobs.sh) still alive: running (latest event for the sid is 'working') or queued on the GPU lock. */
+/** Line jobs (pipeline line_job.sh, alt_jobs.sh) still alive: running (latest event for the sid is 'working') or queued on the GPU lock. */
 function jobs() {
   const last = new Map<string, Rec>();
   for (const e of readJsonl(EVENTS)) if (e.sid) last.set(e.sid, e);
@@ -545,6 +579,53 @@ function pending() {
   );
 }
 
+/** Batch lines with no takes and no final (same_as lines wait for their source): audio an agent has to generate. */
+function missing() {
+  const out: Rec[] = [];
+  for (const gid of groupIds().filter((g) => g.startsWith("batch:"))) {
+    for (const l of batchGroup(gid.slice(6)).lines as Rec[]) {
+      if (l.takes.length || l.same_as) continue;
+      out.push({
+        group: gid,
+        n: l.n,
+        sid: l.sid,
+        speaker: l.speaker,
+        text: l.text,
+        ...(l.missing && { missing: l.missing, missing_text: l.missing_text }),
+      });
+    }
+  }
+  return out;
+}
+
+/** Agent runs with cost totals, overall, per model and today. */
+function runsSummary() {
+  const runs = readJsonl(RUNS);
+  const byModel: Rec = {};
+  for (const r of runs) byModel[r.model] = (byModel[r.model] || 0) + Number(r.cost_usd || 0);
+  const total = runs.reduce((a, r) => a + Number(r.cost_usd || 0), 0);
+  return {
+    runs,
+    total_usd: total,
+    by_model: byModel,
+    agent: agent ? agent.status() : { state: "disabled" },
+  };
+}
+
+/** The line a note is about, for the agent's prompt: its script entry and the takes on disk. */
+function lineInfo(rec: Rec) {
+  if (!String(rec.group).startsWith("batch:")) return null;
+  const batch = rec.group.slice(6);
+  const l = (scriptFor(batch)[1].lines || []).find((x: Rec) => x.sid === rec.sid);
+  const dir = lineDirs(batch, rec.sid)[0];
+  return {
+    ...l,
+    script: `higgs/${scriptFor(batch)[0]}`,
+    dir: dir && rel(dir),
+    takes: dir ? listDir(dir) : [],
+  };
+}
+
 const postEvent = (e: Rec) => appendJsonl(EVENTS, { ts: now(), ...e });
 const lineDirs = (batch: string, sid: string) =>
   listDir(path.join(HIGGS, batch))
@@ -552,7 +633,7 @@ const lineDirs = (batch: string, sid: string) =>
     .map((f) => path.join(HIGGS, batch, f));
 
 /** Copy picked takes into higgs/final/ (good: the line's s2024 take, or its only file), move unpicked finals to
- * archive/unfinal/, post a done event for each, then run scripts/backup_finals.sh if the workspace has one. */
+ * archive/unfinal/, post a done event for each, then run backup_finals.sh from the pipeline. */
 function finalize() {
   const handled = new Set(
     readJsonl(EVENTS)
@@ -639,10 +720,10 @@ function runAuto(rec: Rec) {
     try {
       const kind = autoKind(rec);
       if (kind === "final") {
-        const backup = path.join(ROOT, "scripts", "backup_finals.sh");
+        const backup = path.join(PIPELINE, "backup_finals.sh");
         if (finalize() && fs.existsSync(backup)) await runScript(backup); // mirror finals into the mod folder
       } else if (kind === "redo") {
-        const script = path.join(ROOT, "scripts", "line_job.sh");
+        const script = path.join(PIPELINE, "line_job.sh");
         if (!fs.existsSync(script)) return;
         postEvent({
           feedback_id: rec.id,
@@ -673,8 +754,13 @@ function snapshot() {
     ["jobs", JOBS],
     ["run", RUNLOG],
     ["page", INDEX],
+    ["runs", RUNS],
   ])
     s.set(k, treeSig([p]).join(","));
+  if (agent) {
+    const a = agent.status();
+    s.set("agent", a.state + " " + a.notes.map((n) => n.id).join(","));
+  }
   return s;
 }
 
@@ -782,6 +868,10 @@ function handleGet(req: http.IncomingMessage, res: http.ServerResponse, u: URL) 
       return sendJson(res, statuses(readJsonl(FEEDBACK), readJsonl(EVENTS)));
     case "/api/pending":
       return sendJson(res, pending());
+    case "/api/runs":
+      return sendJson(res, runsSummary());
+    case "/api/missing":
+      return sendJson(res, missing());
     case "/api/linestatus":
       return sendJson(res, lineStates(readJsonl(FEEDBACK), readJsonl(EVENTS)));
     case "/api/events":
@@ -816,6 +906,7 @@ function handlePost(res: http.ServerResponse, u: URL, data: Rec) {
     };
     appendJsonl(FEEDBACK, rec);
     if (autoKind(rec)) runAuto(rec);
+    agent?.pump();
     return sendJson(res, rec);
   }
   if (u.pathname === "/api/delete") return sendJson(res, ...deleteTake(data.path || ""));
@@ -859,9 +950,41 @@ const server = http.createServer((req, res) => {
   }
 });
 
+// the agent that handles notes with a hand-written comment (VOICEOVER_AGENT=0 turns it off)
+const agent =
+  process.env.VOICEOVER_AGENT === "0"
+    ? null
+    : createAgent({
+        root: ROOT,
+        modDir: process.env.VOICEOVER_MOD_DIR ? path.resolve(process.env.VOICEOVER_MOD_DIR) : null,
+        pipelineDir: PIPELINE,
+        protocol: path.join(import.meta.dirname, "..", "AGENT_PROTOCOL.md"),
+        port: PORT,
+        model: process.env.VOICEOVER_AGENT_MODEL || "sonnet",
+        command: process.env.VOICEOVER_AGENT_CMD || "claude",
+        turnTimeoutMs: Number(process.env.VOICEOVER_AGENT_TIMEOUT_MIN || 15) * 60000,
+        rotateAfter: Number(process.env.VOICEOVER_AGENT_ROTATE || 25),
+        dailyUsd: Number(process.env.VOICEOVER_AGENT_DAILY_USD || 15),
+        pending,
+        lineInfo,
+        postEvent,
+        runs: () => readJsonl(RUNS),
+        appendRun: (r) => appendJsonl(RUNS, r),
+        now,
+      });
+for (const sig of ["SIGTERM", "SIGINT"] as const)
+  process.on(sig, () => {
+    agent?.stop();
+    process.exit(0);
+  });
+
 sigs = snapshot();
 setInterval(watch, 1000);
 setTimeout(() => runAuto({ group: "batch:", verdict: "pick" }), 1000); // picks made while the server was down
+if (agent) {
+  setTimeout(agent.pump, 2000); // notes left open while the server was down
+  setInterval(agent.pump, 60000); // and notes held back by the daily budget
+}
 server.listen(PORT, "127.0.0.1", () =>
   console.log(`Voice review: http://127.0.0.1:${PORT}/  (pid ${process.pid}, Ctrl+C to stop)`),
 );

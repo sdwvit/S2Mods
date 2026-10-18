@@ -46,6 +46,7 @@ Run with `node` via npm scripts:
 - `npm run create-git-branches`: utility to create mod branches.
 - `npm run purge-caches`: remove `.cache.zlib` files (safe cleanup).
 - `npm run check-comments`: list new mod.io + Steam Workshop comments on all published mods (`--mark-seen` to acknowledge; see the `mod-comments` skill).
+- `npm run voiceover-server`: voice-line review site. The whole voiceover workflow (Higgs TTS pipeline, review site, agent) is in `src/voiceover/README.md`.
 
 ## Generated/ignored content
 The following are git-ignored and should not be committed unless explicitly requested:

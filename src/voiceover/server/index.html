@@ -53,6 +53,8 @@ summary .meta { font-weight:400; color:var(--dim); font-size:13px; margin-left:8
 .sid { font-family:ui-monospace, monospace; font-size:12px; }
 .why { font-size:11px; font-weight:700; color:#000; background:var(--needs); border-radius:9px; padding:0 7px; }
 .why:empty { visibility:hidden; }
+.why.muted { background:none; color:var(--needs); border:1px solid var(--needs); }
+.text .miss { font-size:11px; font-weight:700; color:var(--needs); }
 .fin { color:var(--pick); font-weight:600; }
 .text { font-size:17px; margin:4px 0 6px; }
 .tag { font-size:11px; background:var(--chip); color:var(--acc); border-radius:9px; padding:1px 7px; margin:0 2px; vertical-align:2px; }
@@ -132,6 +134,9 @@ body.onlyneeds .line:not(.needs):not(.playing):not(.cur):not(.sticky) { display:
 #hidegood.on { background:var(--good); color:#000; }
 #onlyneeds.on { background:var(--needs); color:#000; }
 .pending { color:var(--dim); font-style:italic; font-size:12px; }
+#cost { font-size:12px; color:var(--dim); white-space:nowrap; }
+#cost.working { color:var(--acc); } #cost.paused { color:var(--del); font-weight:700; }
+.agent .cost { color:var(--dim); font-size:11px; }
 </style>
 </head>
 <body>
@@ -142,6 +147,7 @@ body.onlyneeds .line:not(.needs):not(.playing):not(.cur):not(.sticky) { display:
   <button id="nextneeds" title="jump to the next line that needs you (n)">Next ↓</button>
   <button id="hidegood" title="show/hide lines marked good (g)">Hide good</button>
   <span id="prog"></span>
+  <span id="cost" title="cost of the agent that answers notes"></span>
   <span class="keys"><kbd>j</kbd>/<kbd>k</kbd> line · <kbd>n</kbd> next needing you · <kbd>f</kbd> only needs me · <kbd>space</kbd> play/pause · <kbd>1</kbd>-<kbd>9</kbd> play take · <kbd>p</kbd> choose played take · <kbd>Enter</kbd> Apply · <kbd>c</kbd> comment (<kbd>Enter</kbd> sends redo) · <kbd>g</kbd> hide good · <kbd>Esc</kbd> leave field</span>
 </header>
 <main>
@@ -158,6 +164,7 @@ const api = (p, body) => fetch(p, body ? {method:'POST', headers:{'Content-Type'
 const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
                 set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 const parseTs = s => Date.parse(String(s || '').replace(/([+-]\d\d)(\d\d)$/, '$1:$2')) || 0;
+let costByFb = {};
 let allEvents = [], feedback = [], lineStatus = {}, lineIdx = {}, shown = {}, cur = null, lastAudio = null, pageStale = false;
 const openGroups = store.get('openGroups', null);
 
@@ -210,7 +217,6 @@ function patchGroup(g) {
   $('.sm', el).innerHTML = `All lines<span class="meta">${Object.values(groupStats).filter(x => x.lines).map(x => `${esc(x.name)} ${x.lines}`).join(' · ')}</span>`;
   const keep = new Set();
   for (const l of g.lines) {
-    if (!l.takes.length) continue;  // script lines without audio yet are not reviewable
     const key = lineKey(g.id, l.sid); keep.add(key);
     let le = lineEl(g.id, l.sid);
     if (!le) { le = newLine(g, l); box.append(le); }
@@ -257,9 +263,12 @@ function patchLine(le, g, l) {
   const fin = l.takes.find(t => t.final);
   le.classList.toggle('hasfinal', !!fin);
   le.querySelector('.lhi').innerHTML = `<span class="nn">${String(l.n).padStart(2, '0')}</span><span class="dot"></span>${sp}${fin ? `<span class="fin">★ ${esc(fin.label)}</span>` : ''}<span class="sid">${esc(l.sid)}</span>${exp}${l.seed != null ? ' · seed ' + esc(l.seed) : ''}<span class="lst"></span>`;
-  const tx = renderText(l.text || '');
-  const textChanged = le.dataset.text !== l.text;
+  le.dataset.missing = l.missing || '';
+  // a line only the other language's script has: show that text until this script gets the line
+  const tx = l.missing ? `<span class="miss">not in this script yet · ${esc(l.missing)}:</span> ${renderText(l.missing_text || '')}` : renderText(l.text || '');
+  const textChanged = le.dataset.text !== l.text || le.dataset.missingText !== (l.missing_text || '');
   if (textChanged) {
+    le.dataset.missingText = l.missing_text || '';
     le.querySelector('.text').innerHTML = tx || '';
     const sug = $('.sug', le);
     if (sug.value === sug.dataset.orig) sug.value = l.text || '';  // untouched: follow new script text
@@ -402,7 +411,8 @@ function patchFeedback(le) {
   le.dataset.question = fresh && ev.status === 'question' && !closed ? '1' : '';
   ag.classList.toggle('q', !!le.dataset.question);
   ag.classList.toggle('stale', !!ev && !fresh);
-  const html = ev ? `<span class="st ${esc(ev.status)}">${esc(ev.status)}</span> ${esc(ev.message || '')} <span class="ats">${esc(ev.ts)}</span>` : '';
+  const cost = ev && costByFb[ev.feedback_id];
+  const html = ev ? `<span class="st ${esc(ev.status)}">${esc(ev.status)}</span> ${esc(ev.message || '')} <span class="ats">${esc(ev.ts)}</span>${cost != null ? ` <span class="cost" title="agent cost for this note">$${cost.toFixed(3)}</span>` : ''}` : '';
   if (ag.innerHTML !== html) ag.innerHTML = html;
   patchDot(le);
   const lst = $('.lst', le);
@@ -419,8 +429,13 @@ function patchNeeds(le) {
     why = le.dataset.question ? 'agent asks' : unheard ? `${unheard} new` : !x.noteTs ? 'not reviewed'
       : x.ev && parseTs(x.ev.ts) >= x.noteTs ? 'agent replied' : 'open';
   }
-  le.classList.toggle('needs', !!why);
+  // no takes at all: nothing to approve yet, but the line is open (an agent has to generate it)
+  const noTakes = !hasTakes && !le.classList.contains('hasfinal') && s !== 'queued' && s !== 'working';
+  if (noTakes) why = le.dataset.missing ? 'not in script' : 'no takes yet';
+  le.classList.toggle('needs', !!why && !noTakes);
+  le.classList.toggle('notakes', noTakes);
   const w = $('.why', le); if (w.textContent !== why) w.textContent = why;
+  w.classList.toggle('muted', noTakes);
 }
 
 // Verdict buttons only select; Apply sends verdict + comment + suggested text together.
@@ -535,6 +550,7 @@ function groupCounts() {
       good && `<span title="marked good, no final copy yet">✓ ${good} good</span>`,
       agent && `<span class="c-agent" title="waiting on the agent (queued or working)">⟳ ${agent} with agent</span>`,
       needs && `<span class="c-needs" title="show only these (f)">● ${needs} need you</span>`,
+      q('.line.notakes') && `<span title="lines with no takes yet: an agent has to generate them">○ ${q('.line.notakes')} no takes</span>`,
       hideGood && q('.line.good') && `<span>${q('.line.good')} good hidden</span>`].filter(Boolean).join('');
     const c = $('.cnt', g); if (c && c.innerHTML !== parts) c.innerHTML = parts;
   }
@@ -638,6 +654,19 @@ async function loadJobs() {
   $('#feed').innerHTML = jobs.map(e => `<div><span class="st ${esc(e.status)}">${esc(e.status)}</span>
     <span class="sid">${esc(e.ts)}</span> ${esc(e.group || '')} ${esc(e.sid || '')} ${e.feedback_id ? '#' + esc(e.feedback_id) : ''}<br>${esc(e.message || '')}</div>`).join('') || '<i>no jobs in progress</i>';
 }
+// Agent cost: total, per model and today against the daily budget; a run's cost is split across the notes it handled
+const usd = x => '$' + (x < 10 ? x.toFixed(2) : x.toFixed(0));
+async function loadRuns() {
+  const r = await api('/api/runs'), a = r.agent || {}, el = $('#cost');
+  costByFb = {};
+  for (const run of r.runs) for (const id of run.feedback_ids || []) costByFb[id] = (costByFb[id] || 0) + run.cost_usd / run.feedback_ids.length;
+  const state = a.state === 'working' ? ` · working on ${a.notes.length} note${a.notes.length > 1 ? 's' : ''}`
+    : a.paused ? ' · paused: daily budget reached' : a.state === 'disabled' ? ' · off' : '';
+  el.textContent = `Agent ${usd(r.total_usd)} · ${r.runs.length} runs${a.daily_usd != null ? ` · today ${usd(a.spent_today)} of ${usd(a.daily_usd)}` : ''}${state}`;
+  el.title = 'cost of the agent that answers notes\n' + Object.entries(r.by_model).map(([m, c]) => `${m}: ${usd(c)}`).join('\n');
+  el.className = a.state === 'working' ? 'working' : a.paused ? 'paused' : '';
+  document.querySelectorAll('.line').forEach(patchFeedback);
+}
 async function loadRun() {
   const r = await api('/api/run');
   const tail = $('#runlog'), atEnd = tail.scrollTop + tail.clientHeight >= tail.scrollHeight - 4;
@@ -667,7 +696,7 @@ addEventListener('resize', setHH); setHH();
 
 let initialised = false;
 (async () => {
-  await loadGroups(); await loadFeedback(); await loadRun();
+  await loadGroups(); await loadFeedback(); await loadRun(); await loadRuns();
   sortLines(); initialised = true;
   try {
     const v = JSON.parse(sessionStorage.getItem('view') || 'null'); sessionStorage.removeItem('view');
@@ -681,7 +710,7 @@ let initialised = false;
   let dropped = false;
   es.onopen = async () => {
     $('#conn').classList.add('on');
-    if (dropped) { dropped = false; await loadGroups(); await loadFeedback(); await loadRun(); }  // catch up on what was missed
+    if (dropped) { dropped = false; await loadGroups(); await loadFeedback(); await loadRun(); await loadRuns(); }  // catch up on what was missed
   };
   es.onerror = () => { $('#conn').classList.remove('on'); dropped = true; };
   es.addEventListener('change', async ev => {
@@ -691,6 +720,7 @@ let initialised = false;
     if (ch.includes('feedback') || ch.includes('events')) await loadFeedback();
     else if (ch.includes('jobs')) await loadJobs();
     if (ch.includes('run')) await loadRun();
+    if (ch.includes('runs') || ch.includes('agent')) await loadRuns();
     if (ch.includes('page')) { pageStale = true; $('#banner').style.display = 'block'; maybeReload(); }
   });
   setInterval(maybeReload, 3000);
