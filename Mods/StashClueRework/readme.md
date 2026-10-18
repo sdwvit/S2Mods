@@ -2,26 +2,4 @@
 
 Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines):
 
-`GlobalVariablePrototypes`:
- - `CluePrototypes`
-
-`ObjPrototypes`:
- - `Faust`
- - `GeneralNPCObjPrototypes`
- - `Granit`
- - `Korshunov`
- - `QuestObjPrototypes`
- - `Scar`
- - `Strelok`
- - `Supersoldier`
- - `TestNPCObjPrototypes`
-
-`GameData`:
- - `ObjPrototypes`
-
-`QuestNodePrototypes`
-
-`QuestPrototypes`:
- - `A-life_interrupts`
-
-`SpawnActorPrototypes`
+`Modified or added assets`: [see the mod's raw/ folder on GitHub](https://github.com/sdwvit/S2Mods/tree/master/Mods/StashClueRework/raw)
