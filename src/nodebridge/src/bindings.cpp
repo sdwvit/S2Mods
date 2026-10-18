@@ -3,10 +3,14 @@
 #include <windows.h>
 
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
+#include <future>
+#include <memory>
 
 #include "aob_scanner.h"
 #include "fname.h"
+#include "game_thread_queue.h"
 #include "logging.h"
 #include "rpc.h"
 #include "ue_reflection.h"
@@ -211,7 +215,31 @@ json game_process_event(const json& params) {
   }
 
   unsigned long excode = 0;
-  if (!nb_try_invoke_pe(fnAddr, target, func, buf.empty() ? nullptr : buf.data(), &excode)) {
+  bool invoked = false;
+  if (nb::gt::process_event_hooked()) {
+    // Run on the game thread: the ProcessEvent detour drains the queue there.
+    // Without an explicit fnAddr, call the trampoline so our own call skips the detour.
+    if (!fnAddrParam) fnAddr = reinterpret_cast<uint64_t>(nb::gt::original_process_event());
+    auto done = std::make_shared<std::promise<std::pair<bool, unsigned long>>>();
+    auto fut = done->get_future();
+    void* raw = buf.empty() ? nullptr : buf.data();
+    nb::gt::schedule([done, fnAddr, target, func, raw] {
+      unsigned long code = 0;
+      bool ok = nb_try_invoke_pe(fnAddr, target, func, raw, &code) != 0;
+      done->set_value({ok, code});
+    });
+    if (fut.wait_for(std::chrono::seconds(10)) != std::future_status::ready) {
+      // The task still holds `raw`; leak buf rather than free it under the game thread.
+      new std::vector<uint8_t>(std::move(buf));
+      return {{"ok", false}, {"reason", "game thread did not run the call within 10s"}};
+    }
+    auto [ok, code] = fut.get();
+    invoked = ok;
+    excode = code;
+  } else {
+    invoked = nb_try_invoke_pe(fnAddr, target, func, buf.empty() ? nullptr : buf.data(), &excode) != 0;
+  }
+  if (!invoked) {
     char rsn[160];
     snprintf(rsn, sizeof(rsn),
              "ProcessEvent faulted (exc=0x%08lx, fnAddr=0x%llx) — wrong vtableIdx/fnAddr or params layout",
@@ -524,6 +552,16 @@ json game_install_fname_ctor_addr(const json& params) {
   return {{"ok", true}, {"addr", addr}};
 }
 
+// Detour UObject::ProcessEvent at a caller-supplied address (mainExeBase + RVA
+// from an offline scan) so game.processEvent runs its calls on the game thread.
+json game_install_process_event_hook(const json& params) {
+  uint64_t addr = params.value("addr", 0ULL);
+  if (!addr) return {{"error", "addr required"}};
+  if (!nb::gt::install_process_event_hook(static_cast<uintptr_t>(addr)))
+    return {{"error", "hook install failed (see bridge log)"}};
+  return {{"ok", true}, {"addr", addr}};
+}
+
 // Register a UTF-8 string in the FName pool and return its (comp, num).
 // Resolves FName::FName constructor via AOB on first call.
 json game_fname_from_string(const json& params) {
@@ -610,6 +648,7 @@ void install(nb::rpc::Router& router) {
   router.handle("game.fnameFromString", game_fname_from_string);
   router.handle("game.installFnameCtorAddr", game_install_fname_ctor_addr);
   router.handle("game.processEvent", game_process_event);
+  router.handle("game.installProcessEventHook", game_install_process_event_hook);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
 

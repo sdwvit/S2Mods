@@ -58,6 +58,7 @@ export function createBridge(rpc, modName) {
     fnameToString: (comp, num) => call("game.fnameToString", { comp, num: num ?? 0 }),
     fnameFromString: (str) => call("game.fnameFromString", { str }),
     installFnameCtorAddr: (addr) => call("game.installFnameCtorAddr", { addr }),
+    installProcessEventHook: (addr) => call("game.installProcessEventHook", { addr }),
     processEvent: (target, func, paramsHex, opts) =>
       call("game.processEvent", {
         target,

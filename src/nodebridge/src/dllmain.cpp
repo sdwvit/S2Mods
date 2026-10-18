@@ -28,6 +28,7 @@
 #include <memory>
 
 #include "bindings.h"
+#include "game_thread_queue.h"
 #include "hook_init.h"
 #include "ipc_server.h"
 #include "logging.h"
@@ -116,6 +117,7 @@ BOOL APIENTRY DllMain(HMODULE module, DWORD reason, LPVOID) {
       nb::log::init();
       nb::log::banner();
       nb::log::info("dll", "NodeBridge attaching (pid={})", GetCurrentProcessId());
+      nb::gt::set_game_thread_id(GetCurrentThreadId());
 
       // MUST happen before DllMain returns: Windows resolves our forwarders
       // (→ dwmapi_orig.dll) right after this function exits.
