@@ -92,6 +92,21 @@ function makeWorkspace() {
   return ws;
 }
 
+// the agent is off unless a test turns it on with a stub claude
+function startServer(port, env = {}) {
+  return spawn(process.execPath, [path.join(DIR, "server.mts"), String(port)], {
+    stdio: "ignore",
+    env: {
+      ...process.env,
+      VOICEOVER_ROOT: ws,
+      VOICEOVER_AGENT: "0",
+      VOICEOVER_MOD_DIR: ws,
+      VOICEOVER_PIPELINE_DIR: path.join(ws, "scripts"),
+      ...env,
+    },
+  });
+}
+
 class FakeEventSource {
   static last = null;
   constructor(url) {
@@ -114,10 +129,7 @@ beforeEach(async () => {
   ws = makeWorkspace();
   const port = await freePort();
   base = `http://127.0.0.1:${port}`;
-  server = spawn(process.execPath, [path.join(DIR, "server.mts"), String(port)], {
-    stdio: "ignore",
-    env: { ...process.env, VOICEOVER_ROOT: ws },
-  });
+  server = startServer(port);
   await waitFor(
     () =>
       fetch(base + "/api/run").then(
@@ -604,4 +616,217 @@ test("/api/pending lists only what an agent has to do", async () => {
     }),
   });
   assert.deepEqual(await ids(), [pickNote.id]);
+});
+
+test("lines with no takes are listed: missing from this language, never generated, or reusing another line", async () => {
+  const higgs = path.join(ws, "higgs");
+  const uk = JSON.parse(fs.readFileSync(path.join(higgs, "test_uk.json"), "utf8"));
+  uk.lines.push(
+    { n: 3, sid: "Test_Line_D", speaker: "volk", text: "Нова." },
+    { n: 4, sid: "Test_Line_E", speaker: "volk", text: "Перша лінія.", same_as: SID_A },
+  );
+  fs.writeFileSync(path.join(higgs, "test_uk.json"), JSON.stringify(uk));
+  fs.mkdirSync(path.join(higgs, "final", "test_uk"), { recursive: true });
+  fs.copyFileSync(
+    takeFile("s2024.wav"),
+    path.join(higgs, "final", "test_uk", "01_" + SID_A + ".wav"),
+  );
+  // the English script has only line A
+  fs.writeFileSync(
+    path.join(higgs, "test_en.json"),
+    JSON.stringify({
+      refs: {},
+      lines: [{ n: 1, sid: SID_A, speaker: "volk", text: "First line." }],
+    }),
+  );
+
+  const g = (id) =>
+    fetch(base + "/api/groups?ids=" + id)
+      .then((r) => r.json())
+      .then((x) => x[0]);
+  const en = await g("batch:test_en");
+  assert.deepEqual(
+    en.lines.map((l) => [l.sid, l.missing || null, l.takes.length]),
+    [
+      [SID_A, null, 0],
+      [SID_B, "test_uk", 0],
+      ["Test_Line_D", "test_uk", 0],
+      ["Test_Line_E", "test_uk", 0],
+    ],
+  );
+  assert.equal(en.lines[1].missing_text, "Друга лінія.");
+  const ukE = (await g("batch:test_uk")).lines.find((l) => l.sid === "Test_Line_E");
+  assert.deepEqual(
+    [ukE.takes.length, ukE.takes[0].final, ukE.takes[0].label],
+    [1, true, "same as 01"],
+  );
+
+  const miss = await fetch(base + "/api/missing").then((r) => r.json());
+  assert.deepEqual(
+    miss.map((m) => m.group + " " + m.sid).sort(),
+    [
+      "batch:test_en " + SID_A,
+      "batch:test_en " + SID_B,
+      "batch:test_en Test_Line_D",
+      "batch:test_uk Test_Line_D",
+    ].sort(),
+    "same_as lines wait for their source; lines with takes are not listed",
+  );
+
+  refreshGroups();
+  const d = await waitFor(() => line("Test_Line_D"), "new line rendered");
+  assert.equal(d.querySelector(".why").textContent, "no takes yet");
+  assert.ok(
+    d.classList.contains("notakes") && !d.classList.contains("needs"),
+    "listed, but not counted as needing the user",
+  );
+  await waitFor(
+    () => /○ 1 no takes/.test(doc.querySelector("details.group .cnt").textContent),
+    "group count",
+  );
+  await waitFor(
+    () => line("Test_Line_E")?.classList.contains("hasfinal"),
+    "same_as line counts as approved",
+  );
+});
+
+// ---- the agent: a stub claude that speaks stream-json, costs $0.05 per turn and records its arguments ----
+const STUB = `#!/usr/bin/env node
+const fs = require("fs"), rl = require("readline");
+const dir = process.cwd() + "/review";
+fs.appendFileSync(dir + "/stub_args.jsonl", JSON.stringify(process.argv.slice(2)) + "\\n");
+const out = (o) => process.stdout.write(JSON.stringify(o) + "\\n");
+let total = 0;
+out({ type: "system", subtype: "init", session_id: "stub-1" });
+rl.createInterface({ input: process.stdin }).on("line", async (ln) => {
+  const msg = JSON.parse(ln).message.content;
+  const notes = msg.split("\\n").filter((l) => l.startsWith("{")).map((l) => JSON.parse(l));
+  fs.appendFileSync(dir + "/stub_msgs.jsonl", JSON.stringify(notes.map((n) => n.id)) + "\\n");
+  if (!process.env.STUB_SILENT)
+    for (const n of notes)
+      await fetch("http://127.0.0.1:" + process.env.REVIEW_PORT + "/api/event", { method: "POST",
+        body: JSON.stringify({ feedback_id: n.id, group: n.group, sid: n.sid, status: "queued", message: "Queued: stub" }) });
+  if (process.env.STUB_DELAY) await new Promise((r) => setTimeout(r, +process.env.STUB_DELAY));
+  total += 0.05;
+  out({ type: "result", subtype: "success", is_error: false, result: "started a stub job", total_cost_usd: total,
+    num_turns: 2, duration_ms: 5, session_id: "stub-1", modelUsage: { "claude-stub": {} } });
+});
+`;
+async function withAgent(env = {}) {
+  const stub = path.join(ws, "stub-claude");
+  fs.writeFileSync(stub, STUB);
+  fs.chmodSync(stub, 0o755);
+  server.kill();
+  await new Promise((r) => server.once("exit", r));
+  server = startServer(new URL(base).port, {
+    VOICEOVER_AGENT: "1",
+    VOICEOVER_AGENT_CMD: stub,
+    ...env,
+  });
+  await waitFor(
+    () =>
+      fetch(base + "/api/run").then(
+        (r) => r.ok,
+        () => false,
+      ),
+    "server restart",
+  );
+}
+const runs = () => fetch(base + "/api/runs").then((r) => r.json());
+const readLines = (f) => {
+  try {
+    return fs
+      .readFileSync(path.join(ws, "review", f), "utf8")
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map((l) => JSON.parse(l));
+  } catch {
+    return [];
+  }
+};
+const note = (sid, comment) =>
+  postFeedback({ group: "batch:test_uk", sid, verdict: "redo", comment });
+
+test("a note with a comment goes to the agent; its cost is logged and shown on the page", async () => {
+  await withAgent();
+  const rec = await note(SID_A, "lower pitch");
+  await waitFor(() => readLines("agent_runs.jsonl").length === 1, "run logged");
+  const r = await runs();
+  assert.equal(r.runs[0].cost_usd, 0.05);
+  assert.deepEqual(r.runs[0].feedback_ids, [rec.id]);
+  assert.equal(r.total_usd, 0.05);
+  assert.deepEqual(r.by_model, { "claude-stub": 0.05 });
+  assert.equal(events().find((e) => e.feedback_id === rec.id).message, "Queued: stub");
+  assert.equal(
+    JSON.parse(fs.readFileSync(path.join(ws, "review", "agent_session.json"), "utf8")).session_id,
+    "stub-1",
+  );
+  const args = readLines("stub_args.jsonl")[0];
+  assert.ok(
+    args.includes("--allowedTools") && !args.includes("--resume"),
+    "new session, limited tools",
+  );
+  // a second note: same process, cost is the difference of the cumulative total
+  await note(SID_B, "faster");
+  await waitFor(() => readLines("agent_runs.jsonl").length === 2, "second run");
+  assert.equal((await runs()).runs[1].cost_usd, 0.05);
+  assert.equal(readLines("stub_args.jsonl").length, 1, "the agent process is kept");
+
+  FakeEventSource.last.emit("change", { changed: ["runs", "events"] });
+  await waitFor(
+    () =>
+      /Agent \$0\.10 · 2 runs · today \$0\.10 of \$15\b/.test(
+        doc.querySelector("#cost").textContent,
+      ),
+    "header cost",
+  );
+  await waitFor(
+    () => /\$0\.050/.test(line(SID_A).querySelector(".agent").textContent),
+    "note cost under the line",
+  );
+});
+
+test("notes sent while the agent works go together in the next message", async () => {
+  await withAgent({ STUB_DELAY: "800" });
+  await note(SID_A, "one");
+  await sleep(200);
+  await note(SID_A, "two");
+  await note(SID_B, "three");
+  await waitFor(() => readLines("agent_runs.jsonl").length === 2, "two runs");
+  assert.deepEqual(
+    readLines("stub_msgs.jsonl").map((m) => m.length),
+    [1, 2],
+  );
+});
+
+test("a note the agent leaves without an event gets its summary; a restarted server resumes the session", async () => {
+  await withAgent({ STUB_SILENT: "1" });
+  const rec = await note(SID_A, "lower pitch");
+  const ev = await waitFor(() => events().find((e) => e.feedback_id === rec.id), "summary event");
+  assert.deepEqual([ev.status, ev.message], ["done", "Agent: started a stub job"]);
+  await withAgent();
+  await note(SID_B, "faster");
+  await waitFor(() => readLines("stub_args.jsonl").length === 2, "second agent process");
+  const args = readLines("stub_args.jsonl")[1];
+  assert.equal(args[args.indexOf("--resume") + 1], "stub-1");
+});
+
+test("the daily budget holds notes back until the next day", async () => {
+  await withAgent({ VOICEOVER_AGENT_DAILY_USD: "0.05" });
+  await note(SID_A, "one");
+  await waitFor(() => readLines("agent_runs.jsonl").length === 1, "first run");
+  const held = await note(SID_B, "two");
+  await sleep(1000);
+  assert.equal(readLines("stub_msgs.jsonl").length, 1, "second note not sent");
+  assert.ok(
+    (await fetch(base + "/api/pending").then((r) => r.json())).some((f) => f.id === held.id),
+    "still open",
+  );
+  assert.equal((await runs()).agent.paused, true);
+  FakeEventSource.last.emit("change", { changed: ["runs"] });
+  await waitFor(
+    () => /paused: daily budget reached/.test(doc.querySelector("#cost").textContent),
+    "paused in header",
+  );
 });
