@@ -1,0 +1,129 @@
+{
+ "SoundBanksInfo": {
+  "Platform": "Windows",
+  "BasePlatform": "Windows",
+  "SchemaVersion": "16",
+  "SoundBankVersion": "154",
+  "SoundBanks": [
+   {
+    "Id": "2875594258",
+    "Type": "Event",
+    "GUID": "{55736A04-E2F6-4C5D-89CE-267A8CD7B3F8}",
+    "Language": "SFX",
+    "Hash": "{F85F59A3-30E7-A631-B0A7-CAC2468DC646}",
+    "ObjectPath": "SFX_Controller_PsyStrike_Seccess",
+    "ShortName": "SFX_Controller_PsyStrike_Seccess",
+    "Path": "Event/SFX_Controller_PsyStrike_Seccess.bnk",
+    "Media": [
+     {
+      "Id": "87568857",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_Controller_PsyStrike_Seccess_02.wav",
+      "Path": "Media/87568857.wem",
+      "CachePath": "DD/{DD643934-9BC9-20C1-D1FF-B21DDD18CB87}.wem"
+     },
+     {
+      "Id": "285535536",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_Controller_PsyStrike_Seccess_06.wav",
+      "Path": "Media/285535536.wem",
+      "CachePath": "93/{9391E662-17E8-573C-8072-29B6036B6F90}.wem"
+     },
+     {
+      "Id": "353388003",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_Controller_PsyStrike_Seccess_Track.wav",
+      "Path": "Media/353388003.wem",
+      "CachePath": "50/{506AB79A-3F7A-D24C-0539-0D776B590DF9}.wem"
+     },
+     {
+      "Id": "626974922",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_Controller_PsyStrike_Seccess_05.wav",
+      "Path": "Media/626974922.wem",
+      "CachePath": "40/{40F4B801-A02C-336B-98DD-1AB3857CB114}.wem"
+     },
+     {
+      "Id": "642469469",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_Controller_PsyStrike_Seccess_01.wav",
+      "Path": "Media/642469469.wem",
+      "CachePath": "77/{7763010A-C050-53C0-3755-FE8776502D0D}.wem"
+     },
+     {
+      "Id": "923315617",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_Controller_PsyStrike_Seccess_04.wav",
+      "Path": "Media/923315617.wem",
+      "CachePath": "E7/{E7372032-B084-4634-AEC0-BB6F6E8707E7}.wem"
+     },
+     {
+      "Id": "1066180121",
+      "Language": "SFX",
+      "Streaming": "false",
+      "Location": "Loose",
+      "ShortName": "S2_Live\\S_Controller_PsyStrike_Seccess_03.wav",
+      "Path": "Media/1066180121.wem",
+      "CachePath": "0F/{0FDF70C5-E623-2A9A-25B3-77093C92F05C}.wem"
+     }
+    ],
+    "Events": [
+     {
+      "Id": "2875594258",
+      "Name": "SFX_Controller_PsyStrike_Seccess",
+      "ObjectPath": "\\Events\\S2 Live\\Mutants\\Controller\\Controller Voice\\SFX_Controller_PsyStrike_Seccess",
+      "GUID": "{55736A04-E2F6-4C5D-89CE-267A8CD7B3F8}",
+      "DurationType": "OneShot",
+      "DurationMin": "5",
+      "DurationMax": "16.979605",
+      "MediaRefs": [
+       {
+        "Id": "87568857"
+       },
+       {
+        "Id": "285535536"
+       },
+       {
+        "Id": "353388003"
+       },
+       {
+        "Id": "626974922"
+       },
+       {
+        "Id": "642469469"
+       },
+       {
+        "Id": "923315617"
+       },
+       {
+        "Id": "1066180121"
+       }
+      ],
+      "AuxBusRefs": [
+       {
+        "Id": "3978680762",
+        "Name": "AUX_Motion_MutantAbility",
+        "ObjectPath": "\\Master-Mixer Hierarchy\\Motion\\Motion Master Bus\\Motion_MutantAbility\\AUX_Motion_MutantAbility",
+        "GUID": "{8F359D56-95BB-425B-B8C7-E19430B2DFE0}",
+        "Color": "14"
+       }
+      ]
+     }
+    ]
+   }
+  ],
+  "FileHash": "{A5704884-172C-D7C6-A55A-4503D4428064}"
+ }
+}
