@@ -24,7 +24,15 @@ jobs:
 
       - name: Configure CMake
         working-directory: src/nodebridge
-        run: cmake --preset windows-release
+        # windows-latest moves to new Visual Studio releases; pick the generator
+        # for whichever one is installed instead of the preset's fixed one.
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $major = (& $vswhere -latest -property installationVersion).Split('.')[0]
+          $year = & $vswhere -latest -property catalog_productLineVersion
+          $gen = "Visual Studio $major $year"
+          Write-Host "Using generator: $gen"
+          cmake --preset windows-release -G "$gen"
 
       - name: Build
         working-directory: src/nodebridge
