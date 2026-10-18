@@ -24,6 +24,16 @@ namespace {
 constexpr std::string_view kGUObjectArrayPattern =
     "48 8D 0D ? ? ? ? E8 ? ? ? ? E8 ? ? ? ? E8 ? ? ? ? C6 05 ? ? ? ? 01";
 
+// The 2026-09-29 game build inlines that lea away. Fallback is the head of
+// FUObjectArray::AllocateObjectPool (offline scan, one hit at RVA 0x3133a9f):
+//   89 15 ? ? ? ?       mov [rip+disp32], edx   ; MaxObjectsNotConsideredByGC (+0x8)
+//   31 C0 85 D2 0F 9F C0 F7 D8
+//   89 05 ? ? ? ?       mov [rip+disp32], eax
+// Resolution: first mov's NextInstr + disp - 0x8 lands on the FUObjectArray.
+// Cross-checked: the same function then does lea rcx, [array+0x10] (ObjObjects).
+constexpr std::string_view kGUObjectArrayPatternAllocPool =
+    "89 15 ? ? ? ? 31 C0 85 D2 0F 9F C0 F7 D8 89 05 ? ? ? ?";
+
 std::atomic<const FUObjectArray*> g_array{nullptr};
 std::atomic<bool> g_ready{false};
 
@@ -35,8 +45,17 @@ const FUObjectArray* resolve_guobject_array() {
   }
   const uint8_t* hit = nb::aob::scan_main_exe(pattern);
   if (!hit) {
-    nb::log::warn("ue", "GUObjectArray AOB not found in main exe");
-    return nullptr;
+    auto fallback = nb::aob::parse(kGUObjectArrayPatternAllocPool);
+    const uint8_t* fhit = fallback.valid() ? nb::aob::scan_main_exe(fallback) : nullptr;
+    if (!fhit) {
+      nb::log::warn("ue", "GUObjectArray AOB not found in main exe");
+      return nullptr;
+    }
+    int32_t fdisp = *reinterpret_cast<const int32_t*>(fhit + 2);
+    const uint8_t* ftarget = fhit + 6 + fdisp - 0x8;
+    nb::log::info("ue", "GUObjectArray AllocateObjectPool AOB hit at {}, resolved at {}",
+                  static_cast<const void*>(fhit), static_cast<const void*>(ftarget));
+    return reinterpret_cast<const FUObjectArray*>(ftarget);
   }
   nb::log::info("ue", "GUObjectArray AOB hit at {}", static_cast<const void*>(hit));
 
