@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voice Line Review</title>
+<style>
+:root { --bg:#14161a; --panel:#1c1f25; --line:#1c1f25; --cur:#262d3b; --fg:#e4e6ea; --dim:#9aa0ab; --acc:#7aa2f7;
+  --good:#5fb870; --redo:#e0745e; --pick:#d9b44a; --chip:#33384a; --border:#2f343d; --ins:rgba(95,184,112,.22); --del:#e0745e;
+  --needs:#e0a84a; --q:#8a3a3a; --qbg:rgba(224,116,94,.12); }
+:root[data-theme="light"] { --bg:#f6f7f9; --panel:#fff; --line:#fff; --cur:#e8eefc;
+  --fg:#1d2026; --dim:#5a616c; --chip:#e4e8f2; --border:#d8dce3; --pick:#a87d0c; --good:#2f8a43; --redo:#c0452c;
+  --ins:rgba(47,138,67,.18); --del:#c0452c; --needs:#b2730c; --q:#c0452c; --qbg:rgba(192,69,44,.08); }
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bg:#f6f7f9; --panel:#fff; --line:#fff; --cur:#e8eefc;
+  --fg:#1d2026; --dim:#5a616c; --chip:#e4e8f2; --border:#d8dce3; --pick:#a87d0c; --good:#2f8a43; --redo:#c0452c;
+  --ins:rgba(47,138,67,.18); --del:#c0452c; --needs:#b2730c; --q:#c0452c; --qbg:rgba(192,69,44,.08); } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.45 system-ui, sans-serif; }
+header { position:sticky; top:0; z-index:5; background:var(--panel); border-bottom:1px solid var(--border); padding:8px 16px;
+  display:flex; gap:10px 14px; align-items:center; flex-wrap:wrap; }
+header h1 { font-size:16px; margin:0; }
+#conn { width:9px; height:9px; border-radius:50%; background:var(--redo); display:inline-block; }
+#conn.on { background:var(--good); }
+#prog { font-size:13px; color:var(--dim); max-width:420px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+#prog progress { width:120px; vertical-align:middle; }
+.keys { font-size:12px; color:var(--dim); flex-basis:100%; }
+@media (max-width:700px) { .keys { display:none; } }
+kbd { background:var(--chip); border-radius:3px; padding:0 4px; font-size:11px; }
+main { max-width:1100px; margin:0 auto; padding:12px 16px 80px; }
+.side { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+@media (max-width:800px) { .side { grid-template-columns:1fr; } }
+.side details { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:6px 10px; }
+.side summary { cursor:pointer; }
+.side pre, #feed { font-size:12px; max-height:220px; overflow:auto; margin:6px 0 0; white-space:pre-wrap; }
+#feed div { padding:2px 0; border-bottom:1px solid var(--border); }
+#banner { display:none; background:var(--pick); color:#000; padding:6px 16px; cursor:pointer; }
+details.group { background:var(--panel); border:1px solid var(--border); border-radius:6px; margin-bottom:10px; }
+details.group > summary { padding:8px 12px; cursor:pointer; font-weight:600; position:sticky; top:var(--hh, 50px); z-index:3;
+  background:var(--panel); border-radius:6px; }
+summary .meta { font-weight:400; color:var(--dim); font-size:13px; margin-left:8px; }
+.cnt { font-weight:400; font-size:13px; margin-left:8px; display:inline-flex; gap:6px; flex-wrap:wrap; vertical-align:1px; }
+.cnt span { padding:0 7px; border-radius:9px; background:var(--chip); }
+.cnt .c-fin { color:var(--pick); } .cnt .c-agent { color:var(--acc); } .cnt .c-needs { color:#000; background:var(--needs); cursor:pointer; }
+.kind { font-size:11px; text-transform:uppercase; padding:1px 6px; border-radius:3px; background:var(--chip); margin-right:6px; }
+.line { border-top:1px solid var(--border); padding:8px 12px; background:var(--line); scroll-margin-top:110px; }
+.line.cur { background:var(--cur); box-shadow:inset 3px 0 var(--acc); }
+.line.needs { box-shadow:inset 3px 0 var(--needs); }
+.line.cur.needs { box-shadow:inset 3px 0 var(--acc), inset 6px 0 var(--needs); }
+.lh { display:grid; grid-template-columns:minmax(0,1fr) 8em; gap:8px; align-items:center; font-size:13px; color:var(--dim); }
+.lh .why { justify-self:end; }
+.lh .lhi { display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; min-width:0; }
+.lh .nn { font-weight:700; color:var(--fg); font-size:15px; }
+.sid { font-family:ui-monospace, monospace; font-size:12px; }
+.why { font-size:11px; font-weight:700; color:#000; background:var(--needs); border-radius:9px; padding:0 7px; }
+.why:empty { visibility:hidden; }
+.fin { color:var(--pick); font-weight:600; }
+.text { font-size:17px; margin:4px 0 6px; }
+.tag { font-size:11px; background:var(--chip); color:var(--acc); border-radius:9px; padding:1px 7px; margin:0 2px; vertical-align:2px; }
+.stress { color:var(--pick); font-weight:600; }
+.agent { font-size:13px; margin:6px 0 2px; padding:0 8px; border:4px solid transparent; border-left:3px solid var(--acc); background:var(--chip); border-radius:0 4px 4px 0;
+  cursor:pointer; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.agent.open { display:block; }
+.agent:empty { display:none; }
+.agent.stale { opacity:.55; }
+.agent.q { border-left-color:var(--redo); background:var(--qbg); font-size:14px; -webkit-line-clamp:4; }
+.agent .ats { color:var(--dim); font-size:11px; }
+.takes { display:flex; flex-direction:column; gap:4px; }
+.take { display:grid; grid-template-columns:22px minmax(10em,16em) 3.4em 260px auto; align-items:center; gap:4px 8px; font-size:13px; padding:2px 0; }
+.take .nw { justify-self:start; }
+.take .tn { min-width:20px; height:20px; border-radius:4px; background:var(--chip); color:var(--dim); font-size:11px; font-weight:700;
+  display:inline-flex; align-items:center; justify-content:center; }
+.take .tl { min-width:0; font-family:ui-monospace, monospace; font-size:13px; overflow-wrap:anywhere; }
+.take .tl .d { color:var(--dim); font-family:system-ui, sans-serif; font-size:12px; }
+.take.final .tl { color:var(--pick); font-weight:700; }
+.take.picked { outline:2px solid var(--good); outline-offset:2px; border-radius:6px; }
+.take.picked button.tpick { background:var(--good); color:#000; border-color:var(--good); font-weight:700; }
+.take.staged button.tpick { border-color:var(--good); color:var(--good); font-weight:700; }
+.line.good { box-shadow:inset 4px 0 var(--good); }
+.line.good.cur { box-shadow:inset 3px 0 var(--acc), inset 7px 0 var(--good); }
+.take.final .tn { background:var(--pick); color:#000; }
+.take audio { height:32px; width:260px; max-width:100%; }
+@media (max-width:700px) {
+  .take { grid-template-columns:22px minmax(0,1fr) 3.4em; }
+  .take audio { grid-column:1 / -1; width:100%; }
+  .take .tb { grid-column:1 / -1; }
+  .take .alt { margin-left:0; }
+  .lh { grid-template-columns:minmax(0,1fr) auto; } .lh .why { grid-column:1; grid-row:2; justify-self:start; }
+  details.group > summary { position:static; } }
+.take .alt { grid-column:2 / -1; font-size:13px; color:var(--dim); margin-left:0; padding-left:6px; border-left:2px solid var(--chip); }
+.take .alt:empty { display:none; }
+.alt .ins { background:var(--ins); color:var(--fg); border-radius:3px; }
+.alt del { color:var(--del); opacity:.8; }
+.alt .same { font-style:italic; font-size:12px; }
+.take .nw { visibility:hidden; font-size:10px; font-weight:700; color:#000; background:var(--pick); border-radius:8px; padding:0 6px; }
+.take.unheard .nw { visibility:visible; }
+.take .tb { display:inline-flex; gap:4px; }
+.take button { font-size:12px; padding:3px 9px; min-height:28px; }
+.take button.del { color:var(--dim); min-width:7.5em; }
+.take button.tpick { min-width:6.5em; }
+.take.deleting > :not(.tb), .take.deleting .tb > :not(.del) { opacity:.35; pointer-events:none; }
+.take.deleting button.del { color:var(--pick); border-color:var(--pick); font-weight:600; }
+.fbl { margin-top:4px; font-size:13px; }
+.fb { padding:2px 0; color:var(--dim); }
+.fb b { color:var(--fg); }
+.fb .fa { font-style:italic; display:block; max-height:3em; overflow:hidden; }
+.hist summary { cursor:pointer; color:var(--dim); font-size:12px; }
+.st { font-size:11px; padding:0 6px; border-radius:3px; background:var(--chip); color:var(--fg); }
+.st.new { background:#4a5a8a; color:#fff; } .st.seen,.st.working,.st.queued { background:#7a6a2a; color:#fff; }
+.st.regenerated,.st.done { background:#2f6a3c; color:#fff; } .st.question { background:#8a3a3a; color:#fff; }
+.form { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; align-items:flex-start; }
+.form textarea { flex:1 1 260px; min-height:32px; height:32px; background:var(--bg); color:var(--fg); border:1px solid var(--border); border-radius:4px; padding:5px 6px; font:inherit; font-size:13px; resize:vertical; }
+.form textarea.sug { flex-basis:100%; height:48px; display:none; }
+.form.edit textarea.sug { display:block; }
+.form select { background:var(--bg); color:var(--fg); border:1px solid var(--border); font-size:12px; height:32px; max-width:180px; }
+button { background:var(--chip); color:var(--fg); border:1px solid var(--border); border-radius:4px; cursor:pointer; padding:5px 10px; font-size:13px; min-height:32px; }
+button.good { border-color:var(--good); } button.redo { border-color:var(--redo); } button.pick { border-color:var(--pick); }
+button:hover { filter:brightness(1.25); }
+button:focus-visible { outline:2px solid var(--acc); outline-offset:1px; }
+button.sel { background:var(--acc); color:#000; font-weight:700; }
+button.apply { border-color:var(--acc); font-weight:600; }
+.dot { display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--pick); align-self:center; }
+.dot.queued { animation:pulse 1.8s ease-in-out infinite; }
+.dot.working { background:transparent; border:2px solid var(--pick); border-top-color:transparent; animation:spin .8s linear infinite; }
+.dot.done { background:none; width:auto; height:auto; color:var(--good); font-weight:700; font-size:13px; }
+.dot.done::before { content:"✓"; }
+.dot:not(.queued):not(.working):not(.done) { display:none; }
+@keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.35; transform:scale(.7); } }
+@keyframes spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .dot.queued, .dot.working { animation:none; } .dot.working { background:var(--pick); border:0; } }
+body.hidegood .line:is(.good, .hasfinal):not(.playing):not(.cur):not(.sticky) { display:none; }
+body.onlyneeds .line:not(.needs):not(.playing):not(.cur):not(.sticky) { display:none; }
+#hidegood.on { background:var(--good); color:#000; }
+#onlyneeds.on { background:var(--needs); color:#000; }
+.pending { color:var(--dim); font-style:italic; font-size:12px; }
+</style>
+</head>
+<body>
+<div id="banner">The page was updated. Click to reload (or it reloads when nothing is playing or typed).</div>
+<header>
+  <h1>Voice Line Review</h1><span id="conn" title="live connection"></span>
+  <button id="onlyneeds" title="show only lines waiting on you: new takes, agent questions, not reviewed yet (f)">Needs me</button>
+  <button id="nextneeds" title="jump to the next line that needs you (n)">Next ↓</button>
+  <button id="hidegood" title="show/hide lines marked good (g)">Hide good</button>
+  <span id="prog"></span>
+  <span class="keys"><kbd>j</kbd>/<kbd>k</kbd> line · <kbd>n</kbd> next needing you · <kbd>f</kbd> only needs me · <kbd>space</kbd> play/pause · <kbd>1</kbd>-<kbd>9</kbd> play take · <kbd>p</kbd> choose played take · <kbd>Enter</kbd> Apply · <kbd>c</kbd> comment (<kbd>Enter</kbd> sends redo) · <kbd>g</kbd> hide good · <kbd>Esc</kbd> leave field</span>
+</header>
+<main>
+  <div class="side">
+    <details id="feedbox"><summary>Agent activity</summary><div id="feed"></div></details>
+    <details><summary>run.log</summary><pre id="runlog"></pre></details>
+  </div>
+  <div id="groups"></div>
+</main>
+<script>
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const api = (p, body) => fetch(p, body ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)} : {}).then(r => r.json());
+const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+                set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+const parseTs = s => Date.parse(String(s || '').replace(/([+-]\d\d)(\d\d)$/, '$1:$2')) || 0;
+let allEvents = [], feedback = [], lineStatus = {}, lineIdx = {}, shown = {}, cur = null, lastAudio = null, pageStale = false;
+const openGroups = store.get('openGroups', null);
+
+// Text: Higgs tags as chips, stressed letters (U+0301) highlighted
+function renderWord(p) { return esc(p).replace(/(.́)/g, '<span class="stress">$1</span>'); }
+function renderText(t) {
+  return t.split(/(<\|[^|]*\|>)/).map(p => {
+    const m = p.match(/^<\|([^|]*)\|>$/);
+    if (m) return `<span class="tag">${esc(m[1])}</span>`;
+    return renderWord(p);
+  }).join('');
+}
+// Word-level diff of an alt take's text against the line's script text: changed words highlighted, removed ones struck through.
+const toks = t => String(t || '').replace(/<\|[^|]*\|>/g, ' $& ').split(/\s+/).filter(Boolean);
+const renderTok = w => { const m = w.match(/^<\|([^|]*)\|>$/); return m ? `<span class="tag">${esc(m[1])}</span>` : renderWord(w); };
+function renderDiff(base, alt) {
+  const a = toks(base), b = toks(alt);
+  if (!a.length) return renderText(alt);
+  const n = a.length, m = b.length, L = Array.from({length: n + 1}, () => new Uint16Array(m + 1));
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+  const out = []; let i = 0, j = 0, changed = false;
+  while (i < n || j < m) {
+    if (i < n && j < m && a[i] === b[j]) { out.push(renderTok(b[j])); i++; j++; }
+    else if (j < m && (i >= n || L[i][j + 1] >= L[i + 1][j])) { out.push(`<span class="ins">${renderTok(b[j])}</span>`); j++; changed = true; }
+    else { out.push(`<del>${renderTok(a[i])}</del>`); i++; changed = true; }
+  }
+  return changed ? out.join(' ') : '<span class="same">same text as the script</span>';
+}
+const lineKey = (g, sid) => g + '|' + sid;
+const lineEl = (g, sid) => document.querySelector(`.line[data-key="${CSS.escape(lineKey(g, sid))}"]`);
+
+// One list for everything: every group's lines go into a single container (the API still has groups, and each
+// line keeps its own group id for feedback). Open lines first, approved after; order is set on full loads only.
+const groupStats = {};
+function listEl() {
+  let el = document.getElementById('g-all');
+  if (!el) {
+    el = document.createElement('details');
+    el.className = 'group'; el.id = 'g-all'; el.open = true;
+    el.innerHTML = `<summary><span class="sm"></span><span class="cnt"></span></summary><div class="lines"></div>`;
+    $('.cnt', el).addEventListener('click', e => { if (e.target.classList.contains('c-needs')) { e.preventDefault(); setOnlyNeeds(true); } });
+    $('#groups').append(el);
+  }
+  return el;
+}
+
+function patchGroup(g) {
+  const el = listEl(), box = $('.lines', el);
+  groupStats[g.id] = { name: g.name, lines: g.lines.filter(l => l.takes.length).length };
+  $('.sm', el).innerHTML = `All lines<span class="meta">${Object.values(groupStats).filter(x => x.lines).map(x => `${esc(x.name)} ${x.lines}`).join(' · ')}</span>`;
+  const keep = new Set();
+  for (const l of g.lines) {
+    if (!l.takes.length) continue;  // script lines without audio yet are not reviewable
+    const key = lineKey(g.id, l.sid); keep.add(key);
+    let le = lineEl(g.id, l.sid);
+    if (!le) { le = newLine(g, l); box.append(le); }
+    patchLine(le, g, l);
+  }
+  for (const le of [...box.children]) if (le.dataset.group === g.id && !keep.has(le.dataset.key) && [...le.querySelectorAll('audio')].every(a => a.paused)) le.remove();
+}
+
+// open lines (not good/final) first, then approved; within each: group name, then line number
+function sortLines() {
+  const box = $('#g-all .lines'); if (!box || busy()) return;
+  const k = le => [le.classList.contains('good') || le.classList.contains('hasfinal') ? 1 : 0, le.dataset.group, +le.dataset.n];
+  const sorted = [...box.children].sort((a, b) => { const x = k(a), y = k(b); return x[0] - y[0] || x[1].localeCompare(y[1]) || x[2] - y[2]; });
+  if (sorted.some((le, i) => box.children[i] !== le)) sorted.forEach(le => box.append(le));
+}
+
+function newLine(g, l) {
+  const le = document.createElement('div');
+  le.className = 'line'; le.dataset.key = lineKey(g.id, l.sid);
+  le.dataset.group = g.id; le.dataset.sid = l.sid; le.dataset.n = l.n;
+  le.innerHTML = `<div class="lh"><span class="lhi"></span><span class="why"></span></div>
+    <div class="text"></div><div class="takes"></div><div class="agent" title="latest agent message, click to expand"></div><div class="fbl"></div>
+    <div class="form"><textarea class="cmt" placeholder="${CMT_PH}"></textarea>
+      <button class="apply" title="send as redo (Enter in the comment)">Apply</button>
+      <textarea class="sug" spellcheck="false" hidden></textarea></div>`;
+  $('.sug', le).value = l.text || '';
+  $('.sug', le).dataset.orig = l.text || '';
+  le.addEventListener('click', () => setCur(le, false));
+  $('.apply', le).onclick = e => { e.stopPropagation(); setCur(le, false); submit(le); };  // stop: the line's own click handler would re-select it after Apply moved on
+  $('.agent', le).onclick = () => $('.agent', le).classList.toggle('open');
+  for (const ta of le.querySelectorAll('textarea')) {
+    ta.addEventListener('input', () => applyLabel(le));
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey || (!e.shiftKey && !e.altKey && !e.isComposing))) { e.preventDefault(); submit(le, true); }
+    });
+  }
+  applyLabel(le);
+  return le;
+}
+
+function patchLine(le, g, l) {
+  const sp = l.speaker ? `<span class="tag">${esc(l.speaker)}</span>` : '';
+  const exp = l.expected ? ` · want ~${l.expected}s` : '';
+  const fin = l.takes.find(t => t.final);
+  le.classList.toggle('hasfinal', !!fin);
+  le.querySelector('.lhi').innerHTML = `<span class="nn">${String(l.n).padStart(2, '0')}</span><span class="dot"></span>${sp}${fin ? `<span class="fin">★ ${esc(fin.label)}</span>` : ''}<span class="sid">${esc(l.sid)}</span>${exp}${l.seed != null ? ' · seed ' + esc(l.seed) : ''}<span class="lst"></span>`;
+  const tx = renderText(l.text || '');
+  const textChanged = le.dataset.text !== l.text;
+  if (textChanged) {
+    le.querySelector('.text').innerHTML = tx || '';
+    const sug = $('.sug', le);
+    if (sug.value === sug.dataset.orig) sug.value = l.text || '';  // untouched: follow new script text
+    sug.dataset.orig = l.text || ''; le.dataset.text = l.text;
+  }
+  const tb = $('.takes', le), have = new Map([...tb.querySelectorAll(':scope > .take')].map(c => [c.dataset.file, c]));
+  const files = new Set(l.takes.map(t => t.file));
+  for (const [f, c] of have) if (!files.has(f) && $('audio', c).paused) c.remove();
+  let prev = null;
+  // newest take first
+  const takes = [...l.takes].sort((a, b) => (b.mtime - a.mtime) || a.file.localeCompare(b.file));
+  for (const t of takes) {
+    let te = have.get(t.file);
+    if (!te) {
+      te = document.createElement('div'); te.className = 'take'; te.dataset.file = t.file;
+      te.innerHTML = `<span class="tn"></span><span class="tl"></span><span class="nw">new</span><audio controls preload="none"></audio>
+        <span class="tb"><button class="pick tpick" title="choose this take as the final; Apply copies it (p while it plays)">✓ pick</button><button class="tnote" title="write a comment about this take">✎</button><button class="del" title="delete this take (10 s to restore)">✕ delete</button></span><div class="alt"></div>`;
+      $('audio', te).src = t.url;
+      $('button.del', te).onclick = e => { e.stopPropagation(); deleteTake(te, t); };  // second click = restore
+      $('button.tpick', te).onclick = e => { e.stopPropagation(); setCur(le, false); if (te.classList.contains('picked')) send(le, 'unpick', te.dataset.file); else stagePick(le, te.dataset.file); };
+      $('button.tnote', te).onclick = e => { e.stopPropagation(); setCur(le, false); if (le.dataset.verdict === 'pick') selVerdict(le, ''); noteTake(le, te.dataset.file); markStaged(le); $('.cmt', le).focus(); };
+      wireAudio($('audio', te), le);
+      $('audio', te).addEventListener('play', () => { markHeard(te.dataset.url); te.classList.remove('unheard'); patchNeeds(le); groupCounts(); });
+    } else if ($('audio', te).getAttribute('src') !== t.url && $('audio', te).paused) {
+      $('audio', te).src = t.url;  // regenerated file
+    }
+    te.classList.toggle('final', !!t.final);
+    te.dataset.url = t.url;  // carries ?v=<mtime>, so a regenerated file counts as unheard again
+    te.dataset.mtime = t.mtime;
+    te.dataset.label = t.label;
+    const alt = $('.alt', te), ak = (t.alt_text || '') + '\u0000' + (l.text || '');
+    if (alt.dataset.k !== ak) { alt.dataset.k = ak; alt.innerHTML = t.alt_text ? renderDiff(l.text || '', t.alt_text) : ''; }
+    $('.tl', te).innerHTML = `${esc(t.label)}${t.dur != null ? ' <span class="d">' + t.dur + 's</span>' : ''}${t.final ? ' ★final' : ''}`;
+    const want = prev ? prev.nextSibling : tb.firstChild;
+    if (want !== te) tb.insertBefore(te, want);  // moving a playing <audio> would pause it
+    prev = te;
+  }
+  if (!l.takes.length && !$('.pending', tb)) tb.innerHTML = '<span class="pending">no audio yet</span>';
+  if (l.takes.length) tb.querySelector('.pending')?.remove();
+  renumber(le);
+  if (le.dataset.take && !files.has(le.dataset.take)) { noteTake(le, ''); if (le.dataset.verdict === 'pick') selVerdict(le, ''); }
+  patchFeedback(le);
+}
+// Visible takes get numbers 1..n; the 1-9 keys play the same numbers.
+const visibleTakes = le => [...le.querySelectorAll('.take')].filter(t => !t.hidden);
+function renumber(le) { visibleTakes(le).forEach((t, i) => { $('.tn', t).textContent = i + 1; }); }
+
+// Delete with a 10 s undo: the take hides at once, the server moves it to archive/deleted/ when the timer runs out.
+const pendingDeletes = new Map();
+const DELETE_SECS = window.__DELETE_SECS || 10;  // tests shorten it
+function takePath(url) { return decodeURIComponent(url.replace(/^\/audio\//, '').replace(/\?.*$/, '')); }
+function commitDelete(path) {
+  const p = pendingDeletes.get(path); if (!p) return;
+  clearInterval(p.timer); pendingDeletes.delete(path); p.te.hidden = true; renumber(p.le);
+  setTimeout(maybeReload, 0);  // a page update was held back while the countdown ran
+  return fetch('/api/delete', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({path})});
+}
+function toast(msg) { console.log('[review]', msg); }  // no on-screen notifications (user preference)
+// The take stays in place, dimmed; its ✕ becomes "restore (N)" until the 10 s run out.
+function deleteTake(te, t) {
+  const path = takePath(t.url), btn = $('button.del', te), le = te.closest('.line');
+  const p = pendingDeletes.get(path);
+  if (p) {  // restore
+    clearInterval(p.timer); pendingDeletes.delete(path); setTimeout(maybeReload, 0);
+    te.classList.remove('deleting'); btn.textContent = '✕ delete'; btn.title = 'delete this take (10 s to restore)';
+    return;
+  }
+  te.classList.add('deleting');
+  let left = DELETE_SECS;
+  const show = () => { btn.textContent = `↺ restore ${left}`; };
+  show(); btn.title = 'click to keep this take';
+  const timer = setInterval(() => { left--; show(); if (left <= 0) commitDelete(path); }, 1000);
+  pendingDeletes.set(path, {timer, te, le});
+  $('audio', te).pause();  // after registering: the pause event checks for a page reload, which must see this delete
+}
+window.addEventListener('pagehide', () => {
+  for (const path of [...pendingDeletes.keys()]) navigator.sendBeacon('/api/delete', JSON.stringify({path}));
+});
+
+let heardSet = null;
+function heard() { return heardSet ??= new Set(store.get('heard', [])); }
+// unheard: never played here, and made after the last note on this line (older takes were heard before notes were left)
+function markUnheard(le) {
+  const lastNote = lineIdx[le.dataset.key]?.noteTs || 0;
+  for (const te of le.querySelectorAll('.take'))
+    te.classList.toggle('unheard', !heard().has(te.dataset.url) && te.dataset.mtime * 1000 > lastNote);
+}
+function markHeard(url) { const h = heard(); if (h.has(url)) return; h.add(url); store.set('heard', [...h].slice(-3000)); }
+
+function wireAudio(a, le) {
+  a.addEventListener('play', () => {
+    document.querySelectorAll('audio').forEach(o => { if (o !== a) o.pause(); });
+    lastAudio = a; setCur(le, false);
+  });
+  a.addEventListener('play', () => le.classList.add('playing'));
+  // a line marked good while playing stays visible until playback stops
+  const stop = () => { if ([...le.querySelectorAll('audio')].every(x => x.paused)) le.classList.remove('playing'); groupCounts(); };
+  a.addEventListener('pause', stop); a.addEventListener('ended', stop);
+  a.addEventListener('pause', maybeReload);
+}
+
+// Per line: time of the user's last note and the newest agent event (by group+sid, or through its feedback_id).
+function buildIndex() {
+  const byId = Object.fromEntries(feedback.map(f => [f.id, f])), idx = {};
+  for (const f of feedback) { const k = f.group + '|' + f.sid; (idx[k] ??= {}).noteTs = Math.max(idx[k].noteTs || 0, parseTs(f.ts)); }
+  for (const e of allEvents) {
+    const f = byId[e.feedback_id] || {}, g = e.group || f.group, sid = e.sid || f.sid;
+    if (!g || !sid) continue;
+    const k = g + '|' + sid, x = (idx[k] ??= {});
+    if (!x.ev || parseTs(e.ts) >= parseTs(x.ev.ts)) x.ev = e;
+  }
+  lineIdx = idx;
+}
+
+function patchFeedback(le) {
+  markUnheard(le);
+  const items = feedback.filter(f => f.group === le.dataset.group && f.sid === le.dataset.sid);
+  const fbItem = (f, withAgent) => `<div class="fb"><span class="st ${esc(f.status)}">${esc(f.status)}</span>
+    <b>${esc(f.verdict)}</b>${f.take ? ' [' + esc(f.take) + ']' : ''} ${esc(f.comment)}
+    ${f.suggested_text ? '<br>→ ' + renderText(f.suggested_text) : ''}
+    ${withAgent && f.latest?.message ? '<span class="fa">agent: ' + esc(f.latest.message) + '</span>' : ''}
+    <span class="sid"> ${esc(f.ts)} #${esc(f.id)}</span></div>`;
+  const histOpen = $('.hist', le)?.open;
+  const older = items.slice(0, -1), last = items[items.length - 1];
+  $('.fbl', le).innerHTML = (older.length ? `<details class="hist"${histOpen ? ' open' : ''}><summary>${older.length} earlier note${older.length > 1 ? 's' : ''}</summary>${older.map(f => fbItem(f, true)).join('')}</details>` : '')
+    + (last ? fbItem(last, false) : '');
+  // latest agent message for the line, shown below the takes when it is newer than the user's last note
+  const x = lineIdx[le.dataset.key] || {}, ev = x.ev, ag = $('.agent', le);
+  const fresh = ev && parseTs(ev.ts) >= (x.noteTs || 0);
+  le.classList.toggle('good', isGood(le)); applyLabel(le);
+  // the take of the latest pick (while the line is still good) is marked picked; its button stops sending repeats
+  const lastPick = le.classList.contains('good') ? [...feedback].reverse().find(f => f.group === le.dataset.group && f.sid === le.dataset.sid && ['pick', 'good', 'unpick'].includes(f.verdict)) : null;
+  for (const te of le.querySelectorAll('.take')) {
+    const on = !!lastPick && lastPick.verdict === 'pick' && lastPick.take === te.dataset.file;
+    te.classList.toggle('picked', on);
+  }
+  markStaged(le);
+
+  const closed = le.classList.contains('good') || le.classList.contains('hasfinal');
+  le.dataset.question = fresh && ev.status === 'question' && !closed ? '1' : '';
+  ag.classList.toggle('q', !!le.dataset.question);
+  ag.classList.toggle('stale', !!ev && !fresh);
+  const html = ev ? `<span class="st ${esc(ev.status)}">${esc(ev.status)}</span> ${esc(ev.message || '')} <span class="ats">${esc(ev.ts)}</span>` : '';
+  if (ag.innerHTML !== html) ag.innerHTML = html;
+  patchDot(le);
+  const lst = $('.lst', le);
+  if (lst) lst.innerHTML = last ? ` <span class="st ${esc(last.status)}">${esc(last.status)}</span>` : '';
+  patchNeeds(le);
+}
+// "Needs me": takes exist, the line is not good/final, no agent job is pending, and there is something to do:
+// unheard takes, an agent question or result after the last note, or no note yet.
+function patchNeeds(le) {
+  const s = (lineStatus[le.dataset.key] || {}).state, x = lineIdx[le.dataset.key] || {};
+  const unheard = le.querySelectorAll('.take.unheard:not([hidden])').length, hasTakes = !!le.querySelector('.take');
+  let why = '';
+  if (hasTakes && !le.classList.contains('good') && !le.classList.contains('hasfinal') && s !== 'queued' && s !== 'working') {
+    why = le.dataset.question ? 'agent asks' : unheard ? `${unheard} new` : !x.noteTs ? 'not reviewed'
+      : x.ev && parseTs(x.ev.ts) >= x.noteTs ? 'agent replied' : 'open';
+  }
+  le.classList.toggle('needs', !!why);
+  const w = $('.why', le); if (w.textContent !== why) w.textContent = why;
+}
+
+// Verdict buttons only select; Apply sends verdict + comment + suggested text together.
+const CMT_PH = 'what to change (Enter sends as redo, Shift+Enter new line)';
+// ✎ on a take: the next note is about that take (shown in the placeholder); Esc in the box or sending clears it.
+function noteTake(le, file) {
+  le.dataset.take = file || '';
+  $('.cmt', le).placeholder = file ? `about ${file.replace(/\.wav$/, '')}: what to change (Enter sends)` : CMT_PH;
+}
+// ✓ pick only chooses the take (verdict pick + that take); Apply sends it and the agent copies it to finals.
+// Clicking the chosen take again clears the choice.
+function stagePick(le, file) {
+  const same = le.dataset.verdict === 'pick' && le.dataset.take === file;
+  selVerdict(le, same ? '' : 'pick'); noteTake(le, same ? '' : file);
+  markStaged(le); applyLabel(le);
+}
+function markStaged(le) {
+  for (const te of le.querySelectorAll('.take')) {
+    const on = te.classList.contains('picked'), st = !on && le.dataset.verdict === 'pick' && le.dataset.take === te.dataset.file;
+    te.classList.toggle('staged', st);
+    const b = $('button.tpick', te); if (!b) continue;
+    b.textContent = on ? '★ picked' : st ? '✓ chosen' : '✓ pick';
+    b.title = on ? 'click to unpick (removes it from finals)' : st ? 'Apply copies this take to finals; click again to clear' : 'choose this take as the final; Apply copies it (p while it plays)';
+  }
+}
+function selVerdict(le, v) {
+  const was = le.dataset.verdict === v;
+  le.dataset.verdict = was ? '' : v;
+  le.querySelectorAll('button[data-v]').forEach(b => b.classList.toggle('sel', !was && b.dataset.v === v));
+  applyLabel(le);
+}
+// What Apply would send: the selected verdict, else apply_text if the text was edited, else redo if there is a comment.
+function plannedVerdict(le) {
+  const sug = $('.sug', le), changed = sug.value !== sug.dataset.orig, comment = $('.cmt', le).value.trim();
+  return le.dataset.verdict || (changed ? 'apply_text' : comment ? 'redo' : '');
+}
+function applyLabel(le) { const v = plannedVerdict(le); $('.apply', le).textContent = v ? 'Apply: ' + v : le.classList.contains('good') ? 'Apply: done' : 'Apply'; }
+// Pending-redo indicator: pulsing (queued), spinning (working), brief green check when it flips to done.
+function patchDot(le) {
+  const d = $('.dot', le); if (!d) return;
+  const k = le.dataset.key, s = lineStatus[k] || {}, prev = shown[k];
+  let cls = s.state === 'queued' || s.state === 'working' ? s.state : '';
+  if (s.state === 'done' && (prev === 'queued' || prev === 'working' || prev === 'flash')) {
+    cls = 'done'; shown[k] = 'flash';
+    clearTimeout(le._flash);
+    le._flash = setTimeout(() => { shown[k] = 'done'; patchDot(le); }, 5000);
+  } else if (prev !== 'flash') shown[k] = s.state;
+  if (prev === 'flash' && s.state === 'done') cls = 'done';
+  d.className = 'dot ' + cls;
+  d.title = s.message ? `${s.message} (${s.ts})` : '';
+}
+// Fallback when the server predates /api/linestatus: derive from feedback + merged latest event.
+async function fetchLineStatus() {
+  const ls = await api('/api/linestatus').catch(() => ({error: 1}));
+  if (!ls.error) return ls;
+  const map = {seen:'queued', queued:'queued', working:'working', regenerated:'done', done:'done', question:'done'}, out = {};
+  for (const f of feedback) {
+    const ev = f.latest, st = ev ? map[ev.status] : (['redo', 'apply_text'].includes(f.verdict) ? 'queued' : null);
+    if (st || ev) out[f.group + '|' + f.sid] = { state: st ?? out[f.group + '|' + f.sid]?.state ?? null,
+      ts: ev?.ts || f.ts, message: ev ? `${ev.status}: ${ev.message || ''}` : `feedback ${f.verdict}: ${f.comment}` };
+  }
+  return out;
+}
+// "Good" filter: latest of good/pick feedback or a "Final:" done event, not overridden by later redo/apply_text/redo-comment.
+let hideGood = false, onlyNeeds = false;
+try { hideGood = localStorage.getItem('hideGood') !== '0'; /* approved lines hidden unless the user shows them */ onlyNeeds = localStorage.getItem('onlyNeeds') === '1'; } catch {}
+function isGood(le) {
+  const g = le.dataset.group, sid = le.dataset.sid, byId = Object.fromEntries(feedback.map(f => [f.id, f]));
+  const items = feedback.filter(f => f.group === g && f.sid === sid).map(f => {
+    const v = f.verdict;
+    const val = v === 'good' || v === 'pick' ? true : v === 'redo' || v === 'apply_text' || v === 'unpick' || (v === 'comment' && /redo/i.test(f.comment || '')) ? false : null;
+    return [f.ts || '', val];
+  });
+  for (const e of allEvents) {
+    const f = byId[e.feedback_id] || {};
+    if ((e.group || f.group) === g && (e.sid || f.sid) === sid && e.status === 'done' && /^Final:/.test(e.message || ''))
+      items.push([e.ts || '', true]);
+  }
+  items.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
+  let good = false;
+  for (const [, v] of items) if (v !== null) good = v;
+  return good;
+}
+function unstick() { document.querySelectorAll('.line.sticky').forEach(l => l.classList.remove('sticky')); }
+function setHideGood(on) {
+  hideGood = on; unstick();
+  try { localStorage.setItem('hideGood', on ? '1' : '0'); } catch {}
+  document.body.classList.toggle('hidegood', on);
+  $('#hidegood').classList.toggle('on', on);
+  $('#hidegood').textContent = on ? 'Show good' : 'Hide good';
+  groupCounts();
+}
+function setOnlyNeeds(on) {
+  onlyNeeds = on; unstick();
+  try { localStorage.setItem('onlyNeeds', on ? '1' : '0'); } catch {}
+  document.body.classList.toggle('onlyneeds', on);
+  $('#onlyneeds').classList.toggle('on', on);
+  groupCounts();
+  cur?.offsetParent && cur.scrollIntoView({block:'center'});
+}
+$('#hidegood').onclick = () => setHideGood(!hideGood);
+$('#onlyneeds').onclick = () => setOnlyNeeds(!onlyNeeds);
+$('#nextneeds').onclick = () => gotoNeeds(cur, true);
+setHideGood(hideGood); setOnlyNeeds(onlyNeeds);
+function groupCounts() {
+  let total = 0;
+  for (const g of document.querySelectorAll('details.group')) {
+    const q = s => g.querySelectorAll(s).length;
+    const fin = q('.line.hasfinal'), good = q('.line.good:not(.hasfinal)'), agent = q('.dot.queued, .dot.working'), needs = q('.line.needs');
+    if (!g.hidden) total += needs;
+    const parts = [fin && `<span class="c-fin" title="lines with a final take">★ ${fin} final</span>`,
+      good && `<span title="marked good, no final copy yet">✓ ${good} good</span>`,
+      agent && `<span class="c-agent" title="waiting on the agent (queued or working)">⟳ ${agent} with agent</span>`,
+      needs && `<span class="c-needs" title="show only these (f)">● ${needs} need you</span>`,
+      hideGood && q('.line.good') && `<span>${q('.line.good')} good hidden</span>`].filter(Boolean).join('');
+    const c = $('.cnt', g); if (c && c.innerHTML !== parts) c.innerHTML = parts;
+  }
+  $('#onlyneeds').textContent = `Needs me · ${total}`;
+}
+
+// Send one feedback record. Used by Apply, Enter, the one-click "✓ good" and per-take "✓ pick".
+async function send(le, verdict, take, viaKey) {
+  const sug = $('.sug', le), comment = $('.cmt', le).value.trim(), changed = sug.value !== sug.dataset.orig;
+  if (verdict === 'pick' && !take) { alert('Choose a take first (✓ pick next to a take, or the dropdown).'); return; }
+  const body = { group: le.dataset.group, n: +le.dataset.n, sid: le.dataset.sid, take, verdict,
+    comment, suggested_text: changed ? sug.value : null };
+  const r = await api('/api/feedback', body).catch(e => ({error: String(e)}));
+  if (r.error) { alert(r.error); return; }
+  $('.cmt', le).value = ''; sug.value = sug.dataset.orig; selVerdict(le, ''); noteTake(le, ''); markStaged(le);
+  $('.cmt', le).blur(); sug.blur();
+  feedback.push(r); buildIndex();
+  lineStatus = await fetchLineStatus(); patchFeedback(le); groupCounts();
+  toast(`${String(le.dataset.n).padStart(2, '0')}: sent ${verdict}${take ? ' ' + take : ''}`);
+  // a pick is the line's confirmation: it folds away with the approved lines, go to the next
+  if (verdict === 'pick') { if (le === cur) cur = null; le.classList.remove('cur'); groupCounts(); gotoNeeds(le, true); return; }
+  le.classList.add('sticky');  // stays visible under the filters until the next jump, so nothing moves under the mouse
+  if (viaKey && verdict !== 'comment') gotoNeeds(le, false);
+}
+function submit(le, viaKey) {
+  const take = le.dataset.take || null, verdict = plannedVerdict(le);
+  if (!verdict) {
+    // picked line + empty box: Apply confirms it — the line folds away with the approved ones, go to the next
+    if (le.classList.contains('good')) { le.classList.remove('sticky'); if (le === cur) cur = null; le.classList.remove('cur'); groupCounts(); gotoNeeds(le, true); return; }
+    $('.cmt', le).focus(); return;
+  }
+  return send(le, verdict, take, viaKey);
+}
+
+function setCur(le, scroll = true) {
+  if (cur === le) return;
+  cur?.classList.remove('cur'); cur = le; le.classList.add('cur');
+  if (scroll) le.scrollIntoView({block:'center', behavior:'smooth'});
+}
+// Next line needing attention after `from` (document order, wraps around). Opens its group if closed.
+function gotoNeeds(from, wrap) {
+  unstick();
+  const all = [...document.querySelectorAll('details.group:not([hidden]) .line.needs')].filter(l => l !== from);
+  if (!all.length) { toast('Nothing needs you right now'); return; }
+  const after = from ? all.find(l => from.compareDocumentPosition(l) & Node.DOCUMENT_POSITION_FOLLOWING) : null;
+  const nx = after || all[0];
+  if (!after && from && !wrap) return;
+  nx.closest('details.group').open = true;
+  setCur(nx);
+}
+function playedTake(le) {
+  const auds = [...le.querySelectorAll('.take:not([hidden]) audio')];
+  const a = auds.find(x => !x.paused) || (auds.includes(lastAudio) ? lastAudio : null);
+  return a?.closest('.take');
+}
+
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if (t.matches('textarea, input, select')) { if (e.key === 'Escape') { const l = t.closest('.line'); if (l) { if (l.dataset.verdict === 'pick') selVerdict(l, ''); noteTake(l, ''); markStaged(l); } t.blur(); } return; }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const lines = [...document.querySelectorAll('details.group[open] .line')].filter(l => l === cur || l.offsetParent !== null);
+  const i = lines.indexOf(cur);
+  if (e.key === 'j' || e.key === 'k') {
+    const nx = lines[e.key === 'j' ? Math.min(i + 1, lines.length - 1) : Math.max(i - 1, 0)];
+    if (nx) setCur(nx); e.preventDefault();
+  } else if (e.key === ' ' && cur) {
+    e.preventDefault();
+    const auds = visibleTakes(cur).map(x => $('audio', x));
+    const playing = auds.find(a => !a.paused);
+    if (playing) playing.pause();
+    else (auds.includes(lastAudio) ? lastAudio : auds[0])?.play();
+  } else if (/^[1-9]$/.test(e.key) && cur) {
+    const te = visibleTakes(cur)[+e.key - 1], a = te && $('audio', te);
+    if (a) { a.currentTime = 0; a.play(); }
+  } else if (e.key === 'g') { setHideGood(!hideGood); cur?.offsetParent && cur.scrollIntoView({block:'center'}); }
+  else if (e.key === 'f') setOnlyNeeds(!onlyNeeds);
+  else if (e.key === 'n') { e.preventDefault(); gotoNeeds(cur, true); }
+  else if (e.key === 'p' && cur) {
+    e.preventDefault();
+    const te = playedTake(cur);
+    if (te) { stagePick(cur, te.dataset.file); toast(`${te.dataset.file} chosen: Apply (Enter) copies it`); } else toast('Play a take on this line first, then p picks it');
+  }
+  else if (e.key === 'Enter' && cur && !t.matches('button, a, summary')) { e.preventDefault(); submit(cur, true); }
+  else if (e.key === 'c' && cur) { e.preventDefault(); $('.cmt', cur).focus(); }
+});
+
+async function loadGroups(ids) {
+  const gs = await api('/api/groups' + (ids ? '?ids=' + encodeURIComponent(ids.join(',')) : ''));
+  gs.forEach(patchGroup); groupCounts();
+}
+async function loadFeedback() {
+  allEvents = await api('/api/events?n=100000');
+  feedback = await api('/api/feedback'); buildIndex(); lineStatus = await fetchLineStatus();
+  document.querySelectorAll('.line').forEach(patchFeedback); groupCounts();
+  await loadJobs();
+}
+// Agent activity: only jobs still in progress (running first, then queued on the GPU)
+async function loadJobs() {
+  const jobs = await api('/api/jobs');
+  $('#feedbox summary').textContent = 'Agent activity' + (jobs.length ? ` (${jobs.length})` : '');
+  $('#feed').innerHTML = jobs.map(e => `<div><span class="st ${esc(e.status)}">${esc(e.status)}</span>
+    <span class="sid">${esc(e.ts)}</span> ${esc(e.group || '')} ${esc(e.sid || '')} ${e.feedback_id ? '#' + esc(e.feedback_id) : ''}<br>${esc(e.message || '')}</div>`).join('') || '<i>no jobs in progress</i>';
+}
+async function loadRun() {
+  const r = await api('/api/run');
+  const tail = $('#runlog'), atEnd = tail.scrollTop + tail.clientHeight >= tail.scrollHeight - 4;
+  tail.textContent = r.tail.join('\n');
+  if (atEnd) tail.scrollTop = tail.scrollHeight;
+  const p = r.progress;
+  $('#prog').innerHTML = p ? `${esc(p.batch)}: <progress max="${p.total}" value="${p.done}"></progress> ${p.done}/${p.total}`
+    : (r.finished ? 'batch finished: ' + esc(r.tail[r.tail.length - 1]) : '');
+  $('#prog').title = $('#prog').textContent;
+}
+
+function busy() {
+  return pendingDeletes.size > 0 || [...document.querySelectorAll('audio')].some(a => !a.paused) ||
+    [...document.querySelectorAll('.cmt, .sug')].some(t => t.classList.contains('sug') ? t.value !== t.dataset.orig : t.value.trim());
+}
+// Keep the current line and scroll position across a page reload.
+function reload() {
+  try { sessionStorage.setItem('view', JSON.stringify({cur: cur?.dataset.key, y: scrollY})); } catch {}
+  location.reload();
+}
+function maybeReload() { if (pageStale && !busy()) reload(); }
+$('#banner').onclick = reload;
+$('#feedbox').open = store.get('feedOpen', false);
+$('#feedbox').addEventListener('toggle', () => store.set('feedOpen', $('#feedbox').open));
+const setHH = () => document.documentElement.style.setProperty('--hh', $('header').offsetHeight + 'px');
+addEventListener('resize', setHH); setHH();
+
+let initialised = false;
+(async () => {
+  await loadGroups(); await loadFeedback(); await loadRun();
+  sortLines(); initialised = true;
+  try {
+    const v = JSON.parse(sessionStorage.getItem('view') || 'null'); sessionStorage.removeItem('view');
+    if (v) {
+      const le = v.cur && document.querySelector(`.line[data-key="${CSS.escape(v.cur)}"]`);
+      if (le) setCur(le, false);
+      scrollTo(0, v.y || 0);
+    }
+  } catch {}
+  const es = new EventSource('/api/stream');
+  let dropped = false;
+  es.onopen = async () => {
+    $('#conn').classList.add('on');
+    if (dropped) { dropped = false; await loadGroups(); await loadFeedback(); await loadRun(); }  // catch up on what was missed
+  };
+  es.onerror = () => { $('#conn').classList.remove('on'); dropped = true; };
+  es.addEventListener('change', async ev => {
+    const ch = JSON.parse(ev.data).changed;
+    const gids = ch.filter(c => c.startsWith('batch:') || c.startsWith('test:') || c === 'decider');
+    if (gids.length) await loadGroups(gids);
+    if (ch.includes('feedback') || ch.includes('events')) await loadFeedback();
+    else if (ch.includes('jobs')) await loadJobs();
+    if (ch.includes('run')) await loadRun();
+    if (ch.includes('page')) { pageStale = true; $('#banner').style.display = 'block'; maybeReload(); }
+  });
+  setInterval(maybeReload, 3000);
+})();
+</script>
+</body>
+</html>
