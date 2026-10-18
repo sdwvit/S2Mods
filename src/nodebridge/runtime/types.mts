@@ -104,6 +104,8 @@ export interface GameApi {
   /** Bypass AOB: install FName::FName at a caller-supplied address (e.g. mainExeBase + RVA).
    *  Call before fnameFromString when AOB scan misses. */
   installFnameCtorAddr(addr: number): Promise<{ ok: true; addr: number } | { error: string }>;
+  /** Detour UObject::ProcessEvent at `addr` so processEvent calls run on the game thread. */
+  installProcessEventHook(addr: number): Promise<{ ok: true; addr: number } | { error: string }>;
   /** Invoke UObject::ProcessEvent on `target` for UFunction at `func`. paramsHex
    *  is the raw bytes of the function's parameter struct (caller knows the
    *  layout). On success the returned paramsHex contains the buffer

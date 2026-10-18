@@ -91,8 +91,67 @@ export async function readU64At(bridge: Bridge, addr: number): Promise<number | 
 export async function decodeFName(bridge: Bridge, comp: number, num: number): Promise<string> {
   if (comp === 0 && num === 0) return "None";
   const r = await bridge.game.fnameToString(comp, num);
-  if ("name" in r) return r.name;
-  return "";
+  if ("name" in r && r.name) return r.name;
+  const base = await readPoolName(bridge, comp);
+  if (!base) return "";
+  return num > 0 ? `${base}_${num - 1}` : base;
+}
+
+/**
+ * Static addresses in the 2026-09-29 game build, from an offline scan of
+ * Stalker2-Win64-Shipping.exe on 2026-10-18. FNamePool is the instance all 34
+ * inlined `lea rcx, [pool]; call FNamePool::FNamePool` sites agree on;
+ * GUObjectArray is what the AllocateObjectPool AOB in ue_reflection.cpp resolves.
+ */
+export const BUILD_RVA = {
+  fNamePool: 0x9ff0c80,
+  guObjectArray: 0xa0e68c0,
+  /** UObject vtable slot 79 (0x4F). Checks FUNC_Native at UFunction+0xB1, allocas PropertiesSize (+0x58). */
+  processEvent: 0x216a728,
+} as const;
+
+let exeBase: number | null = null;
+export async function getExeBase(bridge: Bridge): Promise<number> {
+  if (exeBase == null) exeBase = (await bridge.game.mainExeBase()).base;
+  return exeBase;
+}
+
+const poolNames = new Map<number, string>();
+const poolBlocks = new Map<number, number>();
+
+/**
+ * FName::ToString done in JS, for builds where the C++ resolver finds no
+ * trusted candidate. UE 5.1 FNamePool: Blocks[] at +0x10; an entry sits at
+ * Blocks[comp >> 16] + (comp & 0xFFFF) * 2 and starts with a u16 header
+ * (bit 0 = wide, bits 6..15 = length).
+ */
+async function readPoolName(bridge: Bridge, comp: number): Promise<string> {
+  const cached = poolNames.get(comp);
+  if (cached != null) return cached;
+  const blockIdx = comp >>> 16;
+  let block = poolBlocks.get(blockIdx);
+  if (block == null) {
+    const pool = (await getExeBase(bridge)) + BUILD_RVA.fNamePool;
+    block = (await readU64At(bridge, pool + 0x10 + blockIdx * 8)) ?? 0;
+    poolBlocks.set(blockIdx, block);
+  }
+  if (!block) return "";
+  const entry = block + (comp & 0xffff) * 2;
+  const hdrR = await bridge.game.readMemory(entry, 2);
+  if (!("hex" in hdrR)) return "";
+  const hdr = parseHex(hdrR.hex);
+  const header = hdr[0] | (hdr[1] << 8);
+  const wide = (header & 1) === 1;
+  const len = header >>> 6;
+  if (!len || len > 1024) return "";
+  const bodyR = await bridge.game.readMemory(entry + 2, wide ? len * 2 : len);
+  if (!("hex" in bodyR)) return "";
+  const body = parseHex(bodyR.hex);
+  const name = wide
+    ? String.fromCharCode(...Array.from({ length: len }, (_, i) => body[i * 2] | (body[i * 2 + 1] << 8)))
+    : String.fromCharCode(...body);
+  poolNames.set(comp, name);
+  return name;
 }
 
 // ---------------------------------------------------------------------------
@@ -630,4 +689,206 @@ export async function readPlayerLocation(
     ? await readVector3At(bridge, session.ctwTranslationAddr)
     : null;
   return { rel, ctw };
+}
+
+// ---------------------------------------------------------------------------
+// Object table walking + console commands. These read GUObjectArray and the
+// FNamePool directly (BUILD_RVA), so they work while the C++ name resolver
+// has no trusted FName::ToString candidate.
+
+/** FUObjectItem stride in FChunkedFixedUObjectArray (UE 5.1). */
+const OBJECT_ITEM_SIZE = 0x18;
+const OBJECTS_PER_CHUNK = 64 * 1024;
+
+/** UObjectBase.NamePrivate decoded. */
+export async function getObjectName(bridge: Bridge, obj: number): Promise<string> {
+  const r = await bridge.game.readMemory(obj + 0x18, 8);
+  if (!("hex" in r)) return "";
+  const b = parseHex(r.hex);
+  return decodeFName(bridge, readU32LE(b, 0), readU32LE(b, 4));
+}
+
+/** Every UObject pointer in GUObjectArray (0 for free slots), read 170 items per call. */
+export async function getObjectPointers(bridge: Bridge): Promise<number[]> {
+  const arr = (await getExeBase(bridge)) + BUILD_RVA.guObjectArray;
+  const chunks = (await readU64At(bridge, arr + 0x10)) ?? 0;
+  const numR = await bridge.game.readMemory(arr + 0x24, 4);
+  const num = "hex" in numR ? readU32LE(parseHex(numR.hex), 0) : 0;
+  const objects: number[] = [];
+  const perRead = Math.floor(4096 / OBJECT_ITEM_SIZE);
+  for (let c = 0; c * OBJECTS_PER_CHUNK < num; c++) {
+    const chunk = (await readU64At(bridge, chunks + c * 8)) ?? 0;
+    const inChunk = Math.min(OBJECTS_PER_CHUNK, num - c * OBJECTS_PER_CHUNK);
+    for (let j = 0; j < inChunk; j += perRead) {
+      const n = Math.min(perRead, inChunk - j);
+      const r = chunk ? await bridge.game.readMemory(chunk + j * OBJECT_ITEM_SIZE, n * OBJECT_ITEM_SIZE) : null;
+      const b = r && "hex" in r ? parseHex(r.hex) : null;
+      for (let k = 0; k < n; k++) objects.push(b ? readU64LE(b, k * OBJECT_ITEM_SIZE) : 0);
+    }
+  }
+  return objects;
+}
+
+/** First object named `name` within objects[from, to). /Script classes and CDOs sit low in the table. */
+export async function findObjectByName(bridge: Bridge, objects: number[], name: string, from = 0, to = objects.length): Promise<number> {
+  for (let i = from; i < Math.min(to, objects.length); i++) {
+    if (objects[i] && (await getObjectName(bridge, objects[i])) === name) return objects[i];
+  }
+  return 0;
+}
+
+/** Newest live (non-CDO) instance whose class derives from `baseClass`. */
+export async function findInstanceOf(bridge: Bridge, objects: number[], baseClass: number): Promise<number> {
+  const derives = new Map<number, boolean>();
+  const isA = async (cls: number): Promise<boolean> => {
+    const known = derives.get(cls);
+    if (known != null) return known;
+    let cur = cls;
+    let hit = false;
+    for (let depth = 0; cur && depth < 32; depth++) {
+      if (cur === baseClass) { hit = true; break; }
+      const k = derives.get(cur);
+      if (k != null) { hit = k; break; }
+      cur = (await readU64At(bridge, cur + GSC.uStructSuperStruct)) ?? 0;
+    }
+    derives.set(cls, hit);
+    return hit;
+  };
+  for (let i = objects.length - 1; i >= 0; i--) {
+    const obj = objects[i];
+    if (!obj) continue;
+    const cls = await readU64At(bridge, obj + GSC.uObjectClassPtr);
+    if (!cls || !(await isA(cls))) continue;
+    if ((await getObjectName(bridge, obj)).startsWith("Default__")) continue;
+    return obj;
+  }
+  return 0;
+}
+
+function u64Hex(n: number): string {
+  let hex = "";
+  let v = n;
+  for (let i = 0; i < 8; i++) {
+    hex += (v % 256).toString(16).padStart(2, "0");
+    v = Math.floor(v / 256);
+  }
+  return hex;
+}
+
+function u32Hex(n: number): string {
+  return u64Hex(n >>> 0).slice(0, 8);
+}
+
+interface ConsoleSession {
+  kismetCdo: number;
+  executeFn: number;
+  paramsSize: number;
+  offWorld: number;
+  offCommand: number;
+  offPlayer: number;
+  playerControllerClass: number;
+  playerController: number;
+  /** Reused UTF-16 buffer the FString points at. */
+  strBuf: number;
+}
+
+let consoleSession: ConsoleSession | null = null;
+const STR_BUF_SIZE = 64 * 1024;
+
+async function ensureConsoleSession(bridge: Bridge): Promise<ConsoleSession> {
+  if (consoleSession) {
+    // The controller is recreated on every level load; re-find it if this one is gone.
+    const cls = await readU64At(bridge, consoleSession.playerController + GSC.uObjectClassPtr);
+    if (cls) return consoleSession;
+  }
+  const base = await getExeBase(bridge);
+  const hook = await bridge.game.installProcessEventHook(base + BUILD_RVA.processEvent);
+  if ("error" in hook) throw new Error(`installProcessEventHook: ${hook.error}`);
+
+  const objects = await getObjectPointers(bridge);
+  const lowEnd = Math.min(objects.length, 60000);
+  const pcClass = consoleSession?.playerControllerClass || (await findObjectByName(bridge, objects, "PlayerController", 0, lowEnd));
+  const kismetCdo = consoleSession?.kismetCdo || (await findObjectByName(bridge, objects, "Default__KismetSystemLibrary", 0, lowEnd));
+  if (!pcClass || !kismetCdo) throw new Error(`console: PlayerController=0x${pcClass.toString(16)} KismetSystemLibrary CDO=0x${kismetCdo.toString(16)}`);
+  const playerController = await findInstanceOf(bridge, objects, pcClass);
+  if (!playerController) throw new Error("console: no PlayerController instance (load a save first)");
+
+  let executeFn = consoleSession?.executeFn ?? 0;
+  let paramsSize = consoleSession?.paramsSize ?? 0;
+  let offWorld = consoleSession?.offWorld ?? 0;
+  let offCommand = consoleSession?.offCommand ?? 0;
+  let offPlayer = consoleSession?.offPlayer ?? 0;
+  if (!executeFn) {
+    const kslClass = (await readU64At(bridge, kismetCdo + GSC.uObjectClassPtr)) ?? 0;
+    executeFn = (await findUFunction(bridge, kslClass, "ExecuteConsoleCommand")) ?? 0;
+    if (!executeFn) throw new Error("console: KismetSystemLibrary.ExecuteConsoleCommand not found");
+    const sizeR = await bridge.game.readMemory(executeFn + GSC.uStructPropertiesSize, 4);
+    paramsSize = "hex" in sizeR ? readU32LE(parseHex(sizeR.hex), 0) : 0;
+    offWorld = (await findPropertyOffset(bridge, executeFn, "WorldContextObject")) ?? -1;
+    offCommand = (await findPropertyOffset(bridge, executeFn, "Command")) ?? -1;
+    offPlayer = (await findPropertyOffset(bridge, executeFn, "SpecificPlayer")) ?? -1;
+    if (offWorld < 0 || offCommand < 0 || offPlayer < 0 || !paramsSize) {
+      throw new Error(`console: ExecuteConsoleCommand layout size=${paramsSize} world=${offWorld} command=${offCommand} player=${offPlayer}`);
+    }
+  }
+  let strBuf = consoleSession?.strBuf ?? 0;
+  if (!strBuf) {
+    const a = await bridge.game.virtualAlloc(STR_BUF_SIZE);
+    if (!("addr" in a)) throw new Error("console: virtualAlloc failed");
+    strBuf = a.addr;
+  }
+  consoleSession = { kismetCdo, executeFn, paramsSize, offWorld, offCommand, offPlayer, playerControllerClass: pcClass, playerController, strBuf };
+  bridge.log(
+    `console ready: PC=0x${playerController.toString(16)} ExecuteConsoleCommand=0x${executeFn.toString(16)} ` +
+      `size=${paramsSize} world@${offWorld} command@${offCommand} player@${offPlayer}`,
+  );
+  return consoleSession;
+}
+
+/**
+ * Run a console command as if typed in the game console, through
+ * UKismetSystemLibrary::ExecuteConsoleCommand on the game thread
+ * (ProcessEvent detour). The first call scans the object table (~5-20 s).
+ */
+export async function runConsoleCommand(bridge: Bridge, command: string): Promise<void> {
+  const s = await ensureConsoleSession(bridge);
+  const chars = command.length + 1;
+  if (chars * 2 > STR_BUF_SIZE) throw new Error("console: command too long");
+  let str = "";
+  for (let i = 0; i < command.length; i++) {
+    const c = command.charCodeAt(i);
+    str += (c & 0xff).toString(16).padStart(2, "0") + (c >> 8).toString(16).padStart(2, "0");
+  }
+  const w = await bridge.game.writeMemory(s.strBuf, str + "0000");
+  if (!("count" in w)) throw new Error("console: string write failed");
+
+  const params = new Array<string>(s.paramsSize).fill("00");
+  const put = (off: number, hex: string) => {
+    for (let i = 0; i < hex.length / 2; i++) params[off + i] = hex.slice(i * 2, i * 2 + 2);
+  };
+  put(s.offWorld, u64Hex(s.playerController));
+  // FString = TArray<TCHAR> { Data, ArrayNum, ArrayMax }
+  put(s.offCommand, u64Hex(s.strBuf) + u32Hex(chars) + u32Hex(chars));
+  put(s.offPlayer, u64Hex(s.playerController));
+  const r = await bridge.game.processEvent(s.kismetCdo, s.executeFn, params.join(""));
+  if (r.ok === false) throw new Error(`console: processEvent failed: ${r.reason}`);
+}
+
+/** The player pawn's world location, read through reflected property names. */
+export async function getPlayerPawnLocation(bridge: Bridge): Promise<Vector3> {
+  const s = await ensureConsoleSession(bridge);
+  const pcClass = (await readU64At(bridge, s.playerController + GSC.uObjectClassPtr)) ?? 0;
+  const offPawn = await findPropertyOffset(bridge, pcClass, "Pawn");
+  if (offPawn == null) throw new Error("location: Controller.Pawn not found");
+  const pawn = (await readU64At(bridge, s.playerController + offPawn)) ?? 0;
+  if (!pawn) throw new Error("location: no pawn");
+  const pawnClass = (await readU64At(bridge, pawn + GSC.uObjectClassPtr)) ?? 0;
+  const offRoot = await findPropertyOffset(bridge, pawnClass, "RootComponent");
+  const root = offRoot == null ? 0 : ((await readU64At(bridge, pawn + offRoot)) ?? 0);
+  if (!root) throw new Error("location: no RootComponent");
+  const rootClass = (await readU64At(bridge, root + GSC.uObjectClassPtr)) ?? 0;
+  const offLoc = await findPropertyOffset(bridge, rootClass, "RelativeLocation");
+  const loc = offLoc == null ? null : await readVector3At(bridge, root + offLoc);
+  if (!loc) throw new Error("location: RelativeLocation unreadable");
+  return loc;
 }

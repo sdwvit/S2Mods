@@ -1,8 +1,29 @@
 // Extends EWeather UEnum in-memory with 10 new weather variants.
 // See src/nodebridge/offsets.md for layout details and verified addresses.
 
-import type { ModInit } from "@nodebridge/runtime";
-import { waitForReflection, parseHex, readU32LE, readU64LE } from "@nodebridge/runtime";
+import type { Bridge, ModInit } from "@nodebridge/runtime";
+import {
+  getPlayerPawnLocation,
+  parseHex,
+  readU32LE,
+  readU64LE,
+  runConsoleCommand,
+  waitForReflection,
+} from "@nodebridge/runtime";
+
+/** End-to-end check of console commands: spawn one Spark soldier 5 m from the player. */
+async function testSpawn(bridge: Bridge): Promise<void> {
+  await waitForReflection(bridge);
+  try {
+    const p = await getPlayerPawnLocation(bridge);
+    bridge.log(`[spawn-test] player at ${p.x.toFixed(0)} ${p.y.toFixed(0)} ${p.z.toFixed(0)}`);
+    const cmd = `XSpawnObjBySID GeneralNPC_Spark_Stormtrooper 2 0 ${Math.round(p.x + 500)} ${Math.round(p.y)} ${Math.round(p.z + 50)} 0 180 0`;
+    await runConsoleCommand(bridge, cmd);
+    bridge.log(`[spawn-test] ran: ${cmd}`);
+  } catch (e) {
+    bridge.log.error(`[spawn-test] ${(e as Error).message}`);
+  }
+}
 
 const FNAME_CTOR_RVA = 0xd26be8; // patternsleuth offline scan 2026-05-01
 // The RVA above predates the 2026-09-29 game build; calling it now would jump into unrelated code.
@@ -35,7 +56,11 @@ function toLE64(n: number): string {
 }
 
 const init: ModInit = async (bridge) => {
-  if (!EWEATHER_ENABLED) { bridge.log("EWeather extend: disabled (stale FName ctor RVA)"); return; }
+  if (!EWEATHER_ENABLED) {
+    bridge.log("EWeather extend: disabled (stale FName ctor RVA)");
+    await testSpawn(bridge);
+    return;
+  }
   bridge.log("EWeather extend: start");
   await waitForReflection(bridge);
 

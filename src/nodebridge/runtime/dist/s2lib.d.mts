@@ -25,6 +25,19 @@ export declare function readU32LE(b: Uint8Array, off: number): number;
 export declare function readU64LE(b: Uint8Array, off: number): number;
 export declare function readU64At(bridge: Bridge, addr: number): Promise<number | null>;
 export declare function decodeFName(bridge: Bridge, comp: number, num: number): Promise<string>;
+/**
+ * Static addresses in the 2026-09-29 game build, from an offline scan of
+ * Stalker2-Win64-Shipping.exe on 2026-10-18. FNamePool is the instance all 34
+ * inlined `lea rcx, [pool]; call FNamePool::FNamePool` sites agree on;
+ * GUObjectArray is what the AllocateObjectPool AOB in ue_reflection.cpp resolves.
+ */
+export declare const BUILD_RVA: {
+    readonly fNamePool: 167709824;
+    readonly guObjectArray: 168716480;
+    /** UObject vtable slot 79 (0x4F). Checks FUNC_Native at UFunction+0xB1, allocas PropertiesSize (+0x58). */
+    readonly processEvent: 35039016;
+};
+export declare function getExeBase(bridge: Bridge): Promise<number>;
 export declare function readVector3At(bridge: Bridge, addr: number): Promise<Vector3 | null>;
 export declare function writeVector3At(bridge: Bridge, addr: number, v: Vector3): Promise<boolean>;
 /** Find a property's offset within a UClass instance by name.
@@ -140,3 +153,19 @@ export declare function readPlayerLocation(bridge: Bridge, session: PlayerSessio
     rel: Vector3 | null;
     ctw: Vector3 | null;
 }>;
+/** UObjectBase.NamePrivate decoded. */
+export declare function getObjectName(bridge: Bridge, obj: number): Promise<string>;
+/** Every UObject pointer in GUObjectArray (0 for free slots), read 170 items per call. */
+export declare function getObjectPointers(bridge: Bridge): Promise<number[]>;
+/** First object named `name` within objects[from, to). /Script classes and CDOs sit low in the table. */
+export declare function findObjectByName(bridge: Bridge, objects: number[], name: string, from?: number, to?: number): Promise<number>;
+/** Newest live (non-CDO) instance whose class derives from `baseClass`. */
+export declare function findInstanceOf(bridge: Bridge, objects: number[], baseClass: number): Promise<number>;
+/**
+ * Run a console command as if typed in the game console, through
+ * UKismetSystemLibrary::ExecuteConsoleCommand on the game thread
+ * (ProcessEvent detour). The first call scans the object table (~5-20 s).
+ */
+export declare function runConsoleCommand(bridge: Bridge, command: string): Promise<void>;
+/** The player pawn's world location, read through reflected property names. */
+export declare function getPlayerPawnLocation(bridge: Bridge): Promise<Vector3>;
