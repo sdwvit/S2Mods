@@ -29,7 +29,7 @@ jobs:
         run: |
           $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
           $major = (& $vswhere -latest -property installationVersion).Split('.')[0]
-          $year = & $vswhere -latest -property catalog_productLineVersion
+          $year = @{ "17" = "2022"; "18" = "2026" }[$major]
           $gen = "Visual Studio $major $year"
           Write-Host "Using generator: $gen"
           cmake --preset windows-release -G "$gen"
