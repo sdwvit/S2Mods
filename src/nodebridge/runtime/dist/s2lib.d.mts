@@ -8,11 +8,14 @@ export declare const GSC: {
      *  Walk via UField.Next at +0x28 to enumerate functions defined on a
      *  class. Stock UE5 +0x38 → GSC +0x48 with the +0x10 UStruct shift. */
     readonly uStructChildren: 72;
-    readonly fFieldNamePrivate: 40;
+    /** 2026-09-29 build: FFieldVariant Owner shrank to 8 bytes, so FField/FProperty
+     *  members past it sit 8 lower than stock 5.1. PlayerController's first
+     *  property decodes as 'Player' at +0x20 (probe 2026-10-19). */
+    readonly fFieldNamePrivate: 32;
     /** UField.Next — same chain UFunctions and UProperties live on. */
     readonly uFieldNext: 40;
-    readonly fPropertyNextLink: 88;
-    readonly fPropertyOffsetInternal: 76;
+    readonly fPropertyNextLink: 72;
+    readonly fPropertyOffsetInternal: 68;
     readonly uObjectClassPtr: 16;
     /** Empirical: the cached FTransform.Translation slot lives at
      *  RelativeLocation + 0x130 within USceneComponent memory. UE renders

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <SoundBanksInfo Platform="Windows" BasePlatform="Windows" SchemaVersion="16" SoundBankVersion="154">
 	<SoundBanks>
-		<SoundBank Id="2875594258" Type="Event" GUID="{55736A04-E2F6-4C5D-89CE-267A8CD7B3F8}" Language="SFX" Hash="{F85F59A3-30E7-A631-B0A7-CAC2468DC646}">
+		<SoundBank Id="2875594258" Type="Event" GUID="{55736A04-E2F6-4C5D-89CE-267A8CD7B3F8}" Language="SFX" Hash="{ADCD347D-3ECF-7A90-2589-71101848CF04}">
 			<ObjectPath>SFX_Controller_PsyStrike_Seccess</ObjectPath>
 			<ShortName>SFX_Controller_PsyStrike_Seccess</ShortName>
 			<Path>Event/SFX_Controller_PsyStrike_Seccess.bnk</Path>
@@ -16,11 +16,6 @@
 					<Path>Media/285535536.wem</Path>
 					<CachePath>93/{9391E662-17E8-573C-8072-29B6036B6F90}.wem</CachePath>
 				</File>
-				<File Id="353388003" Language="SFX" Streaming="false" Location="Loose">
-					<ShortName>S2_Live\S_Controller_PsyStrike_Seccess_Track.wav</ShortName>
-					<Path>Media/353388003.wem</Path>
-					<CachePath>50/{506AB79A-3F7A-D24C-0539-0D776B590DF9}.wem</CachePath>
-				</File>
 				<File Id="626974922" Language="SFX" Streaming="false" Location="Loose">
 					<ShortName>S2_Live\S_Controller_PsyStrike_Seccess_05.wav</ShortName>
 					<Path>Media/626974922.wem</Path>
@@ -30,6 +25,16 @@
 					<ShortName>S2_Live\S_Controller_PsyStrike_Seccess_01.wav</ShortName>
 					<Path>Media/642469469.wem</Path>
 					<CachePath>77/{7763010A-C050-53C0-3755-FE8776502D0D}.wem</CachePath>
+				</File>
+				<File Id="653746826" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_Controller_PsyStrike_Seccess_Phase3.wav</ShortName>
+					<Path>Media/653746826.wem</Path>
+					<CachePath>4B/{4B6F27E7-647E-2CDD-E050-1DA6D922C21A}.wem</CachePath>
+				</File>
+				<File Id="866918276" Language="SFX" Streaming="false" Location="Loose">
+					<ShortName>S2_Live\S_Controller_PsyStrike_Seccess_Phase2.wav</ShortName>
+					<Path>Media/866918276.wem</Path>
+					<CachePath>01/{010BA91A-B81B-034A-DF79-05FA2238FE72}.wem</CachePath>
 				</File>
 				<File Id="923315617" Language="SFX" Streaming="false" Location="Loose">
 					<ShortName>S2_Live\S_Controller_PsyStrike_Seccess_04.wav</ShortName>
@@ -43,13 +48,14 @@
 				</File>
 			</Media>
 			<Events>
-				<Event Id="2875594258" Name="SFX_Controller_PsyStrike_Seccess" ObjectPath="\Events\S2 Live\Mutants\Controller\Controller Voice\SFX_Controller_PsyStrike_Seccess" GUID="{55736A04-E2F6-4C5D-89CE-267A8CD7B3F8}" DurationType="OneShot" DurationMin="5" DurationMax="16.979605">
+				<Event Id="2875594258" Name="SFX_Controller_PsyStrike_Seccess" ObjectPath="\Events\S2 Live\Mutants\Controller\Controller Voice\SFX_Controller_PsyStrike_Seccess" GUID="{55736A04-E2F6-4C5D-89CE-267A8CD7B3F8}" DurationType="OneShot" DurationMin="5" DurationMax="13.625">
 					<MediaRefs>
 						<MediaRef Id="87568857"/>
 						<MediaRef Id="285535536"/>
-						<MediaRef Id="353388003"/>
 						<MediaRef Id="626974922"/>
 						<MediaRef Id="642469469"/>
+						<MediaRef Id="653746826"/>
+						<MediaRef Id="866918276"/>
 						<MediaRef Id="923315617"/>
 						<MediaRef Id="1066180121"/>
 					</MediaRefs>
@@ -60,5 +66,5 @@
 			</Events>
 		</SoundBank>
 	</SoundBanks>
-	<FileHash>{6606D6DC-5296-CF02-CA26-67860DAF6D7E}</FileHash>
+	<FileHash>{5D641173-2AB3-3626-C2A3-B158C98370CA}</FileHash>
 </SoundBanksInfo>

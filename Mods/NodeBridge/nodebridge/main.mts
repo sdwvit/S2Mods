@@ -1,6 +1,7 @@
-// Extends EWeather UEnum in-memory with 10 new weather variants.
+// Serves console commands over a local HTTP API; the EWeather UEnum extension is disabled.
 // See src/nodebridge/offsets.md for layout details and verified addresses.
 
+import http from "node:http";
 import type { Bridge, ModInit } from "@nodebridge/runtime";
 import {
   getPlayerPawnLocation,
@@ -11,18 +12,66 @@ import {
   waitForReflection,
 } from "@nodebridge/runtime";
 
-/** End-to-end check of console commands: spawn one Spark soldier 5 m from the player. */
-async function testSpawn(bridge: Bridge): Promise<void> {
-  await waitForReflection(bridge);
-  try {
-    const p = await getPlayerPawnLocation(bridge);
-    bridge.log(`[spawn-test] player at ${p.x.toFixed(0)} ${p.y.toFixed(0)} ${p.z.toFixed(0)}`);
-    const cmd = `XSpawnObjBySID GeneralNPC_Spark_Stormtrooper 2 0 ${Math.round(p.x + 500)} ${Math.round(p.y)} ${Math.round(p.z + 50)} 0 180 0`;
+const COMMAND_PORT = 47811;
+
+/**
+ * Local control server, so one bridge process serves a whole play session: the object-table
+ * scan behind runConsoleCommand runs once, and later commands reuse the cached session.
+ * Bound to 127.0.0.1 only.
+ *   GET /cmd?c=<console command>     run any console command
+ *   GET /pos                         player location
+ *   GET /squad?faction=Spark&size=5  spawnSquad at the player
+ */
+function startCommandServer(bridge: Bridge): void {
+  const server = http.createServer(async (req, res) => {
+    const url = new URL(req.url ?? "/", "http://127.0.0.1");
+    const reply = (status: number, body: unknown) => {
+      res.writeHead(status, { "content-type": "application/json" });
+      res.end(JSON.stringify(body));
+    };
+    try {
+      if (url.pathname === "/cmd") {
+        const c = url.searchParams.get("c");
+        if (!c) return reply(400, { error: "c required" });
+        await runConsoleCommand(bridge, c);
+        bridge.log(`[http] ran: ${c}`);
+        return reply(200, { ok: true, ran: c });
+      }
+      if (url.pathname === "/pos") return reply(200, await getPlayerPawnLocation(bridge));
+      if (url.pathname === "/squad") {
+        const faction = url.searchParams.get("faction") ?? "Spark";
+        const size = Number(url.searchParams.get("size") ?? 5);
+        return reply(200, { ok: true, ran: await spawnSquad(bridge, faction, size) });
+      }
+      return reply(404, { error: "unknown path" });
+    } catch (e) {
+      bridge.log.error(`[http] ${url.pathname}: ${(e as Error).message}`);
+      return reply(500, { error: (e as Error).message });
+    }
+  });
+  server.on("error", (e) => bridge.log.error(`[http] server: ${e.message}`));
+  server.listen(COMMAND_PORT, "127.0.0.1", () => bridge.log(`[http] listening on 127.0.0.1:${COMMAND_PORT}`));
+}
+
+const SQUAD_ROLES = ["Stormtrooper", "Recon", "Sniper", "CloseCombat"];
+
+/**
+ * Spawns `size` soldiers of `faction` (GeneralNPC_<Faction>_<Role>) in a row 8 m along +X from
+ * the player, 2.5 m apart, facing back toward the player.
+ */
+async function spawnSquad(bridge: Bridge, faction: string, size: number): Promise<string[]> {
+  const p = await getPlayerPawnLocation(bridge);
+  const ran: string[] = [];
+  for (let i = 0; i < size; i++) {
+    const role = SQUAD_ROLES[i % SQUAD_ROLES.length];
+    const x = Math.round(p.x + 800);
+    const y = Math.round(p.y + (i - (size - 1) / 2) * 250);
+    const cmd = `XSpawnObjBySID GeneralNPC_${faction}_${role} 2 0 ${x} ${y} ${Math.round(p.z + 50)} 0 180 0`;
     await runConsoleCommand(bridge, cmd);
-    bridge.log(`[spawn-test] ran: ${cmd}`);
-  } catch (e) {
-    bridge.log.error(`[spawn-test] ${(e as Error).message}`);
+    bridge.log(`[squad] ran: ${cmd}`);
+    ran.push(cmd);
   }
+  return ran;
 }
 
 const FNAME_CTOR_RVA = 0xd26be8; // patternsleuth offline scan 2026-05-01
@@ -58,7 +107,7 @@ function toLE64(n: number): string {
 const init: ModInit = async (bridge) => {
   if (!EWEATHER_ENABLED) {
     bridge.log("EWeather extend: disabled (stale FName ctor RVA)");
-    await testSpawn(bridge);
+    startCommandServer(bridge);
     return;
   }
   bridge.log("EWeather extend: start");
