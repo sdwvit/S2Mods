@@ -2290,7 +2290,7 @@
 										<ActiveSource Name="S_Controller_PsyStrike_Seccess_06" ID="{C7BEC4B2-E524-44B1-9246-6381FC45E343}" Platform="Linked"/>
 									</ActiveSourceList>
 								</Sound>
-								<Sound Name="S_Controller_PsyStrike_Seccess_Track" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" ShortID="697295916">
+								<Sound Name="S_Controller_PsyStrike_Seccess_Phase2" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" ShortID="697295916">
 									<ReferenceList>
 										<Reference Name="Conversion">
 											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
@@ -2300,16 +2300,38 @@
 										</Reference>
 									</ReferenceList>
 									<ChildrenList>
-										<AudioFileSource Name="S_Controller_PsyStrike_Seccess_Track" ID="{B723533B-8A65-4BAF-AECE-60AE7B29CDFC}">
+										<AudioFileSource Name="S_Controller_PsyStrike_Seccess_Phase2" ID="{16799F1C-1BB8-4946-B1ED-F516D5889084}">
 											<Language>SFX</Language>
-											<AudioFile>S2_Live\S_Controller_PsyStrike_Seccess_Track.wav</AudioFile>
+											<AudioFile>S2_Live\S_Controller_PsyStrike_Seccess_Phase2.wav</AudioFile>
 											<MediaIDList>
-												<MediaID ID="353388003"/>
+												<MediaID ID="866918276"/>
 											</MediaIDList>
 										</AudioFileSource>
 									</ChildrenList>
 									<ActiveSourceList>
-										<ActiveSource Name="S_Controller_PsyStrike_Seccess_Track" ID="{B723533B-8A65-4BAF-AECE-60AE7B29CDFC}" Platform="Linked"/>
+										<ActiveSource Name="S_Controller_PsyStrike_Seccess_Phase2" ID="{16799F1C-1BB8-4946-B1ED-F516D5889084}" Platform="Linked"/>
+									</ActiveSourceList>
+								</Sound>
+								<Sound Name="S_Controller_PsyStrike_Seccess_Phase3" ID="{C6E681D5-473B-4846-8787-1B26311561B4}" ShortID="465221548">
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="Default Conversion Settings" ID="{6D1B890C-9826-4384-BF07-C15223E9FB56}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+										<Reference Name="OutputBus">
+											<ObjectRef Name="Master Audio Bus" ID="{1514A4D8-1DA6-412A-A17E-75CA0C2149F3}" WorkUnitID="{689EDD57-DC67-46AA-9884-E22DC8BB6A94}"/>
+										</Reference>
+									</ReferenceList>
+									<ChildrenList>
+										<AudioFileSource Name="S_Controller_PsyStrike_Seccess_Phase3" ID="{FF87A78B-993A-422A-ACC9-8178B09EA99C}">
+											<Language>SFX</Language>
+											<AudioFile>S2_Live\S_Controller_PsyStrike_Seccess_Phase3.wav</AudioFile>
+											<MediaIDList>
+												<MediaID ID="653746826"/>
+											</MediaIDList>
+										</AudioFileSource>
+									</ChildrenList>
+									<ActiveSourceList>
+										<ActiveSource Name="S_Controller_PsyStrike_Seccess_Phase3" ID="{FF87A78B-993A-422A-ACC9-8178B09EA99C}" Platform="Linked"/>
 									</ActiveSourceList>
 								</Sound>
 							</ChildrenList>
@@ -2347,37 +2369,37 @@
 										<ObjectRef Name="S_Controller_PsyStrike_Seccess_01" ID="{3DFADEEB-A46D-474D-99B9-F4A6B4C5DE4C}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
-										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Track" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
+										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Phase2" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
 										<ObjectRef Name="S_Controller_PsyStrike_Seccess_02" ID="{3E0BF83F-7044-4F21-BF01-0EA1C24DB80B}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
-										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Track" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
+										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Phase3" ID="{C6E681D5-473B-4846-8787-1B26311561B4}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
 										<ObjectRef Name="S_Controller_PsyStrike_Seccess_03" ID="{0BB28698-4EF6-4907-B9C7-DF8337DB448A}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
-										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Track" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
+										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Phase2" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
 										<ObjectRef Name="S_Controller_PsyStrike_Seccess_04" ID="{EB44A4CF-5D01-48CF-8131-661BEC186765}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
-										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Track" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
+										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Phase3" ID="{C6E681D5-473B-4846-8787-1B26311561B4}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
 										<ObjectRef Name="S_Controller_PsyStrike_Seccess_05" ID="{B876BB61-CFC8-48D0-9B85-A9966557B959}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
-										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Track" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
+										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Phase2" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
 										<ObjectRef Name="S_Controller_PsyStrike_Seccess_06" ID="{75863A85-5152-4D3D-B51E-239C5DAAA6BB}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 									<Reference>
-										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Track" ID="{6ED18F5E-70B5-4636-A534-FE417A159578}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
+										<ObjectRef Name="S_Controller_PsyStrike_Seccess_Phase3" ID="{C6E681D5-473B-4846-8787-1B26311561B4}" WorkUnitID="{AFA74526-EDB4-496A-AD1C-08841455265B}"/>
 									</Reference>
 								</ObjectList>
 							</ObjectLists>

@@ -30,11 +30,14 @@ export const GSC = {
    *  Walk via UField.Next at +0x28 to enumerate functions defined on a
    *  class. Stock UE5 +0x38 → GSC +0x48 with the +0x10 UStruct shift. */
   uStructChildren: 0x48,
-  fFieldNamePrivate: 0x28,      // stock
+  /** 2026-09-29 build: FFieldVariant Owner shrank to 8 bytes, so FField/FProperty
+   *  members past it sit 8 lower than stock 5.1. PlayerController's first
+   *  property decodes as 'Player' at +0x20 (probe 2026-10-19). */
+  fFieldNamePrivate: 0x20,      // stock +0x28
   /** UField.Next — same chain UFunctions and UProperties live on. */
   uFieldNext: 0x28,
-  fPropertyNextLink: 0x58,      // stock
-  fPropertyOffsetInternal: 0x4c,// stock
+  fPropertyNextLink: 0x48,      // stock +0x58; +0x50 is now NextRef (RefLink chain, probe 2026-10-19)
+  fPropertyOffsetInternal: 0x44,// stock +0x4c
   uObjectClassPtr: 0x10,        // stock UObjectBase
   /** Empirical: the cached FTransform.Translation slot lives at
    *  RelativeLocation + 0x130 within USceneComponent memory. UE renders
@@ -808,7 +811,7 @@ async function ensureConsoleSession(bridge: Bridge): Promise<ConsoleSession> {
   const objects = await getObjectPointers(bridge);
   const lowEnd = Math.min(objects.length, 60000);
   const pcClass = consoleSession?.playerControllerClass || (await findObjectByName(bridge, objects, "PlayerController", 0, lowEnd));
-  const kismetCdo = consoleSession?.kismetCdo || (await findObjectByName(bridge, objects, "Default__KismetSystemLibrary", 0, lowEnd));
+  const kismetCdo = consoleSession?.kismetCdo || (await findObjectByName(bridge, objects, "Default__KismetSystemLibrary"));
   if (!pcClass || !kismetCdo) throw new Error(`console: PlayerController=0x${pcClass.toString(16)} KismetSystemLibrary CDO=0x${kismetCdo.toString(16)}`);
   const playerController = await findInstanceOf(bridge, objects, pcClass);
   if (!playerController) throw new Error("console: no PlayerController instance (load a save first)");
@@ -827,6 +830,14 @@ async function ensureConsoleSession(bridge: Bridge): Promise<ConsoleSession> {
     offWorld = (await findPropertyOffset(bridge, executeFn, "WorldContextObject")) ?? -1;
     offCommand = (await findPropertyOffset(bridge, executeFn, "Command")) ?? -1;
     offPlayer = (await findPropertyOffset(bridge, executeFn, "SpecificPlayer")) ?? -1;
+    if ((offWorld < 0 || offCommand < 0 || offPlayer < 0) && paramsSize === 32) {
+      // Stock layout: UObject* @0, FString @8 (16 bytes), APlayerController* @0x18.
+      const chain = await listAllProperties(bridge, executeFn, 8);
+      bridge.log(`console: ExecuteConsoleCommand PropertyLink chain=${JSON.stringify(chain)}; using stock layout`);
+      offWorld = 0;
+      offCommand = 8;
+      offPlayer = 0x18;
+    }
     if (offWorld < 0 || offCommand < 0 || offPlayer < 0 || !paramsSize) {
       throw new Error(`console: ExecuteConsoleCommand layout size=${paramsSize} world=${offWorld} command=${offCommand} player=${offPlayer}`);
     }
@@ -874,21 +885,47 @@ export async function runConsoleCommand(bridge: Bridge, command: string): Promis
   if (r.ok === false) throw new Error(`console: processEvent failed: ${r.reason}`);
 }
 
+/** findPropertyOffset on `classPtr`, then on each SuperStruct until one has `propName`. */
+async function findPropertyOffsetInHierarchy(bridge: Bridge, classPtr: number, propName: string): Promise<number | null> {
+  let cls = classPtr;
+  for (let depth = 0; cls && depth < 16; depth++) {
+    const off = await findPropertyOffset(bridge, cls, propName, 4096);
+    if (off != null) return off;
+    cls = (await readU64At(bridge, cls + GSC.uStructSuperStruct)) ?? 0;
+  }
+  return null;
+}
+
 /** The player pawn's world location, read through reflected property names. */
 export async function getPlayerPawnLocation(bridge: Bridge): Promise<Vector3> {
   const s = await ensureConsoleSession(bridge);
   const pcClass = (await readU64At(bridge, s.playerController + GSC.uObjectClassPtr)) ?? 0;
-  const offPawn = await findPropertyOffset(bridge, pcClass, "Pawn");
-  if (offPawn == null) throw new Error("location: Controller.Pawn not found");
+  // APlayerController::AcknowledgedPawn is near the head of the chain; AController::Pawn
+  // sits past the Blueprint class's own properties.
+  const offPawn =
+    (await findPropertyOffsetInHierarchy(bridge, pcClass, "AcknowledgedPawn")) ??
+    (await findPropertyOffsetInHierarchy(bridge, pcClass, "Pawn"));
+  if (offPawn == null) {
+    const chain = await listAllProperties(bridge, pcClass, 40);
+    throw new Error(
+      `location: PlayerController pawn property not found; class '${await getObjectName(bridge, pcClass)}' chain=` +
+        chain.map((p) => `${p.name}@0x${p.off.toString(16)}`).join(","),
+    );
+  }
   const pawn = (await readU64At(bridge, s.playerController + offPawn)) ?? 0;
   if (!pawn) throw new Error("location: no pawn");
   const pawnClass = (await readU64At(bridge, pawn + GSC.uObjectClassPtr)) ?? 0;
-  const offRoot = await findPropertyOffset(bridge, pawnClass, "RootComponent");
+  const offRoot = await findPropertyOffsetInHierarchy(bridge, pawnClass, "RootComponent");
   const root = offRoot == null ? 0 : ((await readU64At(bridge, pawn + offRoot)) ?? 0);
   if (!root) throw new Error("location: no RootComponent");
   const rootClass = (await readU64At(bridge, root + GSC.uObjectClassPtr)) ?? 0;
-  const offLoc = await findPropertyOffset(bridge, rootClass, "RelativeLocation");
+  const offLoc = await findPropertyOffsetInHierarchy(bridge, rootClass, "RelativeLocation");
   const loc = offLoc == null ? null : await readVector3At(bridge, root + offLoc);
-  if (!loc) throw new Error("location: RelativeLocation unreadable");
+  if (!loc) {
+    throw new Error(
+      `location: RelativeLocation unreadable (pawn=0x${pawn.toString(16)} '${await getObjectName(bridge, pawn)}' ` +
+        `root@${offRoot}=0x${root.toString(16)} '${await getObjectName(bridge, root)}' class '${await getObjectName(bridge, rootClass)}' loc@${offLoc})`,
+    );
+  }
   return loc;
 }
