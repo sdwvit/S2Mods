@@ -30,8 +30,8 @@ importers:
         specifier: ^3.6.2
         version: 3.8.1
       s2cfgtojson:
-        specifier: 9.0.1
-        version: 9.0.1
+        specifier: 9.1.0
+        version: 9.1.0
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
@@ -58,6 +58,8 @@ importers:
   Mods/CP77MenuMusic: {}
 
   Mods/CantBeKnockedDown: {}
+
+  Mods/ControllerPsyStrikeSound: {}
 
   Mods/CratesDontDropAnything: {}
 
@@ -202,6 +204,8 @@ importers:
   Mods/SkipLesserZoneCutscenes: {}
 
   Mods/SlowerRadiationDamage: {}
+
+  Mods/SpawnSquads: {}
 
   Mods/SpecialistMerchants: {}
 
@@ -1005,8 +1009,8 @@ packages:
   rrweb-cssom@0.8.0:
     resolution: {integrity: sha512-guoltQEx+9aMf2gDZ0s62EcV8lsXR+0w8915TC3ITdn2YueuNjdAYh/levpU9nFaoChh9RUS5ZdQMrKfVEN9tw==}
 
-  s2cfgtojson@9.0.1:
-    resolution: {integrity: sha512-gyQUloMs3atyy7MEGPnQjblwL3ReOb5yra4JtIXTUwEkTYhIAtxG/eNnhOhRhBu0cUj225UKt4cUdSVyJtLTvA==}
+  s2cfgtojson@9.1.0:
+    resolution: {integrity: sha512-Z2jmO7WjjBRITs4g/cR2V+EmqlBBHk7v+5lkqBaMdYz5xl6CYjsDcLoEET7InGrhsiYWSssTFj9032+021Q9tg==}
     engines: {node: '>=24'}
 
   safe-buffer@5.1.2:
@@ -1962,7 +1966,7 @@ snapshots:
 
   rrweb-cssom@0.8.0: {}
 
-  s2cfgtojson@9.0.1: {}
+  s2cfgtojson@9.1.0: {}
 
   safe-buffer@5.1.2: {}
 
