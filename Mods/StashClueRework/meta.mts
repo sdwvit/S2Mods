@@ -20,7 +20,7 @@ bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Stashes that some quests put items into are no longer hidden, so those quests can be completed again.",
+  changenote: "Fixed the mod failing to install from the Steam Workshop.",
   structTransformers: [
     transformObjPrototypes,
     transformSpawnActorPrototypes,
