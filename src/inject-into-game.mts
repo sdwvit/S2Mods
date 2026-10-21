@@ -1,5 +1,5 @@
 import { logger } from "./logger.mts";
-import { gameModsFolder, modName } from "./base-paths.mts";
+import { gameModsFolder, legacyGameModsFolder, modName } from "./base-paths.mts";
 import { cpSync, mkdirSync, rmSync } from "node:fs";
 import path from "node:path";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
@@ -22,6 +22,7 @@ export async function injectStagedIntoGame() {
     // this is a plain overlay - nothing of one half can overwrite the other, and the game mounts
     // both containers.
     rmSync(destination, { recursive: true, force: true });
+    rmSync(path.join(legacyGameModsFolder, modName), { recursive: true, force: true });
     for (const target of targets) {
       const label = modClassification.isSplit ? ` (${target.kind})` : "";
       logger.log(

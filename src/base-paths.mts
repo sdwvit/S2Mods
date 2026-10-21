@@ -36,7 +36,15 @@ export const sdkStagedFolder = path.join(process.env.SDK_PATH, "Stalker2", "Save
 export const sdkModsFolder = path.join(process.env.SDK_PATH, "Stalker2", "Mods");
 
 export const gameRootFolder = process.env.STALKER2_FOLDER;
-export const gameModsFolder = path.join(gameRootFolder, "Stalker2", "Content", "Paks", "notmods");
+/**
+ * `~mods` is the folder the game's mod pipeline scans for custom mods: only mods there (or from
+ * the Workshop) get their plugin registered and their AssetRegistry.bin appended, which assets the
+ * game finds by class need (e.g. DialogRuntimeData voiceover). Other folders under Paks/ are only
+ * mounted as plain paks.
+ */
+export const gameModsFolder = path.join(gameRootFolder, "Stalker2", "Content", "Paks", "~mods");
+/** Where mods were injected before 2026-10-20; a copy left there would be mounted twice. */
+export const legacyGameModsFolder = path.join(gameRootFolder, "Stalker2", "Content", "Paks", "notmods");
 /**
  * Loose .cfg overlay the game reads directly - takes precedence over the packed data. Both
  * `GameData` and `DLCGameData/<DLC>` live below it; a mod with `dlc = true` patches only the latter.

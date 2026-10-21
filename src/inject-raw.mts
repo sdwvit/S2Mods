@@ -14,6 +14,7 @@ import {
   gameGameDataFolder,
   gameGameLiteFolder,
   gameModsFolder,
+  legacyGameModsFolder,
   injectableCfgTrees,
   modFolder,
   modFolderRaw,
@@ -156,10 +157,11 @@ export async function injectRawIntoGame() {
 
 /** Earlier versions installed loose configs under Paks/notmods/<ModName>; they would still load. */
 function purgeNotmodsFolderForMod() {
-  const legacy = path.join(gameModsFolder, modName);
-  if (!existsSync(legacy)) return;
-  logger.log(`Removing legacy loose-config folder ${legacy}`);
-  rmSync(legacy, { recursive: true, force: true });
+  for (const legacy of [path.join(gameModsFolder, modName), path.join(legacyGameModsFolder, modName)]) {
+    if (!existsSync(legacy)) continue;
+    logger.log(`Removing legacy loose-config folder ${legacy}`);
+    rmSync(legacy, { recursive: true, force: true });
+  }
 }
 
 /** Loose configs and a cooked pak of the same mod would both load, so keep only one of them. */
