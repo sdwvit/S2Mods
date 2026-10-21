@@ -6,6 +6,7 @@ import path from "node:path";
 import {
   parseUasset,
   renameLocalizationPackage,
+  writeDialogRuntimeData,
   writeDialogTexts,
   writeLocalizationDatabase,
   writeLocalizedTexts,
@@ -454,5 +455,83 @@ describe("writeDialogTexts", () => {
     ];
     writeDialogTexts(file, topics);
     expect(topicsOf(file)).toEqual(topics);
+  });
+});
+
+/** A vanilla `<ChainSID>_Voiceover` the editor saved: two phrases, each mapped to a Wolf VO event. */
+const VOICEOVER_FIXTURE = path.join(import.meta.dirname, "fixtures/dialog-runtime-voiceover.uasset");
+const VANILLA_EVENT = (key: string) =>
+  `/Game/_STALKER2/Audio/WwiseAudio/Events/Voiceover/Hubs/VO_RookieVillage_Hub/volk/VO_volk_${key}.VO_volk_${key}`;
+
+describe("writeDialogRuntimeData", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "drd-"));
+  const vanilla = ["RookieVillage_Hub_volk_1_InfoTopic_1_1_62354", "RookieVillage_Hub_volk_1_InfoTopic_1_1_62358"].map((key) => ({
+    key,
+    path: VANILLA_EVENT(key),
+  }));
+
+  it("reproduces the editor's bytes from the asset's own entries", () => {
+    const out = path.join(dir, "same.uasset");
+    writeDialogRuntimeData(VOICEOVER_FIXTURE, parseUasset(VOICEOVER_FIXTURE).summary.packageName, vanilla, out);
+    expect(readFileSync(out).equals(readFileSync(VOICEOVER_FIXTURE))).toBe(true);
+  });
+
+  it("renames and refills it, and a rewrite of the result is stable", () => {
+    const pkg = "/SomeMod/Dialogs/SomeMod_Topic_Voiceover";
+    const entries = ["SomeMod_Topic_Hi_000", "SomeMod_Topic_Hi_001", "SomeMod_Topic_Bye_12"].map((key) => ({
+      key,
+      path: `/SomeMod/Events/VO_x_${key}.VO_x_${key}`,
+    }));
+    const a = path.join(dir, "a.uasset");
+    const b = path.join(dir, "b.uasset");
+    writeDialogRuntimeData(VOICEOVER_FIXTURE, pkg, entries, a);
+    writeDialogRuntimeData(a, pkg, entries, b);
+    expect(readFileSync(b).equals(readFileSync(a))).toBe(true);
+    const parsed = parseUasset(a);
+    expect(parsed.summary.packageName).toBe(pkg);
+    expect(parsed.exports.map((e) => [e.objectName, e.className])).toEqual([
+      ["SomeMod_Topic_Voiceover", "DialogRuntimeData"],
+      ["PackageMetaData", "MetaData"],
+      ["Voiceover", "NameToAsset_AssetContainer"],
+    ]);
+    expect(parsed.exports[0].properties).toEqual({ AssetType: "Voiceover", AssetContainer: 3 });
+    // a trailing number becomes the FName number, so "_12" is not in the table but "_000" is
+    expect(parsed.names).toContain("SomeMod_Topic_Hi_000");
+    expect(parsed.names).toContain("SomeMod_Topic_Bye");
+  });
+
+  it("sizes the registry's SoftPackageUsedInGame bits to the soft package list", () => {
+    // 40 packages: more than one uint32 word, and the template has 2
+    const entries = Array.from({ length: 40 }, (_, i) => ({ key: `SomeMod_Topic_Hi_${i}`, path: `/SomeMod/Events/VO_${i}.VO_${i}` }));
+    const out = path.join(dir, "many.uasset");
+    writeDialogRuntimeData(VOICEOVER_FIXTURE, "/SomeMod/Dialogs/SomeMod_Topic_Voiceover", entries, out);
+    const bytes = readFileSync(out);
+    const { summary } = parseUasset(out);
+    const dependencyAt = Number(bytes.readBigInt64LE(bytes.readInt32LE(summary.assetRegistryDataOffsetAt!)));
+    const softAt = dependencyAt + 4 + 4 * Math.ceil(bytes.readInt32LE(dependencyAt) / 32);
+    expect(bytes.readInt32LE(softAt)).toBe(40);
+    expect(bytes.readUInt32LE(softAt + 4)).toBe(0xffffffff);
+    expect(bytes.readUInt32LE(softAt + 8)).toBe(0xff);
+    expect(softAt + 12 + 4).toBe(summary.totalHeaderSize); // then the empty ExtraPackageDependencies
+  });
+});
+
+/** A vanilla `<ChainSID>_FaceAnimation`: one phrase, a face anim per language. */
+const FACE_FIXTURE = path.join(import.meta.dirname, "fixtures/dialog-runtime-faceanimation.uasset");
+
+describe("writeDialogRuntimeData (FaceAnimation)", () => {
+  const dir = mkdtempSync(path.join(tmpdir(), "drd-face-"));
+  const anim = (lang: string) =>
+    `/Game/_STALKER2/Animations/CharacterHead/MainQuests/E02_MQ01/rihter/${lang}/AS_FAC_${lang}_rihter_E02_MQ01_rihter_0_HelloTopic_hello_41656.AS_FAC_${lang}_rihter_E02_MQ01_rihter_0_HelloTopic_hello_41656`;
+
+  it("reproduces the editor's bytes from the asset's own entries", () => {
+    const out = path.join(dir, "same.uasset");
+    const entries = [{ key: "E02_MQ01_rihter_0_HelloTopic_hello_41656", paths: { Ukrainian: anim("UA"), English: anim("EN") } }];
+    writeDialogRuntimeData(FACE_FIXTURE, parseUasset(FACE_FIXTURE).summary.packageName, entries, out);
+    expect(readFileSync(out).equals(readFileSync(FACE_FIXTURE))).toBe(true);
+  });
+
+  it("refuses Voiceover entries", () => {
+    expect(() => writeDialogRuntimeData(FACE_FIXTURE, "/M/Dialogs/X_FaceAnimation", [{ key: "X_000", path: "/M/E.E" }], path.join(dir, "x.uasset"))).toThrow();
   });
 });

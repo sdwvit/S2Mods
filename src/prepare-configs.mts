@@ -1,8 +1,11 @@
 console.time("Took");
 import * as fs from "node:fs";
 import { spawnSync } from "child_process";
-import { modFolderRaw, modFolderSteam } from "./base-paths.mts";
-import { modMeta } from "./mod-meta-paths.mts";
+import { modFolderRaw, modFolderSteam, modName } from "./base-paths.mts";
+// Before mod-meta-paths: it classifies raw/ at import, and the blueprint decides the split.
+import "./announce-installed-raw.mts";
+import { modMeta, sdkModName } from "./mod-meta-paths.mts";
+import { announcesInstalled, writeInstalledEffectCfg } from "./announce-installed.mts";
 import { logger } from "./logger.mts";
 import { onL2Finish } from "./cache/l2-cache.mts";
 import { onL3Finish } from "./cache/l3-cache.mts";
@@ -24,6 +27,8 @@ const total = await Promise.all(
     processOneTransformer(t).finally(() => meta.onTransformerFinish?.(t)),
   ),
 );
+
+if (announcesInstalled(modName)) writeInstalledEffectCfg(modFolderRaw, await sdkModName);
 
 await meta.onFinish?.();
 console.timeEnd("Took");
