@@ -30,22 +30,29 @@ constants instead, never patch those offsets.
 Skip `tsc --noEmit`, `node --check`, manual syntax verification — errors surface in the
 bridge log and cost one extra iteration; pre-checking just slows the loop.
 
-## Verified GSC UE 5.1 offsets
-Live in the `GSC` constant block at the top of `Mods/NodeBridge/nodebridge/main.mts`,
-confirmed by an in-game JS probe 2026-04-24:
+## Verified GSC UE 5.1 offsets (2026-09-29 game build)
+Live in `GSC` and `BUILD_RVA` at the top of `src/nodebridge/runtime/s2lib.mts`, confirmed by
+in-game JS probes 2026-10-19/20. A game update can move any of them; re-probe before trusting.
 
-- `UStruct.PropertyLink` @ +0x70 (stock UE 5.1: +0x60)
-- `UStruct.PropertiesSize` @ +0x58 (stock: +0x48)
-- `UStruct.SuperStruct` @ +0x40 (assumed +0x10 shift, not directly verified)
-- `FField.NamePrivate` @ +0x28 (stock)
-- `FProperty.property_link_next` @ +0x58 (stock)
-- `FProperty.offset_internal` @ +0x4C (stock)
-- `UObjectBase.class_ptr` @ +0x10 (stock)
+- `UStruct.PropertyLink` @ +0x70, `PropertiesSize` @ +0x58, `SuperStruct` @ +0x40, `Children` @ +0x48
+- `FField.NamePrivate` @ +0x20 (stock +0x28: FFieldVariant Owner is 8 bytes in this build)
+- `FProperty.offset_internal` @ +0x44, `PropertyLinkNext` @ +0x48 (+0x50 is the RefLink chain)
+- `UObjectBase.class_ptr` @ +0x10, `NamePrivate` @ +0x18
+- RVAs: GUObjectArray 0xa0e68c0, FNamePool 0x9ff0c80, UObject::ProcessEvent 0x216a728 (vtable slot 79)
+- C++ FName::ToString has no trusted candidate in this build; `decodeFName` falls back to
+  reading FNamePool in JS.
 
-FField/FProperty are pure stock; only UStruct's own members shift by +0x10.
+Look properties up by name (`findPropertyOffset` up the SuperStruct chain), not by fixed
+offsets: `RootComponent` moved 0x1A0 → 0x1C0 with the update.
 
-`BP_Stalker2Character_C`: `RootComponent` +0x1A0, `Mesh` +0x320,
-`CharacterMovement` +0x328, `CapsuleComponent` +0x330.
+Console commands: `runConsoleCommand` calls `KismetSystemLibrary.ExecuteConsoleCommand`
+(params: WorldContextObject @0, FString Command @8, SpecificPlayer @0x18) through ProcessEvent,
+which the DLL runs on the game thread via its ProcessEvent detour. `APlayerController::ConsoleCommand`
+is not a UFunction. The player controller class is `BP_Stalker2PlayerContoller_C` (GSC spelling).
+
+During play, use the HTTP API in `Mods/NodeBridge/nodebridge/main.mts` (127.0.0.1:47811:
+`/cmd?c=`, `/pos`, `/squad?faction=&size=`). Every inject restarts node.exe and the first
+command then rescans GUObjectArray (~1 min), so don't edit bridge files mid-session.
 
 `USceneComponent`: `RelativeLocation` +0x130 (FVector3d, 24B). `ComponentToWorld` is **not**
 a UProperty in the GSC fork — the cached FTransform's Translation slot is at

@@ -10,7 +10,7 @@
     "Type": "Event",
     "GUID": "{55736A04-E2F6-4C5D-89CE-267A8CD7B3F8}",
     "Language": "SFX",
-    "Hash": "{ADCD347D-3ECF-7A90-2589-71101848CF04}",
+    "Hash": "{297C0F70-574C-2170-3314-5909D5AD4552}",
     "ObjectPath": "SFX_Controller_PsyStrike_Seccess",
     "ShortName": "SFX_Controller_PsyStrike_Seccess",
     "Path": "Event/SFX_Controller_PsyStrike_Seccess.bnk",
@@ -58,7 +58,7 @@
       "Location": "Loose",
       "ShortName": "S2_Live\\S_Controller_PsyStrike_Seccess_Phase3.wav",
       "Path": "Media/653746826.wem",
-      "CachePath": "4B/{4B6F27E7-647E-2CDD-E050-1DA6D922C21A}.wem"
+      "CachePath": "7B/{7B22DBCB-561D-740A-2FE0-6915CD958F99}.wem"
      },
      {
       "Id": "866918276",
@@ -67,7 +67,7 @@
       "Location": "Loose",
       "ShortName": "S2_Live\\S_Controller_PsyStrike_Seccess_Phase2.wav",
       "Path": "Media/866918276.wem",
-      "CachePath": "01/{010BA91A-B81B-034A-DF79-05FA2238FE72}.wem"
+      "CachePath": "D0/{D09908E1-2B58-EC73-4A71-0ADBD24B038E}.wem"
      },
      {
       "Id": "923315617",
@@ -136,6 +136,6 @@
     ]
    }
   ],
-  "FileHash": "{FDE25CB8-7334-545E-9DAE-88B1E95E7F9A}"
+  "FileHash": "{1148F580-DE1A-DE2B-5425-1EFCFCD58221}"
  }
 }

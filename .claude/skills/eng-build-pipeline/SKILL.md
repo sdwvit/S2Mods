@@ -122,7 +122,8 @@ A split mod is still ONE Steam/mod.io/Nexus/Xbox listing. Both halves' staged tr
 into the single `steamworkshop/Windows/` payload by `src/pull-staged.mts`; they differ in their
 `Stalker2/Mods/<sdkName>/` subfolder and in their container basenames
 (`<sdkName>Stalker2-Windows-<variant>.{pak,utoc,ucas}`), so the merge is a pure overlay with no
-collision and the game mounts both containers out of `notmods/<ModName>/`. Steam takes
+collision and the game mounts both containers out of `~mods/<ModName>/` (it must be `~mods`: only
+there does the game register the mod plugin and append its AssetRegistry.bin). Steam takes
 `steamworkshop/` as its content folder, mod.io zips it, `zip-for-xbox` zips `raw/` (loose, no
 paks) — none of them needs to know there are two halves. `pull-staged` throws rather than
 publishing half a mod if only one half is staged.
