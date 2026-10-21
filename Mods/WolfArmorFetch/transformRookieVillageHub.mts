@@ -18,6 +18,17 @@ import {
   lastLineSID,
 } from "./dialog.mts";
 import { Q, hasRun, questNode, setDialog } from "./nodes.mts";
+import {
+  COVER_ACCEPT,
+  COVER_ACCEPTED,
+  COVER_DECLINED,
+  COVER_NOT_YET,
+  COVER_PAYOFF,
+  COVER_TURNIN,
+  MEETING,
+  MEETING_INTEL,
+} from "./coverDialog.mts";
+import { COVER_OFFER_DELAY_HOURS, DEALER_PDA, QC } from "./cover.mts";
 
 const HUB = "RookieVillage_Hub";
 /** Our nodes live in the hub quest, so their SIDs carry its prefix. */
@@ -39,6 +50,8 @@ const WOLF_TOPIC_TRIGGERS = [
 ];
 
 const QD = `${Q}_Decider`;
+/** Vanilla's RookieVillage_Hub tick (LaunchOnQuestStart), so it already runs on saves past the hub's start. */
+const COVER_READY_TICK = `${HUB}_OnTickEvent`;
 const If = (SID: string, launchers: { SID: string; Name?: string }[], condition: string) =>
   node(SID, {
     NodePrototypeVersion: 1,
@@ -50,10 +63,16 @@ const If = (SID: string, launchers: { SID: string; Name?: string }[], condition:
 
 let once = false;
 
+/** Where the hub starts listening for Skif's return: on accepting, and at each re-attach until then. */
+const coverListenFrom = [
+  { SID: `${H}_If_CoverReturned`, Name: "False" },
+  { SID: `${H}_CoverAcceptDialog`, Name: lastLineSID(COVER_ACCEPT, COVER_ACCEPTED) },
+];
+
 /**
- * Wolf's offer and hand-in dialogs for both jobs, as RookieVillage_Hub nodes. Which one he gets is
- * decided at each re-attach from WolfArmorFetch's own progress: the Decider first, then the Falcon a
- * day later.
+ * Wolf's offer and hand-in dialogs for all three jobs, as RookieVillage_Hub nodes. Which one he gets
+ * is decided at each re-attach from the quests' own progress: the Decider first, then the Falcon a day
+ * later, then Cover Story (WolfArmorFetch_Cover) a day after the Falcon hand-in.
  * A save that accepted the Falcon before the Decider existed finishes the Falcon first, then gets the
  * Decider. WolfArmorFetch reacts to how they end with `OnInfotopicFinishEvent` listeners (see
  * transformQuestNodes).
@@ -138,6 +157,82 @@ export const transformRookieVillageHub: StructTransformer<Struct> = () => {
       [
         { label: FALCON_GIVE, finish: true },
         { label: FALCON_NOT_YET, finish: false },
+      ],
+    ),
+
+    // Cover Story: once its own quest says it's ready (a day after the Falcon hand-in), the same
+    // condition its quest-giver marker on Wolf uses. Gating on WolfArmorFetch's End as well left saves
+    // with the marker and no topic.
+    If(`${H}_If_CoverAccepted`, [{ SID: `${H}_If_FalconDone`, Name: "True" }], `${QC}_OnAccepted`),
+    If(`${H}_If_CoverReady`, [{ SID: `${H}_If_CoverAccepted`, Name: "False" }], `${QC}_Ready`),
+    If(`${H}_If_CoverDone`, [{ SID: `${H}_If_CoverAccepted`, Name: "True" }], `${QC}_OnHandedIn`),
+    // A day after the Falcon hand-in, straight away, the way the Falcon offer follows the Decider.
+    node(`${H}_CoverOfferTimer`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::SetTimer",
+      Launchers: getLaunchers([{ SID: `${H}_TurnInDialog`, Name: lastLineSID(TURNIN, FALCON_GIVE) }]),
+      InGameHours: COVER_OFFER_DELAY_HOURS,
+    }),
+    If(`${H}_If_CoverOfferEnded`, [{ SID: `${H}_CoverOfferTimer` }], `${QC}_Ready`),
+    // The quest can turn ready (and mark Wolf) while Wolf stands there, or after his creation on a
+    // load: then no re-attach follows. The hub's own vanilla tick picks it up, once, unless the job
+    // is already taken.
+    node(`${H}_CoverReadyPin`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::Condition",
+      Launchers: getLaunchers([{ SID: COVER_READY_TICK }]),
+      Conditions: hasRun(`${QC}_Ready`),
+    }),
+    node(`${H}_CoverReadyNow`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::Technical",
+      Launchers: getLaunchers([[{ SID: COVER_READY_TICK, Name: "" }, { SID: `${H}_CoverReadyPin` }]]),
+    }),
+    If(`${H}_If_CoverTakenNow`, [{ SID: `${H}_CoverReadyNow` }], `${QC}_OnAccepted`),
+    setDialog(
+      HUB,
+      `${H}_CoverAcceptDialog`,
+      [
+        { SID: `${H}_If_CoverReady`, Name: "True" },
+        { SID: `${H}_If_CoverOfferEnded`, Name: "True" },
+        { SID: `${H}_If_CoverTakenNow`, Name: "False" },
+      ],
+      COVER_ACCEPT,
+      [
+        { label: COVER_ACCEPTED, finish: true },
+        { label: COVER_DECLINED, finish: false },
+      ],
+    ),
+    // The hand-in shows only once Skif has something to hand in: the lead's word or the dealers' PDA.
+    If(`${H}_If_CoverReturned`, [{ SID: `${H}_If_CoverDone`, Name: "False" }], `${QC}_SetJournal_ReturnToWolf`),
+    // Not yet: listen for either, so the topic appears without waiting for the next re-attach. Each
+    // listener stops the other, so the topic is attached once.
+    node(`${H}_OnCoverIntel`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::OnInfotopicFinishEvent",
+      Launchers: getLaunchers([...coverListenFrom, { SID: `${H}_OnCoverDealerPDA`, Excluding: true }]),
+      EventType: "EQuestEventType::OnDialogFinished",
+      TrackBeforeActive: false,
+      InfotopicLastPhrases: new Struct({ 0: new Struct({ LastPhraseSID: lastLineSID(MEETING, MEETING_INTEL) }) }),
+    }),
+    node(`${H}_OnCoverDealerPDA`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::OnPlayerGetItemEvent",
+      Launchers: getLaunchers([...coverListenFrom, { SID: `${H}_OnCoverIntel`, Excluding: true }]),
+      EventType: "EQuestEventType::OnPlayerGetItem",
+      TrackBeforeActive: false,
+      ItemPrototypeSID: DEALER_PDA,
+      ExpectedItemsCount: 1,
+      WithEquipped: true,
+    }),
+    setDialog(
+      HUB,
+      `${H}_CoverTurnInDialog`,
+      [{ SID: `${H}_If_CoverReturned`, Name: "True" }, { SID: `${H}_OnCoverIntel` }, { SID: `${H}_OnCoverDealerPDA` }],
+      COVER_TURNIN,
+      [
+        { label: COVER_PAYOFF, finish: true },
+        { label: COVER_NOT_YET, finish: false },
       ],
     ),
   ];

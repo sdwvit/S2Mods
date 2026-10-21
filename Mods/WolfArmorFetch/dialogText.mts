@@ -74,7 +74,7 @@ export const T = {
   },
   offer2: {
     English: "And? Did you find your sniper?",
-    Ukrainian: "Ну і що? Знайшов свого снайпера?",
+    Ukrainian: "Ну що, знайшов свого снайпера?",
     German: "Und? Hast du deinen Scharfschützen gefunden?",
     French: "Et alors ? Tu as retrouvé ton sniper ?",
     SpanishEuropean: "¿Y qué? ¿Has encontrado a tu francotirador?",
@@ -672,7 +672,7 @@ export const T = {
   },
   giveWolf2: {
     English: "Anyway, a deal's a deal. Here are your coupons. And I've marked a stash on your PDA. There's something useful in it, it's yours.",
-    Ukrainian: "Ну, домовлялися — тримай купони. І схрон один тобі на ПДА відмітив. Там дещо корисне є, забирай.",
+    Ukrainian: "Домовлялися — тримай купони. І схрон тобі на КПК відмітив. Там дещо корисне є, забирай.",
     German: "Na ja, abgemacht ist abgemacht. Hier sind deine Marken. Und ich hab dir ein Versteck auf dem PDA markiert. Da ist was Nützliches drin, nimm's mit.",
     French: "Bon, marché conclu : voilà tes coupons. Et je t'ai marqué une planque sur ton PDA. Il y a quelque chose d'utile dedans, c'est pour toi.",
     SpanishEuropean: "Bueno, lo acordado: aquí tienes los cupones. Y te he marcado un alijo en el PDA. Hay algo útil dentro, quédatelo.",

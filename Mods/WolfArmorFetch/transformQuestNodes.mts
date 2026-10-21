@@ -14,10 +14,11 @@ import {
   FALCON_OFFER_DELAY_HOURS,
   TURNIN,
 } from "./dialog.mts";
-import { INSTALLED_EFFECT_SID as HEADLESS_ARMORS_INSTALLED } from "../HeadlessArmors/transformEffectPrototypes.mts";
+import { INSTALLED_EFFECT_SID as HEADLESS_ARMORS_INSTALLED } from "../HeadlessArmors/installed.mts";
 import { PLAYER_GUID as PLAYER, Q, WOLF_GUID, hasRun, onDialogEnding, questNode } from "./nodes.mts";
-
-const STASH_GUID = "1DFF64AA468013EBAE934D8F3B8F980B";
+import { allOf, hasEffect, itemInContainer } from "./conditions.mts";
+import { coverNodes } from "./coverNodes.mts";
+import { REWARD_STASH_GUID as STASH_GUID } from "./coverPrototypes.mts";
 
 const node = (SID: string, fields: Record<string, unknown>) => questNode(Q, SID, fields);
 
@@ -117,6 +118,70 @@ function deciderNodes() {
       JournalEntity: "EJournalEntity::Quest",
       JournalAction: "EJournalAction::Finish",
       JournalQuestSID: QD,
+    }),
+  ];
+}
+
+/** The Falcon stash's failsafe: checked once, 10 s after the fill. */
+function stashRetry() {
+  const R = `${Q}_StashRetry`;
+  return [
+    node(`${R}_Delay`, {
+      NodeType: "EQuestNodeType::Technical",
+      Launchers: getLaunchers([{ SID: `${Q}_PopulateStash` }, { SID: `${Q}_PopulateStashHeadless` }]),
+      StartDelay: 10,
+    }),
+    node(`${R}_If_Empty`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::If",
+      Launchers: getLaunchers([{ SID: `${R}_Delay` }]),
+      Conditions: allOf(
+        ["Exoskeleton_Neutral_Armor", "Exoskeleton_Neutral_Armor_headless"].map((item) => itemInContainer(STASH_GUID, item, "Equal", 0)),
+      ),
+    }),
+    node(`${R}_Spawn`, {
+      NodeType: "EQuestNodeType::Spawn",
+      Launchers: getLaunchers([{ SID: `${R}_If_Empty`, Name: "True" }]),
+      TargetQuestGuid: STASH_GUID,
+      SpawnHidden: false,
+      SpawnNodeExcludeType: "ESpawnNodeExcludeType::SeamlessDespawn",
+    }),
+    node(`${R}_RevealDelay`, {
+      NodeType: "EQuestNodeType::Technical",
+      Launchers: getLaunchers([{ SID: `${R}_If_Empty`, Name: "True" }]),
+      StartDelay: 1,
+    }),
+    node(`${R}_Reveal`, {
+      NodeType: "EQuestNodeType::GiveCache",
+      Launchers: getLaunchers([{ SID: `${R}_RevealDelay` }]),
+      TargetQuestGuid: STASH_GUID,
+    }),
+    node(`${R}_FillDelay`, {
+      NodeType: "EQuestNodeType::Technical",
+      Launchers: getLaunchers([{ SID: `${R}_Reveal` }]),
+      StartDelay: 1,
+    }),
+    node(`${R}_If_HeadlessArmors`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::If",
+      Launchers: getLaunchers([{ SID: `${R}_FillDelay` }]),
+      Conditions: allOf([hasEffect(HEADLESS_ARMORS_INSTALLED)]),
+    }),
+    node(`${R}_Populate`, {
+      NodeType: "EQuestNodeType::SetItemGenerator",
+      Launchers: getLaunchers([{ SID: `${R}_If_HeadlessArmors`, Name: "False" }]),
+      TargetQuestGuid: STASH_GUID,
+      ReplaceInventory: false,
+      EquipItems: false,
+      ItemGeneratorSID: `${Q}_StashReward`,
+    }),
+    node(`${R}_PopulateHeadless`, {
+      NodeType: "EQuestNodeType::SetItemGenerator",
+      Launchers: getLaunchers([{ SID: `${R}_If_HeadlessArmors`, Name: "True" }]),
+      TargetQuestGuid: STASH_GUID,
+      ReplaceInventory: false,
+      EquipItems: false,
+      ItemGeneratorSID: `${Q}_StashRewardHeadless`,
     }),
   ];
 }
@@ -296,6 +361,9 @@ export const transformQuestNodes: StructTransformer<Struct> = () => {
       ItemGeneratorSID: `${Q}_StashRewardHeadless`,
     }),
 
+    // 12b. A second try, if the stash still holds neither exo 10 s on: spawn, reveal and fill it again.
+    ...stashRetry(),
+
     // 13. Journal: return stage done
     node(`${Q}_SetJournal_ReturnDone`, {
       NodeType: "EQuestNodeType::SetJournal",
@@ -315,8 +383,10 @@ export const transformQuestNodes: StructTransformer<Struct> = () => {
       JournalQuestSID: Q,
     }),
 
-    // 15. End, once both jobs are finished, whichever finishes last: End stops every node of the
-    // quest, the other job's included.
+    // 15. Both jobs finished, whichever finishes last: the hub reads this node (If_QuestEnded). A
+    // Technical: an End node excludes every node of the quest, and an excluded Spawn node despawns
+    // what it spawned, which took the Falcon's stash a moment after it appeared. Vanilla's reward
+    // quests that spawn a stash (EQ155_P) have no End either. Older saves ran a real End here.
     node(`${Q}_If_DeciderFinished`, {
       NodePrototypeVersion: 1,
       NodeType: "EQuestNodeType::If",
@@ -330,13 +400,15 @@ export const transformQuestNodes: StructTransformer<Struct> = () => {
       Conditions: hasRun(`${Q}_SetJournal_QuestFinish`),
     }),
     node(`${Q}_End`, {
-      NodeType: "EQuestNodeType::End",
+      NodeType: "EQuestNodeType::Technical",
       Launchers: getLaunchers([
         { SID: `${Q}_If_DeciderFinished`, Name: "True" },
         { SID: `${QD}_If_FalconFinished`, Name: "True" },
       ]),
-      ExcludeAllNodesInContainer: true,
     }),
+
+    // Job 3, Cover Story: a quest of its own (see ./cover.mts).
+    ...coverNodes(),
   ];
 };
 transformQuestNodes.files = ["/QuestNodePrototypes/SQ86.cfg"];

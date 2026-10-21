@@ -40,3 +40,7 @@ locale/
 
 # Per-mod Wwise project copies (authored in the SDK, 256 MB each)
 Mods/*/raw/Stalker2/S2_WwiseProject/
+
+# WolfArmorFetch voice assets (lip-sync AnimSequences, generated SoundBanks): too large for git
+Mods/WolfArmorFetch/raw/Stalker2/Content/Animations/
+Mods/WolfArmorFetch/wwise/GeneratedSoundBanks/

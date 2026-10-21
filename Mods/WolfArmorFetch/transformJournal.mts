@@ -36,6 +36,7 @@ export const transformJournal: StructTransformer<Struct> = () => {
   return [
     journalQuest("WolfArmorFetch_Decider", ["FindGun", "ReturnToWolf"]),
     journalQuest("WolfArmorFetch", ["FindArmor", "ReturnToWolf"]),
+    journalQuest("WolfArmorFetch_Cover", ["FindGoBetween", "Meeting", "TakeDealerPDA", "ReturnToWolf"]),
   ];
 };
 transformJournal.files = ["/JournalQuestPrototypes/RSQ06_Journal.cfg"];

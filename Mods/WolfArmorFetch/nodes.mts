@@ -13,22 +13,22 @@ export const questNode = (questSID: string, SID: string, fields: Record<string, 
   new Struct({ __internal__: { rawName: SID, isRoot: true }, SID, QuestSID: questSID, ...fields });
 
 /** "Has quest node `SID` run?" - a Bridge condition, which vanilla also points across quests. */
-export const hasRun = (SID: string) =>
+export const ran = (SID: string) =>
   new Struct({
-    0: new Struct({
-      0: new Struct({
-        ConditionType: "EQuestConditionType::Bridge",
-        ConditionComparance: "EConditionComparance::Equal",
-        LinkedNodePrototypeSID: SID,
-        CompletedNodeLauncherNames: new Struct({ 0: "" }),
-      }),
-    }),
+    ConditionType: "EQuestConditionType::Bridge",
+    ConditionComparance: "EConditionComparance::Equal",
+    LinkedNodePrototypeSID: SID,
+    CompletedNodeLauncherNames: new Struct({ 0: "" }),
   });
 
+/** `ran(SID)` as a node's whole `Conditions`. */
+export const hasRun = (SID: string) => new Struct({ 0: new Struct({ 0: ran(SID) }) });
+
 /**
- * A `SetDialog` putting `topic` on Wolf. `endings` are the labels whose last line ends it; one with
- * `finish: false` leaves the topic on Wolf afterwards (a decline, a "not yet"), the way vanilla keeps
- * hub topics and Sidorovich's job offer around.
+ * A `SetDialog` putting `topic` on Wolf, or on `npc`. `endings` are the labels whose last line ends it;
+ * one with `finish: false` leaves the topic on the NPC afterwards (a decline, a "not yet"), the way
+ * vanilla keeps hub topics and Sidorovich's job offer around. `forced` starts it at once
+ * (`OverrideDialogTopic = Forced`), as vanilla's SQ03 confrontation does.
  */
 export function setDialog(
   questSID: string,
@@ -36,13 +36,14 @@ export function setDialog(
   launchers: LauncherConfig,
   topic: Topic,
   endings: { label: Label; finish: boolean }[],
+  { npc = WOLF_GUID, forced = false }: { npc?: string; forced?: boolean } = {},
 ) {
   const LastPhrases = new Struct();
   for (const { label, finish } of endings)
     LastPhrases.addNode(new Struct({ FinishNode: finish, LastPhraseSID: lastLineSID(topic, label) }));
 
   const DialogMembers = new Struct();
-  DialogMembers.addNode(WOLF_GUID);
+  DialogMembers.addNode(npc);
   const TalkThroughRadio = new Struct();
   TalkThroughRadio.addNode(false);
   const DialogObjectLocation = new Struct();
@@ -67,12 +68,13 @@ export function setDialog(
     TalkThroughRadio,
     DialogObjectLocation,
     NPCToStartDialog: -1,
-    StartForcedDialog: false,
+    StartForcedDialog: forced || !!topic.comment,
     WaitAllDialogEndingsToFinish: false,
-    IsComment: false,
+    // A comment starts by itself and plays without a dialog window (vanilla SQ18's Comment SetDialogs).
+    IsComment: !!topic.comment,
     // `None` adds a quest topic next to Wolf's own, as Sidorovich's job offer (RSQ06) and E02_SQ01's
     // quest dialog do; `Info` is Wolf's single info slot, which the hub fills with his own topic.
-    OverrideDialogTopic: "EOverrideDialogTopic::None",
+    OverrideDialogTopic: forced || topic.comment ? "EOverrideDialogTopic::Forced" : "EOverrideDialogTopic::None",
     CanExitAnytime: false,
     ContinueThroughRadio: false,
     CallPlayer: false,
@@ -82,8 +84,8 @@ export function setDialog(
 }
 
 /** Fires once when a dialog ends on `label`'s last line - how this quest hears a hub-owned dialog. */
-export const onDialogEnding = (SID: string, topic: Topic, label: Label) =>
-  questNode(Q, SID, {
+export const onDialogEnding = (SID: string, topic: Topic, label: Label, questSID = Q) =>
+  questNode(questSID, SID, {
     NodePrototypeVersion: 1,
     NodeType: "EQuestNodeType::OnInfotopicFinishEvent",
     LaunchOnQuestStart: true,
