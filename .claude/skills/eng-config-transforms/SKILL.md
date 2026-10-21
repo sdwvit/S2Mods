@@ -33,6 +33,31 @@ Any `new Struct(name)` intended as a top-level cfg entry needs
 just `struct.begin` instead of `Name : struct.begin`. Parsed structs and `fork()` get this
 automatically; `new Struct()` does not.
 
+## How the game applies patch files (retail exe, 2026-10-21)
+Read from `Stalker2-Win64-Shipping.exe` disassembly (log records near `0x148edbb00`, merge
+function at `0x146ca347c`; addresses are build-specific).
+- **Any `.cfg` inside the folder `<stem>/` is a patch to `<stem>.cfg`.** On loading `X.cfg` the
+  game strips `.bin`/`.cfg`, appends `/`, scans `X/` for `.cfg` files and applies each
+  ("Applying %d .cfg files as patches from '%s' to '%s'"). The `_patch_` name is a
+  convention, not a requirement (`_patch_*` globbing is only used for the binary-cache
+  `.bin_patch` files). Vanilla relies on this: `GameData/ObjPrototypes.cfg` is the root and every
+  file in `ObjPrototypes/` (`QuestObjPrototypes.cfg`, `GeneralNPCObjPrototypes.cfg`, the mutant
+  files) is a patch merged into it. A third-party `ObjPrototypes/zzKpLMTradePatch.cfg` therefore
+  patches the same tree as vanilla's QuestObjPrototypes entries.
+- **Merge is per top-level key** (the struct name before `: struct.begin`, not its `SID`):
+  - key absent: the node is added ("Adding struct node").
+  - key present, `removenode`: the existing node is deleted.
+  - key present, `bpatch`: recursive merge, field by field (see `fork()` below).
+  - key present, neither: the **whole existing node is replaced** ("Replacing node"). Every
+    vanilla field it doesn't restate is gone, so a non-bpatch override must re-inherit them,
+    e.g. `CorpusMedlak : struct.begin {refurl=@BaseGame/ObjPrototypes/QuestObjPrototypes.cfg;refkey=CorpusMedlak}`
+    plus only the changed fields. Keys can differ from SIDs (vanilla `CorpusMedlak` has
+    `SID = CorpMedlak`); match the key.
+- Not verified: the order patch files in one folder apply in (a sort-like routine follows the
+  scan; the `zz` prefix in third-party mods assumes alphabetical), and whether a self-`refkey`
+  on a replacing node resolves against the pre-replacement vanilla node. These logs sit at a
+  verbosity the game doesn't print by default.
+
 ## refkey vs refurl
 - New structs created in a `_patch_` file are conceptually in the **same** vanilla file:
   set `__internal__.refkey = <baseSID>` (a struct in that file) and delete
