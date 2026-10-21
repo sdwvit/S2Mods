@@ -224,7 +224,13 @@ Vanilla only offers it in a narrow window of the main story, and cancels it outr
 With this mod, Diode's radio call comes as soon as you have been to the Slag Heap and walk into one of the usual trigger areas, no matter how far into the main story you are. The quest is never cancelled by main-story progress.
 
 Works on existing saves, including ones where the quest window has already closed.
-
+[h1][/h1]
+In case the quest doesn't start for some reason, run these two commands:
+[h1][/h1]
+XStartQuestNodeBySID Garbage_L_Container_SQ103_P_EarlyX18Lab
+[h1][/h1]
+XStartQuestNodeBySID SQ103_P_EarlyX18Lab_SetDialog_SQ103_QC_DiodFirstCall
+[h1][/h1]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Fixed the mod failing to install from the Steam Workshop.",
