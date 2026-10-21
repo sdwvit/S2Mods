@@ -3,7 +3,6 @@ import {
   isRecentQuestNodesJsDebugOutput,
   renderQuestJsGlobalFunctionStub,
   resolveQuestNodesToJsInputPath,
-  shouldSkipRecentQuestNodesJsDebugRegeneration,
 } from "./quest/js-gen-utils.mts";
 
 describe("renderQuestJsGlobalFunctionStub", () => {
@@ -106,14 +105,6 @@ describe("resolveQuestNodesToJsInputPath", () => {
 });
 
 describe("quest nodes js debug regeneration guard", () => {
-  it("skips recent outputs by default", () => {
-    expect(shouldSkipRecentQuestNodesJsDebugRegeneration()).toBe(true);
-  });
-
-  it("can be disabled with env value 0", () => {
-    expect(shouldSkipRecentQuestNodesJsDebugRegeneration("0")).toBe(false);
-  });
-
   it("does not treat missing output as recent", async () => {
     expect(await isRecentQuestNodesJsDebugOutput("/definitely/missing/file.js")).toBe(false);
   });
