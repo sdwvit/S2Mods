@@ -1,0 +1,1536 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WwiseDocument Type="WorkUnit" ID="{DA09602A-4504-4648-AC44-1F53BA2157D3}" SchemaVersion="123">
+	<Events>
+		<WorkUnit Name="VO_WolfArmorFetch" ID="{DA09602A-4504-4648-AC44-1F53BA2157D3}" PersistMode="Standalone">
+			<ChildrenList>
+				<Folder Name="pc" ID="{A2A40E9B-D02D-4460-8EFD-4BC5D32DA5F6}" ShortID="559908893">
+					<ChildrenList>
+						<Event Name="VO_pc_WolfArmorFetch_Decider_Accept_Accepted_000" ID="{F051E321-6F6F-440D-B0D1-55EA64B03918}">
+							<ChildrenList>
+								<Action Name="" ID="{17FDA1F7-73DE-49D4-9B50-47AA1B4C1210}" ShortID="55673671">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Decider_Accept_Accepted_000" ID="{F2FC8049-2FAA-48A7-8C23-0EE9C6CD3A78}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Decider_Accept_Declined_000" ID="{C62BCF3D-A3C3-4A35-864B-C423A40282C8}">
+							<ChildrenList>
+								<Action Name="" ID="{B1EB512D-9C48-43EA-B7DB-802791422533}" ShortID="999626520">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Decider_Accept_Declined_000" ID="{6195A83E-98FB-4CE6-8D03-2143B3EBAD87}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Decider_Accept_Remember_000" ID="{6064FD02-9C87-4DE6-881F-7D681B59F1E5}">
+							<ChildrenList>
+								<Action Name="" ID="{929DB2A2-F3B3-4E2B-A76D-DD5BE0E09894}" ShortID="758807513">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Decider_Accept_Remember_000" ID="{FFE0A38E-85B1-4FE9-B19C-776F6252B9FC}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Decider_Accept_Remind_000" ID="{564C9425-E897-4990-BC16-AA24B72F7996}">
+							<ChildrenList>
+								<Action Name="" ID="{24870759-645D-48FB-B6F9-10ECE8D678C4}" ShortID="659664759">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Decider_Accept_Remind_000" ID="{C9F15568-55A8-4079-9461-C47AD9D0DA3B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Decider_Accept_WhatFor_000" ID="{DF857465-08DD-4C05-A901-243E7FD3ABAC}">
+							<ChildrenList>
+								<Action Name="" ID="{DE73BFEA-41BF-4C90-8833-E36D187B759E}" ShortID="924155767">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Decider_Accept_WhatFor_000" ID="{A4AFCF26-D68B-4F78-A0D8-FB3E170C40A3}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Decider_Accept_Where_000" ID="{ECD91ACF-FC95-445F-AD26-381F28EBB6A7}">
+							<ChildrenList>
+								<Action Name="" ID="{30B6DF79-5E55-4DE4-8C94-944BFFCAC8E0}" ShortID="406015824">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Decider_Accept_Where_000" ID="{84353F62-760C-4588-86DA-0DD23A706DE7}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Decider_TurnIn_Doubt_000" ID="{EB973297-11C8-44CE-92AB-43BAD1D39E4C}">
+							<ChildrenList>
+								<Action Name="" ID="{5A7CB993-E0D4-4A52-BB22-33B8EF14D249}" ShortID="1047478822">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Decider_TurnIn_Doubt_000" ID="{3613B5CA-3B61-4A76-9AD9-2E775F4C6DEE}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Decider_TurnIn_Give_000" ID="{C4714A03-5A12-4439-8DB1-97B68F6B6DA2}">
+							<ChildrenList>
+								<Action Name="" ID="{51B6948E-397F-4B42-BEBC-6E59255A7359}" ShortID="217574434">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Decider_TurnIn_Give_000" ID="{139BACEC-D321-45B4-8472-E63000E0CE0C}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Decider_TurnIn_NotYet_000" ID="{403B9519-9DD0-4BD6-8C12-EABFFDE1FF3F}">
+							<ChildrenList>
+								<Action Name="" ID="{0425EE8A-8B09-4016-AB78-297D1C7E660C}" ShortID="881918483">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Decider_TurnIn_NotYet_000" ID="{579A374D-207D-4B73-8D84-F29AEC3FD35F}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Accept_Accepted_000" ID="{F6857DB9-1FC8-487D-9963-2E93C35CEF4A}">
+							<ChildrenList>
+								<Action Name="" ID="{BDB4D63C-78B8-485F-BAA2-8F095EA14E13}" ShortID="815181768">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Accept_Accepted_000" ID="{804EC52D-365C-4234-A202-69BA3D53AD83}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Accept_Declined_000" ID="{D40C4771-CB30-4219-B440-1EB219AF178B}">
+							<ChildrenList>
+								<Action Name="" ID="{C2F00DF8-D2B8-445D-944F-E784E9ECE1F4}" ShortID="591796283">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Accept_Declined_000" ID="{366389B0-9945-4329-AE62-ED1FA476CE7E}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Accept_HowIn_000" ID="{FF70DECB-C4EC-4B01-ABB9-09898657F83E}">
+							<ChildrenList>
+								<Action Name="" ID="{1B36B9B1-38E4-492E-9630-219617F8BCED}" ShortID="418208368">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Accept_HowIn_000" ID="{351690B5-FA82-451E-8C7A-677F1D002A45}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Accept_Name_000" ID="{93A54AA2-8CEA-47C6-970F-74DAAADC7237}">
+							<ChildrenList>
+								<Action Name="" ID="{029F9014-E956-4281-A828-3B4B77973362}" ShortID="829296879">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Accept_Name_000" ID="{293464F4-3AC4-4FCA-8406-3A0898DB847F}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Accept_Offer_001" ID="{25C8DE54-C160-4243-B269-2310C3636A0E}">
+							<ChildrenList>
+								<Action Name="" ID="{7BD91A33-874D-44CF-80BE-DDCABF50A274}" ShortID="792217492">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Accept_Offer_001" ID="{A684219E-CF35-4282-974B-E6E2ECED2CDA}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Accept_Offer_004" ID="{D44DE7C9-FBED-4949-84DD-6098785BD394}">
+							<ChildrenList>
+								<Action Name="" ID="{5A723FF4-B545-46AC-A4A1-F005CD60880B}" ShortID="855486229">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Accept_Offer_004" ID="{7A4703EB-64AB-4663-85AE-2BEC61741B97}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Favor_Accepted_000" ID="{B5C725A4-7E5E-48A0-B4DC-CB9E76F6EF50}">
+							<ChildrenList>
+								<Action Name="" ID="{8511269C-BC4F-4831-AC6B-8A3C38819BA3}" ShortID="488632666">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Favor_Accepted_000" ID="{152EEE20-6D31-4815-835A-C8888F6EB24B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Favor_Ask_000" ID="{F38C1F30-7398-488A-BAA0-61D71ADDCFF9}">
+							<ChildrenList>
+								<Action Name="" ID="{1A59E00C-AC9A-481E-8D47-6FE52F84387D}" ShortID="384070803">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Favor_Ask_000" ID="{639645B8-7A5C-4411-B155-3CCF9AB359CE}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Favor_Ask_002" ID="{795E63EB-AED7-41B8-A227-7DB4FC438EBE}">
+							<ChildrenList>
+								<Action Name="" ID="{0B81E153-E1D7-40E5-B300-E3D77F9E5408}" ShortID="898906430">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Favor_Ask_002" ID="{C0F9F4A0-5925-4FB8-9F9F-98D725EFCD0A}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Favor_Declined_000" ID="{7657EC09-AC84-4DD9-894E-4400BAAFD87B}">
+							<ChildrenList>
+								<Action Name="" ID="{64CDBBDC-9F0A-4ACD-8677-4FA1B1635B35}" ShortID="17775615">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Favor_Declined_000" ID="{04250BC5-BEC0-4D2D-9E10-C89A9BC9F039}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Badge_000" ID="{612A902A-66BB-46C3-B9D4-6855C196DECA}">
+							<ChildrenList>
+								<Action Name="" ID="{1B299B63-1E5C-4880-89E9-3F7749C60EF5}" ShortID="252894187">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Badge_000" ID="{803E27F9-DE42-4E5C-8F14-C45A886AC72E}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_DescribeName_000" ID="{6EF32725-2FFF-440D-A55D-46929D005FDC}">
+							<ChildrenList>
+								<Action Name="" ID="{F2D61946-B0CF-4F4C-A2CE-EA610464862A}" ShortID="182592954">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_DescribeName_000" ID="{FF41D942-F3C4-4D40-AB53-C027D8AAFE4F}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Describe_000" ID="{5FC64552-0772-41F7-B241-357015C620F3}">
+							<ChildrenList>
+								<Action Name="" ID="{07314680-5318-4F19-85C4-B0B065E08506}" ShortID="605960157">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Describe_000" ID="{603F57BC-F99A-4138-AC96-864FE74730A2}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Fish2Try_000" ID="{E7B763A1-0E12-42E8-BD06-5B1EAFD1DF24}">
+							<ChildrenList>
+								<Action Name="" ID="{3598894A-7706-434A-A8CD-B3EFFD43A8EF}" ShortID="353139800">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Fish2Try_000" ID="{47AC7872-70EB-4065-9A70-767CB1D02218}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_FishTry_000" ID="{6FE316B8-3A66-415A-9409-C07412F0FF19}">
+							<ChildrenList>
+								<Action Name="" ID="{5BCF40F9-FFD8-4616-A6B4-95929969ECA9}" ShortID="742893530">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_FishTry_000" ID="{1674086A-F3E6-4A0B-BE96-1F0E31FACDC9}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_HookTruth_000" ID="{51B99B69-AF66-4A41-B884-ABFF26820E9E}">
+							<ChildrenList>
+								<Action Name="" ID="{2FCEA298-7A03-441B-942B-8A269DEDD8F6}" ShortID="415102224">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_HookTruth_000" ID="{3C8924C0-5C44-4059-8504-F327022E6C67}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Hook_000" ID="{B05A4E7B-5775-4A6A-92B4-22DC9E1874B0}">
+							<ChildrenList>
+								<Action Name="" ID="{2A9C942A-A08B-4362-9FBD-3B54D3B8CDCC}" ShortID="48282226">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Hook_000" ID="{C7F4F510-AD3A-42E8-BCDE-96F1068595F5}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_NoPassword_000" ID="{D3E8C2D1-A7D4-4F45-BA28-EA88A2E729DA}">
+							<ChildrenList>
+								<Action Name="" ID="{07059E1F-95E0-4A8F-A041-7786D61D8727}" ShortID="71409211">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_NoPassword_000" ID="{1D4EC6A3-B15D-4A83-85EF-1BC1482F4F92}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Password_000" ID="{E4A9ADCB-78EB-487A-9804-649845201266}">
+							<ChildrenList>
+								<Action Name="" ID="{23D508BD-F2A9-4E07-BEFC-B6CB86FB304C}" ShortID="541883651">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Password_000" ID="{B0C01ED9-D20F-48F5-AE05-C115D5EFA966}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz1_Right_000" ID="{CB9D47B5-5FDB-440B-BF88-24618643ED22}">
+							<ChildrenList>
+								<Action Name="" ID="{AAD7C473-9AC9-4AFD-A9E8-593B5E18247F}" ShortID="412890876">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz1_Right_000" ID="{354A9C02-9C86-4729-976C-2918F802674B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_000" ID="{B906D086-4122-4DDB-8C15-B85743C20509}">
+							<ChildrenList>
+								<Action Name="" ID="{FA909348-725D-4029-B8D2-8A82C71CB484}" ShortID="168139776">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_000" ID="{EDEA4837-83C0-4F42-A8E3-59B430D269FD}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_000" ID="{5575B7A3-AC48-4CE9-827D-DFA259FB27E8}">
+							<ChildrenList>
+								<Action Name="" ID="{359408A2-0192-42DE-A370-D061BFB57480}" ShortID="441708410">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_000" ID="{8F8BD387-AEEA-4492-AE27-4D9EC8A89841}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz2_Right_000" ID="{0EB746E6-8C11-44BB-9CC8-35325FE4D33D}">
+							<ChildrenList>
+								<Action Name="" ID="{5423EF52-171D-4968-BC6E-91517410447F}" ShortID="1055998378">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz2_Right_000" ID="{CF95A375-DFB7-4537-B50E-EC570D6E5CDA}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_000" ID="{995DFB5F-5B16-4B84-9FFE-0E908CFACCA4}">
+							<ChildrenList>
+								<Action Name="" ID="{0F002941-6A75-4787-A520-548E01F783B6}" ShortID="1064911255">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_000" ID="{108028D8-C764-4DFA-BA20-0C2539B8580B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_000" ID="{3D50FBE4-4B1A-472E-B54B-A9BF70F54280}">
+							<ChildrenList>
+								<Action Name="" ID="{DEE61487-59EE-4DD5-8787-C2455BFA73CE}" ShortID="356255452">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_000" ID="{C1C821DA-5F82-4D21-AEB2-40AFF07F807D}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_RifleName_000" ID="{6F62CDF3-1B92-4022-8856-EC9990C39FF8}">
+							<ChildrenList>
+								<Action Name="" ID="{8A5E6075-12BE-4AD5-96ED-442AED6F346E}" ShortID="668871391">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_RifleName_000" ID="{E44E0A92-3905-45C2-B2CD-4C41C04D589B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_Meeting_ShowRifle_000" ID="{2865A2D7-3D44-44DF-B43A-9CF7AC1559BD}">
+							<ChildrenList>
+								<Action Name="" ID="{5EC69994-0F92-42C5-89B4-CA0AA4B66F01}" ShortID="19476884">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_Meeting_ShowRifle_000" ID="{DF89A58C-DDB7-458E-9FDA-4EFAD048B9DC}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_TurnIn_Intel_000" ID="{A862C378-B77F-462A-A462-E25596497078}">
+							<ChildrenList>
+								<Action Name="" ID="{9D5C2179-0F97-4147-A22F-C9E3BA331E63}" ShortID="540170934">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_TurnIn_Intel_000" ID="{DE757F69-80DA-46CA-9919-F61E16B450A2}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_TurnIn_NotYet_000" ID="{EF2399F4-1E70-4F14-863C-4F8F5ECB63B9}">
+							<ChildrenList>
+								<Action Name="" ID="{93139193-914D-4EB3-8960-816A0A0E35DE}" ShortID="149293012">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_TurnIn_NotYet_000" ID="{D58D62B2-73F5-4F2D-899D-DDAB1946CD54}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_TurnIn_PDA_000" ID="{BF94D390-DBCA-4284-8282-1A83B34DC634}">
+							<ChildrenList>
+								<Action Name="" ID="{7C2A2BD9-C567-4488-AB80-3F8B03DB3CBA}" ShortID="536778439">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_TurnIn_PDA_000" ID="{98028A42-B8EB-48E3-A301-8AD165D943A6}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Cover_TurnIn_Payoff_002" ID="{60112E4F-E7BD-4E6C-B5B6-8BABA079B2B7}">
+							<ChildrenList>
+								<Action Name="" ID="{D801BCCF-1980-49A2-B30B-CC2D82B91408}" ShortID="905247032">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Cover_TurnIn_Payoff_002" ID="{B8E501D6-1A1C-4052-9BA6-AECD21101DED}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_Accept_Accepted_000" ID="{B3B8D03A-A005-4A0B-91AD-66AA15762C71}">
+							<ChildrenList>
+								<Action Name="" ID="{B8991007-5521-4C6F-B5FB-67D994ADBFF7}" ShortID="563105751">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_Accept_Accepted_000" ID="{226E958A-99B3-4A05-94CA-8F412E2C9B89}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_Accept_Declined_000" ID="{93D847BE-6627-45EE-A3D3-F654897B9D0A}">
+							<ChildrenList>
+								<Action Name="" ID="{01EA62E8-65A4-40B8-9FF4-A27FB30A08B5}" ShortID="171999826">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_Accept_Declined_000" ID="{33B797D8-73B1-4452-BC36-93589032C474}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_Accept_Offer_001" ID="{A3594578-3CB4-4742-9F88-813902AAC53F}">
+							<ChildrenList>
+								<Action Name="" ID="{FEA110DB-C6C7-426D-963C-01BCE3458A78}" ShortID="876147588">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_Accept_Offer_001" ID="{C2675884-A765-4FFE-BF7C-D52773DBAEC7}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_Accept_Offer_004" ID="{1AE6BF66-E8C3-4B92-A173-0BF45025A240}">
+							<ChildrenList>
+								<Action Name="" ID="{97EF2134-610C-4AD9-B89C-F0998094E65B}" ShortID="162972088">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_Accept_Offer_004" ID="{00470ADE-A728-4346-BFD4-11D5288D86B2}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_Accept_Prisoners_000" ID="{5B44583F-87BC-4315-A9EB-1E897AB8D559}">
+							<ChildrenList>
+								<Action Name="" ID="{47A9A873-7C44-42AE-9AE9-C3193087C5E3}" ShortID="1041212561">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_Accept_Prisoners_000" ID="{5A9D8767-BA88-4540-A68F-492DA9D6687D}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_Accept_Prisoners_002" ID="{7FDA72A0-5351-40C2-8A86-6EAA368D91E4}">
+							<ChildrenList>
+								<Action Name="" ID="{6DB80C74-56A0-4CB1-9AC1-7EFEA360273E}" ShortID="367462355">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_Accept_Prisoners_002" ID="{7D47909B-4956-44D3-9890-F8846BBCFA7B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_Accept_Where_000" ID="{4444892B-6A67-447A-BB8F-4E1190B8FD19}">
+							<ChildrenList>
+								<Action Name="" ID="{85702207-A120-4872-AC15-EB099B97FB85}" ShortID="300288924">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_Accept_Where_000" ID="{7237FCF1-539C-486C-A2E4-202FBFD165E9}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_Accept_WhyFalcon_000" ID="{F678CC46-7EC8-4E14-985A-07DFA7BF7A9E}">
+							<ChildrenList>
+								<Action Name="" ID="{D13716B4-3DF3-4692-9DEC-C58A2B39F763}" ShortID="671983363">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_Accept_WhyFalcon_000" ID="{915241AA-EDBA-4964-A5A3-28CA2524AB63}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_Accept_WhyFalcon_003" ID="{2251E6DD-A4F8-4F24-8950-E9927242C14C}">
+							<ChildrenList>
+								<Action Name="" ID="{41468413-944C-45B7-B41B-1C01B7B83A23}" ShortID="1016784279">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_Accept_WhyFalcon_003" ID="{B7B29893-B4A5-4E52-9132-01B36197A6AB}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_TurnIn_Give_000" ID="{1B2DF7EA-004A-4B64-AD32-2FAA04561EE9}">
+							<ChildrenList>
+								<Action Name="" ID="{BF82F7BA-CD7F-41C8-8BE1-F91732C751C0}" ShortID="328050337">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_TurnIn_Give_000" ID="{69DD20F2-B6DF-43C5-A1B8-F1E6D1B79723}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_TurnIn_Give_003" ID="{596B24EC-55DD-4DEC-9CB5-585E2C659E97}">
+							<ChildrenList>
+								<Action Name="" ID="{35A56C9F-E9ED-4F2B-A564-005BE9502EAE}" ShortID="623781834">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_TurnIn_Give_003" ID="{E3CC4E7D-4009-4D20-9F9B-0A6451D17FA5}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_pc_WolfArmorFetch_Dialog_TurnIn_NotYet_000" ID="{EDEDCFE3-6273-4371-9294-7CB50E0B2D90}">
+							<ChildrenList>
+								<Action Name="" ID="{AA7EB5C5-8323-4EE1-8001-04DD618DF068}" ShortID="5666455">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_pc_WolfArmorFetch_Dialog_TurnIn_NotYet_000" ID="{4EBFB60A-5AF3-44AB-A320-27AEB3AD29DA}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
+				<Folder Name="volk" ID="{C776A55A-7AE9-4390-A634-08E23F75BE38}" ShortID="1024815187">
+					<ChildrenList>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Accepted_001" ID="{4AA24390-050A-41C5-8E95-D313723EC81B}">
+							<ChildrenList>
+								<Action Name="" ID="{F5AB6F86-C837-484F-B4DE-86A9AE7535A7}" ShortID="299924068">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Accepted_001" ID="{9DD090B6-F0C4-49BC-8431-4D191C4AC8D2}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Accepted_002" ID="{CC202B1E-14FA-4FCE-832B-C33BCAF0E215}">
+							<ChildrenList>
+								<Action Name="" ID="{2AE01833-4633-4E82-B198-54A1D6421360}" ShortID="481892216">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Accepted_002" ID="{F5471B05-2DCD-4D30-A339-21657508570F}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Declined_001" ID="{FFC39AD4-33E8-4EF7-93CB-4F9B38842EB1}">
+							<ChildrenList>
+								<Action Name="" ID="{EAD56752-1FCA-4077-A387-A6F500DD761B}" ShortID="347990131">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Declined_001" ID="{5C036135-CEE1-4B7F-840A-2C19FE149617}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Offer_000" ID="{7804827E-7CC5-49DA-A711-FBF9950F607B}">
+							<ChildrenList>
+								<Action Name="" ID="{5B906315-48FE-47FB-AEC7-CD7F04C7AF71}" ShortID="873316897">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Offer_000" ID="{32D71EA6-4859-4BE8-B601-168AB4E75764}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Remember_001" ID="{73E7E79E-78D0-4720-A396-A86C84D26820}">
+							<ChildrenList>
+								<Action Name="" ID="{9E1F45B6-D36F-440F-99C3-65DAC7B23800}" ShortID="453818183">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Remember_001" ID="{0CD4AC9C-40B1-491C-B027-F7D1E0368AEE}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Remind_001" ID="{3A7BB374-7E4B-4F83-987D-F05E1696EF66}">
+							<ChildrenList>
+								<Action Name="" ID="{6C7DCAD9-C71E-46B4-AE40-A3665BF05FA1}" ShortID="270507031">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Remind_001" ID="{8D33CCDF-A791-4565-AB70-0F4E47B5255F}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Story_000" ID="{C7F1CEB1-F4F0-4C5F-B132-4252B79F85CB}">
+							<ChildrenList>
+								<Action Name="" ID="{0C1E7A0E-1C82-4511-B398-4B29226660B1}" ShortID="318489013">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Story_000" ID="{62629BF7-9DD1-48E7-8615-95F1550F7BF3}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Story_001" ID="{2DA3007F-A298-42FE-BA86-D9A4CE18ABD9}">
+							<ChildrenList>
+								<Action Name="" ID="{A7A11E60-579F-47E3-B74A-90C488BE3B33}" ShortID="94049891">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Story_001" ID="{DA1413EC-B397-4409-974A-62E4C9AC08A6}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Story_002" ID="{F473FEAC-FEA5-4053-B856-AD2A2090623A}">
+							<ChildrenList>
+								<Action Name="" ID="{0A03F170-2D44-4032-ACD5-25609DC79873}" ShortID="896341006">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Story_002" ID="{61ACFFCA-4E21-48FC-AE92-DE2CC4498889}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Story_003" ID="{833A559A-73EB-41E7-A52E-61D08856B10D}">
+							<ChildrenList>
+								<Action Name="" ID="{2F856D0D-4ED8-4C39-BA19-360F67E4CAC5}" ShortID="640686396">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Story_003" ID="{F18071E7-91F6-4515-8C55-016AFF3B2F31}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_WhatFor_001" ID="{385DB62D-4E76-4B43-B5A9-66AB7F503EF7}">
+							<ChildrenList>
+								<Action Name="" ID="{63D43441-0ECB-412A-A28E-4F6739400DC5}" ShortID="686627644">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_WhatFor_001" ID="{BC267348-3DFD-477D-AE4C-2235871E20CF}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_WhatFor_002" ID="{E3F0E49F-E345-408D-8059-DA2C6D557662}">
+							<ChildrenList>
+								<Action Name="" ID="{46DEDE2A-DA1B-4589-BC3F-733B6BBBF431}" ShortID="917405171">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_WhatFor_002" ID="{FFE111AE-9079-469D-9C37-10EF7D9917CD}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_Accept_Where_001" ID="{B12736B5-6C4E-40F6-A8F4-774064BD0D66}">
+							<ChildrenList>
+								<Action Name="" ID="{1784C4C2-7907-45F8-AEE1-2972189803FB}" ShortID="992978573">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_Accept_Where_001" ID="{7A671816-68FE-4911-B167-E636D5D3BFE8}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Ask_000" ID="{B5115C47-B97C-469F-960C-09C27A6872D3}">
+							<ChildrenList>
+								<Action Name="" ID="{AD9B677E-CC81-4BE3-8161-B9B2E61D66FB}" ShortID="1045883613">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Ask_000" ID="{6B3264A8-E3E9-4DA9-BCC7-D977CBAB31CF}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Doubt_001" ID="{9867DCFB-6101-4928-A7A6-B9FEA96B201B}">
+							<ChildrenList>
+								<Action Name="" ID="{4BEA53A7-CC76-43A4-BD84-ADE1E371E52E}" ShortID="54810884">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Doubt_001" ID="{BB91F727-E644-433C-B461-D12815EA5A38}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Doubt_002" ID="{5C6ECCA5-BAAE-4952-8270-4DDD0D2C2714}">
+							<ChildrenList>
+								<Action Name="" ID="{2D1AAC11-30A5-47FD-ADB5-5856EBAC1507}" ShortID="727631857">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Doubt_002" ID="{4D733F43-6445-4DBB-9354-8D565D3C799C}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Give_001" ID="{08621DAF-51E1-460C-954E-52A93BD0E009}">
+							<ChildrenList>
+								<Action Name="" ID="{5BDBF053-C0EB-4800-9895-8716DB040FCB}" ShortID="452278721">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Give_001" ID="{EDA14F04-2CD1-4149-827C-3899214DCFE9}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Give_002" ID="{E1ECC5CC-B58D-4BDC-88BF-D2C0A4227807}">
+							<ChildrenList>
+								<Action Name="" ID="{0C439F9E-6D0E-4746-9A5A-05537FDEEE3B}" ShortID="87784822">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Give_002" ID="{27E9DCFA-9653-4F59-967C-1981086FF6E8}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Give_003" ID="{2F30C6E0-5F8B-4AEB-8CEC-AC2020F6B41C}">
+							<ChildrenList>
+								<Action Name="" ID="{697C07CD-952F-4382-8BBA-5631B9DF9250}" ShortID="1058882369">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_TurnIn_Give_003" ID="{1CCB7D25-9903-4953-AD42-E0D21D65EE4A}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Decider_TurnIn_NotYet_001" ID="{BE768CE4-9B34-40A1-9AE6-042DABD3D1AD}">
+							<ChildrenList>
+								<Action Name="" ID="{B56BE818-8889-446A-9D8B-128D5F0B843B}" ShortID="196294543">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Decider_TurnIn_NotYet_001" ID="{DAE7FAAC-0192-4632-8A00-8E0C26CA8D18}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_Accepted_001" ID="{14D6BAAE-6D99-4ADE-A638-EEA2B66835DD}">
+							<ChildrenList>
+								<Action Name="" ID="{48FF1A07-6F2B-4DD3-A53D-6822120837CA}" ShortID="331973418">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_Accepted_001" ID="{A5449FB8-3742-4D20-ACE1-3A0A949D0C12}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_Accepted_002" ID="{B064FEBE-7882-496D-BF94-D4E7DBCF1879}">
+							<ChildrenList>
+								<Action Name="" ID="{D01B12A5-D445-4649-9209-ACD3C3B0363B}" ShortID="594468635">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_Accepted_002" ID="{122D5CB3-68AD-4CD8-8E12-5038D5251D5B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_Declined_001" ID="{78ADCC69-BB36-48CA-B439-94C98E7D70C0}">
+							<ChildrenList>
+								<Action Name="" ID="{C448F6F4-3B6B-4C10-8F6A-C564CFD5C372}" ShortID="757018722">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_Declined_001" ID="{0C5AD66C-DFF7-4822-A046-DAB98E85393F}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_HowIn_001" ID="{A91913A4-8441-4C30-8215-8F51118A1EB9}">
+							<ChildrenList>
+								<Action Name="" ID="{4F34F0FF-289E-4D5E-B51D-897F771F022C}" ShortID="474711564">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_HowIn_001" ID="{19404654-5591-4A3F-B690-3064E2454FE9}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_HowIn_002" ID="{EE02CD08-8FDC-4858-BC70-9E71F1EAEC4B}">
+							<ChildrenList>
+								<Action Name="" ID="{122ECDF0-AB5D-4B9F-BA30-3E4BEA073A80}" ShortID="93492303">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_HowIn_002" ID="{EC9461BE-785A-4743-B40B-31634C71BE41}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_Name_001" ID="{BE82A137-29DD-46EC-A74D-2F25D702DA35}">
+							<ChildrenList>
+								<Action Name="" ID="{7290A2F6-5415-4825-B8E2-014398245E81}" ShortID="372302539">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_Name_001" ID="{33010BC1-E5EE-417A-A0AB-026221288460}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_Offer_000" ID="{B92A84DD-671F-4A55-9281-47E985B4C7D7}">
+							<ChildrenList>
+								<Action Name="" ID="{6E6538BE-46A6-4E16-8043-FA08F89B0909}" ShortID="1013161354">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_Offer_000" ID="{9CA42A2E-0D5E-4998-B0EB-8591E6F0C2D5}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_Offer_002" ID="{5BBFFE8C-4399-4127-8967-CFB80E12B3AA}">
+							<ChildrenList>
+								<Action Name="" ID="{0B19DA46-044E-407E-B9EE-C73E67ABA309}" ShortID="59764067">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_Offer_002" ID="{DC573943-4233-4F84-889E-DE9C39EF255E}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_Offer_003" ID="{24CF9811-71D4-4E06-8733-4F2A8B43FDA9}">
+							<ChildrenList>
+								<Action Name="" ID="{A3D77C5E-F5F3-4FEA-9B91-4ADCB47A0EEE}" ShortID="880347870">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_Offer_003" ID="{6B8BD18A-AAC1-4203-B79D-E447152D7DAE}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_Accept_Offer_005" ID="{2DD0DACE-395A-41BA-A35D-0FA73FDA3A2A}">
+							<ChildrenList>
+								<Action Name="" ID="{6C218BA8-EA24-4628-A231-F5939931C403}" ShortID="270625837">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_Accept_Offer_005" ID="{63180B34-3322-4CB4-B0F4-50D17F47308F}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_TurnIn_Ask_000" ID="{C303CEF6-E0CA-4ED1-8B26-4B010C88916C}">
+							<ChildrenList>
+								<Action Name="" ID="{F240E940-BC17-4540-88E1-8FAD56F417B8}" ShortID="828706559">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_TurnIn_Ask_000" ID="{DD0C5C97-A324-4282-B9BD-4468969D425B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_TurnIn_NotYet_001" ID="{72D29DFD-2B0C-4DDD-8DB6-C81464377C2F}">
+							<ChildrenList>
+								<Action Name="" ID="{B2D8CEC0-9A4E-4E49-A152-D500E7383F12}" ShortID="282243399">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_TurnIn_NotYet_001" ID="{CFE71FD3-1A19-4DB8-AEC7-C5E55D00C7C7}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_TurnIn_Payoff_000" ID="{5C1EBB42-7ED1-4572-BFB7-3D27AD280016}">
+							<ChildrenList>
+								<Action Name="" ID="{E919BC1D-7771-44B5-8F83-05055F132081}" ShortID="20750132">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_TurnIn_Payoff_000" ID="{BC070282-B1B2-4516-A97B-371C4E0B254E}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_TurnIn_Payoff_001" ID="{0D47ED40-7A07-4603-992E-B39AA9B6630A}">
+							<ChildrenList>
+								<Action Name="" ID="{30A25783-32EC-4B92-9D65-6F78A79FF8AF}" ShortID="857273648">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_TurnIn_Payoff_001" ID="{D207ACA0-A6C1-4A80-9FD2-377D219AB585}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Cover_TurnIn_Payoff_003" ID="{B52E007D-0E3B-48E4-9D7B-3706DE929836}">
+							<ChildrenList>
+								<Action Name="" ID="{3910DE39-E579-46D8-B188-72447DDC59FD}" ShortID="998066328">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Cover_TurnIn_Payoff_003" ID="{7AE943B4-D0D2-4B93-9A3F-844F355C5B0E}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Accepted_001" ID="{36A5C571-C158-4D11-BE6E-0CC6007B6E7B}">
+							<ChildrenList>
+								<Action Name="" ID="{68241D43-3828-4F1A-ACD9-1B56D63D5E11}" ShortID="804282355">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Accepted_001" ID="{AFCBF839-C6E4-4F74-A1C1-AFB64519E655}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Declined_001" ID="{C43C245C-FC51-4268-B466-2F0AF6C42ADD}">
+							<ChildrenList>
+								<Action Name="" ID="{9DC1ED46-00D0-4AB1-9952-A7946C31DD89}" ShortID="467903624">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Declined_001" ID="{762E97C0-7940-4A1C-8A36-874DBD7A4413}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_000" ID="{5C7475FA-9314-47DD-AFAE-7A6336CD851E}">
+							<ChildrenList>
+								<Action Name="" ID="{2CEFEA9C-05CB-4168-BB32-B2C72C5CF831}" ShortID="419094368">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_000" ID="{3B46E66D-BA33-4FA0-8674-D9BEFDDD1A8C}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_002" ID="{5E571CBB-7BDF-40EE-B03A-A09B7C461BF2}">
+							<ChildrenList>
+								<Action Name="" ID="{BA0BAB5A-DAB4-4553-A74B-9594279A9F7C}" ShortID="563503208">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_002" ID="{33CABB70-B4C7-4021-9F2D-ACF50BA1EF63}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_003" ID="{47E20FAF-A778-4C4A-9DDC-F167293A31F9}">
+							<ChildrenList>
+								<Action Name="" ID="{2168DA6B-F67E-4D56-AF20-5D47222C6E1F}" ShortID="378754923">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_003" ID="{E60ACB75-F3FF-4BF0-9FA6-C9BE95AE4357}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_005" ID="{4D73CE02-7B07-40FB-B52E-C8346991468D}">
+							<ChildrenList>
+								<Action Name="" ID="{0EF1CF5C-2CCE-49F0-BCB4-B045B93836BB}" ShortID="498609631">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_005" ID="{5FD6ACC1-1840-4BA9-8918-F9070D9FC882}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_006" ID="{0626D7EB-B423-4F15-B31F-7063EB841A0A}">
+							<ChildrenList>
+								<Action Name="" ID="{843FE0DE-F85D-4547-9458-E3232C9AC51D}" ShortID="814035408">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Offer_006" ID="{3E533B41-C335-46DD-9B4B-FAAFFEBC338B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Prisoners_001" ID="{1E1A7464-1FDE-4BEE-B31D-0DAE393A1641}">
+							<ChildrenList>
+								<Action Name="" ID="{33E9CA05-EF95-4A1B-92E1-E9004A760C50}" ShortID="318384639">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Prisoners_001" ID="{A5618ED6-E22D-4C01-A7C1-46660748CD30}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Prisoners_003" ID="{806B3C13-C362-40D3-870D-5A9757E3E7D5}">
+							<ChildrenList>
+								<Action Name="" ID="{E499EEB2-63FB-4040-84A0-DBA4A9190275}" ShortID="306368532">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Prisoners_003" ID="{56669CCA-D8B3-435F-BA09-FD6696FFF512}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_Where_001" ID="{0D25616F-CBF1-45C9-AB98-9084C5B8BCF7}">
+							<ChildrenList>
+								<Action Name="" ID="{103EE1F5-A356-4AB6-B857-C89934074CA3}" ShortID="47103951">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_Where_001" ID="{61855449-4366-4685-A84D-1A880648E9BF}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_WhyFalcon_001" ID="{DD2874B3-53E8-465B-8343-CBCD52DBCC74}">
+							<ChildrenList>
+								<Action Name="" ID="{184F0DA4-631A-4F74-AB24-C083C8B31C5C}" ShortID="888369201">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_WhyFalcon_001" ID="{1DD221E9-A64D-40A3-B95E-3A90886538A8}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_WhyFalcon_002" ID="{B13286D2-F9EF-498D-B682-15472B16D804}">
+							<ChildrenList>
+								<Action Name="" ID="{AC544AD2-9839-4146-BC30-850ADE9B7F5B}" ShortID="459399936">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_WhyFalcon_002" ID="{478E8289-0B9D-4E17-8663-15B79CA08C82}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_Accept_WhyFalcon_004" ID="{C86A4687-9DDA-4368-824C-DC655063CBC4}">
+							<ChildrenList>
+								<Action Name="" ID="{A4E78E72-6E6A-4E05-9587-DF62D7453139}" ShortID="79763552">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_Accept_WhyFalcon_004" ID="{F1F38469-CB12-4008-8CD6-9FE752382286}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_Ask_000" ID="{405A4446-198E-4402-84D3-39D95F1B5B62}">
+							<ChildrenList>
+								<Action Name="" ID="{E5C43512-2676-44D9-9393-195BFCD7FCD3}" ShortID="759749438">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_Ask_000" ID="{60ECA1FF-5761-4A25-BC67-DAA03C1CAE10}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_Give_001" ID="{CB7EA57C-67DE-4AB7-BB30-07805AF0360A}">
+							<ChildrenList>
+								<Action Name="" ID="{8110402E-9514-4C65-863F-6380A99A06CD}" ShortID="20366413">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_Give_001" ID="{A824FD75-6941-48CC-8328-F8A11DC1193C}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_Give_002" ID="{67B8AC56-9641-4A59-82D1-28407F6C5130}">
+							<ChildrenList>
+								<Action Name="" ID="{0BB6718A-2ABB-4484-9F70-65DC3A850214}" ShortID="254079468">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_Give_002" ID="{07AA6F45-1ADC-4D8D-95FE-46C730D41D4A}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_Give_004" ID="{42BCE7A3-9926-43E5-B2A8-99D9E1BEF65B}">
+							<ChildrenList>
+								<Action Name="" ID="{8ED7EA7D-1DFA-437F-9678-0B38B55ED65D}" ShortID="324343439">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_Give_004" ID="{98D084D8-4F75-48E7-8237-7A48CF3BD557}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_NotYet_001" ID="{3B93BCBA-62CD-4D74-A69D-7EA6EB5E00E2}">
+							<ChildrenList>
+								<Action Name="" ID="{A1226D67-8295-42A3-8A24-ECAA737F4195}" ShortID="784177832">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_volk_WolfArmorFetch_Dialog_TurnIn_NotYet_001" ID="{25327E07-F7C0-4EB0-9307-DAFEB838DD21}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
+				<Folder Name="sultan" ID="{8DB8CFDC-67D0-478E-B0BD-26907B0A7588}" ShortID="843261512">
+					<ChildrenList>
+						<Event Name="VO_sultan_WolfArmorFetch_Cover_Favor_Accepted_001" ID="{00C95A60-9E43-49C3-830C-2B9D212885FE}">
+							<ChildrenList>
+								<Action Name="" ID="{A6851624-74CB-4173-A501-3FCDB64ED6BF}" ShortID="16676101">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_sultan_WolfArmorFetch_Cover_Favor_Accepted_001" ID="{9C45D8A4-1FB6-4E3D-8093-777153CC580B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_sultan_WolfArmorFetch_Cover_Favor_Ask_001" ID="{622C320D-26D2-4030-94AA-DB275F753223}">
+							<ChildrenList>
+								<Action Name="" ID="{E915BDEC-8B39-466A-9FE3-DCEE09CC5BD2}" ShortID="810188567">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_sultan_WolfArmorFetch_Cover_Favor_Ask_001" ID="{19B583A4-F4F6-4983-8CEA-11321E62744B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_sultan_WolfArmorFetch_Cover_Favor_Ask_003" ID="{21B63D9D-8992-4CC5-B63F-943279270768}">
+							<ChildrenList>
+								<Action Name="" ID="{A6753341-B1B5-478C-BC53-AE298D22F26A}" ShortID="1059809354">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_sultan_WolfArmorFetch_Cover_Favor_Ask_003" ID="{C7ADEDC8-04BF-44E5-9442-92CB33BBE4C4}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_sultan_WolfArmorFetch_Cover_Favor_Declined_001" ID="{74062D4E-28A9-4627-BF18-02CDE4FA7CBF}">
+							<ChildrenList>
+								<Action Name="" ID="{DFC56B18-4E07-4B1F-B6E1-409F506DEB7F}" ShortID="9100902">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_sultan_WolfArmorFetch_Cover_Favor_Declined_001" ID="{7246610D-7F75-4963-8EF7-678AE7FA056E}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
+				<Folder Name="vasyan" ID="{A4E28F85-C222-4745-A880-8FED08275729}" ShortID="828158475">
+					<ChildrenList>
+						<Event Name="VO_vasyan_WolfArmorFetch_Cover_HookComment_Corpse_000" ID="{D6B381E4-DDB0-444F-B4D2-DEF41AB7B89A}">
+							<ChildrenList>
+								<Action Name="" ID="{D88FCFFD-278D-498E-8072-B27A45B7E05A}" ShortID="90565889">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_vasyan_WolfArmorFetch_Cover_HookComment_Corpse_000" ID="{8E577DC3-748A-4F01-94B3-BEAF8AD7E147}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_vasyan_WolfArmorFetch_Cover_Hook_Greet_000" ID="{3375C708-EA79-4965-AD5E-20DF044349EA}">
+							<ChildrenList>
+								<Action Name="" ID="{8773FB3F-A33F-4336-8637-00B33E5678A6}" ShortID="855903134">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_vasyan_WolfArmorFetch_Cover_Hook_Greet_000" ID="{3A9F5670-40F9-44E5-9D0B-501189DA5AAE}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
+				<Folder Name="ward" ID="{EFA1BCCF-4498-4466-A93A-6DEA87055C12}" ShortID="912498217">
+					<ChildrenList>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Badge_001" ID="{146D6F26-7ADE-4203-9AF2-0DD70A832B19}">
+							<ChildrenList>
+								<Action Name="" ID="{78F14E12-A0D2-4093-A4D7-0648F8F8CD9C}" ShortID="253154840">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Badge_001" ID="{736C4849-1EBF-4428-8E28-307C77364912}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_DescribeName_001" ID="{6EB81FE2-C069-4257-8422-2F881B724228}">
+							<ChildrenList>
+								<Action Name="" ID="{FFBCC6F3-3887-483C-BA23-33C4B0EEBED6}" ShortID="647401145">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_DescribeName_001" ID="{79448DA4-F152-4BBF-83C3-58A0A7F1366E}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_DescribeOnly_000" ID="{615CA543-ADF8-4B76-B536-B9FC6D4AEE60}">
+							<ChildrenList>
+								<Action Name="" ID="{5269B2C7-A99C-4ABC-9B3E-69BD0659A3D3}" ShortID="1069482367">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_DescribeOnly_000" ID="{D5D1037F-A849-478E-B6B2-DED8BC519FDA}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Fish2_000" ID="{07991747-F86C-4C19-8A87-BEB471A1E921}">
+							<ChildrenList>
+								<Action Name="" ID="{BD3BA1C2-A9CE-47CE-85CA-9EA262952E59}" ShortID="773600347">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Fish2_000" ID="{77D56EDF-4E53-479E-82C6-D9A30E1DE19D}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Fish_000" ID="{47BD3366-3265-4520-AA42-472D94066D6D}">
+							<ChildrenList>
+								<Action Name="" ID="{364DA7CA-D0AF-4F74-AA89-8121A507071D}" ShortID="1001895844">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Fish_000" ID="{BC4F2143-72D8-4309-92D8-5231045CF01D}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Greet_000" ID="{0BB9825F-F037-42F3-9972-C54B7A66999E}">
+							<ChildrenList>
+								<Action Name="" ID="{680E5E07-84B6-49A8-8AFC-A58C2853B45B}" ShortID="670628004">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Greet_000" ID="{3D6E2712-7E1D-48FA-8204-FBEB9EE2A471}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Greet_001" ID="{A02BED5F-4925-4607-8C38-2C0654A885B7}">
+							<ChildrenList>
+								<Action Name="" ID="{7CDD738A-AFF0-4C60-BDF7-9DDBFD5737AA}" ShortID="267709310">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Greet_001" ID="{1023CD5C-E8B3-4570-BBED-2676CB1A3086}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_HookPassed_000" ID="{4AA07F1B-9BA0-4123-93DE-29B42560730B}">
+							<ChildrenList>
+								<Action Name="" ID="{2AB6C30D-C13E-4256-A573-C1553F35CFB4}" ShortID="569172278">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_HookPassed_000" ID="{C9CFEE14-1D2B-48D3-ADD5-E8D6F1BA6FB4}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Hook_Slip_000" ID="{BA5F8D35-6BAD-4F27-9437-734F8750AA75}">
+							<ChildrenList>
+								<Action Name="" ID="{FDE70DD7-A286-4398-9F2E-D5F92AF377EC}" ShortID="778670272">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Hook_Slip_000" ID="{F9023579-442C-4BD6-8AB4-0D76DF6B1BD7}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Intel_000" ID="{CDC63437-AB3B-4DA5-A249-36F6BD844EB2}">
+							<ChildrenList>
+								<Action Name="" ID="{EA2BB411-2C2A-4C39-A4D3-BAF50E35530B}" ShortID="314663457">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Intel_000" ID="{1657AED5-20D3-4C79-A29F-E9F891737AC7}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Intel_001" ID="{A85BD353-548A-4286-967F-A00464AEF722}">
+							<ChildrenList>
+								<Action Name="" ID="{6E46A616-14F2-4186-9579-7CFFFCD856A4}" ShortID="697605133">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Intel_001" ID="{99F5D06C-8055-4D35-BFDC-D8592A0E56D9}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Loud_000" ID="{C295BF8A-5424-4BAA-AB57-71C6FCB9973C}">
+							<ChildrenList>
+								<Action Name="" ID="{0B0548A0-F74C-4316-9803-764CEE06AD70}" ShortID="418357287">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Loud_000" ID="{9E6336E2-786D-466D-9350-29EEEE594630}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Loud_001" ID="{27D74D19-7450-4BE3-B4F4-39EC5B10743B}">
+							<ChildrenList>
+								<Action Name="" ID="{46D6094D-CB6C-40E1-9DC7-CC0A54BA9DA5}" ShortID="491764505">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Loud_001" ID="{CB4349FA-15C2-4B73-B2ED-14A8FD3952E1}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Password_001" ID="{D53DA4CB-86A6-46CE-BFFB-4C0F06AB14C3}">
+							<ChildrenList>
+								<Action Name="" ID="{EAB74BC3-9162-4265-9643-23E60844ABAA}" ShortID="728344129">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Password_001" ID="{875B4A77-9FDB-4CE4-9EB4-696D49ED6001}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Proof_000" ID="{021CA1DE-6F3F-46EF-923D-62211857011C}">
+							<ChildrenList>
+								<Action Name="" ID="{44153356-6FBA-42E3-A8DF-8357450CEDC9}" ShortID="929389560">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Proof_000" ID="{772DFE89-2337-446F-A667-20F9BF13DDB5}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_000" ID="{332DC53B-E7E1-4C4C-8A94-9A62BCE7350E}">
+							<ChildrenList>
+								<Action Name="" ID="{C9CD7C87-1DDF-4417-B320-7346C264FA0E}" ShortID="75236831">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_000" ID="{F2D9CC71-61EB-4695-81CC-861B05288A10}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_001" ID="{FD228E1D-A9C8-4F5A-AB3F-876D9C01C2C2}">
+							<ChildrenList>
+								<Action Name="" ID="{DE264F97-9BCF-4333-845C-80560AE99B36}" ShortID="467008608">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_001" ID="{8A72018C-2C05-4460-A060-834523105FCF}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001" ID="{D38BA023-F47D-4417-9F11-68E7A1D7EEB4}">
+							<ChildrenList>
+								<Action Name="" ID="{F2C03C77-08EA-4058-9E48-D8B0F3086582}" ShortID="118139074">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001" ID="{ECD53580-E16E-415C-8143-F520D39D5EE2}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_Slip_000" ID="{3638797C-E5B1-404A-B9F2-689993E0D736}">
+							<ChildrenList>
+								<Action Name="" ID="{160314B7-C89C-4E6A-B6FD-15C725213A3F}" ShortID="338913749">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_Slip_000" ID="{1AD0E98B-06B4-4180-B432-E508402C052B}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_Slip_000" ID="{1AB50EB3-FD07-4BE2-BB12-7AA57529552B}">
+							<ChildrenList>
+								<Action Name="" ID="{6A959C58-DD92-4EE0-88F9-A4EF3B0A78A3}" ShortID="547960217">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_Slip_000" ID="{3DE863B5-DAFE-42B0-9DA0-1572F39CDF9D}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz2_000" ID="{812D7938-E6B0-4CF0-A23F-DB3EC10404B2}">
+							<ChildrenList>
+								<Action Name="" ID="{7C412FC4-453F-429D-9DAD-C8BF60A5DA39}" ShortID="881283555">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz2_000" ID="{56A81643-E27B-4E0D-9A7D-2A18DD43BCE1}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz2_Right_001" ID="{59C42C1B-A470-42D2-8374-947D72D8DF33}">
+							<ChildrenList>
+								<Action Name="" ID="{5BC93B13-07E6-4E9B-80E5-7E8658061E67}" ShortID="388521052">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz2_Right_001" ID="{E82AEEB0-879F-42D8-AEF8-DAE82A193314}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_Slip_000" ID="{ED88FFAF-E2F7-424A-8589-3118EB245529}">
+							<ChildrenList>
+								<Action Name="" ID="{5162BEE8-3856-4C6F-91E4-84D7EBCF35DF}" ShortID="982516133">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_Slip_000" ID="{5E66736D-79D1-4A19-94A8-12D86768C4F5}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_Slip_000" ID="{D3AAC63E-071C-4AA5-B4ED-91CDC392DA7E}">
+							<ChildrenList>
+								<Action Name="" ID="{A7AFE533-064B-4B7A-8B49-0BD71A8B9707}" ShortID="802813262">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_Slip_000" ID="{705025B2-C238-4C18-86B5-E9686C89BDA3}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_RifleName_001" ID="{B0AE5331-A5AC-4A90-97F9-67DC1F966CC6}">
+							<ChildrenList>
+								<Action Name="" ID="{E8984D11-324F-418D-BA55-7C847E5D6ABE}" ShortID="756072521">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_RifleName_001" ID="{4FAF595E-7E18-46C5-88B8-9080175704CD}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+						<Event Name="VO_ward_WolfArmorFetch_Cover_Meeting_RifleOnly_000" ID="{3D94C3F6-A775-4056-A4B1-B09036896765}">
+							<ChildrenList>
+								<Action Name="" ID="{8C9EE54A-5126-4C0C-89FB-1383EFEEE880}" ShortID="459998184">
+									<ReferenceList>
+										<Reference Name="Target">
+											<ObjectRef Name="VO_ward_WolfArmorFetch_Cover_Meeting_RifleOnly_000" ID="{7CB2AED5-38B8-4AB8-9A12-B82F5A473ADD}" WorkUnitID="{5FDDB334-D023-4529-8B47-BF542C29109A}"/>
+										</Reference>
+									</ReferenceList>
+								</Action>
+							</ChildrenList>
+						</Event>
+					</ChildrenList>
+				</Folder>
+			</ChildrenList>
+		</WorkUnit>
+	</Events>
+</WwiseDocument>

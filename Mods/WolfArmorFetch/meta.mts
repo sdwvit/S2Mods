@@ -8,17 +8,27 @@ import { transformDialogPrototypes } from "./transformDialogPrototypes.mts";
 import { transformRewards } from "./transformRewards.mts";
 import { transformRootgraph } from "./transformRootgraph.mts";
 import { transformRookieVillageHub } from "./transformRookieVillageHub.mts";
+import { transformSkadovskHub } from "./transformSkadovskHub.mts";
+import {
+  transformCoverGlobalVariables,
+  transformCoverNotes,
+  transformCoverNPCPrototypes,
+  transformCoverObjPrototypes,
+  transformCoverQuestItems,
+  writeCoverSpawnActors,
+} from "./coverPrototypes.mts";
 
 export const meta: MetaType = {
   description: `
 Wolf's Jobs
 [hr][/hr]
-Wolf in Rookie Village has two jobs for you.[h1][/h1]
+Wolf in Rookie Village has three jobs for you.[h1][/h1]
 The first is personal: Wolf has picked up a lead on an old score and needs you to fetch something for him.[h1][/h1]
 The second follows a day later and builds on what the first one turned up.[h1][/h1]
+The third takes you to Zaton, where you'll have to talk your way through a meeting. How well you're prepared changes your odds.[h1][/h1]
 Works on existing saves. Dialogs and journal text are translated into every language the game supports.[h1][/h1]
 `,
-  changenote: "A new job from Wolf, a rewritten second job, and a different stash reward when the latest HeadlessArmors is installed.",
+  changenote: "Voiced dialogs in English and Ukrainian with lip-sync, a few new dialog lines, and a fix for a job reward that could go missing.",
   structTransformers: [
     transformQuestRegistration,
     transformQuestNodes,
@@ -28,5 +38,12 @@ Works on existing saves. Dialogs and journal text are translated into every lang
     transformRewards,
     transformRootgraph,
     transformRookieVillageHub,
+    transformSkadovskHub,
+    transformCoverObjPrototypes,
+    transformCoverNPCPrototypes,
+    transformCoverQuestItems,
+    transformCoverNotes,
+    transformCoverGlobalVariables,
   ],
+  onFinish: writeCoverSpawnActors,
 };

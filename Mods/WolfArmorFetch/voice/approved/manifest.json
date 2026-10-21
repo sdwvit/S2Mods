@@ -1,0 +1,1664 @@
+{
+ "pc_en/01_WolfArmorFetch_Cover_Accept_Offer_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_001",
+  "speaker": "pc",
+  "tagged_text": "So it <|emotion:bitterness|>was all for nothing?",
+  "text": "So it was all for nothing?"
+ },
+ "pc_en/04_WolfArmorFetch_Cover_Accept_Offer_004.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_004",
+  "speaker": "pc",
+  "tagged_text": "And you want <|emotion:surprise|>me to buy a gun from them?",
+  "text": "And you want me to buy a gun from them?"
+ },
+ "pc_en/06_WolfArmorFetch_Cover_Accept_Name_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Name_000",
+  "speaker": "pc",
+  "tagged_text": "You said the serial gave you a name. <|emotion:determination|>Who is he?",
+  "text": "You said the serial gave you a name. Who is he?"
+ },
+ "pc_en/08_WolfArmorFetch_Cover_Accept_HowIn_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_HowIn_000",
+  "speaker": "pc",
+  "tagged_text": "And how do I get to them?",
+  "text": "And how do I get to them?"
+ },
+ "pc_en/11_WolfArmorFetch_Cover_Accept_Accepted_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Accepted_000",
+  "speaker": "pc",
+  "tagged_text": "Alright. <|emotion:determination|>I'll be your buyer.",
+  "text": "Alright. I'll be your buyer."
+ },
+ "pc_en/14_WolfArmorFetch_Cover_Accept_Declined_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Declined_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Not now Wolf.",
+  "text": "Not now Wolf."
+ },
+ "pc_en/17_WolfArmorFetch_Cover_TurnIn_Intel_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Intel_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>They talked. <|prosody:pause|>He's at their checkpoint by the railway bridge, up in the water tower. Changes shift at dawn, every third day.",
+  "text": "They talked. He's at their checkpoint by the railway bridge, up in the water tower. Changes shift at dawn, every third day."
+ },
+ "pc_en/20_WolfArmorFetch_Cover_TurnIn_Payoff_002.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Payoff_002",
+  "speaker": "pc",
+  "tagged_text": "Be <|emotion:affection|>careful, Wolf.",
+  "text": "Be careful, Wolf."
+ },
+ "pc_en/22_WolfArmorFetch_Cover_TurnIn_NotYet_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_NotYet_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Nothing yet, Wolf.",
+  "text": "Nothing yet, Wolf."
+ },
+ "pc_en/24_WolfArmorFetch_Cover_TurnIn_PDA_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_PDA_000",
+  "speaker": "pc",
+  "tagged_text": "<|emotion:pride|>It went loud. <|prosody:pause|>But their PDA has everything: where he sits and when he changes shift.",
+  "text": "It went loud. But their PDA has everything: where he sits and when he changes shift."
+ },
+ "pc_en/25_WolfArmorFetch_Cover_Favor_Ask_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Ask_000",
+  "speaker": "pc",
+  "tagged_text": "Sultan, I've got a favor to ask.",
+  "text": "Sultan, I've got a favor to ask."
+ },
+ "pc_en/27_WolfArmorFetch_Cover_Favor_Ask_002.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Ask_002",
+  "speaker": "pc",
+  "tagged_text": "I'm meeting Ward dealers at the Weather Station. <|prosody:pause|>As your buyer.",
+  "text": "I'm meeting Ward dealers at the Weather Station. As your buyer."
+ },
+ "pc_en/29_WolfArmorFetch_Cover_Favor_Accepted_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Accepted_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Give me two of your boys. <|emotion:amusement|>A Sultansk buyer with Sultansk muscle looks right.",
+  "text": "Give me two of your boys. A Sultansk buyer with Sultansk muscle looks right."
+ },
+ "pc_en/31_WolfArmorFetch_Cover_Favor_Declined_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Declined_000",
+  "speaker": "pc",
+  "tagged_text": "Forget <|emotion:determination|>it, I'll manage.",
+  "text": "Forget it, I'll manage."
+ },
+ "pc_en/37_WolfArmorFetch_Cover_Meeting_NoPassword_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_NoPassword_000",
+  "speaker": "pc",
+  "tagged_text": "The Sultan sent me. I'm here for the goods.",
+  "text": "The Sultan sent me. I'm here for the goods."
+ },
+ "pc_en/40_WolfArmorFetch_Cover_Meeting_Password_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Password_000",
+  "speaker": "pc",
+  "tagged_text": "Zaton's never quiet.",
+  "text": "Zaton's never quiet."
+ },
+ "pc_en/42_WolfArmorFetch_Cover_Meeting_HookTruth_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_HookTruth_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Vasyan's dead. I took his PDA.",
+  "text": "Vasyan's dead. I took his PDA."
+ },
+ "pc_en/43_WolfArmorFetch_Cover_Meeting_Hook_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Hook_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Vasyan's gone. Ran into a bloodsucker by the river. The Sultan sent me instead.",
+  "text": "Vasyan's gone. Ran into a bloodsucker by the river. The Sultan sent me instead."
+ },
+ "pc_en/46_WolfArmorFetch_Cover_Meeting_ShowRifle_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_ShowRifle_000",
+  "speaker": "pc",
+  "tagged_text": "Recognize it? Green trims, a Ward Fora. It went through Sultansk.",
+  "text": "Recognize it? Green trims, a Ward Fora. It went through Sultansk."
+ },
+ "pc_en/47_WolfArmorFetch_Cover_Meeting_RifleName_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_RifleName_000",
+  "speaker": "pc",
+  "tagged_text": "I even know <|emotion:pride|>whose it was.",
+  "text": "I even know whose it was."
+ },
+ "pc_en/49_WolfArmorFetch_Cover_Meeting_Badge_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Badge_000",
+  "speaker": "pc",
+  "tagged_text": "And this. <|prosody:pause|>I've dealt with your lot before.",
+  "text": "And this. I've dealt with your lot before."
+ },
+ "pc_en/53_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_000",
+  "speaker": "pc",
+  "tagged_text": "Sure, if they know how to shoot.",
+  "text": "Sure, if they know how to shoot."
+ },
+ "pc_en/56_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_000",
+  "speaker": "pc",
+  "tagged_text": "Since the Treaty, you're on the same side.",
+  "text": "Since the Treaty, you're on the same side."
+ },
+ "pc_en/59_WolfArmorFetch_Cover_Meeting_FishTry_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_FishTry_000",
+  "speaker": "pc",
+  "tagged_text": "The Sultan wants a quiet road next time. Who's covering it? Your marksman?",
+  "text": "The Sultan wants a quiet road next time. Who's covering it? Your marksman?"
+ },
+ "pc_en/63_WolfArmorFetch_Cover_Meeting_Fish2Try_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Fish2Try_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Easy. The Sultan just doesn't want his boys shot by mistake. Where's he sitting?",
+  "text": "Easy. The Sultan just doesn't want his boys shot by mistake. Where's he sitting?"
+ },
+ "pc_en/64_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_000",
+  "speaker": "pc",
+  "tagged_text": "You'd shoot them on sight.",
+  "text": "You'd shoot them on sight."
+ },
+ "pc_en/66_WolfArmorFetch_Cover_Meeting_Quiz2_Right_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Right_000",
+  "speaker": "pc",
+  "tagged_text": "Nothing. The Ward doesn't think about them at all.",
+  "text": "Nothing. The Ward doesn't think about them at all."
+ },
+ "pc_en/68_WolfArmorFetch_Cover_Meeting_Quiz1_Right_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Right_000",
+  "speaker": "pc",
+  "tagged_text": "No. You don't take loners.",
+  "text": "No. You don't take loners."
+ },
+ "pc_en/70_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_000",
+  "speaker": "pc",
+  "tagged_text": "If they served before, yeah.",
+  "text": "If they served before, yeah."
+ },
+ "pc_en/73_WolfArmorFetch_Cover_Meeting_Describe_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Describe_000",
+  "speaker": "pc",
+  "tagged_text": "You sold the Sultan a Fora. Ward issue, green trims. I've held it.",
+  "text": "You sold the Sultan a Fora. Ward issue, green trims. I've held it."
+ },
+ "pc_en/74_WolfArmorFetch_Cover_Meeting_DescribeName_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_DescribeName_000",
+  "speaker": "pc",
+  "tagged_text": "Your marksman carried it.",
+  "text": "Your marksman carried it."
+ },
+ "pc_en/75_WolfArmorFetch_Decider_Accept_Remember_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Remember_000",
+  "speaker": "pc",
+  "tagged_text": "I remember. You said you're still looking for the bastard.",
+  "text": "I remember. You said you're still looking for the bastard."
+ },
+ "pc_en/76_WolfArmorFetch_Decider_Accept_WhatFor_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_WhatFor_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>What's that rifle to you? <|emotion:confusion|>Think it'll lead you to the sniper?",
+  "text": "What's that rifle to you? Think it'll lead you to the sniper?"
+ },
+ "pc_en/77_WolfArmorFetch_Decider_Accept_Where_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Where_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Where do I look for that stalker?",
+  "text": "Where do I look for that stalker?"
+ },
+ "pc_en/78_WolfArmorFetch_Decider_Accept_Accepted_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Accepted_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Alright, I'll bring you that Fora.",
+  "text": "Alright, I'll bring you that Fora."
+ },
+ "pc_en/79_WolfArmorFetch_Decider_Accept_Declined_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Declined_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Wolf, I've got enough problems of my own.",
+  "text": "Wolf, I've got enough problems of my own."
+ },
+ "pc_en/80_WolfArmorFetch_Decider_Accept_Remind_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Remind_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Remind me what happened.",
+  "text": "Remind me what happened."
+ },
+ "pc_en/81_WolfArmorFetch_Decider_TurnIn_Give_000.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Give_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Here. Its owner called it the Decider.",
+  "text": "Here. Its owner called it the Decider."
+ },
+ "pc_en/82_WolfArmorFetch_Decider_TurnIn_Doubt_000.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Doubt_000",
+  "speaker": "pc",
+  "tagged_text": "<|emotion:confusion|>You think it's the same rifle?",
+  "text": "You think it's the same rifle?"
+ },
+ "pc_en/83_WolfArmorFetch_Decider_TurnIn_NotYet_000.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_NotYet_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Not yet.",
+  "text": "Not yet."
+ },
+ "pc_en/84_WolfArmorFetch_Dialog_Accept_Offer_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_001",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>And? Did you FIND your sniper?",
+  "text": "And? Did you FIND your sniper?"
+ },
+ "pc_en/85_WolfArmorFetch_Dialog_Accept_Offer_004.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_004",
+  "speaker": "pc",
+  "tagged_text": "<|emotion:confusion|>And how do you picture that?",
+  "text": "And how do you picture that?"
+ },
+ "pc_en/86_WolfArmorFetch_Dialog_Accept_WhyFalcon_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_000",
+  "speaker": "pc",
+  "tagged_text": "<|emotion:confusion|>And what's the suit for?",
+  "text": "And what's the suit for?"
+ },
+ "pc_en/87_WolfArmorFetch_Dialog_Accept_WhyFalcon_003.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_003",
+  "speaker": "pc",
+  "tagged_text": "And if they start SHOOTING?",
+  "text": "And if they start SHOOTING?"
+ },
+ "pc_en/88_WolfArmorFetch_Dialog_Accept_Prisoners_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Prisoners_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Say you catch them. <|prosody:pause|>Then what?",
+  "text": "Say you catch them. Then what?"
+ },
+ "pc_en/89_WolfArmorFetch_Dialog_Accept_Prisoners_002.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Prisoners_002",
+  "speaker": "pc",
+  "tagged_text": "<|emotion:confusion|>And if they don't know?",
+  "text": "And if they don't know?"
+ },
+ "pc_en/90_WolfArmorFetch_Dialog_Accept_Where_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Where_000",
+  "speaker": "pc",
+  "tagged_text": "So WHERE am I supposed to look for that suit?",
+  "text": "So WHERE am I supposed to look for that suit?"
+ },
+ "pc_en/91_WolfArmorFetch_Dialog_Accept_Accepted_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Accepted_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Alright. I'll get you a Falcon.",
+  "text": "Alright. I'll get you a Falcon."
+ },
+ "pc_en/92_WolfArmorFetch_Dialog_Accept_Declined_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Declined_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Find yourself another supplier.",
+  "text": "Find yourself another supplier."
+ },
+ "pc_en/93_WolfArmorFetch_Dialog_TurnIn_Give_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Here's your Falcon. I hope you know what you're doing.",
+  "text": "Here's your Falcon. I hope you know what you're doing."
+ },
+ "pc_en/94_WolfArmorFetch_Dialog_TurnIn_Give_003.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_003",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:pitch_low|>Make sure your lad doesn't get shot.",
+  "text": "Make sure your lad doesn't get shot."
+ },
+ "pc_en/95_WolfArmorFetch_Dialog_TurnIn_NotYet_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_NotYet_000",
+  "speaker": "pc",
+  "tagged_text": "Haven't found one yet.",
+  "text": "Haven't found one yet."
+ },
+ "pc_en/96_WolfArmorFetch_Cover_Meeting_FishPass_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_FishPass_001",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>So the Sultan's boys don't wander in there. <|prosody:expressive_low|>Where's he sitting?",
+  "text": "So the Sultan's boys don't wander in there. Where's he sitting?"
+ },
+ "pc_uk/01_WolfArmorFetch_Cover_Accept_Offer_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_001",
+  "speaker": "pc",
+  "tagged_text": "Тобто <|emotion:bitterness|>все дарма?",
+  "text": "Тобто все дарма?"
+ },
+ "pc_uk/04_WolfArmorFetch_Cover_Accept_Offer_004.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_004",
+  "speaker": "pc",
+  "tagged_text": "І ти хочеш, <|emotion:surprise|>щоб я купив у них ствол?",
+  "text": "І ти хочеш, щоб я купив у них ствол?"
+ },
+ "pc_uk/06_WolfArmorFetch_Cover_Accept_Name_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Name_000",
+  "speaker": "pc",
+  "tagged_text": "Ти казав, що серійник дав тобі ім'я. <|emotion:determination|>Хто він?",
+  "text": "Ти казав, що серійник дав тобі ім'я. Хто він?"
+ },
+ "pc_uk/08_WolfArmorFetch_Cover_Accept_HowIn_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_HowIn_000",
+  "speaker": "pc",
+  "tagged_text": "А як мені до них дістатися?",
+  "text": "А як мені до них дістатися?"
+ },
+ "pc_uk/11_WolfArmorFetch_Cover_Accept_Accepted_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Accepted_000",
+  "speaker": "pc",
+  "tagged_text": "Гаразд. <|emotion:determination|>Буду твоїм покупцем.",
+  "text": "Гаразд. Буду твоїм покупцем."
+ },
+ "pc_uk/14_WolfArmorFetch_Cover_Accept_Declined_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Declined_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Не зараз, Вовче.",
+  "text": "Не зараз, Вовче."
+ },
+ "pc_uk/17_WolfArmorFetch_Cover_TurnIn_Intel_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Intel_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Розговорив. <|prosody:pause|>Він на їхньому блокпосту біля залізничного мосту, на водонапірній вежі. Змінюється на світанку, кожного третього дня.",
+  "text": "Розговорив. Він на їхньому блокпосту біля залізничного мосту, на водонапірній вежі. Змінюється на світанку, кожного третього дня."
+ },
+ "pc_uk/20_WolfArmorFetch_Cover_TurnIn_Payoff_002.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Payoff_002",
+  "speaker": "pc",
+  "tagged_text": "Бережи <|emotion:affection|>себе, Вовче.",
+  "text": "Бережи себе, Вовче."
+ },
+ "pc_uk/22_WolfArmorFetch_Cover_TurnIn_NotYet_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_NotYet_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Поки нічого, Вовче.",
+  "text": "Поки нічого, Вовче."
+ },
+ "pc_uk/24_WolfArmorFetch_Cover_TurnIn_PDA_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_PDA_000",
+  "speaker": "pc",
+  "tagged_text": "Без стрілянини не обійшлося. <|prosody:pause|>Але в їхньому КПК є все: де він сидить і коли змінюється.",
+  "text": "Без стрілянини не обійшлося. Але в їхньому КПК є все: де він сидить і коли змінюється."
+ },
+ "pc_uk/25_WolfArmorFetch_Cover_Favor_Ask_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Ask_000",
+  "speaker": "pc",
+  "tagged_text": "Султане, у мене до тебе прохання.",
+  "text": "Султане, у мене до тебе прохання."
+ },
+ "pc_uk/27_WolfArmorFetch_Cover_Favor_Ask_002.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Ask_002",
+  "speaker": "pc",
+  "tagged_text": "Я зустрічаюся з ва́ртівськими торгашами на Метеостанції. <|prosody:pause|>Як твій покупець.",
+  "text": "Я зустрічаюся з вартівськими торгашами на Метеостанції. Як твій покупець."
+ },
+ "pc_uk/29_WolfArmorFetch_Cover_Favor_Accepted_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Accepted_000",
+  "speaker": "pc",
+  "tagged_text": "Дай мені двох своїх пацанів. Покупець із Султанська із султанськими пацанами — <|emotion:amusement|>виглядає правильно.",
+  "text": "Дай мені двох своїх пацанів. Покупець із Султанська із султанськими пацанами — виглядає правильно."
+ },
+ "pc_uk/31_WolfArmorFetch_Cover_Favor_Declined_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Declined_000",
+  "speaker": "pc",
+  "tagged_text": "Забудь, <|emotion:determination|>сам упораюся.",
+  "text": "Забудь, сам упораюся."
+ },
+ "pc_uk/37_WolfArmorFetch_Cover_Meeting_NoPassword_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_NoPassword_000",
+  "speaker": "pc",
+  "tagged_text": "Мене Султан прислав. По товар.",
+  "text": "Мене Султан прислав. По товар."
+ },
+ "pc_uk/40_WolfArmorFetch_Cover_Meeting_Password_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Password_000",
+  "speaker": "pc",
+  "tagged_text": "У Затоні тихо не буває.",
+  "text": "У Затоні тихо не буває."
+ },
+ "pc_uk/42_WolfArmorFetch_Cover_Meeting_HookTruth_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_HookTruth_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Васян мертвий. Я забрав його КПК.",
+  "text": "Васян мертвий. Я забрав його КПК."
+ },
+ "pc_uk/43_WolfArmorFetch_Cover_Meeting_Hook_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Hook_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Нема більше Васяна. Нарвався на кровососа біля річки. Султан прислав мене замість нього.",
+  "text": "Нема більше Васяна. Нарвався на кровососа біля річки. Султан прислав мене замість нього."
+ },
+ "pc_uk/46_WolfArmorFetch_Cover_Meeting_ShowRifle_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_ShowRifle_000",
+  "speaker": "pc",
+  "tagged_text": "Впізнаєш? Зелені накладки, ва́ртівська Фора. Через Султанськ пройшла.",
+  "text": "Впізнаєш? Зелені накладки, вартівська Фора. Через Султанськ пройшла."
+ },
+ "pc_uk/47_WolfArmorFetch_Cover_Meeting_RifleName_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_RifleName_000",
+  "speaker": "pc",
+  "tagged_text": "Я навіть знаю, <|emotion:pride|>чия вона була.",
+  "text": "Я навіть знаю, чия вона була."
+ },
+ "pc_uk/49_WolfArmorFetch_Cover_Meeting_Badge_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Badge_000",
+  "speaker": "pc",
+  "tagged_text": "І ще оце. <|prosody:pause|>Я з вашими вже мав справу.",
+  "text": "І ще оце. Я з вашими вже мав справу."
+ },
+ "pc_uk/53_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_000",
+  "speaker": "pc",
+  "tagged_text": "Аякже, якщо стріляти вміють.",
+  "text": "Аякже, якщо стріляти вміють."
+ },
+ "pc_uk/56_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_000",
+  "speaker": "pc",
+  "tagged_text": "Відколи уклали угоду, ви з ними заодно.",
+  "text": "Відколи уклали угоду, ви з ними заодно."
+ },
+ "pc_uk/59_WolfArmorFetch_Cover_Meeting_FishTry_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_FishTry_000",
+  "speaker": "pc",
+  "tagged_text": "Султан хоче, щоб наступного разу дорога була тиха. Хто її прикриває? Ваш стрілець?",
+  "text": "Султан хоче, щоб наступного разу дорога була тиха. Хто її прикриває? Ваш стрілець?"
+ },
+ "pc_uk/63_WolfArmorFetch_Cover_Meeting_Fish2Try_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Fish2Try_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Спокійно. Султан просто не хоче, щоб його пацанів підстрелили помилково. Де він сидить?",
+  "text": "Спокійно. Султан просто не хоче, щоб його пацанів підстрелили помилково. Де він сидить?"
+ },
+ "pc_uk/64_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_000",
+  "speaker": "pc",
+  "tagged_text": "Ви б їх на місці стріляли.",
+  "text": "Ви б їх на місці стріляли."
+ },
+ "pc_uk/66_WolfArmorFetch_Cover_Meeting_Quiz2_Right_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Right_000",
+  "speaker": "pc",
+  "tagged_text": "Нічого. Варта про них узагалі не думає.",
+  "text": "Нічого. Варта про них узагалі не думає."
+ },
+ "pc_uk/68_WolfArmorFetch_Cover_Meeting_Quiz1_Right_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Right_000",
+  "speaker": "pc",
+  "tagged_text": "Ні. Вільних ви до себе не берете.",
+  "text": "Ні. Вільних ви до себе не берете."
+ },
+ "pc_uk/70_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_000",
+  "speaker": "pc",
+  "tagged_text": "Тих, хто раніше служив, беруть.",
+  "text": "Тих, хто раніше служив, беруть."
+ },
+ "pc_uk/73_WolfArmorFetch_Cover_Meeting_Describe_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Describe_000",
+  "speaker": "pc",
+  "tagged_text": "Ви продали Султанові Фору. Ва́ртівську, із зеленими накладками. Я її в руках тримав.",
+  "text": "Ви продали Султанові Фору. Вартівську, із зеленими накладками. Я її в руках тримав."
+ },
+ "pc_uk/74_WolfArmorFetch_Cover_Meeting_DescribeName_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_DescribeName_000",
+  "speaker": "pc",
+  "tagged_text": "Її носив ваш стрілець.",
+  "text": "Її носив ваш стрілець."
+ },
+ "pc_uk/75_WolfArmorFetch_Decider_Accept_Remember_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Remember_000",
+  "speaker": "pc",
+  "tagged_text": "Пам'ятаю. Ти ще казав, що шукаєш того виродка.",
+  "text": "Пам'ятаю. Ти ще казав, що шукаєш того виродка."
+ },
+ "pc_uk/76_WolfArmorFetch_Decider_Accept_WhatFor_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_WhatFor_000",
+  "speaker": "pc",
+  "tagged_text": "І що тобі з тієї гвинтівки? Думаєш, знайдеш снайпера?",
+  "text": "І що тобі з тієї гвинтівки? Думаєш, знайдеш снайпера?"
+ },
+ "pc_uk/77_WolfArmorFetch_Decider_Accept_Where_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Where_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Де того сталкера шукати?",
+  "text": "Де того сталкера шукати?"
+ },
+ "pc_uk/78_WolfArmorFetch_Decider_Accept_Accepted_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Accepted_000",
+  "speaker": "pc",
+  "tagged_text": "Гаразд, принесу́ тобі ту Фору.",
+  "text": "Гаразд, принесу тобі ту Фору."
+ },
+ "pc_uk/79_WolfArmorFetch_Decider_Accept_Declined_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Declined_000",
+  "speaker": "pc",
+  "tagged_text": "Вовче, мені своїх проблем вистачає.",
+  "text": "Вовче, мені своїх проблем вистачає."
+ },
+ "pc_uk/80_WolfArmorFetch_Decider_Accept_Remind_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Remind_000",
+  "speaker": "pc",
+  "tagged_text": "Нагадай, що там сталося.",
+  "text": "Нагадай, що там сталося."
+ },
+ "pc_uk/81_WolfArmorFetch_Decider_TurnIn_Give_000.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Give_000",
+  "speaker": "pc",
+  "tagged_text": "Ось. Хазяїн Рішалою називав.",
+  "text": "Ось. Хазяїн Рішалою називав."
+ },
+ "pc_uk/82_WolfArmorFetch_Decider_TurnIn_Doubt_000.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Doubt_000",
+  "speaker": "pc",
+  "tagged_text": "Думаєш, це саме та гвинтівка?",
+  "text": "Думаєш, це саме та гвинтівка?"
+ },
+ "pc_uk/83_WolfArmorFetch_Decider_TurnIn_NotYet_000.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_NotYet_000",
+  "speaker": "pc",
+  "tagged_text": "Поки ні.",
+  "text": "Поки ні."
+ },
+ "pc_uk/84_WolfArmorFetch_Dialog_Accept_Offer_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_001",
+  "speaker": "pc",
+  "tagged_text": "Ну що, ЗНАЙШО́В свого снайпера?",
+  "text": "Ну що, ЗНАЙШОВ свого снайпера?"
+ },
+ "pc_uk/85_WolfArmorFetch_Dialog_Accept_Offer_004.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_004",
+  "speaker": "pc",
+  "tagged_text": "І як ти це собі уявляєш?",
+  "text": "І як ти це собі уявляєш?"
+ },
+ "pc_uk/86_WolfArmorFetch_Dialog_Accept_WhyFalcon_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_000",
+  "speaker": "pc",
+  "tagged_text": "А костюм тобі навіщо?",
+  "text": "А костюм тобі навіщо?"
+ },
+ "pc_uk/87_WolfArmorFetch_Dialog_Accept_WhyFalcon_003.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_003",
+  "speaker": "pc",
+  "tagged_text": "А якщо СТРІЛЯ́ТИ почнуть?",
+  "text": "А якщо СТРІЛЯТИ почнуть?"
+ },
+ "pc_uk/88_WolfArmorFetch_Dialog_Accept_Prisoners_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Prisoners_000",
+  "speaker": "pc",
+  "tagged_text": "А як упіймаєш ва́ртівців,<|prosody:pause|> що далі?",
+  "text": "А як упіймаєш вартівців, що далі?"
+ },
+ "pc_uk/89_WolfArmorFetch_Dialog_Accept_Prisoners_002.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Prisoners_002",
+  "speaker": "pc",
+  "tagged_text": "А якщо не знають?",
+  "text": "А якщо не знають?"
+ },
+ "pc_uk/90_WolfArmorFetch_Dialog_Accept_Where_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Where_000",
+  "speaker": "pc",
+  "tagged_text": "І де́ мені той комбез шукати?",
+  "text": "І де мені той комбез шукати?"
+ },
+ "pc_uk/91_WolfArmorFetch_Dialog_Accept_Accepted_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Accepted_000",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Гаразд. Дістану тобі Со́кола.",
+  "text": "Гаразд. Дістану тобі Сокола."
+ },
+ "pc_uk/92_WolfArmorFetch_Dialog_Accept_Declined_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Declined_000",
+  "speaker": "pc",
+  "tagged_text": "Знайди собі іншого постачальника.",
+  "text": "Знайди собі іншого постачальника."
+ },
+ "pc_uk/93_WolfArmorFetch_Dialog_TurnIn_Give_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_000",
+  "speaker": "pc",
+  "tagged_text": "Ось твій Сокіл. Сподіваюся, знаєш, що робиш.",
+  "text": "Ось твій Сокіл. Сподіваюся, знаєш, що робиш."
+ },
+ "pc_uk/94_WolfArmorFetch_Dialog_TurnIn_Give_003.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_003",
+  "speaker": "pc",
+  "tagged_text": "Дивись, щоб твого хлопця не пристрелили.",
+  "text": "Дивись, щоб твого хлопця не пристрелили."
+ },
+ "pc_uk/95_WolfArmorFetch_Dialog_TurnIn_NotYet_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_NotYet_000",
+  "speaker": "pc",
+  "tagged_text": "Поки не знайшов.",
+  "text": "Поки не знайшов."
+ },
+ "pc_uk/96_WolfArmorFetch_Cover_Meeting_FishPass_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_FishPass_001",
+  "speaker": "pc",
+  "tagged_text": "<|prosody:expressive_low|>Щоб Султанові хлопці туди не сунулись. Де він сидить?",
+  "text": "Щоб Султанові хлопці туди не сунулись. Де він сидить?"
+ },
+ "sultan_en/00_WolfArmorFetch_Cover_Favor_Ask_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Ask_001",
+  "speaker": "sultan",
+  "tagged_text": "<|emotion:amusement|>A favor? <|prosody:expressive_low|>You brought my case back, so go on, talk.",
+  "text": "A favor? You brought my case back, so go on, talk."
+ },
+ "sultan_en/01_WolfArmorFetch_Cover_Favor_Ask_003.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Ask_003",
+  "speaker": "sultan",
+  "tagged_text": "<|prosody:pitch_low|>Using my name, huh? Ballsy. <|emotion:amusement|>I like it.",
+  "text": "Using my name, huh? Ballsy. I like it."
+ },
+ "sultan_en/02_WolfArmorFetch_Cover_Favor_Accepted_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Accepted_001",
+  "speaker": "sultan",
+  "tagged_text": "<|prosody:pitch_low|>Fine. Two of my boys will wait outside the building. You show up, they come to you. <|prosody:pitch_low|>And if the Ward's selling cheap, I hear it from you first.",
+  "text": "Fine. Two of my boys will wait outside the building. You show up, they come to you. And if the Ward's selling cheap, I hear it from you first."
+ },
+ "sultan_en/03_WolfArmorFetch_Cover_Favor_Declined_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Declined_001",
+  "speaker": "sultan",
+  "tagged_text": "<|prosody:expressive_low|>Suit yourself, stalker.",
+  "text": "Suit yourself, stalker."
+ },
+ "sultan_uk/00_WolfArmorFetch_Cover_Favor_Ask_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Ask_001",
+  "speaker": "sultan",
+  "tagged_text": "Прохання? Ти мені валізу повернув, тож кажи, шановний.",
+  "text": "Прохання? Ти мені валізу повернув, тож кажи, шановний."
+ },
+ "sultan_uk/01_WolfArmorFetch_Cover_Favor_Ask_003.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Ask_003",
+  "speaker": "sultan",
+  "tagged_text": "Під моїм іменем значить? <|emotion:surprise|><|prosody:speed_slow|>Борзо. <|emotion:enthusiasm|>Мені подобається.",
+  "text": "Під моїм іменем значить? Борзо. Мені подобається."
+ },
+ "sultan_uk/02_WolfArmorFetch_Cover_Favor_Accepted_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Accepted_001",
+  "speaker": "sultan",
+  "tagged_text": "<|emotion:determination|><|prosody:pitch_low|>Добре. Двоє пацанів чекатимуть біля будівлі. Прийдеш — підійдуть. І якщо Варта продає дешево, ти скажеш мені першому.",
+  "text": "Добре. Двоє пацанів чекатимуть біля будівлі. Прийдеш — підійдуть. І якщо Варта продає дешево, ти скажеш мені першому."
+ },
+ "sultan_uk/03_WolfArmorFetch_Cover_Favor_Declined_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Favor_Declined_001",
+  "speaker": "sultan",
+  "tagged_text": "Як знаєш, сталкере.",
+  "text": "Як знаєш, сталкере."
+ },
+ "vasyan_en/00_WolfArmorFetch_Cover_HookComment_Corpse_000.wav": {
+  "sid": "WolfArmorFetch_Cover_HookComment_Corpse_000",
+  "speaker": "vasyan",
+  "tagged_text": "<|emotion:amusement|>Shoulda handed over the cash and the loot right away, sucker.",
+  "text": "Shoulda handed over the cash and the loot right away, sucker."
+ },
+ "vasyan_en/01_WolfArmorFetch_Cover_Hook_Greet_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Hook_Greet_000",
+  "speaker": "vasyan",
+  "tagged_text": "<|emotion:anger|>And who the fuck are you? <|prosody:pitch_low|>Piss off while you're still in one piece.",
+  "text": "And who the fuck are you? Piss off while you're still in one piece."
+ },
+ "vasyan_uk/00_WolfArmorFetch_Cover_HookComment_Corpse_000.wav": {
+  "sid": "WolfArmorFetch_Cover_HookComment_Corpse_000",
+  "speaker": "vasyan",
+  "tagged_text": "А треба було, фраєр, зразу бабос і хабарчик оддавать.",
+  "text": "А треба було, фраєр, зразу бабос і хабарчик оддавать."
+ },
+ "vasyan_uk/01_WolfArmorFetch_Cover_Hook_Greet_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Hook_Greet_000",
+  "speaker": "vasyan",
+  "tagged_text": "А ти ще хто такий? Ану з'їбався звідси, поки цілий.",
+  "text": "А ти ще хто такий? Ану з'їбався звідси, поки цілий."
+ },
+ "volk_en/00_WolfArmorFetch_Decider_Accept_Story_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Story_000",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Thought I'd never pick up his trail again. <|prosody:speed_fast|>Then the other day I took a client to the Slag Heap. While he was busy with his business, Huron and I had a drink.",
+  "text": "Thought I'd never pick up his trail again. Then the other day I took a client to the Slag Heap. While he was busy with his business, Huron and I had a drink."
+ },
+ "volk_en/01_WolfArmorFetch_Decider_Accept_Story_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Story_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>He says he lent a stalker coupons for a gun. A Fora, Ward issue, with green trims. You won't mix it up with any other.",
+  "text": "He says he lent a stalker coupons for a gun. A Fora, Ward issue, with green trims. You won't mix it up with any other."
+ },
+ "volk_en/02_WolfArmorFetch_Decider_Accept_Story_002.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Story_002",
+  "speaker": "volk",
+  "tagged_text": "The sniper had one just like it. <|emotion:bitterness|>Burned into my memory.",
+  "text": "The sniper had one just like it. Burned into my memory."
+ },
+ "volk_en/03_WolfArmorFetch_Decider_Accept_Story_003.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Story_003",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>I made a deal with Huron if I get that Fora I'll cover the stalker's debt myself. <|prosody:speed_fast|>Threw in a bit extra too so he'd tell me where to look for the debtor.",
+  "text": "I made a deal with Huron if I get that Fora I'll cover the stalker's debt myself. Threw in a bit extra too so he'd tell me where to look for the debtor."
+ },
+ "volk_en/04_WolfArmorFetch_Decider_Accept_WhatFor_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_WhatFor_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Every gun is on record in the Ward's databases. <|emotion:determination|>Who it was issued to, who carried it, when it was written off.",
+  "text": "Every gun is on record in the Ward's databases. Who it was issued to, who carried it, when it was written off."
+ },
+ "volk_en/05_WolfArmorFetch_Decider_Accept_WhatFor_002.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_WhatFor_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:pitch_low|><|emotion:determination|>Once I have the rifle, I'll find someone to run it through the databases. Maybe I'll at least learn the <|emotion:determination|>bastard's name.",
+  "text": "Once I have the rifle, I'll find someone to run it through the databases. Maybe I'll at least learn the bastard's name."
+ },
+ "volk_en/06_WolfArmorFetch_Decider_Accept_Where_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Where_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Huron says he's hanging around somewhere near the Cement Factory. <|prosody:speed_fast|>Hiding from his thugs, most likely.",
+  "text": "Huron says he's hanging around somewhere near the Cement Factory. Hiding from his thugs, most likely."
+ },
+ "volk_en/07_WolfArmorFetch_Decider_Accept_Accepted_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Accepted_001",
+  "speaker": "volk",
+  "tagged_text": "Just don't drag your feet. Huron's thugs are looking for <|emotion:determination|>him too, and they won't stand on ceremony.",
+  "text": "Just don't drag your feet. Huron's thugs are looking for him too, and they won't stand on ceremony."
+ },
+ "volk_en/08_WolfArmorFetch_Decider_Accept_Accepted_002.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Accepted_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Bring me the Fora and I'll pay you well.",
+  "text": "Bring me the Fora and I'll pay you well."
+ },
+ "volk_en/09_WolfArmorFetch_Decider_Accept_Declined_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Declined_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>I get it. <|emotion:bitterness|>I'd go myself, but who'd look after Cordon? <|prosody:expressive_low|>If you change your mind, you'll find me here.",
+  "text": "I get it. I'd go myself, but who'd look after Cordon? If you change your mind, you'll find me here."
+ },
+ "volk_en/10_WolfArmorFetch_Decider_Accept_Remind_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Remind_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>It was on a long run. We ran into a Ward sniper. His first shot hit me, and he didn't finish me off. <|prosody:pitch_low|>I lay there bleeding, and my guys came for me one after another. <|emotion:bitterness|>He dropped every one of them. Used me as bait, the <|emotion:anger|>bastard.",
+  "text": "It was on a long run. We ran into a Ward sniper. His first shot hit me, and he didn't finish me off. I lay there bleeding, and my guys came for me one after another. He dropped every one of them. Used me as bait, the bastard."
+ },
+ "volk_en/11_WolfArmorFetch_Decider_TurnIn_Ask_000.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Ask_000",
+  "speaker": "volk",
+  "tagged_text": "So, did you find it?",
+  "text": "So, did you find it?"
+ },
+ "volk_en/12_WolfArmorFetch_Decider_TurnIn_Give_001.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Give_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>The Decider, huh… <|prosody:pause|><|emotion:determination|>Give it here.",
+  "text": "The Decider, huh… Give it here."
+ },
+ "volk_en/13_WolfArmorFetch_Decider_TurnIn_Give_002.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Give_002",
+  "speaker": "volk",
+  "tagged_text": "Right… Green trims, just like I remember. <|emotion:relief|>And the serial's intact, nobody filed it off.",
+  "text": "Right… Green trims, just like I remember. And the serial's intact, nobody filed it off."
+ },
+ "volk_en/14_WolfArmorFetch_Decider_TurnIn_Give_003.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Give_003",
+  "speaker": "volk",
+  "tagged_text": "I'll cover Huron's debt, like we agreed. And this is for you. <|emotion:contentment|>You've earned it.",
+  "text": "I'll cover Huron's debt, like we agreed. And this is for you. You've earned it."
+ },
+ "volk_en/15_WolfArmorFetch_Decider_TurnIn_Doubt_001.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Doubt_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>I don't know, Skif. <|prosody:expressive_low|>But it's the only lead I've got.",
+  "text": "I don't know, Skif. But it's the only lead I've got."
+ },
+ "volk_en/16_WolfArmorFetch_Decider_TurnIn_Doubt_002.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Doubt_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>At least now I <|emotion:relief|>have somewhere to start.",
+  "text": "At least now I have somewhere to start."
+ },
+ "volk_en/17_WolfArmorFetch_Decider_TurnIn_NotYet_001.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_NotYet_001",
+  "speaker": "volk",
+  "tagged_text": "<|emotion:determination|>Then hurry. If his thugs find him first, you'll be looking for that Fora all over the Zone.",
+  "text": "Then hurry. If his thugs find him first, you'll be looking for that Fora all over the Zone."
+ },
+ "volk_en/18_WolfArmorFetch_Dialog_Accept_Offer_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_000",
+  "speaker": "volk",
+  "tagged_text": "I do. Remember that Fora you brought me? I managed to run <|emotion:pride|>its serial.",
+  "text": "I do. Remember that Fora you brought me? I managed to run its serial."
+ },
+ "volk_en/19_WolfArmorFetch_Dialog_Accept_Offer_002.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>I found a name. <|prosody:pause|>After that, nothing. Where he serves, where they transferred him, no trace. <|prosody:pitch_low|><|emotion:bitterness|>Like he vanished into thin air.",
+  "text": "I found a name. After that, nothing. Where he serves, where they transferred him, no trace. Like he vanished into thin air."
+ },
+ "volk_en/20_WolfArmorFetch_Dialog_Accept_Offer_003.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_003",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Never mind. <|prosody:pitch_low|><|emotion:determination|>If the papers don't have the answer, I'll have to ask people.",
+  "text": "Never mind. If the papers don't have the answer, I'll have to ask people."
+ },
+ "volk_en/21_WolfArmorFetch_Dialog_Accept_Offer_005.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_005",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:pitch_low|><|emotion:determination|>I want to take a couple of Ward soldiers alive. <|prosody:expressive_low|>Question them, maybe one of them knows something. <|prosody:pitch_low|>But first I have to get close to them.",
+  "text": "I want to take a couple of Ward soldiers alive. Question them, maybe one of them knows something. But first I have to get close to them."
+ },
+ "volk_en/22_WolfArmorFetch_Dialog_Accept_Offer_006.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_006",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>I've got an idea. <|emotion:determination|>But I can't pull it off without a Falcon. <|prosody:speed_fast|>PSZ-9I, the Spark make.",
+  "text": "I've got an idea. But I can't pull it off without a Falcon. PSZ-9I, the Spark make."
+ },
+ "volk_en/23_WolfArmorFetch_Dialog_Accept_WhyFalcon_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>The Ward and the Spark don't get along. <|emotion:amusement|>They see one in an expensive suit, they'll get curious. <|prosody:expressive_low|>They might even want to take him alive.",
+  "text": "The Ward and the Spark don't get along. They see one in an expensive suit, they'll get curious. They might even want to take him alive."
+ },
+ "volk_en/24_WolfArmorFetch_Dialog_Accept_WhyFalcon_002.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>My lad hangs around their post, and once they go after him, he leads them where we want. <|emotion:determination|>That's where we'll be waiting for them.",
+  "text": "My lad hangs around their post, and once they go after him, he leads them where we want. That's where we'll be waiting for them."
+ },
+ "volk_en/25_WolfArmorFetch_Dialog_Accept_WhyFalcon_004.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_004",
+  "speaker": "volk",
+  "tagged_text": "That's why it has to be a Falcon. A plain jacket won't do. And my lad's no rookie.",
+  "text": "That's why it has to be a Falcon. A plain jacket won't do. And my lad's no rookie."
+ },
+ "volk_en/26_WolfArmorFetch_Dialog_Accept_Prisoners_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Prisoners_001",
+  "speaker": "volk",
+  "tagged_text": "I'll ask questions. Maybe at least one of them knows where to look for <|emotion:determination|>that sniper.",
+  "text": "I'll ask questions. Maybe at least one of them knows where to look for that sniper."
+ },
+ "volk_en/27_WolfArmorFetch_Dialog_Accept_Prisoners_003.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Prisoners_003",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Then I'll keep looking. Won't be the first time.",
+  "text": "Then I'll keep looking. Won't be the first time."
+ },
+ "volk_en/28_WolfArmorFetch_Dialog_Accept_Where_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Where_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>I heard there's a Falcon hidden in a stash somewhere near Malachite. <|prosody:pause|>Might still be there.",
+  "text": "I heard there's a Falcon hidden in a stash somewhere near Malachite. Might still be there."
+ },
+ "volk_en/29_WolfArmorFetch_Dialog_Accept_Accepted_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Accepted_001",
+  "speaker": "volk",
+  "tagged_text": "<|emotion:contentment|>Good. <|prosody:expressive_low|>I'll pay for the suit, and throw in something from my own supplies on top.",
+  "text": "Good. I'll pay for the suit, and throw in something from my own supplies on top."
+ },
+ "volk_en/30_WolfArmorFetch_Dialog_Accept_Declined_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Declined_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Suit yourself. If you change your mind, drop by.",
+  "text": "Suit yourself. If you change your mind, drop by."
+ },
+ "volk_en/31_WolfArmorFetch_Dialog_TurnIn_Ask_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Ask_000",
+  "speaker": "volk",
+  "tagged_text": "So, did you GET the suit?",
+  "text": "So, did you GET the suit?"
+ },
+ "volk_en/32_WolfArmorFetch_Dialog_TurnIn_Give_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>So do I. I don't like my lads taking risks over my business.",
+  "text": "So do I. I don't like my lads taking risks over my business."
+ },
+ "volk_en/33_WolfArmorFetch_Dialog_TurnIn_Give_002.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Anyway, a deal's a deal. <|emotion:contentment|>Here are your coupons. <|prosody:expressive_low|>And I've marked a stash on your PDA. There's something useful in it, it's yours.",
+  "text": "Anyway, a deal's a deal. Here are your coupons. And I've marked a stash on your PDA. There's something useful in it, it's yours."
+ },
+ "volk_en/34_WolfArmorFetch_Dialog_TurnIn_Give_004.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_004",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>He knows what he's getting into. <|emotion:determination|>And I'll do everything I can to bring him back.",
+  "text": "He knows what he's getting into. And I'll do everything I can to bring him back."
+ },
+ "volk_en/35_WolfArmorFetch_Dialog_TurnIn_NotYet_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_NotYet_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Keep looking. <|emotion:bitterness|>The longer we drag this out, the harder it'll be to find that bastard.",
+  "text": "Keep looking. The longer we drag this out, the harder it'll be to find that bastard."
+ },
+ "volk_en/36_WolfArmorFetch_Cover_Accept_Offer_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_000",
+  "speaker": "volk",
+  "tagged_text": "They talked. <|prosody:pause|>Not about where the sniper sits, <|emotion:bitterness|>though. <|prosody:expressive_low|>That they don't know.",
+  "text": "They talked. Not about where the sniper sits, though. That they don't know."
+ },
+ "volk_en/37_WolfArmorFetch_Cover_Accept_Offer_002.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Not quite. They know his crew. His crew sells Ward guns on the side. To the bandits in Sultansk.",
+  "text": "Not quite. They know his crew. His crew sells Ward guns on the side. To the bandits in Sultansk."
+ },
+ "volk_en/38_WolfArmorFetch_Cover_Accept_Offer_003.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_003",
+  "speaker": "volk",
+  "tagged_text": "That's how a Ward Fora ended up with <|prosody:pitch_low|>a stalker who didn't have a coupon to his name.",
+  "text": "That's how a Ward Fora ended up with a stalker who didn't have a coupon to his name."
+ },
+ "volk_en/39_WolfArmorFetch_Cover_Accept_Offer_005.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_005",
+  "speaker": "volk",
+  "tagged_text": "<|emotion:determination|>I want you to get them talking. <|prosody:expressive_low|>They'll tell a buyer from Sultansk more than they'd ever tell me. They know my face. They don't know yours.",
+  "text": "I want you to get them talking. They'll tell a buyer from Sultansk more than they'd ever tell me. They know my face. They don't know yours."
+ },
+ "volk_en/40_WolfArmorFetch_Cover_Accept_Name_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Name_001",
+  "speaker": "volk",
+  "tagged_text": "Here. <|emotion:amusement|>Wrote it down best I could — my handwriting's worse than my aim. <|prosody:expressive_low|>Only show it if you have to.",
+  "text": "Here. Wrote it down best I could — my handwriting's worse than my aim. Only show it if you have to."
+ },
+ "volk_en/41_WolfArmorFetch_Cover_Accept_HowIn_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_HowIn_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>The Sultan's people don't buy direct. A go-between handles the deals. <|emotion:amusement|>Vasyan Bariga.",
+  "text": "The Sultan's people don't buy direct. A go-between handles the deals. Vasyan Bariga."
+ },
+ "volk_en/42_WolfArmorFetch_Cover_Accept_HowIn_002.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_HowIn_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>He hangs around somewhere north of Sultansk. Only he knows where and when they meet. <|emotion:determination|>The rest is on you.",
+  "text": "He hangs around somewhere north of Sultansk. Only he knows where and when they meet. The rest is on you."
+ },
+ "volk_en/43_WolfArmorFetch_Cover_Accept_Accepted_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Accepted_001",
+  "speaker": "volk",
+  "tagged_text": "Good. Then take this.",
+  "text": "Good. Then take this."
+ },
+ "volk_en/44_WolfArmorFetch_Cover_Accept_Accepted_002.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Accepted_002",
+  "speaker": "volk",
+  "tagged_text": "Here's the Decider, <|prosody:pause|>the same Fora. Patched it up and put some good parts on it. It's yours now.",
+  "text": "Here's the Decider, the same Fora. Patched it up and put some good parts on it. It's yours now."
+ },
+ "volk_en/45_WolfArmorFetch_Cover_Accept_Declined_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Declined_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>I'll wait. <|prosody:pitch_low|><|emotion:bitterness|>I've had practice.",
+  "text": "I'll wait. I've had practice."
+ },
+ "volk_en/46_WolfArmorFetch_Cover_TurnIn_Ask_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Ask_000",
+  "speaker": "volk",
+  "tagged_text": "Well? Did they talk?",
+  "text": "Well? Did they talk?"
+ },
+ "volk_en/47_WolfArmorFetch_Cover_TurnIn_Payoff_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Payoff_000",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:pitch_low|><|prosody:speed_slow|><|emotion:contentment|>Now I know where he sleeps.",
+  "text": "Now I know where he sleeps."
+ },
+ "volk_en/48_WolfArmorFetch_Cover_TurnIn_Payoff_001.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Payoff_001",
+  "speaker": "volk",
+  "tagged_text": "<|emotion:contentment|>Here, you've earned it. <|prosody:expressive_low|>The rest is my business. <|prosody:pitch_low|><|emotion:determination|>Sooner or later, he's mine.",
+  "text": "Here, you've earned it. The rest is my business. Sooner or later, he's mine."
+ },
+ "volk_en/49_WolfArmorFetch_Cover_TurnIn_Payoff_003.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Payoff_003",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>I've waited this long. <|prosody:pitch_low|><|emotion:determination|>I can wait a little more.",
+  "text": "I've waited this long. I can wait a little more."
+ },
+ "volk_en/50_WolfArmorFetch_Cover_TurnIn_NotYet_001.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_NotYet_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Take your time. <|emotion:affection|>Just don't get caught.",
+  "text": "Take your time. Just don't get caught."
+ },
+ "volk_en/51_WolfArmorFetch_Decider_Accept_Offer_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Offer_000",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:speed_fast|>There's one job. A personal one. <|emotion:bitterness|>Remember I told you how a Ward sniper shot me?",
+  "text": "There's one job. A personal one. Remember I told you how a Ward sniper shot me?"
+ },
+ "volk_en/52_WolfArmorFetch_Decider_Accept_Remember_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Remember_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>I am. <|prosody:pitch_low|><|emotion:determination|>And I won't rest until I find him.",
+  "text": "I am. And I won't rest until I find him."
+ },
+ "volk_uk/00_WolfArmorFetch_Decider_Accept_Story_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Story_000",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Дума́в уже́ ніко́ли на його́ слід не натраплю́. <|prosody:speed_fast|>А тут дня́ми води́в одного́ клієнта на Терико́н. <|prosody:speed_fast|>По́ки той свої́ спра́ви вирі́шував ми з Гуро́ном по ча́рці пропусти́ли. <|prosody:speed_fast|>Ну сло́во за́слово…",
+  "text": "Думав уже ніколи на його слід не натраплю. А тут днями водив одного клієнта на Терикон. Поки той свої справи вирішував ми з Гуроном по чарці пропустили. Ну слово заслово…"
+ },
+ "volk_uk/01_WolfArmorFetch_Decider_Accept_Story_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Story_001",
+  "speaker": "volk",
+  "tagged_text": "Каже, позичив одному сталкеру купонів на ствол. Фора ва́ртівська, із зеленими накладками. Таку з іншою не сплутаєш.",
+  "text": "Каже, позичив одному сталкеру купонів на ствол. Фора вартівська, із зеленими накладками. Таку з іншою не сплутаєш."
+ },
+ "volk_uk/02_WolfArmorFetch_Decider_Accept_Story_002.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Story_002",
+  "speaker": "volk",
+  "tagged_text": "А в того снайпера якраз така була. Я її <|emotion:bitterness|>добре запам'ятав.",
+  "text": "А в того снайпера якраз така була. Я її добре запам'ятав."
+ },
+ "volk_uk/03_WolfArmorFetch_Decider_Accept_Story_003.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Story_003",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|><|prosody:pitch_low|>Домовився з Гуроном: якщо дістану ту Фору, борг сталкера закрию сам. Ще й докинув трохи, щоб сказав, де боржника шукати.",
+  "text": "Домовився з Гуроном: якщо дістану ту Фору, борг сталкера закрию сам. Ще й докинув трохи, щоб сказав, де боржника шукати."
+ },
+ "volk_uk/04_WolfArmorFetch_Decider_Accept_WhatFor_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_WhatFor_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>У ва́ртівських базах кожен ствол записаний. Кому видали, хто носив, коли списали.",
+  "text": "У вартівських базах кожен ствол записаний. Кому видали, хто носив, коли списали."
+ },
+ "volk_uk/05_WolfArmorFetch_Decider_Accept_WhatFor_002.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_WhatFor_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:pitch_low|>Дістану <|emotion:determination|>гвинтівку — знайду й того, хто по базах проб'є. Може, хоч ім'я виродка <|emotion:determination|>дізнаюся.",
+  "text": "Дістану гвинтівку — знайду й того, хто по базах проб'є. Може, хоч ім'я виродка дізнаюся."
+ },
+ "volk_uk/06_WolfArmorFetch_Decider_Accept_Where_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Where_001",
+  "speaker": "volk",
+  "tagged_text": "Гурон каже, що той біля Цементного ошивається. Від братків ховається, мабуть.",
+  "text": "Гурон каже, що той біля Цементного ошивається. Від братків ховається, мабуть."
+ },
+ "volk_uk/07_WolfArmorFetch_Decider_Accept_Accepted_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Accepted_001",
+  "speaker": "volk",
+  "tagged_text": "Тільки не барися. Гуронові братки теж його шукають. А вони <|emotion:determination|>церемонитися не стануть.",
+  "text": "Тільки не барися. Гуронові братки теж його шукають. А вони церемонитися не стануть."
+ },
+ "volk_uk/08_WolfArmorFetch_Decider_Accept_Accepted_002.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Accepted_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Принесе́ш Фору — добре заплачу́у.",
+  "text": "Принесеш Фору — добре заплачуу."
+ },
+ "volk_uk/09_WolfArmorFetch_Decider_Accept_Declined_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Declined_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Розумію. Я й сам би пішов, та Кордон <|prosody:pitch_high|>на кого <|prosody:pitch_low|>лишу? Передумаєш — знайдеш мене тут.",
+  "text": "Розумію. Я й сам би пішов, та Кордон на кого лишу? Передумаєш — знайдеш мене тут."
+ },
+ "volk_uk/10_WolfArmorFetch_Decider_Accept_Remind_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Remind_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Було це на одному дальньому виході. <|prosody:expressive_low|>Натрапили на ва́ртівського снайпера. <|prosody:expressive_low|>Першим пострілом він мене підстрелив, а добивати не став. <|prosody:expressive_low|>Лежав я там, стікав кров'ю, а мої хлопці один за одним кинулися мене витягати. <|prosody:expressive_low|>Він їх усіх і поклав. <|prosody:expressive_low|>На живця́ падла ловив.",
+  "text": "Було це на одному дальньому виході. Натрапили на вартівського снайпера. Першим пострілом він мене підстрелив, а добивати не став. Лежав я там, стікав кров'ю, а мої хлопці один за одним кинулися мене витягати. Він їх усіх і поклав. На живця падла ловив."
+ },
+ "volk_uk/11_WolfArmorFetch_Decider_TurnIn_Ask_000.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Ask_000",
+  "speaker": "volk",
+  "tagged_text": "Ну що, знайшов?",
+  "text": "Ну що, знайшов?"
+ },
+ "volk_uk/12_WolfArmorFetch_Decider_TurnIn_Give_001.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Give_001",
+  "speaker": "volk",
+  "tagged_text": "Рішала?… <|prosody:pause|>Давай-но сюди.",
+  "text": "Рішала?… Давай-но сюди."
+ },
+ "volk_uk/13_WolfArmorFetch_Decider_TurnIn_Give_002.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Give_002",
+  "speaker": "volk",
+  "tagged_text": "Так… Зелені накладки, все як пам'ятаю. І серійник цілий, <|emotion:relief|>не сточений.",
+  "text": "Так… Зелені накладки, все як пам'ятаю. І серійник цілий, не сточений."
+ },
+ "volk_uk/14_WolfArmorFetch_Decider_TurnIn_Give_003.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Give_003",
+  "speaker": "volk",
+  "tagged_text": "Гуронові борг закрию, як домовлялися. А це тобі. <|emotion:contentment|>Заслужив.",
+  "text": "Гуронові борг закрию, як домовлялися. А це тобі. Заслужив."
+ },
+ "volk_uk/15_WolfArmorFetch_Decider_TurnIn_Doubt_001.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Doubt_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Не знаю, Скіфе. <|prosody:expressive_low|>Але іншої зачіпки в мене немає.",
+  "text": "Не знаю, Скіфе. Але іншої зачіпки в мене немає."
+ },
+ "volk_uk/16_WolfArmorFetch_Decider_TurnIn_Doubt_002.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_Doubt_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Тепер хоч буде <|emotion:relief|>з чого почати.",
+  "text": "Тепер хоч буде з чого почати."
+ },
+ "volk_uk/17_WolfArmorFetch_Decider_TurnIn_NotYet_001.wav": {
+  "sid": "WolfArmorFetch_Decider_TurnIn_NotYet_001",
+  "speaker": "volk",
+  "tagged_text": "Тоді поспішай. <|emotion:determination|>Як його братки першими знайдуть — шукай потім ту Фору по всій Зоні.",
+  "text": "Тоді поспішай. Як його братки першими знайдуть — шукай потім ту Фору по всій Зоні."
+ },
+ "volk_uk/18_WolfArmorFetch_Dialog_Accept_Offer_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_000",
+  "speaker": "volk",
+  "tagged_text": "Є. Пам'ятаєш ту Фору, що ти мені приніс? Вдалося пробити <|emotion:pride|>серійник.",
+  "text": "Є. Пам'ятаєш ту Фору, що ти мені приніс? Вдалося пробити серійник."
+ },
+ "volk_uk/19_WolfArmorFetch_Dialog_Accept_Offer_002.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Ім'я знайшов. <|prosody:pause|>А далі глухо. Ні де служить, ні куди перевели. Наче крізь землю <|emotion:confusion|>провалився.",
+  "text": "Ім'я знайшов. А далі глухо. Ні де служить, ні куди перевели. Наче крізь землю провалився."
+ },
+ "volk_uk/20_WolfArmorFetch_Dialog_Accept_Offer_003.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_003",
+  "speaker": "volk",
+  "tagged_text": "Але нічого. Якщо в паперах відповіді немає, доведеться в людей <|emotion:determination|>питати.",
+  "text": "Але нічого. Якщо в паперах відповіді немає, доведеться в людей питати."
+ },
+ "volk_uk/21_WolfArmorFetch_Dialog_Accept_Offer_005.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_005",
+  "speaker": "volk",
+  "tagged_text": "Хочу <|emotion:determination|>пару ва́ртівців живцем узяти. Розпитати, може, хтось щось знає. Тільки до них ще <|emotion:determination|>підібратися треба.",
+  "text": "Хочу пару вартівців живцем узяти. Розпитати, може, хтось щось знає. Тільки до них ще підібратися треба."
+ },
+ "volk_uk/22_WolfArmorFetch_Dialog_Accept_Offer_006.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Offer_006",
+  "speaker": "volk",
+  "tagged_text": "Є в мене одна задумка. Але без Сокола не обійтися. ПСЗ-9І, іскрівський.",
+  "text": "Є в мене одна задумка. Але без Сокола не обійтися. ПСЗ-9І, іскрівський."
+ },
+ "volk_uk/23_WolfArmorFetch_Dialog_Accept_WhyFalcon_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_001",
+  "speaker": "volk",
+  "tagged_text": "Ва́ртівці з іскрівцями не в лада́х. Побачать одного в дорогому комбезі — зацікавляться. Може, й живцем узяти захочуть.",
+  "text": "Вартівці з іскрівцями не в ладах. Побачать одного в дорогому комбезі — зацікавляться. Може, й живцем узяти захочуть."
+ },
+ "volk_uk/24_WolfArmorFetch_Dialog_Accept_WhyFalcon_002.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_002",
+  "speaker": "volk",
+  "tagged_text": "Мій хлопець покрутиться біля їхнього поста, а як за ним підуть — заведе куди треба. Там уже ми їх і зустрінемо.",
+  "text": "Мій хлопець покрутиться біля їхнього поста, а як за ним підуть — заведе куди треба. Там уже ми їх і зустрінемо."
+ },
+ "volk_uk/25_WolfArmorFetch_Dialog_Accept_WhyFalcon_004.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_WhyFalcon_004",
+  "speaker": "volk",
+  "tagged_text": "Тому й потрібен Сокіл, а не звичайна куртка. Та й хлопець у мене не перший день у Зоні.",
+  "text": "Тому й потрібен Сокіл, а не звичайна куртка. Та й хлопець у мене не перший день у Зоні."
+ },
+ "volk_uk/26_WolfArmorFetch_Dialog_Accept_Prisoners_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Prisoners_001",
+  "speaker": "volk",
+  "tagged_text": "Розпитаю. Може, хоч один знає, де того снайпера <|emotion:determination|>шукати.",
+  "text": "Розпитаю. Може, хоч один знає, де того снайпера шукати."
+ },
+ "volk_uk/27_WolfArmorFetch_Dialog_Accept_Prisoners_003.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Prisoners_003",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Тоді шукатиму далі. Не вперше.",
+  "text": "Тоді шукатиму далі. Не вперше."
+ },
+ "volk_uk/28_WolfArmorFetch_Dialog_Accept_Where_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Where_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Чув, десь неподалік Малахіту в одному схроні Сокіл прихований. <|prosody:long_pause|>Може, досі там лежить.",
+  "text": "Чув, десь неподалік Малахіту в одному схроні Сокіл прихований. Може, досі там лежить."
+ },
+ "volk_uk/29_WolfArmorFetch_Dialog_Accept_Accepted_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Accepted_001",
+  "speaker": "volk",
+  "tagged_text": "От і <|emotion:enthusiasm|>добре. За комбез заплачу́у, ще й дещо зі своїх запасів підкину.",
+  "text": "От і добре. За комбез заплачуу, ще й дещо зі своїх запасів підкину."
+ },
+ "volk_uk/30_WolfArmorFetch_Dialog_Accept_Declined_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_Accept_Declined_001",
+  "speaker": "volk",
+  "tagged_text": "Як знаєш. Передумаєш — заходь.",
+  "text": "Як знаєш. Передумаєш — заходь."
+ },
+ "volk_uk/31_WolfArmorFetch_Dialog_TurnIn_Ask_000.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Ask_000",
+  "speaker": "volk",
+  "tagged_text": "Ну що, роздобув комбе́з.",
+  "text": "Ну що, роздобув комбез."
+ },
+ "volk_uk/32_WolfArmorFetch_Dialog_TurnIn_Give_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Та я й сам сподіваюся. Не подобається мені, що хлопцям доведеться через мої справи ризикувати.",
+  "text": "Та я й сам сподіваюся. Не подобається мені, що хлопцям доведеться через мої справи ризикувати."
+ },
+ "volk_uk/33_WolfArmorFetch_Dialog_TurnIn_Give_002.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Домовлялися?-тримай купони. І схрон тобі на КПК відмітив. Там дещо кори́сне є, забирай.",
+  "text": "Домовлялися?-тримай купони. І схрон тобі на КПК відмітив. Там дещо корисне є, забирай."
+ },
+ "volk_uk/34_WolfArmorFetch_Dialog_TurnIn_Give_004.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_Give_004",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Він знає, на що йде. А я <|emotion:determination|>зроблю все, щоб повернувся.",
+  "text": "Він знає, на що йде. А я зроблю все, щоб повернувся."
+ },
+ "volk_uk/35_WolfArmorFetch_Dialog_TurnIn_NotYet_001.wav": {
+  "sid": "WolfArmorFetch_Dialog_TurnIn_NotYet_001",
+  "speaker": "volk",
+  "tagged_text": "Шукай. Чим довше тягнемо, тим важче буде <|emotion:bitterness|>знайти того гада.",
+  "text": "Шукай. Чим довше тягнемо, тим важче буде знайти того гада."
+ },
+ "volk_uk/36_WolfArmorFetch_Cover_Accept_Offer_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_000",
+  "speaker": "volk",
+  "tagged_text": "Розповіли. <|prosody:pause|>Тільки не про те, де сидить <|emotion:bitterness|>снайпер. <|prosody:expressive_low|>Цього вони не знають.",
+  "text": "Розповіли. Тільки не про те, де сидить снайпер. Цього вони не знають."
+ },
+ "volk_uk/37_WolfArmorFetch_Cover_Accept_Offer_002.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_002",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Не зовсім. Вони знають його людей. А ті потай торгують ва́ртівськими стволами.",
+  "text": "Не зовсім. Вони знають його людей. А ті потай торгують вартівськими стволами."
+ },
+ "volk_uk/38_WolfArmorFetch_Cover_Accept_Offer_003.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_003",
+  "speaker": "volk",
+  "tagged_text": "Ось як ва́ртівська <|prosody:pitch_low|>Фора опинилася в сталкера.",
+  "text": "Ось як вартівська Фора опинилася в сталкера."
+ },
+ "volk_uk/39_WolfArmorFetch_Cover_Accept_Offer_005.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Offer_005",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:speed_fast|>Хочу, щоб ти їх розговорив. Покупцеві із Султанська вони розкажуть більше, ніж мені. Моє обличчя вони знають, а твоє ні.",
+  "text": "Хочу, щоб ти їх розговорив. Покупцеві із Султанська вони розкажуть більше, ніж мені. Моє обличчя вони знають, а твоє ні."
+ },
+ "volk_uk/40_WolfArmorFetch_Cover_Accept_Name_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Name_001",
+  "speaker": "volk",
+  "tagged_text": "Тримай. Записав як зміг. Показуй тільки якщо <|emotion:determination|>припече.",
+  "text": "Тримай. Записав як зміг. Показуй тільки якщо припече."
+ },
+ "volk_uk/41_WolfArmorFetch_Cover_Accept_HowIn_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_HowIn_001",
+  "speaker": "volk",
+  "tagged_text": "Люди Султана напряму не купують. Угоди веде посередник. <|prosody:pause|>Васян Барига.",
+  "text": "Люди Султана напряму не купують. Угоди веде посередник. Васян Барига."
+ },
+ "volk_uk/42_WolfArmorFetch_Cover_Accept_HowIn_002.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_HowIn_002",
+  "speaker": "volk",
+  "tagged_text": "Крутиться десь на північ від Султанська. Де і коли зустріч — знає тільки він. Далі сам.",
+  "text": "Крутиться десь на північ від Султанська. Де і коли зустріч — знає тільки він. Далі сам."
+ },
+ "volk_uk/43_WolfArmorFetch_Cover_Accept_Accepted_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Accepted_001",
+  "speaker": "volk",
+  "tagged_text": "Добре. Тоді тримай.",
+  "text": "Добре. Тоді тримай."
+ },
+ "volk_uk/44_WolfArmorFetch_Cover_Accept_Accepted_002.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Accepted_002",
+  "speaker": "volk",
+  "tagged_text": "Ось Рішала, <|prosody:pause|>та сама Фора. Підлатав і поставив до́брі деталі. Тепер вона твоя.",
+  "text": "Ось Рішала, та сама Фора. Підлатав і поставив добрі деталі. Тепер вона твоя."
+ },
+ "volk_uk/45_WolfArmorFetch_Cover_Accept_Declined_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Accept_Declined_001",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Я зачекаю. Мені не звикати.",
+  "text": "Я зачекаю. Мені не звикати."
+ },
+ "volk_uk/46_WolfArmorFetch_Cover_TurnIn_Ask_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Ask_000",
+  "speaker": "volk",
+  "tagged_text": "Ну що? Розговорив їх?",
+  "text": "Ну що? Розговорив їх?"
+ },
+ "volk_uk/47_WolfArmorFetch_Cover_TurnIn_Payoff_000.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Payoff_000",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Тепер я знаю, де він спить.",
+  "text": "Тепер я знаю, де він спить."
+ },
+ "volk_uk/48_WolfArmorFetch_Cover_TurnIn_Payoff_001.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Payoff_001",
+  "speaker": "volk",
+  "tagged_text": "Тримай, ти <|emotion:contentment|>заробив. Далі моя справа. Рано чи пізно він мені попадеться.",
+  "text": "Тримай, ти заробив. Далі моя справа. Рано чи пізно він мені попадеться."
+ },
+ "volk_uk/49_WolfArmorFetch_Cover_TurnIn_Payoff_003.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_Payoff_003",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Я стільки чекав. Почекаю ще трохи.",
+  "text": "Я стільки чекав. Почекаю ще трохи."
+ },
+ "volk_uk/50_WolfArmorFetch_Cover_TurnIn_NotYet_001.wav": {
+  "sid": "WolfArmorFetch_Cover_TurnIn_NotYet_001",
+  "speaker": "volk",
+  "tagged_text": "Не поспішай. Тільки не попадися.",
+  "text": "Не поспішай. Тільки не попадися."
+ },
+ "volk_uk/51_WolfArmorFetch_Decider_Accept_Offer_000.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Offer_000",
+  "speaker": "volk",
+  "tagged_text": "<|prosody:expressive_low|>Є одна справа. Особиста. Пам'ятаєш, я розповідав, як мене вартівський снайпер підстрелив?",
+  "text": "Є одна справа. Особиста. Пам'ятаєш, я розповідав, як мене вартівський снайпер підстрелив?"
+ },
+ "volk_uk/52_WolfArmorFetch_Decider_Accept_Remember_001.wav": {
+  "sid": "WolfArmorFetch_Decider_Accept_Remember_001",
+  "speaker": "volk",
+  "tagged_text": "Шукаю. І не заспокоюся, поки не знайду.",
+  "text": "Шукаю. І не заспокоюся, поки не знайду."
+ },
+ "ward_en/00_WolfArmorFetch_Cover_Meeting_Greet_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Greet_000",
+  "speaker": "ward",
+  "tagged_text": "Halt. That's close enough.",
+  "text": "Halt. That's close enough."
+ },
+ "ward_en/01_WolfArmorFetch_Cover_Meeting_Greet_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Greet_001",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Quiet on the river today?",
+  "text": "Quiet on the river today?"
+ },
+ "ward_en/02_WolfArmorFetch_Cover_Meeting_Loud_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Loud_000",
+  "speaker": "ward_angry",
+  "tagged_text": "<|emotion:anger|>He's not the Sultan's!",
+  "text": "He's not the Sultan's!"
+ },
+ "ward_en/03_WolfArmorFetch_Cover_Meeting_Loud_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Loud_001",
+  "speaker": "ward",
+  "tagged_text": "<|emotion:anger|>Open fire!",
+  "text": "Open fire!"
+ },
+ "ward_en/04_WolfArmorFetch_Cover_Meeting_Password_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Password_001",
+  "speaker": "ward",
+  "tagged_text": "Correct. <|emotion:surprise|>But you're not Vasyan. <|prosody:expressive_low|>Where's Vasyan?",
+  "text": "Correct. But you're not Vasyan. Where's Vasyan?"
+ },
+ "ward_en/05_WolfArmorFetch_Cover_Meeting_HookPassed_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_HookPassed_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Figures. <|emotion:amusement|>Vasyan never watched his step.",
+  "text": "Figures. Vasyan never watched his step."
+ },
+ "ward_en/06_WolfArmorFetch_Cover_Meeting_Proof_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Proof_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Anyone can learn a password. <|prosody:pitch_low|>How do you prove the Sultan sent you?",
+  "text": "Anyone can learn a password. How do you prove the Sultan sent you?"
+ },
+ "ward_en/07_WolfArmorFetch_Cover_Meeting_RifleName_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_RifleName_001",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>…WHERE'D you hear that name? <|prosody:long_pause|>No. Don't tell me. <|prosody:pitch_low|>You're the Sultan's man.",
+  "text": "…WHERE'D you hear that name? No. Don't tell me. You're the Sultan's man."
+ },
+ "ward_en/08_WolfArmorFetch_Cover_Meeting_Badge_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Badge_001",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>A badge. Whose was it? <|emotion:contemplation|>…Ah, never mind.",
+  "text": "A badge. Whose was it? …Ah, never mind."
+ },
+ "ward_en/09_WolfArmorFetch_Cover_Meeting_Quiz1_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>The Sultan's people run their mouths. <|prosody:pitch_low|>Let's see if you know who you're dealing with.",
+  "text": "The Sultan's people run their mouths. Let's see if you know who you're dealing with."
+ },
+ "ward_en/10_WolfArmorFetch_Cover_Meeting_Quiz1_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_001",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Do we take STALKERS into our ranks?",
+  "text": "Do we take STALKERS into our ranks?"
+ },
+ "ward_en/11_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:pitch_low|>Wrong. Where'd you pick up that crap?",
+  "text": "Wrong. Where'd you pick up that crap?"
+ },
+ "ward_en/12_WolfArmorFetch_Cover_Meeting_Quiz2_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>And what does the Ward think of Duty?",
+  "text": "And what does the Ward think of Duty?"
+ },
+ "ward_en/13_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:pitch_low|>Wrong. Do you even KNOW who you're buying from?",
+  "text": "Wrong. Do you even KNOW who you're buying from?"
+ },
+ "ward_en/14_WolfArmorFetch_Cover_Meeting_Fish_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Fish_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Fine. Prices go through me, same as with Vasyan. Anything ELSE?",
+  "text": "Fine. Prices go through me, same as with Vasyan. Anything ELSE?"
+ },
+ "ward_en/15_WolfArmorFetch_Cover_Meeting_Intel_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Intel_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:pause|>Fine. <|prosody:pitch_low|>The checkpoint by the railway bridge, up in the water tower. Changes shift at dawn, every third day.",
+  "text": "Fine. The checkpoint by the railway bridge, up in the water tower. Changes shift at dawn, every third day."
+ },
+ "ward_en/16_WolfArmorFetch_Cover_Meeting_Intel_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Intel_001",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Tell the Sultan nobody'll touch his boys. Now go. Same place, one week. <|prosody:pitch_low|>And bring the money.",
+  "text": "Tell the Sultan nobody'll touch his boys. Now go. Same place, one week. And bring the money."
+ },
+ "ward_en/17_WolfArmorFetch_Cover_Meeting_Fish2_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Fish2_000",
+  "speaker": "ward",
+  "tagged_text": "None of YOUR business, loner.",
+  "text": "None of YOUR business, loner."
+ },
+ "ward_en/18_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:pitch_low|>Wrong. Do you even KNOW who you're buying from?",
+  "text": "Wrong. Do you even KNOW who you're buying from?"
+ },
+ "ward_en/19_WolfArmorFetch_Cover_Meeting_Quiz2_Right_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Right_001",
+  "speaker": "ward",
+  "tagged_text": "<|emotion:amusement|>Ha! Damn right.",
+  "text": "Ha! Damn right."
+ },
+ "ward_en/20_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Right_001",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Correct.",
+  "text": "Correct."
+ },
+ "ward_en/21_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:pitch_low|>Wrong. Where'd you pick up that crap?",
+  "text": "Wrong. Where'd you pick up that crap?"
+ },
+ "ward_en/22_WolfArmorFetch_Cover_Meeting_RifleOnly_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_RifleOnly_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>That's our stock, alright. <|prosody:pause|>Fine.",
+  "text": "That's our stock, alright. Fine."
+ },
+ "ward_en/23_WolfArmorFetch_Cover_Meeting_DescribeName_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_DescribeName_001",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:speed_slow|>…Where'd you hear that name? <|prosody:long_pause|>Nevermind. I don't want to know.",
+  "text": "…Where'd you hear that name? Nevermind. I don't want to know."
+ },
+ "ward_en/24_WolfArmorFetch_Cover_Meeting_DescribeOnly_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_DescribeOnly_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Lots of people have held lots of things. We'll see.",
+  "text": "Lots of people have held lots of things. We'll see."
+ },
+ "ward_en/25_WolfArmorFetch_Cover_Meeting_Hook_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Hook_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "<|emotion:bitterness|>Fucking Zone... <|prosody:pitch_low|>Ah, screw it.",
+  "text": "Fucking Zone... Ah, screw it."
+ },
+ "ward_en/26_WolfArmorFetch_Cover_Meeting_FishPass_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_FishPass_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:pitch_low|>Ours. <|prosody:pause|>What's it to you?",
+  "text": "Ours. What's it to you?"
+ },
+ "ward_uk/00_WolfArmorFetch_Cover_Meeting_Greet_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Greet_000",
+  "speaker": "ward",
+  "tagged_text": "Стояти. Ближче не підходь.",
+  "text": "Стояти. Ближче не підходь."
+ },
+ "ward_uk/01_WolfArmorFetch_Cover_Meeting_Greet_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Greet_001",
+  "speaker": "ward",
+  "tagged_text": "На річці сьогодні тихо?",
+  "text": "На річці сьогодні тихо?"
+ },
+ "ward_uk/02_WolfArmorFetch_Cover_Meeting_Loud_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Loud_000",
+  "speaker": "ward",
+  "tagged_text": "<|emotion:anger|>Він не від Султана!",
+  "text": "Він не від Султана!"
+ },
+ "ward_uk/03_WolfArmorFetch_Cover_Meeting_Loud_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Loud_001",
+  "speaker": "ward",
+  "tagged_text": "<|emotion:anger|><|prosody:expressive_high|>Вогонь!",
+  "text": "Вогонь!"
+ },
+ "ward_uk/04_WolfArmorFetch_Cover_Meeting_Password_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Password_001",
+  "speaker": "ward",
+  "tagged_text": "Правильно. <|emotion:surprise|>Тільки ти не Васян. Де Васян?",
+  "text": "Правильно. Тільки ти не Васян. Де Васян?"
+ },
+ "ward_uk/05_WolfArmorFetch_Cover_Meeting_HookPassed_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_HookPassed_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Цього слід було чекати. Васян ніколи під ноги не дивився.",
+  "text": "Цього слід було чекати. Васян ніколи під ноги не дивився."
+ },
+ "ward_uk/06_WolfArmorFetch_Cover_Meeting_Proof_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Proof_000",
+  "speaker": "ward",
+  "tagged_text": "Пароль може вивчити будь-хто. Чим доведеш, що ти від Султана?",
+  "text": "Пароль може вивчити будь-хто. Чим доведеш, що ти від Султана?"
+ },
+ "ward_uk/07_WolfArmorFetch_Cover_Meeting_RifleName_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_RifleName_001",
+  "speaker": "ward",
+  "tagged_text": "ЗВІДКИ ти знаєш це ім'я? ... <|prosody:long_pause|><|emotion:confusion|><|prosody:expressive_low|>Ні... Не кажи... Таки людина Султана.",
+  "text": "ЗВІДКИ ти знаєш це ім'я? ... Ні... Не кажи... Таки людина Султана."
+ },
+ "ward_uk/08_WolfArmorFetch_Cover_Meeting_Badge_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Badge_001",
+  "speaker": "ward",
+  "tagged_text": "Жетон. Чий він був? … <|emotion:sadness|><|prosody:expressive_low|>Ай.. забудь.",
+  "text": "Жетон. Чий він був? … Ай.. забудь."
+ },
+ "ward_uk/09_WolfArmorFetch_Cover_Meeting_Quiz1_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_000",
+  "speaker": "ward",
+  "tagged_text": "<|emotion:bitterness|><|prosody:expressive_low|>Султанові люди язиками мелють. <|prosody:pitch_low|>Перевіримо, чи знаєш, з ким маєш справу.",
+  "text": "Султанові люди язиками мелють. Перевіримо, чи знаєш, з ким маєш справу."
+ },
+ "ward_uk/10_WolfArmorFetch_Cover_Meeting_Quiz1_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_001",
+  "speaker": "ward",
+  "tagged_text": "Чи Варта БЕРЕ́ сталкерів до своїх лав?",
+  "text": "Чи Варта БЕРЕ сталкерів до своїх лав?"
+ },
+ "ward_uk/11_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "Ні. Де ти такої дурні наслухався?",
+  "text": "Ні. Де ти такої дурні наслухався?"
+ },
+ "ward_uk/12_WolfArmorFetch_Cover_Meeting_Quiz2_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>А що Варта думає про Долг?",
+  "text": "А що Варта думає про Долг?"
+ },
+ "ward_uk/13_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Wrong1_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "Ні. Ти взагалі ЗНАЄШ у кого купуєш?",
+  "text": "Ні. Ти взагалі ЗНАЄШ у кого купуєш?"
+ },
+ "ward_uk/14_WolfArmorFetch_Cover_Meeting_Fish_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Fish_000",
+  "speaker": "ward",
+  "tagged_text": "Гаразд. Ціни через мене, як і з Васяно́м. ЩЕ щось?",
+  "text": "Гаразд. Ціни через мене, як і з Васяном. ЩЕ щось?"
+ },
+ "ward_uk/15_WolfArmorFetch_Cover_Meeting_Intel_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Intel_000",
+  "speaker": "ward",
+  "tagged_text": "Гаразд. Блокпост біля залізничного мосту, водонапірна вежа. Змінюється на світанку, кожного третього дня.",
+  "text": "Гаразд. Блокпост біля залізничного мосту, водонапірна вежа. Змінюється на світанку, кожного третього дня."
+ },
+ "ward_uk/16_WolfArmorFetch_Cover_Meeting_Intel_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Intel_001",
+  "speaker": "ward",
+  "tagged_text": "Передай Султанові: його пацанів ніхто не зачепить. А тепер іди. Через тиждень на тому ж місці. І гроші принеси.",
+  "text": "Передай Султанові: його пацанів ніхто не зачепить. А тепер іди. Через тиждень на тому ж місці. І гроші принеси."
+ },
+ "ward_uk/17_WolfArmorFetch_Cover_Meeting_Fish2_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Fish2_000",
+  "speaker": "ward",
+  "tagged_text": "Не твоє діло, вільний.",
+  "text": "Не твоє діло, вільний."
+ },
+ "ward_uk/18_WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Wrong2_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "Ні. Ти взагалі знаєш, у кого купуєш?",
+  "text": "Ні. Ти взагалі знаєш, у кого купуєш?"
+ },
+ "ward_uk/19_WolfArmorFetch_Cover_Meeting_Quiz2_Right_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz2_Right_001",
+  "speaker": "ward",
+  "tagged_text": "Ха! Саме так.",
+  "text": "Ха! Саме так."
+ },
+ "ward_uk/21_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "Ні. Де ти такої дурні наслухався?",
+  "text": "Ні. Де ти такої дурні наслухався?"
+ },
+ "ward_uk/22_WolfArmorFetch_Cover_Meeting_RifleOnly_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_RifleOnly_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Наш товар, точно. <|prosody:pause|>Гаразд.",
+  "text": "Наш товар, точно. Гаразд."
+ },
+ "ward_uk/23_WolfArmorFetch_Cover_Meeting_DescribeName_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_DescribeName_001",
+  "speaker": "ward",
+  "tagged_text": "…Звідки ти знаєш це ім'я? <|prosody:long_pause|>Неважливо. Не хочу знати.",
+  "text": "…Звідки ти знаєш це ім'я? Неважливо. Не хочу знати."
+ },
+ "ward_uk/24_WolfArmorFetch_Cover_Meeting_DescribeOnly_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_DescribeOnly_000",
+  "speaker": "ward",
+  "tagged_text": "Багато хто багато чого тримав. Побачимо.",
+  "text": "Багато хто багато чого тримав. Побачимо."
+ },
+ "ward_uk/25_WolfArmorFetch_Cover_Meeting_Hook_Slip_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Hook_Slip_000",
+  "speaker": "ward",
+  "tagged_text": "<|emotion:bitterness|>От блятська Зона... <|prosody:pitch_low|>Ех, похуй.",
+  "text": "От блятська Зона... Ех, похуй."
+ },
+ "ward_uk/26_WolfArmorFetch_Cover_Meeting_FishPass_000.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_FishPass_000",
+  "speaker": "ward",
+  "tagged_text": "<|prosody:expressive_low|>Наш. А тобі навіщо?",
+  "text": "Наш. А тобі навіщо?"
+ }
+}

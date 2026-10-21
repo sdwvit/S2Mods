@@ -1,11 +1,15 @@
+import type { Struct } from "s2cfgtojson";
 import { dialogTopic, phraseSID, type TemplateByLanguage } from "../../src/localization/text.mts";
 import { T } from "./dialogText.mts";
 import { D } from "./deciderText.mts";
 
 export const MOD = "WolfArmorFetch";
 export const WOLF_CHARACTER = "volk_1";
-/** The player's lines; the editor leaves a phrase's speaker as `None` until one is picked. */
-const PLAYER_CHARACTER = "None";
+/**
+ * The player's lines: vanilla's `sid_character_PC`. With `None` (the editor's default until a speaker is
+ * picked) the editor drops the phrases from the chain's `_Voiceover` runtime data on load.
+ */
+const PLAYER_CHARACTER = "PC";
 
 export const FALCON_ITEM = "HeavyBattle_Spark_Armor";
 /** In-game hours between the Decider hand-in and Wolf offering the Falcon job. */
@@ -14,31 +18,58 @@ export const DECIDER_ITEM = "Gun_Decider_AR";
 /** Wolf's "I'll pay you well", paid with his "this is for you". */
 export const DECIDER_REWARD = 10000;
 
-/** A spoken line; `money` pays the player that many coupons as it plays. */
-type Line = { by: "wolf" | "player"; text: TemplateByLanguage; money?: number };
+/**
+ * A spoken line; `money` pays the player that many coupons as it plays, `actions` are more
+ * `DialogActions` it runs (see `./conditions.mts`). `by: "npc"` is the topic's NPC.
+ */
+export type Line = { by: "npc" | "player"; text: TemplateByLanguage; money?: number; actions?: Struct[] };
 /** A reply picker: the player chooses one of `choices`. */
 export type Picker = { name: string; choices: Label[] };
 /**
+ * A branch the player never sees: vanilla's dialog `If` node (RSQ05_Dialog_Sich_C11_Finish_If_1). The
+ * dialog goes on to `then` when all of `when` hold, else to `else`. Vanilla branches on global
+ * variables this way, never through reply conditions.
+ */
+export type Branch = { name: string; when: Struct[]; then: Next; else: Next };
+/** Where a label goes after its lines. */
+export type Next = Picker | Label | Branch;
+/**
  * A label: a reply option and the lines spoken after it, in order. Then the dialog goes on to `next`:
  * a picker, another label's lines (a branch rejoining shared lines), or nowhere, which ends it.
- * `needsItem` hides the option unless the player carries that item. An `info` option is a side question:
- * drawn white, and gone once asked.
+ * `needsItem` hides the option unless the player carries that item, and `conditions` (all of them) hide
+ * it unless they hold. An `info` option is a side question: drawn white, and gone once asked.
  */
 export type Label = {
   name: string;
   option: TemplateByLanguage;
   lines: Line[];
   needsItem?: string;
+  conditions?: Struct[];
   info?: boolean;
-  next?: Picker | Label;
+  next?: Next;
+  /** Close the dialog after the last line (`Terminate = true`), as vanilla's attack lines do (SQ92_Dialog_AfterFight). */
+  terminate?: boolean;
 };
-/** A topic: Wolf's opening label, and whatever it leads to. */
-export type Topic = { name: string; title: TemplateByLanguage; opening: Label };
+/**
+ * A topic: the NPC's opening label, and whatever it leads to. `character` is the NPC's dialog member
+ * name (`sid_character_<name>`), Wolf's unless set.
+ */
+export type Topic = {
+  name: string;
+  title: TemplateByLanguage;
+  opening: Label;
+  character?: string;
+  /** Said aloud with no dialog window and no player, as vanilla's `*_Comment_*` chains (SQ18). */
+  comment?: boolean;
+};
 
-const wolf = (text: TemplateByLanguage, money?: number): Line => ({ by: "wolf", text, ...(money ? { money } : {}) });
-const player = (text: TemplateByLanguage): Line => ({ by: "player", text });
+/** A line spoken by the topic's NPC. */
+export const npc = (text: TemplateByLanguage, extra: Partial<Line> = {}): Line => ({ by: "npc", text, ...extra });
+export const player = (text: TemplateByLanguage, extra: Partial<Line> = {}): Line => ({ by: "player", text, ...extra });
+const wolf = (text: TemplateByLanguage, money?: number): Line => npc(text, money ? { money } : {});
 
-export const isPicker = (next: Picker | Label): next is Picker => "choices" in next;
+export const isPicker = (next: Next): next is Picker => "choices" in next;
+export const isBranch = (next: Next): next is Branch => "when" in next;
 
 // Falcon: the second job.
 
@@ -215,6 +246,7 @@ export const DECIDER_TURNIN: Topic = {
   },
 };
 
+/** Wolf's first two jobs; `./topics.mts` adds the third's. */
 export const TOPICS = [DECIDER_ACCEPT, DECIDER_TURNIN, ACCEPT, TURNIN];
 
 /** The dialog chain SID, which is also the dialog asset's topic SID. */
@@ -223,41 +255,54 @@ export const chainSID = (topic: Topic) => `${MOD}_${topic.name}`;
 export const lineSID = (topic: Topic, label: Label, index: number) => phraseSID(MOD, topic.name, label.name, index);
 /** A label's last line - the dialog ending quest nodes listen for. */
 export const lastLineSID = (topic: Topic, label: Label) => lineSID(topic, label, label.lines.length - 1);
-export const pickerSID = (topic: Topic, picker: Picker) => `${chainSID(topic)}_${picker.name}`;
-/** Where the dialog goes after `label`'s last line: a picker, a label's first line, or "" (the end). */
-export const nextSID = (topic: Topic, label: Label) =>
-  !label.next ? "" : isPicker(label.next) ? pickerSID(topic, label.next) : lineSID(topic, label.next, 0);
+export const pickerSID = (topic: Topic, picker: Picker | Branch) => `${chainSID(topic)}_${picker.name}`;
+/** The SID the dialog goes to for `next`: a picker's or branch's node, or a label's first line. */
+export const nextNodeSID = (topic: Topic, next: Next) =>
+  isPicker(next) || isBranch(next) ? pickerSID(topic, next) : lineSID(topic, next, 0);
+/** Where the dialog goes after `label`'s last line: a picker, a branch, a label's first line, or "" (the end). */
+export const nextSID = (topic: Topic, label: Label) => (label.next ? nextNodeSID(topic, label.next) : "");
 
-/** Every label and picker of a topic, each once, in the order the dialog reaches them. */
+/** Every label, picker and branch of a topic, each once, in the order the dialog reaches them. */
 export function walk(topic: Topic) {
   const labels: Label[] = [];
   const pickers: Picker[] = [];
-  const visit = (label: Label) => {
-    if (labels.includes(label)) return;
-    labels.push(label);
-    if (!label.next) return;
-    if (!isPicker(label.next)) return visit(label.next);
-    if (pickers.includes(label.next)) return;
-    pickers.push(label.next);
-    label.next.choices.forEach(visit);
+  const branches: Branch[] = [];
+  const visit = (next: Next) => {
+    if (isBranch(next)) {
+      if (branches.includes(next)) return;
+      branches.push(next);
+      visit(next.then);
+      visit(next.else);
+    } else if (isPicker(next)) {
+      if (pickers.includes(next)) return;
+      pickers.push(next);
+      next.choices.forEach(visit);
+    } else {
+      if (labels.includes(next)) return;
+      labels.push(next);
+      if (next.next) visit(next.next);
+    }
   };
   visit(topic.opening);
-  return { labels, pickers };
+  return { labels, pickers, branches };
 }
 
+/** The topic's NPC: its dialog member name. */
+export const characterOf = (topic: Topic) => topic.character ?? WOLF_CHARACTER;
+
 /** Every topic as the dialog asset holds it. */
-export const dialogTopics = () =>
-  TOPICS.map((topic) =>
+export const dialogTopics = (topics: Topic[]) =>
+  topics.map((topic) =>
     dialogTopic(
       MOD,
       topic.name,
       topic.title,
-      [WOLF_CHARACTER],
+      [characterOf(topic)],
       walk(topic).labels.map((label) => ({
         name: label.name,
         text: label.option,
         phrases: label.lines.map((line) => ({
-          character: line.by === "wolf" ? WOLF_CHARACTER : PLAYER_CHARACTER,
+          character: line.by === "npc" ? characterOf(topic) : PLAYER_CHARACTER,
           text: line.text,
         })),
       })),

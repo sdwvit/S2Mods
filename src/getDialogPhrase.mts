@@ -12,6 +12,7 @@ export function getDialogPhrase(
   memberIndex: number,
   nextOptions: { sid: string; terminate: boolean }[],
   textToolPhraseSID = SID,
+  akEvent?: { name: string; subPath: string },
 ) {
   const animations = new Struct();
   animations.addNode(new Struct({ EmotionalState: "EEmotionalFaceMasks::None", LookAtTarget: -1, DialogAnimations: "" }));
@@ -28,8 +29,9 @@ export function getDialogPhrase(
     DialogMemberIndex: memberIndex,
     Unskippable: false,
     DialogMembersAnimations: animations,
-    AKEventName: "",
-    AKEventSubPath: "",
+    // Vanilla phrases either name their event here (`AKEventSubPath` is relative to
+    // `/Game/_STALKER2/Audio/WwiseAudio/Events/Voiceover/`) or leave both fields out; none writes them empty.
+    ...(akEvent ? { AKEventName: akEvent.name, AKEventSubPath: akEvent.subPath } : {}),
     NextDialogOptions,
     HasVOInSequence: false,
     VisibleOnFailedCondition: true,

@@ -165,39 +165,39 @@ export const D = {
   },
   story1: {
     English:
-      "Thought I'd never pick up his trail again. Then the other day I took a client to the Slag Heap. While he was busy with his business, Huron and I had a drink. Well, one word led to another…",
+      "Thought I'd never pick up his trail again. Then the other day I took a client to the Slag Heap. While he was busy with his business, Huron and I had a drink.",
     Ukrainian:
       "Думав, уже ніколи на його слід не натраплю. А тут днями водив одного клієнта на Терикон. Поки той свої справи вирішував, ми з Гуроном по чарці пропустили. Ну, слово за слово…",
     German:
-      "Dachte, ich stoß nie wieder auf seine Spur. Und neulich hab ich einen Kunden zum Schlackeberg geführt. Während der seine Geschäfte erledigt hat, haben Huron und ich einen gekippt. Na ja, ein Wort gab das andere…",
+      "Dachte, ich stoß nie wieder auf seine Spur. Und neulich hab ich einen Kunden zum Schlackeberg geführt. Während der seine Geschäfte erledigt hat, haben Huron und ich einen gekippt.",
     French:
-      "Je pensais ne plus jamais retomber sur sa piste. Et l'autre jour, j'ai guidé un client jusqu'au Terril. Pendant qu'il réglait ses affaires, Huron et moi, on a bu un verre. Bon, de fil en aiguille…",
+      "Je pensais ne plus jamais retomber sur sa piste. Et l'autre jour, j'ai guidé un client jusqu'au Terril. Pendant qu'il réglait ses affaires, Huron et moi, on a bu un verre.",
     SpanishEuropean:
-      "Pensé que nunca volvería a dar con su rastro. Y el otro día guie a un cliente a la Escombrera. Mientras él resolvía sus asuntos, Huron y yo nos tomamos una copa. Bueno, una cosa llevó a la otra…",
+      "Pensé que nunca volvería a dar con su rastro. Y el otro día guie a un cliente a la Escombrera. Mientras él resolvía sus asuntos, Huron y yo nos tomamos una copa.",
     Italian:
-      "Pensavo che non avrei più trovato le sue tracce. E l'altro giorno ho accompagnato un cliente alla Collina di Scorie. Mentre lui sbrigava i suoi affari, io e Huron ci siamo fatti un bicchiere. Be', una parola tira l'altra…",
+      "Pensavo che non avrei più trovato le sue tracce. E l'altro giorno ho accompagnato un cliente alla Collina di Scorie. Mentre lui sbrigava i suoi affari, io e Huron ci siamo fatti un bicchiere.",
     Polish:
-      "Myślałem, że już nigdy nie trafię na jego ślad. A tu niedawno prowadziłem klienta na Hałdę. Kiedy on załatwiał swoje sprawy, wypiliśmy z Huronem po kieliszku. No i od słowa do słowa…",
+      "Myślałem, że już nigdy nie trafię na jego ślad. A tu niedawno prowadziłem klienta na Hałdę. Kiedy on załatwiał swoje sprawy, wypiliśmy z Huronem po kieliszku.",
     Czech:
-      "Myslel jsem, že už nikdy nenarazím na jeho stopu. A nedávno jsem vedl jednoho klienta na Smetiště. Zatímco on vyřizoval svoje záležitosti, dali jsme si s Huronem po panáku. No, slovo dalo slovo…",
+      "Myslel jsem, že už nikdy nenarazím na jeho stopu. A nedávno jsem vedl jednoho klienta na Smetiště. Zatímco on vyřizoval svoje záležitosti, dali jsme si s Huronem po panáku.",
     Turkish:
-      "İzine bir daha asla rastlamam sanıyordum. Geçenlerde bir müşteriyi Atık Tepesi'ne götürdüm. O işlerini hallederken Huron'la birer kadeh attık. Eh, laf lafı açtı…",
+      "İzine bir daha asla rastlamam sanıyordum. Geçenlerde bir müşteriyi Atık Tepesi'ne götürdüm. O işlerini hallederken Huron'la birer kadeh attık.",
     Serbian:
-      "Мислио сам да му више никад нећу ући у траг. А пре неки дан сам водио једног клијента на Брдо шљаке. Док је он завршавао своје послове, Гурон и ја смо попили по једну. Е, па, реч по реч…",
+      "Мислио сам да му више никад нећу ући у траг. А пре неки дан сам водио једног клијента на Брдо шљаке. Док је он завршавао своје послове, Гурон и ја смо попили по једну.",
     PortugalBrazilian:
-      "Achei que nunca mais ia achar o rastro dele. Aí outro dia levei um cliente até a Pilha de Dejetos. Enquanto ele resolvia os negócios dele, eu e o Huron tomamos uma. Bom, uma conversa puxou a outra…",
+      "Achei que nunca mais ia achar o rastro dele. Aí outro dia levei um cliente até a Pilha de Dejetos. Enquanto ele resolvia os negócios dele, eu e o Huron tomamos uma.",
     SpanishLatinoAmerican:
-      "Pensé que nunca volvería a dar con su rastro. Y el otro día guie a un cliente a la Escombrera. Mientras él resolvía sus asuntos, Huron y yo nos tomamos un trago. Bueno, una cosa llevó a la otra…",
+      "Pensé que nunca volvería a dar con su rastro. Y el otro día guie a un cliente a la Escombrera. Mientras él resolvía sus asuntos, Huron y yo nos tomamos un trago.",
     Arabic:
-      "ظننت أنني لن أقع على أثره أبداً. ثم قبل أيام قُدت زبوناً إلى كومة النفايات. وبينما كان ينهي أشغاله، شربت أنا وهيرون كأساً. وهكذا، جرّ الكلام الكلام…",
+      "ظننت أنني لن أقع على أثره أبداً. ثم قبل أيام قُدت زبوناً إلى كومة النفايات. وبينما كان ينهي أشغاله، شربت أنا وهيرون كأساً.",
     ChineseSimplified:
-      "我以为再也找不到他的踪迹了。结果前几天我带一个客人去熔渣堆。他在那儿办自己的事，我就和休伦喝了几杯。嗯，聊着聊着……",
+      "我以为再也找不到他的踪迹了。结果前几天我带一个客人去熔渣堆。他在那儿办自己的事，我就和休伦喝了几杯。",
     ChineseTraditional:
-      "我以為再也找不到他的蹤跡了。結果前幾天我帶一個客人去礦渣場。他在那兒辦自己的事，我就和休倫喝了幾杯。嗯，聊著聊著……",
+      "我以為再也找不到他的蹤跡了。結果前幾天我帶一個客人去礦渣場。他在那兒辦自己的事，我就和休倫喝了幾杯。",
     Japanese:
-      "もう奴の足取りは掴めないと思ってた。ところがこの前、客をボタ山まで案内してな。客が用事を済ませてる間に、ヒューロンと一杯やった。で、話の流れで……",
+      "もう奴の足取りは掴めないと思ってた。ところがこの前、客をボタ山まで案内してな。客が用事を済ませてる間に、ヒューロンと一杯やった。",
     Korean:
-      "다시는 놈의 흔적을 못 찾을 줄 알았지. 그런데 며칠 전에 손님 하나를 폐기물 더미까지 데려갔어. 손님이 볼일 보는 동안 후론이랑 한잔했지. 뭐, 이런저런 얘기를 하다 보니……",
+      "다시는 놈의 흔적을 못 찾을 줄 알았지. 그런데 며칠 전에 손님 하나를 폐기물 더미까지 데려갔어. 손님이 볼일 보는 동안 후론이랑 한잔했지.",
   },
   story2: {
     English:
@@ -232,29 +232,29 @@ export const D = {
     Korean: "어떤 스토커한테 총 살 쿠폰을 빌려줬다더군. 감시단 포라, 녹색 덧판이 달린 거. 다른 거랑 헷갈릴 일이 없지.",
   },
   story3: {
-    English: "That sniper had exactly that one. I remember it well.",
+    English: "The sniper had one just like it. Burned into my memory.",
     Ukrainian: "А в того снайпера якраз така була. Я її добре запам'ятав.",
-    German: "Genau so eine hatte dieser Scharfschütze. Die hab ich mir gut gemerkt.",
-    French: "Ce sniper en avait justement une comme ça. Je m'en souviens bien.",
-    SpanishEuropean: "Aquel francotirador tenía justo una así. La recuerdo bien.",
-    Italian: "Quel cecchino ne aveva proprio una così. Me la ricordo bene.",
-    Polish: "A ten snajper miał właśnie taką. Dobrze ją zapamiętałem.",
-    Czech: "A ten odstřelovač měl přesně takovou. Dobře jsem si ji zapamatoval.",
-    Turkish: "O keskin nişancıda da tam böyle bir tane vardı. Onu iyi hatırlıyorum.",
-    Serbian: "А тај снајпериста је имао баш такву. Добро сам је запамтио.",
-    PortugalBrazilian: "Aquele atirador tinha uma igualzinha. Eu lembro bem dela.",
-    SpanishLatinoAmerican: "Ese francotirador tenía justo una así. La recuerdo bien.",
-    Arabic: "وذلك القناص كان يحمل واحدة مثلها تماماً. أتذكرها جيداً.",
-    ChineseSimplified: "那个狙击手用的正是这么一把。我记得清清楚楚。",
-    ChineseTraditional: "那個狙擊手用的正是這麼一把。我記得清清楚楚。",
-    Japanese: "あのスナイパーが持ってたのが、まさにそれだ。よく覚えてる。",
-    Korean: "그 저격수가 딱 그런 걸 들고 있었어. 똑똑히 기억해.",
+    German: "Der Scharfschütze hatte genau so eine. Hat sich mir eingebrannt.",
+    French: "Le sniper en avait une exactement pareille. Gravée dans ma mémoire.",
+    SpanishEuropean: "El francotirador tenía una igualita. La tengo grabada en la memoria.",
+    Italian: "Il cecchino ne aveva una identica. Ce l'ho stampata in testa.",
+    Polish: "Snajper miał dokładnie taką. Wryła mi się w pamięć.",
+    Czech: "Ten odstřelovač měl úplně stejnou. Vryla se mi do paměti.",
+    Turkish: "O keskin nişancıda tıpkı bunun gibi bir tane vardı. Hafızama kazındı.",
+    Serbian: "Снајпериста је имао баш такву. Урезала ми се у памћење.",
+    PortugalBrazilian: "O atirador tinha uma igualzinha. Ficou gravada na minha memória.",
+    SpanishLatinoAmerican: "El francotirador tenía una igualita. La tengo grabada en la memoria.",
+    Arabic: "كان مع القناص واحدة مثلها تماماً. محفورة في ذاكرتي.",
+    ChineseSimplified: "那个狙击手就有一把一模一样的。我到现在都忘不了。",
+    ChineseTraditional: "那個狙擊手就有一把一模一樣的。我到現在都忘不了。",
+    Japanese: "あのスナイパーも、まさに同じのを持ってた。目に焼き付いてる。",
+    Korean: "그 저격수가 똑같은 걸 갖고 있었어. 머릿속에 박혀 있지.",
   },
   story4: {
     English:
       "I made a deal with Huron: if I get that Fora, I'll cover the stalker's debt myself. Threw in a bit extra, too, so he'd tell me where to look for the debtor.",
     Ukrainian:
-      "Домовився з Гуроном: якщо дістану ту «Фору», борг сталкера закрию сам. Ще й докинув трохи, щоб сказав, де боржника шукати.",
+      "З Гуроном ми так вирішили: дістану ту «Фору» і борг сталкера я закрию сам. Ще й додав зверху щоб він назвав де сидить боржник.",
     German:
       "Ich hab mit Huron 'nen Deal gemacht: Wenn ich die Fora kriege, begleich ich die Schulden von dem Stalker selbst. Hab noch was draufgelegt, damit er mir sagt, wo ich den Schuldner suchen soll.",
     French:
@@ -303,7 +303,7 @@ export const D = {
   },
   whatFor: {
     English: "What's that rifle to you? Think it'll lead you to the sniper?",
-    Ukrainian: "І що тобі з тієї гвинтівки? Думаєш, снайпера знайдеш?",
+    Ukrainian: "І що тобі з тієї гвинтівки? Думаєш, знайдеш снайпера?",
     German: "Und was willst du mit dem Gewehr? Glaubst du, so findest du den Scharfschützen?",
     French: "Et qu'est-ce que tu veux faire de ce fusil ? Tu crois que tu retrouveras le sniper ?",
     SpanishEuropean: "¿Y de qué te sirve ese fusil? ¿Crees que darás con el francotirador?",
@@ -398,7 +398,7 @@ export const D = {
   },
   whereWolf1: {
     English: "Huron says he's hanging around somewhere near the Cement Factory. Hiding from his thugs, most likely.",
-    Ukrainian: "Гурон каже, десь біля Цементного ошивається. Від його братків ховається, мабуть.",
+    Ukrainian: "Гурон каже, що той біля Цементного ошивається. Від братків ховається, мабуть.",
     German: "Huron sagt, er treibt sich irgendwo bei der Zementfabrik rum. Versteckt sich wohl vor seinen Schlägern.",
     French: "Huron dit qu'il traîne quelque part près de l'Usine de ciment. Il se cache sûrement de ses gros bras.",
     SpanishEuropean: "Huron dice que anda por algún sitio cerca de la Fábrica de cemento. Seguramente se esconde de sus matones.",
@@ -627,7 +627,7 @@ export const D = {
   },
   giveWolf1: {
     English: "The Decider, huh… Give it here.",
-    Ukrainian: "«Рішала», значить… Ану сюди.",
+    Ukrainian: "«Рішала»?… Давай-но сюди.",
     German: "„Scharfrichter“, also… Gib her.",
     French: "« Le Décisif », hein… Fais voir.",
     SpanishEuropean: "«Resolutivo», ¿eh?… Trae aquí.",

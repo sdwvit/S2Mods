@@ -115,3 +115,5 @@ Audio-driven face animation, fitted on the vanilla speaker's own lines (Wolf's h
    length, writes the predicted keys and saves `AS_FAC_<EN|UA>_<speaker>_<SID>`. It builds the next 10 missing anims
    per run (paste it again for the next chunk): one run over all of them stalled after ~20. Delete an anim to have it
    rebuilt.
+   Run it from the Output Log (Python mode):
+   `exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\Mods\WolfArmorFetch\voice\create_face_anims.py").read())`.
