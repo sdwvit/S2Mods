@@ -227,7 +227,7 @@ Works on existing saves, including ones where the quest window has already close
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Reworked so the quest becomes available after visiting the Slag Heap, also on saves that already missed it.",
+  changenote: "Fixed the mod failing to install from the Steam Workshop.",
   structTransformers: [
     transformGarbageL,
     transformSQ103PNodes,
