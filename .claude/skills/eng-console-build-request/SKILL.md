@@ -31,27 +31,30 @@ support desk. The request needs two public links, so it always comes after the P
 
 ## The form
 
-URL: https://zonekit-support.stalker2.com/hc/en-us/requests/new?ticket_form_id=37899381377297
-The user is already signed in in Chrome; work in a new tab (see the chrome-browser skill).
+URL: https://zonekit-support.stalker2.com/en-US/support/tickets/create (the old
+`/hc/en-us/requests/new?ticket_form_id=...` Zendesk URL is a 404 since 2026-10-21). No sign-in:
+the form asks for Name and Email itself. Work in a new tab (see the chrome-browser skill).
 
 | Field | Value |
 |---|---|
-| Issue category | `New mod / Mod update` (preselected by `ticket_form_id`) |
-| How would you like us to address you? | `sdwvit` |
-| Subject | `XBOX Mod Cooking Request` |
-| Description | `Requesting Xbox cooking for the mod "<ModName>" by sdwvit. The zip is linked in the Google Drive field. Thanks!` |
-| URL to Google Drive with a mod | the Drive link from `zip-for-xbox` |
+| Category dropdown (top) | `New mod / Mod update` (pick it first; the mod fields appear after) |
+| Name* | `sdwvit` |
+| Email* | ask the user (kept out of this public repo) |
+| Subject* | `XBOX Mod Cooking Request` |
+| Description* | `Requesting Xbox cooking for the mod "<ModName>" by sdwvit. The zip is linked in the Google Drive field. Thanks!` |
+| Your Name (How would you like us to address you?) | `sdwvit` |
+| URL to Google Drive with a mod* | the Drive link from `zip-for-xbox` |
 | URL to mod's page on mod.io | `https://mod.io/g/stalker2/m/<slug>#description` |
 | Malicious files or inappropriate content check* | checked |
-| Reference confirmation* (no references to missing assets) | checked |
+| Reference confirmation* | now a text field: `Confirmed: the mod has no references to missing assets.` |
 | Attachments | none |
 
-The description is a rich-text editor: `form_input` does not stick, and clicking it by `ref`
-can leave focus in Subject, so the typed text lands there (seen 2026-10-07). Scroll it into view,
-take a screenshot, click inside the editor box by coordinates, then type. Verify Subject and
-Description with a screenshot before asking to submit.
-Fields below the fold (mod.io URL, both checkboxes, Submit) do not show in a top-level
-`read_page`; locate them with `find`.
+The plain inputs take `form_input` (find them with `find`). The description is a rich-text
+editor: `form_input` does not stick, so scroll it into view, click inside the editor box by
+coordinates, then type. Click the checkbox by coordinates after scrolling, and zoom to confirm it
+is ticked. Verify everything with screenshots before submitting.
+Submitting shows only "Thank you for contacting us." with no request number; the confirmation
+goes to the email.
 
 The two checkboxes are attestations. Tick them only when the user asked for the request to be
 sent; if the mod's last cook logged missing-asset warnings, raise that before ticking
@@ -60,9 +63,8 @@ sent; if the mod's last cook logged missing-asset warnings, raise that before ti
 ## Submitting
 
 Submitting files a ticket with a third party. Fill the form, take a screenshot, show the user the
-filled values and get an explicit yes before clicking **Submit**. After submitting, report the
-new request number/URL (`/hc/en-us/requests/<id>`).
+filled values and get an explicit yes before clicking **Submit**. The new site shows no request
+number after submitting; report that it went through and that the confirmation goes by email.
 
-Reference ticket with the expected shape: https://zonekit-support.stalker2.com/hc/en-us/requests/110363
 Support replies on the ticket once the Xbox build is uploaded to mod.io; nothing else is needed
 from our side.

@@ -30,7 +30,6 @@ import { getGdocsArmorData } from "./gdocs-armors.mts";
 import { backfillDef } from "../../src/backfill-def.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { getDropChance, maxDropChance } from "./calculateArmorScore.mts";
-import { transformEffectPrototypes } from "./transformEffectPrototypes.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 const finishedTransformers = new Set<string>();
@@ -53,7 +52,6 @@ export const meta: MetaType = {
   changenote: `Other mods can now detect HeadlessArmors through a HeadlessArmorsInstalled flag effect on the player. It replaces the HeadlessArmorsInstalled global variable.`,
   structTransformers: [
     transformArmorPrototypes,
-    transformEffectPrototypes,
     transformItemGenerators,
     transformMeshPrototypes,
     transformSkifItemGeneratorQuestNodes,

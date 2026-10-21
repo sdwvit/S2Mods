@@ -3,11 +3,17 @@ import path from "node:path";
 import * as fs from "node:fs";
 import { pathToFileURL } from "node:url";
 import { logger } from "./logger.mts";
-import { modFolderRaw } from "./base-paths.mts";
+import { modFolderRaw, modName } from "./base-paths.mts";
 import { primarySdkModTarget } from "./mod-meta-paths.mts";
 import { isTransientCookArtifact } from "./mod-kinds.mts";
 import { cpSync } from "node:fs";
 import { writeModWorldSubsystemData } from "./world-subsystem-data.mts";
+import {
+  announcesInstalled,
+  markPluginAsMod,
+  writeAnnounceBlueprint,
+  writeGameFeatureData,
+} from "./announce-installed.mts";
 
 /**
  * Copy the SDK mod folder back over raw/. This MUTATES raw/, so anything that fingerprints raw/
@@ -50,6 +56,17 @@ export async function pullAssets() {
   for (const stale of findTransientCookArtifacts(destinationPath)) {
     logger.log(`Removing stale cook artifact from raw/: ${path.relative(modFolderRaw, stale)}`);
     fs.rmSync(stale, { force: true });
+  }
+
+  // Every mod ships the announce blueprint (see announce-installed.mts), in the SDK too: the cook
+  // reads the SDK mod, and a pull of an SDK mod without it would leave raw/ ahead of the cook.
+  if (announcesInstalled(modName)) {
+    writeAnnounceBlueprint([path.join(destinationPath, "Content"), path.join(sourcePath, "Content")], target.name);
+    writeGameFeatureData([path.join(destinationPath, "Content"), path.join(sourcePath, "Content")], target.name);
+    markPluginAsMod([
+      path.join(destinationPath, `${target.name}.uplugin`),
+      path.join(sourcePath, `${target.name}.uplugin`),
+    ]);
   }
 
   // The Mod Editor generates this list when it packages a mod; the CLI cook never does. Here,
