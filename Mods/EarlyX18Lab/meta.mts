@@ -42,6 +42,7 @@ const VANILLA_TICK = "Garbage_L_OnTickEvent_SQ103Start";
 const VANILLA_CONTAINER = "Garbage_L_Container_SQ103";
 const CLONE_CONTAINER = "Garbage_L_Container_SQ103_P_EarlyX18Lab";
 const CLONE_CONTAINER_PIN = `${CLONE_CONTAINER}_Pin_0`;
+const ON_WORLD_LOAD = "EarlyX18Lab_OnWorldLoad";
 /** Fires when Skif first enters the Slag Heap; vanilla ReputationRestoreQuest checks it the same way. */
 const SLAG_HEAP_ENTERED = "Terricon_Hub_OnTriggerEnterEvent";
 
@@ -118,12 +119,7 @@ function transformGarbageL(struct: QuestNodePrototype) {
 
     // Anchor for the new container and its gate; the vanilla container is not returned.
     case VANILLA_CONTAINER: {
-      const pin = newRootNode(CLONE_CONTAINER_PIN, {
-        Repeatable: true,
-        QuestSID: "Garbage_L",
-        NodeType: "EQuestNodeType::Condition",
-        Launchers: getLaunchers([{ SID: VANILLA_TICK }]),
-        Conditions: {
+      const gate = () => ({
           0: {
             0: {
               ConditionType: "EQuestConditionType::Bridge",
@@ -142,7 +138,21 @@ function transformGarbageL(struct: QuestNodePrototype) {
             },
           },
           ConditionCheckType: "EConditionCheckType::And",
-        },
+      });
+      const pin = newRootNode(CLONE_CONTAINER_PIN, {
+        Repeatable: true,
+        QuestSID: "Garbage_L",
+        NodeType: "EQuestNodeType::Condition",
+        Launchers: getLaunchers([{ SID: VANILLA_TICK }]),
+        Conditions: gate(),
+      });
+      // The same gate, checked on every world load (gameStartCommand), in case the tick never
+      // launches the container: players report no radio call on very late saves.
+      const onWorldLoad = newRootNode(ON_WORLD_LOAD, {
+        Repeatable: true,
+        QuestSID: "Garbage_L",
+        NodeType: "EQuestNodeType::If",
+        Conditions: gate(),
       });
 
       const container = newRootNode(CLONE_CONTAINER, {
@@ -151,11 +161,14 @@ function transformGarbageL(struct: QuestNodePrototype) {
         NodeType: "EQuestNodeType::Container",
         OutputPinNames: { 0: cloneSID("SQ103_P_End") },
         // Same shape as the vanilla container's launcher: the tick, ANDed with its pin.
-        Launchers: getLaunchers([[{ SID: VANILLA_TICK, Name: "" }, { SID: CLONE_CONTAINER_PIN }]]),
+        Launchers: getLaunchers([
+          [{ SID: VANILLA_TICK, Name: "" }, { SID: CLONE_CONTAINER_PIN }],
+          { SID: ON_WORLD_LOAD, Name: "True" },
+        ]),
         ContaineredQuestPrototypeSID: CLONE_QUEST,
       });
 
-      return [pin, container];
+      return [pin, onWorldLoad, container];
     }
   }
 }
@@ -233,7 +246,8 @@ XStartQuestNodeBySID SQ103_P_EarlyX18Lab_SetDialog_SQ103_QC_DiodFirstCall
 [h1][/h1]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Fixed the mod failing to install from the Steam Workshop.",
+  changenote: "The quest's start is now also checked every time a save loads, for very late saves where it never triggered.",
+  gameStartCommand: "XStartQuestNodeBySID EarlyX18Lab_OnWorldLoad",
   structTransformers: [
     transformGarbageL,
     transformSQ103PNodes,
