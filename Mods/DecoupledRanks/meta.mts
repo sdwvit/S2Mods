@@ -1,6 +1,6 @@
 import type { MetaType } from "../../src/meta-type.mts";
 import { transformKeyItemPrototypes } from "./transformKeyItemPrototypes.mts";
-import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
+import { ON_WORLD_LOAD, transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 import { transformQuestRegistration } from "./transformQuestRegistration.mts";
 import { transformItemGeneratorPrototypes } from "../FactionPatches/transformItemGeneratorPrototypes.mts";
 import { transformGlobalVariablePrototypes } from "./transformGlobalVariablePrototypes.mts";
@@ -57,10 +57,9 @@ XP table:[h1][/h1]
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote:
-    "Rank and level items no longer show raw placeholder text (SID_ITEMS_RANK LEVEL_NAME and the like) - they now carry their proper names and descriptions in every language. " +
-    "The quest-only pickups also say what they are worth: a faction patch taken off a body and a part cut from a mutant show \"+N XP\" with a line explaining it counts the moment you pick it up, instead of borrowing the patch's or the vanilla mutant part's name. " +
-    "The patch you actually keep is unchanged - it still carries its faction's name and description.",
+  changenote: "Rank and level items show their proper names in every language, quest-only pickups say how much XP they are worth, and the mod now also works on saves made before it was installed.",
+  // Saves from before the mod never ran rootgraph_Start with it, so its quest never started.
+  gameStartCommand: `XStartQuestNodeBySID ${ON_WORLD_LOAD}`,
   structTransformers: [
     transformQuestNodePrototypes,
     transformQuestRegistration,

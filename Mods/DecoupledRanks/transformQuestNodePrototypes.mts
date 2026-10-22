@@ -118,20 +118,46 @@ function asSuccessConnection(node: QuestNodePrototype) {
   return { SID: node.SID, Name: "" };
 }
 
-function getLaunchQuestNode(struct: QuestNodePrototype) {
+/**
+ * Started on every world load by the announce blueprint (meta.mts `gameStartCommand`). On a save from before
+ * the mod, rootgraph_Start had already run, so the quest was never started: its False pin starts it then.
+ */
+export const ON_WORLD_LOAD = `${modName}_OnWorldLoad`;
+
+function getLaunchQuestNodes(struct: QuestNodePrototype) {
   const launchQuestSID = `${struct.QuestSID}_run_${modName}`;
 
-  return new Struct({
+  const onWorldLoad = new Struct({
+    NodePrototypeVersion: 1,
+    NodeType: "EQuestNodeType::If",
+    QuestSID: struct.QuestSID,
+    SID: ON_WORLD_LOAD,
+    Repeatable: true,
+    Conditions: {
+      0: {
+        0: {
+          ConditionType: "EQuestConditionType::Bridge",
+          ConditionComparance: "EConditionComparance::Equal",
+          LinkedNodePrototypeSID: launchQuestSID,
+          CompletedNodeLauncherNames: { 0: "" },
+        },
+      },
+    },
+    __internal__: { rawName: ON_WORLD_LOAD, isRoot: true },
+  }) as QuestNodePrototype;
+
+  const launchQuest = new Struct({
     ConsoleCommand: `XStartQuestBySID ${modName}`,
     NodeType: "EQuestNodeType::ConsoleCommand",
     QuestSID: struct.QuestSID,
     SID: launchQuestSID,
-    Launchers: getLaunchers([{ SID: "rootgraph_Start" }]),
+    Launchers: getLaunchers([{ SID: "rootgraph_Start" }, { SID: ON_WORLD_LOAD, Name: "False" }]),
     __internal__: {
       rawName: launchQuestSID,
       isRoot: true,
     },
   }) as QuestNodePrototypeConsoleCommand;
+  return [onWorldLoad, launchQuest];
 }
 
 export const transformQuestNodePrototypes: StructTransformer<
@@ -141,7 +167,7 @@ export const transformQuestNodePrototypes: StructTransformer<
 
   if (context.filePath.endsWith("/QuestNodePrototypes/rootgraph.cfg") && !once) {
     once = true;
-    extraStructs.push(getLaunchQuestNode(struct));
+    extraStructs.push(...getLaunchQuestNodes(struct));
     extraStructs.push(...createOnPlayerGetFactionPatchEventListeners());
   }
 
