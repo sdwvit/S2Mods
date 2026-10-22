@@ -7,7 +7,7 @@ import { transformDialogChains } from "./transformDialogChains.mts";
 import { transformDialogPrototypes } from "./transformDialogPrototypes.mts";
 import { transformRewards } from "./transformRewards.mts";
 import { transformRootgraph } from "./transformRootgraph.mts";
-import { transformRookieVillageHub } from "./transformRookieVillageHub.mts";
+import { ON_WORLD_LOAD, transformRookieVillageHub } from "./transformRookieVillageHub.mts";
 import { transformSkadovskHub } from "./transformSkadovskHub.mts";
 import {
   transformCoverGlobalVariables,
@@ -28,7 +28,9 @@ The second follows a day later and builds on what the first one turned up.[h1][/
 The third takes you to Zaton, where you'll have to talk your way through a meeting. How well you're prepared changes your odds.[h1][/h1]
 Works on existing saves. Dialogs and journal text are translated into every language the game supports.[h1][/h1]
 `,
-  changenote: "Voiced dialogs in English and Ukrainian with lip-sync, a few new dialog lines, and a fix for a job reward that could go missing.",
+  changenote: "Voiced dialogs in English and Ukrainian with lip-sync, a few new dialog lines, Wolf's jobs on saves from before the mod was installed, and a fix for a job reward that could go missing.",
+  // Saves where Wolf spawned before the mod was installed never re-run his topic triggers.
+  gameStartCommand: `XStartQuestNodeBySID ${ON_WORLD_LOAD}`,
   structTransformers: [
     transformQuestRegistration,
     transformQuestNodes,

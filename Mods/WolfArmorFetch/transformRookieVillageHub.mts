@@ -49,6 +49,13 @@ const WOLF_TOPIC_TRIGGERS = [
   `${HUB}_Technical_13`,
 ];
 
+/**
+ * Started on every world load by the mod's announce blueprint (`XStartQuestNodeBySID`), for saves where
+ * Wolf was created before the mod was installed: none of the triggers above runs again there. It
+ * re-runs the same re-attach as they do, once Wolf exists.
+ */
+export const ON_WORLD_LOAD = `${Q}_OnWorldLoad`;
+
 const QD = `${Q}_Decider`;
 /** Vanilla's RookieVillage_Hub tick (LaunchOnQuestStart), so it already runs on saves past the hub's start. */
 const COVER_READY_TICK = `${HUB}_OnTickEvent`;
@@ -82,7 +89,17 @@ export const transformRookieVillageHub: StructTransformer<Struct> = () => {
   once = true;
 
   return [
-    If(`${H}_If_FalconAccepted`, WOLF_TOPIC_TRIGGERS.map((SID) => ({ SID })), `${Q}_OnAccepted`),
+    node(ON_WORLD_LOAD, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::If",
+      Repeatable: true,
+      Conditions: hasRun(WOLF_TOPIC_TRIGGERS[0]),
+    }),
+    If(
+      `${H}_If_FalconAccepted`,
+      [...WOLF_TOPIC_TRIGGERS.map((SID) => ({ SID })), { SID: ON_WORLD_LOAD, Name: "True" }],
+      `${Q}_OnAccepted`,
+    ),
     If(`${H}_If_FalconDone`, [{ SID: `${H}_If_FalconAccepted`, Name: "True" }], `${Q}_OnHandedIn`),
     // Falcon not taken: the Decider, or the Falcon offer once the Decider is done and a day has passed.
     If(`${H}_If_DeciderDone`, [{ SID: `${H}_If_FalconAccepted`, Name: "False" }], `${QD}_OnHandedIn`),
