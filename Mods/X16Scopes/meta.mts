@@ -25,14 +25,15 @@ Adds 2 new X16 scopes, and makes X8 and X16 scopes fit these guns:
  [*] Sniper rifles: SVDM-2, Lynx, SVU-MK S-3, Whip, M701 Super, Cavalier
 [/list]
 [hr][/hr]
-Built-in scopes are now regular scopes: guns that came with a fixed scope (M701 Super, Jagerblick, Sharpshooter, SVU-MK S-3, Whip, VS Vintar, Merc, SVDM-2, Lynx, GP37V2, Sotnyk and the red dots on SOFMOD, Partner, Cavalier and Trophy) now spawn with the matching regular scope only 10% of the time, the same way MasterMod handles the Vintar. Copies placed in the world or handed out by quests come without one. The scope can be detached, sold and swapped. The Sotnyk keeps its faster aiming. The M701 Super also takes a red dot. Guns you already own keep their old scope.
+Built-in scopes are now regular scopes: guns that came with a fixed scope (M701 Super, Jagerblick, Sharpshooter, SVU-MK S-3, Whip, VS Vintar, Merc, SVDM-2, Lynx, GP37V2, Sotnyk and the red dots on SOFMOD, Partner, Cavalier and Trophy) now spawn with the matching regular scope only 10% of the time. Copies placed in the world or handed out by quests come without one. The scope can be detached, sold and swapped. The Sotnyk keeps its faster aiming. The M701 Super also takes a red dot. Guns you already own keep their old scope.
 [hr][/hr]
 You can buy the X16 scopes from T4 attachment traders like the one on Yaniv.
 [hr][/hr]
 To get both X16 scopes, both X8 scopes, the underbarrel launchers and a curated list of 33 assault rifles, DMRs and sniper rifles in Skif's inventory, use the console command:
-[u]XStartQuestNodeBySID Skif_X16Scopes[/u]
+[code]XStartQuestNodeBySID Skif_X16Scopes[/code]
 [hr][/hr]
-With attach animations. Some are placeholders, and the inventory icons of the newly supported guns are placeholders too.
+With attach animations (some are placeholders) and inventory icons for every supported gun.
+[hr][/hr]
 bPatches AttachPrototypes, MeshPrototypes, EffectPrototypes, WeaponPrototypes, WeaponGeneralSetupPrototypes, DynamicItemGenerator, QuestItemGeneratorPrototypes, ItemGeneratorPrototypes and QuestNodePrototypes.
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
