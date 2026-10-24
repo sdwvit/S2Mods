@@ -3,6 +3,7 @@ import { Struct } from "s2cfgtojson";
 import { modName } from "../../src/base-paths.mts";
 import { writeUberTozLocalization } from "./writeLocalization.mts";
 import { slugEffects, slugUpgrades } from "./slugUpgrades.mts";
+import { forkThreeLineScope, forkThreeLineSetupWithVisibleScope, THREE_LINE_SCOPE_SID } from "./threeLineScope.mts";
 import type {
   AttachPrototype,
   ItemGeneratorPrototype,
@@ -40,7 +41,7 @@ bPatches WeaponGeneralSetupPrototypes, UpgradePrototypes, AttachPrototypes, NPCP
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: `Ported to 2.0. Scopes and the top rail work again, with attach animations, icons, and names and descriptions in all languages. New slug sniper upgrades: Extended Slug Barrels, Rifled Barrel Liners and Polished Action. Added console command XStartQuestNodeBySID Skif_UberToz to get a scoped TOZ-34 and all three scopes.`,
+  changenote: `The PU 3.5X scope gets a real-world description.`,
   structTransformers: [structTransformer, transformEffectPrototypes, transformItemGeneratorPrototypes, transformQuestNodePrototypes],
 };
 
@@ -157,22 +158,18 @@ function structTransformer(
       return fork;
     }
     if (structT.SID === "GunThreeLine_SP_GS") {
-      const fork = structT.fork();
-      fork.PreinstalledAttachmentsItemPrototypeSIDs = structT.PreinstalledAttachmentsItemPrototypeSIDs.fork(true);
-      fork.PreinstalledAttachmentsItemPrototypeSIDs["0"].bHiddenInInventory = false;
-      return fork;
+      return forkThreeLineSetupWithVisibleScope(structT);
     }
   }
   if (context.filePath.endsWith("/AttachPrototypes.cfg")) {
     const structT = struct as AttachPrototype;
-    const fork = structT.fork();
-    if (struct.SID === "GunThreeLine_Scope") {
+    if (struct.SID === THREE_LINE_SCOPE_SID) {
       writeUberTozLocalization();
-      fork.Icon = `Texture2D'/${modName}/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/threeline_scope_icon.threeline_scope_icon'`;
-      fork.Cost = 9500.0;
-      fork.Weight = 0.6;
+      const icon = `Texture2D'/${modName}/_STALKER2/SkeletalMeshes/weapons/shg/TOZ34/threeline_scope_icon.threeline_scope_icon'`;
+      return forkThreeLineScope(structT, icon, ["GunTOZ_SG"]);
     }
     if (fittingAttachments.has(struct.SID)) {
+      const fork = structT.fork();
       fork.FittingWeaponsSIDs = structT.FittingWeaponsSIDs.fork();
       fork.FittingWeaponsSIDs.addNode("GunTOZ_SG", "GunTOZ_SG");
       return fork;
@@ -196,7 +193,12 @@ function structTransformer(
   return null;
 }
 
-structTransformer.files = ["/WeaponGeneralSetupPrototypes.cfg", "/UpgradePrototypes.cfg", "/AttachPrototypes.cfg", "/NPCPrototypes.cfg"];
+structTransformer.files = [
+  "/WeaponGeneralSetupPrototypes.cfg",
+  "/UpgradePrototypes.cfg",
+  "/AttachPrototypes.cfg",
+  "/NPCPrototypes.cfg",
+];
 
 const SKIF_QUEST_GUID = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 const SKIF_ITEM_GENERATOR_SID = "ItemGen_Skif_UberToz";
@@ -224,8 +226,18 @@ function transformItemGeneratorPrototypes() {
           Chance: 1,
           MinDurability: 1,
           MaxDurability: 1,
-          Upgrades: new Struct({ MinCount: 1, MaxCount: 1, Chance: 1, PossibleItems: tozRailUpgrade.SID }),
-          Attaches: new Struct({ MinCount: 1, MaxCount: 1, Chance: 1, PossibleItems: "TopRailAKU" }),
+          Upgrades: new Struct({
+            MinCount: 1,
+            MaxCount: 1,
+            Chance: 1,
+            PossibleItems: tozRailUpgrade.SID,
+          }),
+          Attaches: new Struct({
+            MinCount: 1,
+            MaxCount: 1,
+            Chance: 1,
+            PossibleItems: "TopRailAKU",
+          }),
         }),
       }),
     }),

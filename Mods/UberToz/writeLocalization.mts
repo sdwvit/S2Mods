@@ -1,77 +1,21 @@
 /**
- * Regenerates `raw/Stalker2/Content/UberToz-localization.uasset`: the item name and description of
- * the Three-Line Rifle scope, which this mod turns into a standalone attachment (vanilla ships no
- * text for it, because it was always hidden inside the rifle), and the names and descriptions of
+ * Regenerates `raw/Stalker2/Content/UberToz-localization.uasset`: the PU scope's name and description
+ * (shared with ScopedDrahunka, see threeLineScope.mts), and the names and descriptions of
  * the slug sniper upgrades in slugUpgrades.mts. The stat lines under an upgrade come from the
  * effects' vanilla `LocalizationSID`s and need no text here.
  *
- * The names follow each language's own vanilla PSO 4X name ("4Х" with a Cyrillic Х, "X4" in Spanish,
- * "4KY" in Turkish...), and the Three-Line Rifle and TOZ-34 are spelled the way vanilla spells them.
  * The Russian slot is served Ukrainian text by `src/localization/text.mts`.
  *
  * Not runnable on its own: the only entry point is `writeUberTozLocalization()`, called from the
  * mod's struct transformer, so the asset is only rewritten by `prepare-configs`.
  */
 import {
-  itemLocalization,
   localized,
   writeModLocalization,
   type TemplateByLanguage,
 } from "../../src/localization/text.mts";
 import { POLISHED_ACTION_SID, RIFLED_LINER_SID, SLUG_BARREL_SID } from "./slugUpgrades.mts";
-
-const THREE_LINE_SCOPE_TEXT: { name: TemplateByLanguage; description: TemplateByLanguage } = {
-  name: {
-    English: "PU 3.5X Scope",
-    Ukrainian: "Приціл ПУ 3,5Х",
-    German: "PU-3,5X-Zielfernrohr",
-    French: "Lunette PU 3,5X",
-    SpanishEuropean: "Visor PU X3,5",
-    Italian: "Mirino PU 3,5X",
-    Polish: "Luneta PU 3,5X",
-    Czech: "Optika PU 3,5X",
-    Turkish: "PU 3,5KY Dürbün",
-    Serbian: "ПУ нишан (3,5x)",
-    PortugalBrazilian: "Luneta PU 3,5X",
-    SpanishLatinoAmerican: "Mira telescópica PU 3.5X",
-    Arabic: "منظار PU 3.5X",
-    ChineseSimplified: "PU 3.5 倍瞄准镜",
-    ChineseTraditional: "PU 3.5倍瞄準鏡",
-    Japanese: "PU 3.5Xスコープ",
-    Korean: "PU 3.5X 조준경",
-  },
-  description: {
-    English: "A 3.5x Soviet sniper scope taken off a Three-Line Rifle. Its side mount fits both the Three-Line Rifle and the TOZ-34.",
-    Ukrainian:
-      "Радянський снайперський приціл зі збільшенням 3,5х, знятий із трилінійки. Його бічне кріплення підходить і до трилінійки, і до ТОЗ-34.",
-    German:
-      "Ein sowjetisches Scharfschützenzielfernrohr mit 3,5-facher Vergrößerung, abgenommen von einem Dreiliniengewehr. Die Seitenmontage passt sowohl auf das Dreiliniengewehr als auch auf die TOZ-34.",
-    French:
-      "Lunette de tireur d’élite soviétique de grossissement 3,5x, démontée d’un fusil Trois lignes. Son montage latéral s’adapte au fusil Trois lignes comme au TOZ-34.",
-    SpanishEuropean:
-      "Un visor de francotirador soviético de aumento x3,5, desmontado de un fusil de tres líneas. Su montura lateral encaja tanto en el fusil de tres líneas como en la TOZ-34.",
-    Italian:
-      "Mirino da cecchino sovietico con ingrandimento 3,5x, smontato da un fucile a tre linee. Il suo attacco laterale si adatta sia al fucile a tre linee che al TOZ-34.",
-    Polish:
-      "Radziecka luneta snajperska o zbliżeniu 3,5x, zdjęta z karabinu trzyliniowego. Jej boczny montaż pasuje zarówno do karabinu trzyliniowego, jak i do TOZ-34.",
-    Czech:
-      "Sovětská odstřelovačská optika s 3,5x zvětšením, sejmutá z třířadé pušky. Její boční montáž pasuje na třířadou pušku i na TOZ-34.",
-    Turkish:
-      "Üç Çizikli Tüfek'ten sökülmüş, 3,5 kat yakınlaştırma sağlayan bir Sovyet keskin nişancı dürbünü. Yan bağlantısı hem Üç Çizikli Tüfek'e hem de TOZ-34'e uyar.",
-    Serbian:
-      "Совјетски снајперски нишан са увећањем од 3,5x, скинут са тролинијке. Бочни носач му одговара и тролинијци и ТОЗ-34.",
-    PortugalBrazilian:
-      "Uma luneta de atirador soviética com ampliação de 3,5x, retirada de um Rifle de Três Linhas. Seu suporte lateral encaixa tanto no Rifle de Três Linhas quanto na TOZ-34.",
-    SpanishLatinoAmerican:
-      "Una mira telescópica de francotirador soviética con aumento de 3.5x, retirada de un rifle de tres líneas. Su montura lateral encaja tanto en el rifle de tres líneas como en la TOZ-34.",
-    Arabic:
-      "منظار قنص سوفيتي بتكبير 3.5x، مأخوذ من بندقية ثلاثية الخطوط. تتوافق تركيبته الجانبية مع البندقية ثلاثية الخطوط ومع TOZ-34.",
-    ChineseSimplified: "从莫辛-纳甘上拆下的苏制 3.5 倍狙击瞄准镜。其侧装座既适用于莫辛-纳甘，也适用于 TOZ-34。",
-    ChineseTraditional: "從三線來福槍上拆下的蘇聯3.5倍狙擊瞄準鏡。其側裝座同時適用於三線來福槍與TOZ-34。",
-    Japanese: "スリーラインライフルから取り外した、拡大率3.5倍のソビエト製狙撃スコープ。サイドマウントはスリーラインライフルにもTOZ-34にも対応する。",
-    Korean: "쓰리 라인 라이플에서 떼어 낸 소련제 3.5배율 저격 조준경입니다. 측면 마운트는 쓰리 라인 라이플과 TOZ-34 모두에 맞습니다.",
-  },
-};
+import { threeLineScopeLocalization } from "./threeLineScope.mts";
 
 const UPGRADE_TEXT: Record<string, { name: TemplateByLanguage; description: TemplateByLanguage }> = {
   [SLUG_BARREL_SID]: {
@@ -204,7 +148,7 @@ const upgradeLocalization = (sid: string, text: { name: TemplateByLanguage; desc
 
 export function writeUberTozLocalization() {
   writeModLocalization(import.meta.url, [
-    ...itemLocalization("GunThreeLine_Scope", THREE_LINE_SCOPE_TEXT),
+    ...threeLineScopeLocalization(),
     ...Object.entries(UPGRADE_TEXT).flatMap(([sid, text]) => upgradeLocalization(sid, text)),
   ]);
 }
