@@ -130,6 +130,12 @@ async function ensureCookedTarget(target: SdkModTarget) {
   const label = modClassification.isSplit ? `[${target.kind}: ${target.name}] ` : "";
 
   if (target.kind === "cfgs") {
+    // Repacking takes the SDK lock, so a publisher would queue behind any running cook just to
+    // rewrite containers that are already current.
+    if (stagedExists && existsSync(hashFile) && readFileSync(hashFile, "utf8").trim() === fingerprint) {
+      logger.log(`${label}Staged cfg pack matches raw/, skipping repack.`);
+      return;
+    }
     logger.log(`${label}Nothing cookable - packing the cfgs directly (~10s).`);
     const { repackMod } = await import("./repack.mts");
     await repackMod(target);
