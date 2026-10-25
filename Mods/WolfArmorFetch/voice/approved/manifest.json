@@ -1625,6 +1625,12 @@
   "tagged_text": "Ха! Саме так.",
   "text": "Ха! Саме так."
  },
+ "ward_uk/20_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001.wav": {
+  "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Right_001",
+  "speaker": "ward",
+  "tagged_text": "Правильно.",
+  "text": "Правильно."
+ },
  "ward_uk/21_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_Slip_000.wav": {
   "sid": "WolfArmorFetch_Cover_Meeting_Quiz1_Wrong2_Slip_000",
   "speaker": "ward",

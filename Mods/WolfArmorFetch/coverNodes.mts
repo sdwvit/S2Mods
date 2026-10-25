@@ -326,15 +326,30 @@ export function coverNodes() {
       JournalQuestDescriptionIndex: 0,
       SetQuestActive: false,
     }),
-    spawn(`${QC}_SpawnHook`, [{ SID: `${QC}_OnAccepted` }], GUID.hook),
+    // Debug: `XStartQuestNodeBySID WolfArmorFetch_Cover_DebugHook` turns god mode on, teleports Skif 12 m north of Vasyan, spawns
+    // him, his lads and the body, then plays his comment and his line to Skif, as if walked in.
+    technical(`${QC}_DebugHook`, []),
+    node(`${QC}_DebugHookTeleport`, {
+      NodeType: "EQuestNodeType::ConsoleCommand",
+      ConsoleCommand: `XTeleportTo ${POS.hook.x} ${POS.hook.y + 1200} ${POS.hook.z + 200}`,
+      Launchers: getLaunchers([{ SID: `${QC}_DebugHook` }]),
+    }),
+    node(`${QC}_DebugHookGodMode`, {
+      NodeType: "EQuestNodeType::ConsoleCommand",
+      ConsoleCommand: "XSetGodMode true",
+      Launchers: getLaunchers([{ SID: `${QC}_DebugHook` }]),
+    }),
+    technical(`${QC}_DebugHookComment`, [{ SID: `${QC}_DebugHook` }], 5),
+    ifNode(`${QC}_DebugIfHookTalk`, [{ SID: `${QC}_HookCommentDone` }], hasRun(`${QC}_DebugHook`)),
+    spawn(`${QC}_SpawnHook`, [{ SID: `${QC}_OnAccepted` }, { SID: `${QC}_DebugHook` }], GUID.hook),
     technical(`${QC}_HookSpawned`, [{ SID: `${QC}_SpawnHook` }], 1),
     aiBehavior(`${QC}_HookStay`, [{ SID: `${QC}_HookSpawned` }], GUID.hook, { stay: POS.hook }, "EWeaponState::NoWeapon", 500),
     // His lads and the stalker they robbed.
     ...CREW.flatMap((guid, i) => [
-      spawn(`${QC}_SpawnCrew${i}`, [{ SID: `${QC}_OnAccepted` }], guid),
+      spawn(`${QC}_SpawnCrew${i}`, [{ SID: `${QC}_OnAccepted` }, { SID: `${QC}_DebugHook` }], guid),
       aiBehavior(`${QC}_CrewStay${i}`, [{ SID: `${QC}_HookSpawned` }], guid, { stay: [POS.crew1, POS.crew2][i] }, undefined, 500),
     ]),
-    spawn(`${QC}_SpawnCorpse`, [{ SID: `${QC}_OnAccepted` }], GUID.corpse),
+    spawn(`${QC}_SpawnCorpse`, [{ SID: `${QC}_OnAccepted` }, { SID: `${QC}_DebugHook` }], GUID.corpse),
     stage(`${QC}_SetJournal_FindGoBetween`, [{ SID: `${QC}_SetJournal_QuestStart` }], "FindGoBetween", "Start", GUID.hook),
     // His PDA goes in once he is surely online - the player close by, as vanilla EQ13 spawns Filimon
     // and fills his pockets - or onto his body if he is shot from further out.
@@ -349,7 +364,7 @@ export function coverNodes() {
     // At 10 m he is still busy with the stalker his lads robbed: a comment, his back to Skif. Then, once
     // Skif is at 5 m, he turns to him. A timeout stands in if the comment never reports its end.
     tickPin(`${QC}_HookComment_Pin_0`, allOf([nearPoint(POS.hook, 1000), ran(`${QC}_HookSpawned`)])),
-    technical(`${QC}_HookCommentStart`, onTickWhen(`${QC}_HookComment_Pin_0`)),
+    technical(`${QC}_HookCommentStart`, [...onTickWhen(`${QC}_HookComment_Pin_0`), { SID: `${QC}_DebugHookComment` }]),
     setDialog(QC, `${QC}_HookCommentDialog`, [{ SID: `${QC}_HookCommentStart` }], HOOK_COMMENT, [{ label: HOOK_COMMENT.opening, finish: true }], {
       npc: GUID.hook,
     }),
@@ -360,7 +375,7 @@ export function coverNodes() {
     ]),
     technical(`${QC}_HookCommentTimeout`, [{ SID: `${QC}_HookCommentStart` }], 6),
     tickPin(`${QC}_HookTalk_Pin_0`, allOf([nearPoint(POS.hook, 500), ran(`${QC}_HookCommentDone`)])),
-    technical(`${QC}_HookTalk`, onTickWhen(`${QC}_HookTalk_Pin_0`)),
+    technical(`${QC}_HookTalk`, [...onTickWhen(`${QC}_HookTalk_Pin_0`), { SID: `${QC}_DebugIfHookTalk`, Name: "True" }]),
     setDialog(QC, `${QC}_HookDialog`, [{ SID: `${QC}_HookTalk` }], HOOK, [{ label: HOOK.opening, finish: true }], {
       npc: GUID.hook,
       forced: true,

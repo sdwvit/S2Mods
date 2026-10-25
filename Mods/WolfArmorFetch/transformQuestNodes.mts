@@ -207,7 +207,7 @@ export const transformQuestNodes: StructTransformer<Struct> = () => {
 
     ...deciderNodes(),
 
-    // The Falcon job is offered a day after the Decider hand-in (the hub runs its own timer for the
+    // The Falcon job is offered an hour after the Decider hand-in (the hub runs its own timer for the
     // dialog, see transformRookieVillageHub).
     node(`${Q}_FalconOfferTimer`, {
       NodePrototypeVersion: 1,

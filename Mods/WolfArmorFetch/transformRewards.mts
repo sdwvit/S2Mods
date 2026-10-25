@@ -34,14 +34,14 @@ function generator(SID: string, categories: [string, Record<string, unknown>[]][
   return new Struct({ __internal__: { rawName: SID, isRoot: true }, SID, ItemGenerator });
 }
 
-/** A weapon, carried with ammo for it, the way vanilla's quest NPC generators hand them out. */
-const weapon = (item: string, ammo = 150) => ({
+/** A weapon with vanilla's general-NPC ammo (GeneralNPC_Varta_Heavy_ItemGenerator: 0-5), so its owner drops no more. */
+const weapon = (item: string) => ({
   ItemPrototypeSID: item,
   Weight: 1,
   MinDurability: 0.8,
   MaxDurability: 0.95,
-  AmmoMinCount: ammo,
-  AmmoMaxCount: ammo,
+  AmmoMinCount: 0,
+  AmmoMaxCount: 5,
 });
 const one = (item: string) => ({ ItemPrototypeSID: item, Weight: 1 });
 const medicine = () => [{ ItemPrototypeSID: "Bandage", Chance: 1, MinCount: 2, MaxCount: 4 }, { ItemPrototypeSID: "Medkit", Chance: 0.6, MinCount: 1, MaxCount: 1 }];
@@ -100,14 +100,14 @@ export const transformRewards: StructTransformer<Struct> = () => {
     ...DEALER_PROTOTYPES.map(({ SID }) => {
       const [gun, armor, helmet] = DEALER_KITS[SID];
       return generator(dealerGenerator(SID), [
-        ["WeaponPrimary", [weapon(gun, gun === "GunPKP_MG" ? 300 : 180)]],
+        ["WeaponPrimary", [weapon(gun)]],
         ["BodyArmor", [one(armor)]],
         ...(helmet ? [["Head", [one(helmet)]] as [string, Record<string, unknown>[]]] : []),
         ["Consumable", medicine()],
       ]);
     }),
     // The Sultan's lads keep their own looks; this only puts an SMG in their hands.
-    generator(`${QC}_GuardLoadout`, [["WeaponPrimary", [weapon("GunIntegral_PP", 180)]]]),
+    generator(`${QC}_GuardLoadout`, [["WeaponPrimary", [weapon("GunIntegral_PP")]]]),
   ];
 };
 transformRewards.files = ["/ItemGeneratorPrototypes/QuestRewardsPrototypes/SQ87_Reward.cfg"];

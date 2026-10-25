@@ -195,8 +195,8 @@ export const transformCoverObjPrototypes: StructTransformer<Struct> = () => {
   onceObj = true;
   return [
     ...DEALER_PROTOTYPES.map(({ SID }) => root(SID, { ItemGeneratorPrototypeSID: dealerGenerator(SID) }, "GeneralNPC_Varta_Heavy")),
-    // Bagor: a Sultansk stormtrooper wearing his own NPC prototype, for his name.
-    root(BAGOR, { NPCPrototypeSID: BAGOR }, "GeneralNPC_SultanBandit_Stormtrooper"),
+    // Bagor: a Sultansk stormtrooper wearing his own NPC prototype, for his name, and a fixed look, as Sultan's.
+    root(BAGOR, { NPCPrototypeSID: BAGOR, CustomMeshGeneratorPrototypeSID: BAGOR_MESH }, "GeneralNPC_SultanBandit_Stormtrooper"),
   ];
 };
 transformCoverObjPrototypes.files = ["/ObjPrototypes/GeneralNPCObjPrototypes.cfg"];
@@ -239,10 +239,42 @@ let onceNPC = false;
 export const transformCoverNPCPrototypes: StructTransformer<Struct> = () => {
   if (onceNPC) return;
   onceNPC = true;
-  // HumanBase (under GeneralNPC_SultanBandit) sets UseGeneratedName, which gave him a random bandit name over
-  // NameTextKey; vanilla's named NPCs inherit [0], without it. QuestNPC as theirs (1178 of 1180).
+  // Inheriting GeneralNPC_SultanBandit (HumanBase, UseGeneratedName = true) gave him a random bandit name in
+  // game even with UseGeneratedName = false on top. Every vanilla named NPC inherits [0], as Sultan does, so he
+  // does too and carries GeneralNPC_SultanBandit's dialog chains himself. QuestNPC as theirs (1178 of 1180).
   return [
-    root(BAGOR, { NameTextKey: `sid_character_${BAGOR}`, UseGeneratedName: false, QuestNPC: true }, "GeneralNPC_SultanBandit"),
+    root(
+      BAGOR,
+      {
+        HelloDialogChain: "General_bandits_0_HelloTopic",
+        ByeDialogChain: "General_bandits_0_ByeTopic",
+        DefeatCommentDialogChain: "General_bandits_0_DefeatComment_Group",
+        CallPlayerCommentDialogChain: "General_bandits_0_CallPlayer",
+        ResumeCommentDialogChain: "General_bandits_0_ResumeComment",
+        BusyCommentDialogChain: "General_bandits_0_BusyTopic",
+        TradeTopicDialogChain: "General_bandits_0_TradeTopic",
+        NameTextKey: `sid_character_${BAGOR}`,
+        UseGeneratedName: false,
+        QuestNPC: true,
+      },
+      "[0]",
+    ),
   ];
 };
 transformCoverNPCPrototypes.files = ["/NPCPrototypes.cfg"];
+
+/** Bagor's fixed look: SkadovskGuider's bandit outfit (mask and helmet slots empty), with a face of his own. */
+const BAGOR_MESH = `${BAGOR}_MeshGenerator`;
+const BAGOR_FACE = "Fac_30_08_v3";
+
+export const transformCoverMeshGenerators: StructTransformer<Struct> = (struct) => {
+  if (struct.SID !== "SkadovskGuider_MeshGenerator") return;
+  const mesh = struct.clone() as any;
+  mesh.SID = BAGOR_MESH;
+  mesh.__internal__.rawName = BAGOR_MESH;
+  mesh.__internal__.isRoot = true;
+  const face = mesh.Attachments.entries().find(([, slot]: [string, any]) => slot.SlotName === "Face")[1];
+  face.Attaches[0].BodyMeshSID = BAGOR_FACE;
+  return mesh;
+};
+transformCoverMeshGenerators.files = ["/MeshGeneratorPrototypes/QuestMeshGeneratorPrototypes.cfg"];

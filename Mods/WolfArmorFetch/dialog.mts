@@ -13,7 +13,7 @@ const PLAYER_CHARACTER = "PC";
 
 export const FALCON_ITEM = "HeavyBattle_Spark_Armor";
 /** In-game hours between the Decider hand-in and Wolf offering the Falcon job. */
-export const FALCON_OFFER_DELAY_HOURS = 24;
+export const FALCON_OFFER_DELAY_HOURS = 1;
 export const DECIDER_ITEM = "Gun_Decider_AR";
 /** Wolf's "I'll pay you well", paid with his "this is for you". */
 export const DECIDER_REWARD = 10000;
@@ -59,6 +59,11 @@ export type Topic = {
   title: TemplateByLanguage;
   opening: Label;
   character?: string;
+  /**
+   * The speaker the editor's text asset records for the NPC's lines, when `character` is a dialog member of the
+   * mod's own: the editor drops the voice of a speaker missing from its character database at cook.
+   */
+  textToolCharacter?: string;
   /** Said aloud with no dialog window and no player, as vanilla's `*_Comment_*` chains (SQ18). */
   comment?: boolean;
 };
@@ -297,12 +302,12 @@ export const dialogTopics = (topics: Topic[]) =>
       MOD,
       topic.name,
       topic.title,
-      [characterOf(topic)],
+      [topic.textToolCharacter ?? characterOf(topic)],
       walk(topic).labels.map((label) => ({
         name: label.name,
         text: label.option,
         phrases: label.lines.map((line) => ({
-          character: line.by === "npc" ? characterOf(topic) : PLAYER_CHARACTER,
+          character: line.by === "npc" ? (topic.textToolCharacter ?? characterOf(topic)) : PLAYER_CHARACTER,
           text: line.text,
         })),
       })),

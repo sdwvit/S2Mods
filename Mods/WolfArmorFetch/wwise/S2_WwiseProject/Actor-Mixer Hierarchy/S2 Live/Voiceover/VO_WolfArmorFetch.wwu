@@ -7787,7 +7787,7 @@
 								</Reference>
 							</ReferenceList>
 							<ChildrenList>
-								<AudioFileSource Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001" ID="{7E33569C-8B3B-4512-A5FA-05F6C75C47F6}">
+								<AudioFileSource Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001" ID="{DC589768-237E-4C99-90B2-A3351C69661D}">
 									<PropertyList>
 										<Property Name="OverrideConversion" Type="bool" Value="True"/>
 									</PropertyList>
@@ -7802,9 +7802,25 @@
 										<MediaID ID="940940180"/>
 									</MediaIDList>
 								</AudioFileSource>
+								<AudioFileSource Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001" ID="{BBAE58FB-E16A-4544-BD1E-7D5A41C9ECCE}">
+									<PropertyList>
+										<Property Name="OverrideConversion" Type="bool" Value="True"/>
+									</PropertyList>
+									<ReferenceList>
+										<Reference Name="Conversion">
+											<ObjectRef Name="CS_200ms+_VO" ID="{EFC69699-44F3-42D7-83B1-E323FE4FDADE}" WorkUnitID="{E4232AAF-DEF4-430F-BBCE-49D968390284}"/>
+										</Reference>
+									</ReferenceList>
+									<Language>Ukrainian(UA)</Language>
+									<AudioFile>WolfArmorFetch\VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001.wav</AudioFile>
+									<MediaIDList>
+										<MediaID ID="923924214"/>
+									</MediaIDList>
+								</AudioFileSource>
 							</ChildrenList>
 							<ActiveSourceList>
-								<ActiveSource Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001" ID="{7E33569C-8B3B-4512-A5FA-05F6C75C47F6}" Platform="Linked"/>
+								<ActiveSource Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001" ID="{DC589768-237E-4C99-90B2-A3351C69661D}" Platform="Linked"/>
+								<ActiveSource Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Right_001" ID="{BBAE58FB-E16A-4544-BD1E-7D5A41C9ECCE}" Platform="Linked"/>
 							</ActiveSourceList>
 						</Sound>
 						<Sound Name="VO_ward_WolfArmorFetch_Cover_Meeting_Quiz1_Wrong1_Slip_000" ID="{1AD0E98B-06B4-4180-B432-E508402C052B}" ShortID="256176711">

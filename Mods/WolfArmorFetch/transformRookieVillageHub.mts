@@ -78,7 +78,7 @@ const coverListenFrom = [
 
 /**
  * Wolf's offer and hand-in dialogs for all three jobs, as RookieVillage_Hub nodes. Which one he gets
- * is decided at each re-attach from the quests' own progress: the Decider first, then the Falcon a day
+ * is decided at each re-attach from the quests' own progress: the Decider first, then the Falcon an hour
  * later, then Cover Story (WolfArmorFetch_Cover) a day after the Falcon hand-in.
  * A save that accepted the Falcon before the Decider existed finishes the Falcon first, then gets the
  * Decider. WolfArmorFetch reacts to how they end with `OnInfotopicFinishEvent` listeners (see
@@ -136,7 +136,7 @@ export const transformRookieVillageHub: StructTransformer<Struct> = () => {
         { label: DECIDER_NOT_YET, finish: false },
       ],
     ),
-    // A day after the Decider hand-in, the Falcon offer, unless the Falcon was taken already. The
+    // An hour after the Decider hand-in, the Falcon offer, unless the Falcon was taken already. The
     // re-attaches above wait on the same timer.
     If(
       `${H}_If_FalconAcceptedAfterDecider`,

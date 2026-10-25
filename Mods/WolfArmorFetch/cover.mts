@@ -9,7 +9,10 @@ export const QC = "WolfArmorFetch_Cover";
 
 /** New spawn actors (`ESpawnType::Obj`), invented GUIDs. */
 export const GUID = {
-  hook: "E07FB490457C4E288D8EB6A6A299E804",
+  // A fresh GUID. The old one (E07FB490...) spawned a plain Sultansk stormtrooper on 2026-10-16 and kept coming
+  // back as a generic bandit after he got a prototype of his own, while a console spawn of that prototype was
+  // named; saves likely remember a spawned actor by its GUID.
+  hook: "EDDED100D77D49C881150A8F84F468C9",
   lead: "CB4BC704BB454BA5B5DE8000A06F8EBE",
   gunner: "DB26519F274E4FD184B4ABA7AF8EA028",
   smg: "CEF084FAAB5A44F1ADC0430423F65C25",

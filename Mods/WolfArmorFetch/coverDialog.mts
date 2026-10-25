@@ -115,6 +115,8 @@ export const HOOK_COMMENT: Topic = {
   name: "Cover_HookComment",
   title: C.hookCorpse,
   character: BAGOR,
+  // Vanilla's generic bandit: the editor doesn't know BAGOR and dropped his voice.
+  textToolCharacter: "bandits_0",
   comment: true,
   opening: { name: "Corpse", option: C.hookCorpse, lines: [npc(C.hookCorpse)], terminate: true },
 };
@@ -123,6 +125,8 @@ export const HOOK: Topic = {
   name: "Cover_Hook",
   title: C.hookGreet,
   character: BAGOR,
+  // Vanilla's generic bandit: the editor doesn't know BAGOR and dropped his voice.
+  textToolCharacter: "bandits_0",
   opening: {
     name: "Greet",
     option: C.hookGreet,
