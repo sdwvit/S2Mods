@@ -24,6 +24,13 @@ export const ran = (SID: string) =>
 /** `ran(SID)` as a node's whole `Conditions`. */
 export const hasRun = (SID: string) => new Struct({ 0: new Struct({ 0: ran(SID) }) });
 
+/** "Has any of `SIDs` run?" - one group per node, joined with Or, the way vanilla joins condition groups. */
+export function hasRunAny(SIDs: string[]) {
+  const any = new Struct({ ConditionCheckType: "EConditionCheckType::Or" });
+  SIDs.forEach((SID) => any.addNode(new Struct({ 0: ran(SID) })));
+  return any;
+}
+
 /**
  * A `SetDialog` putting `topic` on Wolf, or on `npc`. `endings` are the labels whose last line ends it;
  * one with `finish: false` leaves the topic on the NPC afterwards (a decline, a "not yet"), the way
