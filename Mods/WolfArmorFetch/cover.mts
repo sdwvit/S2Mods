@@ -106,5 +106,7 @@ export const DIE = 20;
 
 /** In-game hours between the Falcon hand-in and Wolf offering this job. */
 export const COVER_OFFER_DELAY_HOURS = 24;
+/** RookieVillage_Hub's check that puts this job's offer on Wolf unless it is taken; the quest starts it when ready. */
+export const COVER_OFFER_CHECK = "RookieVillage_Hub_WolfArmorFetch_If_CoverTakenNow";
 /** Wolf's pay at the hand-in, whether the bluff held or it went loud. */
 export const COVER_REWARD = 8000;

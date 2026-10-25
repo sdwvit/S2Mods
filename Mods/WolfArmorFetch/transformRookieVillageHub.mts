@@ -1,4 +1,5 @@
 import { Struct } from "s2cfgtojson";
+import { isCreated } from "./conditions.mts";
 import type { StructTransformer } from "../../src/meta-type.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
 import {
@@ -17,7 +18,7 @@ import {
   TURNIN,
   lastLineSID,
 } from "./dialog.mts";
-import { Q, WOLF_GUID, hasRun, questNode, setDialog } from "./nodes.mts";
+import { FALCON_ACCEPTED_RAN, FALCON_HANDED_IN_RAN, Q, WOLF_GUID, hasRun, hasRunAny, questNode, setDialog } from "./nodes.mts";
 import {
   COVER_ACCEPT,
   COVER_ACCEPTED,
@@ -28,7 +29,7 @@ import {
   MEETING,
   MEETING_INTEL,
 } from "./coverDialog.mts";
-import { COVER_OFFER_DELAY_HOURS, DEALER_PDA, QC } from "./cover.mts";
+import { COVER_OFFER_CHECK, DEALER_PDA, QC } from "./cover.mts";
 
 const HUB = "RookieVillage_Hub";
 /** Our nodes live in the hub quest, so their SIDs carry its prefix. */
@@ -57,17 +58,17 @@ const WOLF_TOPIC_TRIGGERS = [
  * reads those nodes' state, only their outputs.
  */
 export const ON_WORLD_LOAD = `${Q}_OnWorldLoad`;
+const WOLF_RETRY_SECONDS = 5;
+const WORLD_LOAD_LATE_SECONDS = 30;
 
 const QD = `${Q}_Decider`;
-/** Vanilla's RookieVillage_Hub tick (LaunchOnQuestStart), so it already runs on saves past the hub's start. */
-const COVER_READY_TICK = `${HUB}_OnTickEvent`;
-const If = (SID: string, launchers: { SID: string; Name?: string }[], condition: string) =>
+const If = (SID: string, launchers: { SID: string; Name?: string }[], condition: string | string[]) =>
   node(SID, {
     NodePrototypeVersion: 1,
     NodeType: "EQuestNodeType::If",
     Repeatable: true,
     Launchers: getLaunchers(launchers),
-    Conditions: hasRun(condition),
+    Conditions: typeof condition === "string" ? hasRun(condition) : hasRunAny(condition),
   });
 
 let once = false;
@@ -95,15 +96,46 @@ export const transformRookieVillageHub: StructTransformer<Struct> = () => {
       NodePrototypeVersion: 1,
       NodeType: "EQuestNodeType::If",
       Repeatable: true,
-      Conditions: new Struct({
-        0: new Struct({
-          0: new Struct({
-            ConditionType: "EQuestConditionType::IsCreated",
-            ConditionComparance: "EConditionComparance::Equal",
-            TargetPlaceholder: WOLF_GUID,
-          }),
-        }),
-      }),
+      Conditions: new Struct({ 0: new Struct({ 0: isCreated(WOLF_GUID) }) }),
+    }),
+    // Wolf's topics are attached a while after the world loads, never straight away: attached by the
+    // world-load command itself they went missing, while the same nodes run a minute later attached them
+    // (2026-10-25). Checked 5 s in, then every 5 s until Wolf exists (a save from before his creation
+    // waits for the hub to create him), and once more 30 s in, in case 5 s is still too early.
+    node(`${H}_WolfRetry`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::Technical",
+      Repeatable: true,
+      Launchers: getLaunchers([
+        { SID: ON_WORLD_LOAD, Name: "True" },
+        { SID: ON_WORLD_LOAD, Name: "False" },
+        { SID: `${H}_If_WolfCreated`, Name: "False" },
+      ]),
+      StartDelay: WOLF_RETRY_SECONDS,
+    }),
+    node(`${H}_WorldLoadLate`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::Technical",
+      Repeatable: true,
+      Launchers: getLaunchers([
+        { SID: ON_WORLD_LOAD, Name: "True" },
+        { SID: ON_WORLD_LOAD, Name: "False" },
+      ]),
+      StartDelay: WORLD_LOAD_LATE_SECONDS,
+    }),
+    node(`${H}_If_WolfCreatedLate`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::If",
+      Repeatable: true,
+      Launchers: getLaunchers([{ SID: `${H}_WorldLoadLate` }]),
+      Conditions: new Struct({ 0: new Struct({ 0: isCreated(WOLF_GUID) }) }),
+    }),
+    node(`${H}_If_WolfCreated`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::If",
+      Repeatable: true,
+      Launchers: getLaunchers([{ SID: `${H}_WolfRetry` }]),
+      Conditions: new Struct({ 0: new Struct({ 0: isCreated(WOLF_GUID) }) }),
     }),
     // The jobs' own quests, if rootgraph never started them on this save: the dialogs above live in the
     // hub, so they still showed, but nothing heard them end (a Falcon hand-in paid nothing, 2026-10-25).
@@ -126,10 +158,14 @@ export const transformRookieVillageHub: StructTransformer<Struct> = () => {
     ]),
     If(
       `${H}_If_FalconAccepted`,
-      [...WOLF_TOPIC_TRIGGERS.map((SID) => ({ SID })), { SID: ON_WORLD_LOAD, Name: "True" }],
-      `${Q}_OnAccepted`,
+      [
+        ...WOLF_TOPIC_TRIGGERS.map((SID) => ({ SID })),
+        { SID: `${H}_If_WolfCreated`, Name: "True" },
+        { SID: `${H}_If_WolfCreatedLate`, Name: "True" },
+      ],
+      FALCON_ACCEPTED_RAN,
     ),
-    If(`${H}_If_FalconDone`, [{ SID: `${H}_If_FalconAccepted`, Name: "True" }], `${Q}_OnHandedIn`),
+    If(`${H}_If_FalconDone`, [{ SID: `${H}_If_FalconAccepted`, Name: "True" }], FALCON_HANDED_IN_RAN),
     // Falcon not taken: the Decider, or the Falcon offer once the Decider is done and a day has passed.
     If(`${H}_If_DeciderDone`, [{ SID: `${H}_If_FalconAccepted`, Name: "False" }], `${QD}_OnHandedIn`),
     If(`${H}_If_FalconOfferReady`, [{ SID: `${H}_If_DeciderDone`, Name: "True" }], `${H}_FalconOfferTimer`),
@@ -207,41 +243,30 @@ export const transformRookieVillageHub: StructTransformer<Struct> = () => {
     ),
 
     // Cover Story: once its own quest says it's ready (a day after the Falcon hand-in), the same
-    // condition its quest-giver marker on Wolf uses. Gating on WolfArmorFetch's End as well left saves
-    // with the marker and no topic.
-    If(`${H}_If_CoverAccepted`, [{ SID: `${H}_If_FalconDone`, Name: "True" }], `${QC}_OnAccepted`),
+    // condition its quest-giver marker on Wolf uses, checked straight from each re-attach. Gating on
+    // the Falcon's progress as well left saves with the marker and no topic: WolfArmorFetch's End once,
+    // and a save whose Falcon ran while WolfArmorFetch wasn't running, so it recorded nothing (2026-10-25).
+    If(
+      `${H}_If_CoverAccepted`,
+      [
+        ...WOLF_TOPIC_TRIGGERS.map((SID) => ({ SID })),
+        { SID: `${H}_If_WolfCreated`, Name: "True" },
+        { SID: `${H}_If_WolfCreatedLate`, Name: "True" },
+      ],
+      `${QC}_OnAccepted`,
+    ),
     If(`${H}_If_CoverReady`, [{ SID: `${H}_If_CoverAccepted`, Name: "False" }], `${QC}_Ready`),
     If(`${H}_If_CoverDone`, [{ SID: `${H}_If_CoverAccepted`, Name: "True" }], `${QC}_OnHandedIn`),
-    // A day after the Falcon hand-in, straight away, the way the Falcon offer follows the Decider.
-    node(`${H}_CoverOfferTimer`, {
-      NodePrototypeVersion: 1,
-      NodeType: "EQuestNodeType::SetTimer",
-      Launchers: getLaunchers([{ SID: `${H}_TurnInDialog`, Name: lastLineSID(TURNIN, FALCON_GIVE) }]),
-      InGameHours: COVER_OFFER_DELAY_HOURS,
-    }),
-    If(`${H}_If_CoverOfferEnded`, [{ SID: `${H}_CoverOfferTimer` }], `${QC}_Ready`),
-    // The quest can turn ready (and mark Wolf) while Wolf stands there, or after his creation on a
-    // load: then no re-attach follows. The hub's own vanilla tick picks it up, once, unless the job
-    // is already taken.
-    node(`${H}_CoverReadyPin`, {
-      NodePrototypeVersion: 1,
-      NodeType: "EQuestNodeType::Condition",
-      Launchers: getLaunchers([{ SID: COVER_READY_TICK }]),
-      Conditions: hasRun(`${QC}_Ready`),
-    }),
-    node(`${H}_CoverReadyNow`, {
-      NodePrototypeVersion: 1,
-      NodeType: "EQuestNodeType::Technical",
-      Launchers: getLaunchers([[{ SID: COVER_READY_TICK, Name: "" }, { SID: `${H}_CoverReadyPin` }]]),
-    }),
-    If(`${H}_If_CoverTakenNow`, [{ SID: `${H}_CoverReadyNow` }], `${QC}_OnAccepted`),
+    // The moment the quest turns ready (and marks Wolf), it starts this check from the console
+    // (WolfArmorFetch_Cover's AttachOffer): unless the job is taken already, the offer goes on Wolf.
+    // A hub timer racing the quest's own one left the marker and no topic (2026-10-25).
+    If(COVER_OFFER_CHECK, [], `${QC}_OnAccepted`),
     setDialog(
       HUB,
       `${H}_CoverAcceptDialog`,
       [
         { SID: `${H}_If_CoverReady`, Name: "True" },
-        { SID: `${H}_If_CoverOfferEnded`, Name: "True" },
-        { SID: `${H}_If_CoverTakenNow`, Name: "False" },
+        { SID: COVER_OFFER_CHECK, Name: "False" },
       ],
       COVER_ACCEPT,
       [

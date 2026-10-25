@@ -24,6 +24,21 @@ export const ran = (SID: string) =>
 /** `ran(SID)` as a node's whole `Conditions`. */
 export const hasRun = (SID: string) => new Struct({ 0: new Struct({ 0: ran(SID) }) });
 
+/** "Has any of `SIDs` run?" - one group per node, joined with Or, the way vanilla joins condition groups. */
+export function hasRunAny(SIDs: string[]) {
+  const any = new Struct({ ConditionCheckType: "EConditionCheckType::Or" });
+  SIDs.forEach((SID) => any.addNode(new Struct({ 0: ran(SID) })));
+  return any;
+}
+
+/**
+ * The Falcon's acceptance and hand-in as the hub reads them: the dialog endings, or its payout. A save
+ * whose WolfArmorFetch quest wasn't running had neither ending recorded, and was paid by starting
+ * `RemoveArmor` from the console (2026-10-25).
+ */
+export const FALCON_ACCEPTED_RAN = [`${Q}_OnAccepted`, `${Q}_RemoveArmor`];
+export const FALCON_HANDED_IN_RAN = [`${Q}_OnHandedIn`, `${Q}_RemoveArmor`];
+
 /**
  * A `SetDialog` putting `topic` on Wolf, or on `npc`. `endings` are the labels whose last line ends it;
  * one with `finish: false` leaves the topic on the NPC afterwards (a decline, a "not yet"), the way

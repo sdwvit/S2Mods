@@ -62,6 +62,17 @@ export const stageFinished = (quest: string, stage: string) =>
     JournalQuestStageSID: stage,
   });
 
+/**
+ * NPC `guid` exists, as vanilla checks for a spawned NPC. Holds whatever a save's history: a Bridge
+ * condition on the node that spawned him, or one after it, can stay False (2026-10-25).
+ */
+export const isCreated = (guid: string) =>
+  new Struct({
+    ConditionType: "EQuestConditionType::IsCreated",
+    ConditionComparance: "EConditionComparance::Equal",
+    TargetPlaceholder: guid,
+  });
+
 /** The player is within `cm` of NPC `guid`. */
 export const nearNPC = (guid: string, cm: number) =>
   new Struct({

@@ -16,6 +16,7 @@ import {
   MEETING_LOUD,
 } from "./coverDialog.mts";
 import {
+  COVER_OFFER_CHECK,
   COVER_OFFER_DELAY_HOURS,
   DEALER_NOTE,
   CREW,
@@ -35,8 +36,8 @@ import {
   VAR,
   WARD_BADGE,
 } from "./cover.mts";
-import { PLAYER_GUID, allOf, globalVar, hasEffect, itemCount, nearNPC, nearPoint } from "./conditions.mts";
-import { Q, WOLF_GUID, hasRun, onDialogEnding, questNode, ran, setDialog } from "./nodes.mts";
+import { PLAYER_GUID, allOf, globalVar, hasEffect, isCreated, itemCount, nearNPC, nearPoint } from "./conditions.mts";
+import { FALCON_HANDED_IN_RAN, Q, WOLF_GUID, hasRun, hasRunAny, onDialogEnding, questNode, ran, setDialog } from "./nodes.mts";
 
 const node = (SID: string, fields: Record<string, unknown>) => questNode(QC, SID, fields);
 type Launch = Parameters<typeof getLaunchers>[0];
@@ -218,7 +219,8 @@ const resetAI = (SID: string, launchers: Launch, guid: string) =>
   node(SID, { NodePrototypeVersion: 1, NodeType: "EQuestNodeType::ResetAI", Launchers: getLaunchers(launchers), TargetQuestGuid: guid });
 
 /** `first` and `second` become enemies, personally (vanilla SQ92: preset 0 is Enemy). */
-const makeEnemies = (SID: string, launchers: Launch, first: string, second: string) =>
+/** A ChangeRelationships preset, as vanilla's: 0 enemies, 2 neutral (Terricon_Hub_NeutralsNeutral), 3 friends. */
+const setRelationship = (SID: string, launchers: Launch, first: string, second: string, preset: 0 | 2 | 3) =>
   node(SID, {
     NodePrototypeVersion: 1,
     NodeType: "EQuestNodeType::ChangeRelationships",
@@ -227,10 +229,12 @@ const makeEnemies = (SID: string, launchers: Launch, first: string, second: stri
     SecondTargetSID: second,
     UseDeltaValue: false,
     UsePreset: true,
-    RelationshipValue: 0,
+    RelationshipValue: preset,
     SetFactionRelationshipAsPersonal: false,
     ShouldLockPersonalRelationship: false,
   });
+const makeEnemies = (SID: string, launchers: Launch, first: string, second: string) =>
+  setRelationship(SID, launchers, first, second, 0);
 
 /** A journal stage of the Cover Story entry, optionally with a marker on `marker`. */
 function stage(SID: string, launchers: Launch, name: string, action: "Start" | "Finish", marker?: string) {
@@ -296,7 +300,7 @@ export function coverNodes() {
     }),
 
     // 1. Ready a day after the Falcon hand-in, or at once on saves that are already past it.
-    ifNode(`${QC}_If_FalconDone`, [{ SID: `${QC}_Start` }], hasRun(`${Q}_OnHandedIn`)),
+    ifNode(`${QC}_If_FalconDone`, [{ SID: `${QC}_Start` }], hasRunAny(FALCON_HANDED_IN_RAN)),
     onDialogEnding(`${QC}_OnFalconHandedIn`, TURNIN, FALCON_GIVE, QC),
     node(`${QC}_OfferTimer`, {
       NodePrototypeVersion: 1,
@@ -305,6 +309,13 @@ export function coverNodes() {
       InGameHours: COVER_OFFER_DELAY_HOURS,
     }),
     technical(`${QC}_Ready`, [{ SID: `${QC}_If_FalconDone`, Name: "True" }, { SID: `${QC}_OfferTimer` }]),
+    // Wolf's offer belongs to RookieVillage_Hub, so it is put on him from there, along with the marker.
+    node(`${QC}_AttachOffer`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::ConsoleCommand",
+      Launchers: getLaunchers([{ SID: `${QC}_Ready` }]),
+      ConsoleCommand: `XStartQuestNodeBySID ${COVER_OFFER_CHECK}`,
+    }),
     node(`${QC}_SetQuestGiver_Wolf`, {
       NodePrototypeVersion: 1,
       NodeType: "EQuestNodeType::SetQuestGiver",
@@ -342,7 +353,9 @@ export function coverNodes() {
     technical(`${QC}_DebugHookComment`, [{ SID: `${QC}_DebugHook` }], 5),
     ifNode(`${QC}_DebugIfHookTalk`, [{ SID: `${QC}_HookCommentDone` }], hasRun(`${QC}_DebugHook`)),
     spawn(`${QC}_SpawnHook`, [{ SID: `${QC}_OnAccepted` }, { SID: `${QC}_DebugHook` }], GUID.hook),
-    technical(`${QC}_HookSpawned`, [{ SID: `${QC}_SpawnHook` }], 1),
+    // From the spawn's own launchers, as the dealers' and guards' are: launched off SpawnHook's output it
+    // never ran on a save that did spawn Hook, and neither did his lines (2026-10-25).
+    technical(`${QC}_HookSpawned`, [{ SID: `${QC}_OnAccepted` }, { SID: `${QC}_DebugHook` }], 1),
     aiBehavior(`${QC}_HookStay`, [{ SID: `${QC}_HookSpawned` }], GUID.hook, { stay: POS.hook }, "EWeaponState::NoWeapon", 500),
     // His lads and the stalker they robbed.
     ...CREW.flatMap((guid, i) => [
@@ -359,11 +372,11 @@ export function coverNodes() {
 
     // Hook is one of the Sultan's (neutral): when Skif walks up he says one line and goes for him.
     // A save on the way in, 30 m out, before he can start anything.
-    tickPin(`${QC}_SaveBeforeHook_Pin_0`, allOf([nearPoint(POS.hook, 3000), ran(`${QC}_HookSpawned`)])),
+    tickPin(`${QC}_SaveBeforeHook_Pin_0`, allOf([nearPoint(POS.hook, 3000), isCreated(GUID.hook)])),
     saveGame(`${QC}_SaveBeforeHook`, onTickWhen(`${QC}_SaveBeforeHook_Pin_0`)),
     // At 10 m he is still busy with the stalker his lads robbed: a comment, his back to Skif. Then, once
     // Skif is at 5 m, he turns to him. A timeout stands in if the comment never reports its end.
-    tickPin(`${QC}_HookComment_Pin_0`, allOf([nearPoint(POS.hook, 1000), ran(`${QC}_HookSpawned`)])),
+    tickPin(`${QC}_HookComment_Pin_0`, allOf([nearPoint(POS.hook, 1000), isCreated(GUID.hook)])),
     technical(`${QC}_HookCommentStart`, [...onTickWhen(`${QC}_HookComment_Pin_0`), { SID: `${QC}_DebugHookComment` }]),
     setDialog(QC, `${QC}_HookCommentDialog`, [{ SID: `${QC}_HookCommentStart` }], HOOK_COMMENT, [{ label: HOOK_COMMENT.opening, finish: true }], {
       npc: GUID.hook,
@@ -401,6 +414,11 @@ export function coverNodes() {
     stage(`${QC}_SetJournal_Meeting`, [{ SID: `${QC}_ListenHookPDA` }], "Meeting", "Start", GUID.lead),
     ...DEALERS.map((guid, i) => spawn(`${QC}_SpawnDealer${i}`, [{ SID: `${QC}_ListenHookPDA` }], guid)),
     technical(`${QC}_DealersSpawned`, [{ SID: `${QC}_ListenHookPDA` }], 1),
+    // Neutral to Skif whatever the Ward thinks of him: on a save where the Ward are his enemies they'd
+    // shoot before the meeting (2026-10-25). Going loud makes them enemies again.
+    ...DEALERS.map((dealer, i) =>
+      setRelationship(`${QC}_Neutral_Dealer${i}`, [{ SID: `${QC}_DealersSpawned` }], PLAYER_GUID, dealer, 2),
+    ),
     ...DEALERS.map((guid, i) =>
       aiBehavior(`${QC}_DealerStay${i}`, [{ SID: `${QC}_DealersSpawned` }], guid, { stay: [POS.lead, POS.gunner, POS.smg][i] }, i === 0 ? "EWeaponState::NoWeapon" : undefined),
     ),
