@@ -11,6 +11,9 @@
 // mods at <gameRoot>/.../NodeBridge/mods/<modName>/main.mts import via
 // `import { ... } from "../../runtime/s2lib.mts"`.
 
+import fsp from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Bridge, Vector3 } from "./types.mts";
 
 // Re-export types so mods can `import type { ModInit, Vector3, Bridge }
@@ -91,12 +94,22 @@ export async function readU64At(bridge: Bridge, addr: number): Promise<number | 
 // FName decoder. comp=0 num=0 is FName::None; we short-circuit it so
 // the in-game resolver doesn't need to be ready before we can return.
 
+/** False once the C++ resolver returned nothing for a name the pool has: then every decode
+ *  skips that RPC (it has no trusted candidate in the 2026-09-29 build). */
+let cppFNameWorks: boolean | null = null;
+
 export async function decodeFName(bridge: Bridge, comp: number, num: number): Promise<string> {
   if (comp === 0 && num === 0) return "None";
-  const r = await bridge.game.fnameToString(comp, num);
-  if ("name" in r && r.name) return r.name;
+  if (cppFNameWorks !== false) {
+    const r = await bridge.game.fnameToString(comp, num);
+    if ("name" in r && r.name) {
+      cppFNameWorks = true;
+      return r.name;
+    }
+  }
   const base = await readPoolName(bridge, comp);
   if (!base) return "";
+  cppFNameWorks ??= false;
   return num > 0 ? `${base}_${num - 1}` : base;
 }
 
@@ -117,6 +130,51 @@ let exeBase: number | null = null;
 export async function getExeBase(bridge: Bridge): Promise<number> {
   if (exeBase == null) exeBase = (await bridge.game.mainExeBase()).base;
   return exeBase;
+}
+
+/** "<PE TimeDateStamp>-<SizeOfImage>" of the running exe, read from its mapped headers. */
+export async function getBuildId(bridge: Bridge): Promise<string> {
+  const base = await getExeBase(bridge);
+  const lfanewR = await bridge.game.readMemory(base + 0x3c, 4);
+  if (!("hex" in lfanewR)) return "unknown";
+  const ntR = await bridge.game.readMemory(base + readU32LE(parseHex(lfanewR.hex), 0), 0x54);
+  if (!("hex" in ntR)) return "unknown";
+  const nt = parseHex(ntR.hex);
+  return `${readU32LE(nt, 0x8).toString(16)}-${readU32LE(nt, 0x50).toString(16)}`;
+}
+
+/**
+ * Per-game-build JSON cache in <NodeBridge>/cache/<buildId>.json (next to runtime/, so an
+ * inject never overwrites it). Holds hints such as object-table indices; callers verify
+ * every hint, since object indices can shift with installed mods.
+ */
+function cacheDir(): string {
+  // Mods import through mods/<Mod>/node_modules/@nodebridge/runtime (a symlink Node keeps
+  // in import.meta.url), so step out of mods/ first; else runtime/'s parent.
+  let dir = path.dirname(fileURLToPath(import.meta.url));
+  const parts = dir.split(path.sep);
+  const mods = parts.lastIndexOf("mods");
+  if (mods > 0) return path.join(parts.slice(0, mods).join(path.sep), "cache");
+  while (path.basename(dir) !== "runtime" && path.dirname(dir) !== dir) dir = path.dirname(dir);
+  return path.join(path.dirname(dir), "cache");
+}
+
+export async function readBuildCache(bridge: Bridge): Promise<Record<string, any>> {
+  try {
+    return JSON.parse(await fsp.readFile(path.join(cacheDir(), `${await getBuildId(bridge)}.json`), "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+export async function writeBuildCache(bridge: Bridge, patch: Record<string, unknown>): Promise<void> {
+  const file = path.join(cacheDir(), `${await getBuildId(bridge)}.json`);
+  try {
+    await fsp.mkdir(path.dirname(file), { recursive: true });
+    await fsp.writeFile(file, JSON.stringify({ ...(await readBuildCache(bridge)), ...patch }, null, 2));
+  } catch (e) {
+    bridge.log.warn(`build cache write failed: ${(e as Error).message}`);
+  }
 }
 
 const poolNames = new Map<number, string>();
@@ -732,6 +790,17 @@ export async function getObjectPointers(bridge: Bridge): Promise<number[]> {
   return objects;
 }
 
+/** The UObject in GUObjectArray slot `index` (0 if free or out of range). */
+export async function getObjectAt(bridge: Bridge, index: number): Promise<number> {
+  if (!(index >= 0)) return 0;
+  const arr = (await getExeBase(bridge)) + BUILD_RVA.guObjectArray;
+  const numR = await bridge.game.readMemory(arr + 0x24, 4);
+  if (!("hex" in numR) || index >= readU32LE(parseHex(numR.hex), 0)) return 0;
+  const chunks = (await readU64At(bridge, arr + 0x10)) ?? 0;
+  const chunk = chunks ? ((await readU64At(bridge, chunks + Math.floor(index / OBJECTS_PER_CHUNK) * 8)) ?? 0) : 0;
+  return chunk ? ((await readU64At(bridge, chunk + (index % OBJECTS_PER_CHUNK) * OBJECT_ITEM_SIZE)) ?? 0) : 0;
+}
+
 /** First object named `name` within objects[from, to). /Script classes and CDOs sit low in the table. */
 export async function findObjectByName(bridge: Bridge, objects: number[], name: string, from = 0, to = objects.length): Promise<number> {
   for (let i = from; i < Math.min(to, objects.length); i++) {
@@ -740,8 +809,8 @@ export async function findObjectByName(bridge: Bridge, objects: number[], name: 
   return 0;
 }
 
-/** Newest live (non-CDO) instance whose class derives from `baseClass`. */
-export async function findInstanceOf(bridge: Bridge, objects: number[], baseClass: number): Promise<number> {
+/** Newest (or with `newest = false`, oldest) live non-CDO instance whose class derives from `baseClass`. */
+export async function findInstanceOf(bridge: Bridge, objects: number[], baseClass: number, newest = true): Promise<number> {
   const derives = new Map<number, boolean>();
   const isA = async (cls: number): Promise<boolean> => {
     const known = derives.get(cls);
@@ -757,8 +826,8 @@ export async function findInstanceOf(bridge: Bridge, objects: number[], baseClas
     derives.set(cls, hit);
     return hit;
   };
-  for (let i = objects.length - 1; i >= 0; i--) {
-    const obj = objects[i];
+  for (let n = 0; n < objects.length; n++) {
+    const obj = objects[newest ? objects.length - 1 - n : n];
     if (!obj) continue;
     const cls = await readU64At(bridge, obj + GSC.uObjectClassPtr);
     if (!cls || !(await isA(cls))) continue;
@@ -789,8 +858,8 @@ interface ConsoleSession {
   offWorld: number;
   offCommand: number;
   offPlayer: number;
-  playerControllerClass: number;
-  playerController: number;
+  /** The GameEngine instance (GEngine); lives for the whole run. */
+  engine: number;
   /** Reused UTF-16 buffer the FString points at. */
   strBuf: number;
 }
@@ -798,71 +867,100 @@ interface ConsoleSession {
 let consoleSession: ConsoleSession | null = null;
 const STR_BUF_SIZE = 64 * 1024;
 
-async function ensureConsoleSession(bridge: Bridge): Promise<ConsoleSession> {
-  if (consoleSession) {
-    // The controller is recreated on every level load; re-find it if this one is gone.
-    const cls = await readU64At(bridge, consoleSession.playerController + GSC.uObjectClassPtr);
-    if (cls) return consoleSession;
+const isEngine = async (bridge: Bridge, obj: number) =>
+  !(await getObjectName(bridge, obj)).startsWith("Default__") &&
+  (await getObjectName(bridge, (await readU64At(bridge, obj + GSC.uObjectClassPtr)) ?? 0)).endsWith("GameEngine");
+const isKismetCdo = async (bridge: Bridge, obj: number) => (await getObjectName(bridge, obj)) === "Default__KismetSystemLibrary";
+
+/**
+ * The GameEngine instance and the KismetSystemLibrary CDO. Both are created at startup, so
+ * their object-table indices are cached per game build; a full table scan (~1 min) runs
+ * only when a cached index no longer holds the expected object.
+ */
+async function findConsoleRoots(bridge: Bridge): Promise<{ engine: number; kismetCdo: number }> {
+  const cache = await readBuildCache(bridge);
+  let engine = cache.engineIndex != null ? await getObjectAt(bridge, cache.engineIndex) : 0;
+  if (engine && !(await isEngine(bridge, engine))) engine = 0;
+  let kismetCdo = cache.kismetCdoIndex != null ? await getObjectAt(bridge, cache.kismetCdoIndex) : 0;
+  if (kismetCdo && !(await isKismetCdo(bridge, kismetCdo))) kismetCdo = 0;
+  if (engine && kismetCdo) return { engine, kismetCdo };
+
+  bridge.log("console: scanning the object table (cached per game build afterwards)");
+  const objects = await getObjectPointers(bridge);
+  if (!kismetCdo) kismetCdo = await findObjectByName(bridge, objects, "Default__KismetSystemLibrary");
+  if (!engine) {
+    const engineClass = await findObjectByName(bridge, objects, "GameEngine", 0, Math.min(objects.length, 60000));
+    if (engineClass) engine = await findInstanceOf(bridge, objects, engineClass, false);
   }
+  if (!engine || !kismetCdo) throw new Error(`console: GameEngine=0x${engine.toString(16)} KismetSystemLibrary CDO=0x${kismetCdo.toString(16)}`);
+  await writeBuildCache(bridge, { engineIndex: objects.indexOf(engine), kismetCdoIndex: objects.indexOf(kismetCdo) });
+  return { engine, kismetCdo };
+}
+
+async function ensureConsoleSession(bridge: Bridge): Promise<ConsoleSession> {
+  if (consoleSession) return consoleSession;
   const base = await getExeBase(bridge);
   const hook = await bridge.game.installProcessEventHook(base + BUILD_RVA.processEvent);
   if ("error" in hook) throw new Error(`installProcessEventHook: ${hook.error}`);
 
-  const objects = await getObjectPointers(bridge);
-  const lowEnd = Math.min(objects.length, 60000);
-  const pcClass = consoleSession?.playerControllerClass || (await findObjectByName(bridge, objects, "PlayerController", 0, lowEnd));
-  const kismetCdo = consoleSession?.kismetCdo || (await findObjectByName(bridge, objects, "Default__KismetSystemLibrary"));
-  if (!pcClass || !kismetCdo) throw new Error(`console: PlayerController=0x${pcClass.toString(16)} KismetSystemLibrary CDO=0x${kismetCdo.toString(16)}`);
-  const playerController = await findInstanceOf(bridge, objects, pcClass);
-  if (!playerController) throw new Error("console: no PlayerController instance (load a save first)");
-
-  let executeFn = consoleSession?.executeFn ?? 0;
-  let paramsSize = consoleSession?.paramsSize ?? 0;
-  let offWorld = consoleSession?.offWorld ?? 0;
-  let offCommand = consoleSession?.offCommand ?? 0;
-  let offPlayer = consoleSession?.offPlayer ?? 0;
-  if (!executeFn) {
-    const kslClass = (await readU64At(bridge, kismetCdo + GSC.uObjectClassPtr)) ?? 0;
-    executeFn = (await findUFunction(bridge, kslClass, "ExecuteConsoleCommand")) ?? 0;
-    if (!executeFn) throw new Error("console: KismetSystemLibrary.ExecuteConsoleCommand not found");
-    const sizeR = await bridge.game.readMemory(executeFn + GSC.uStructPropertiesSize, 4);
-    paramsSize = "hex" in sizeR ? readU32LE(parseHex(sizeR.hex), 0) : 0;
-    offWorld = (await findPropertyOffset(bridge, executeFn, "WorldContextObject")) ?? -1;
-    offCommand = (await findPropertyOffset(bridge, executeFn, "Command")) ?? -1;
-    offPlayer = (await findPropertyOffset(bridge, executeFn, "SpecificPlayer")) ?? -1;
-    if ((offWorld < 0 || offCommand < 0 || offPlayer < 0) && paramsSize === 32) {
-      // Stock layout: UObject* @0, FString @8 (16 bytes), APlayerController* @0x18.
-      const chain = await listAllProperties(bridge, executeFn, 8);
-      bridge.log(`console: ExecuteConsoleCommand PropertyLink chain=${JSON.stringify(chain)}; using stock layout`);
-      offWorld = 0;
-      offCommand = 8;
-      offPlayer = 0x18;
-    }
-    if (offWorld < 0 || offCommand < 0 || offPlayer < 0 || !paramsSize) {
-      throw new Error(`console: ExecuteConsoleCommand layout size=${paramsSize} world=${offWorld} command=${offCommand} player=${offPlayer}`);
-    }
+  const { engine, kismetCdo } = await findConsoleRoots(bridge);
+  const kslClass = (await readU64At(bridge, kismetCdo + GSC.uObjectClassPtr)) ?? 0;
+  const executeFn = (await findUFunction(bridge, kslClass, "ExecuteConsoleCommand")) ?? 0;
+  if (!executeFn) throw new Error("console: KismetSystemLibrary.ExecuteConsoleCommand not found");
+  const sizeR = await bridge.game.readMemory(executeFn + GSC.uStructPropertiesSize, 4);
+  const paramsSize = "hex" in sizeR ? readU32LE(parseHex(sizeR.hex), 0) : 0;
+  let offWorld = (await findPropertyOffset(bridge, executeFn, "WorldContextObject")) ?? -1;
+  let offCommand = (await findPropertyOffset(bridge, executeFn, "Command")) ?? -1;
+  let offPlayer = (await findPropertyOffset(bridge, executeFn, "SpecificPlayer")) ?? -1;
+  if ((offWorld < 0 || offCommand < 0 || offPlayer < 0) && paramsSize === 32) {
+    // Stock layout: UObject* @0, FString @8 (16 bytes), APlayerController* @0x18.
+    const chain = await listAllProperties(bridge, executeFn, 8);
+    bridge.log(`console: ExecuteConsoleCommand PropertyLink chain=${JSON.stringify(chain)}; using stock layout`);
+    offWorld = 0;
+    offCommand = 8;
+    offPlayer = 0x18;
   }
-  let strBuf = consoleSession?.strBuf ?? 0;
-  if (!strBuf) {
-    const a = await bridge.game.virtualAlloc(STR_BUF_SIZE);
-    if (!("addr" in a)) throw new Error("console: virtualAlloc failed");
-    strBuf = a.addr;
+  if (offWorld < 0 || offCommand < 0 || offPlayer < 0 || !paramsSize) {
+    throw new Error(`console: ExecuteConsoleCommand layout size=${paramsSize} world=${offWorld} command=${offCommand} player=${offPlayer}`);
   }
-  consoleSession = { kismetCdo, executeFn, paramsSize, offWorld, offCommand, offPlayer, playerControllerClass: pcClass, playerController, strBuf };
+  const a = await bridge.game.virtualAlloc(STR_BUF_SIZE);
+  if (!("addr" in a)) throw new Error("console: virtualAlloc failed");
+  consoleSession = { kismetCdo, executeFn, paramsSize, offWorld, offCommand, offPlayer, engine, strBuf: a.addr };
   bridge.log(
-    `console ready: PC=0x${playerController.toString(16)} ExecuteConsoleCommand=0x${executeFn.toString(16)} ` +
+    `console ready: engine=0x${engine.toString(16)} ExecuteConsoleCommand=0x${executeFn.toString(16)} ` +
       `size=${paramsSize} world@${offWorld} command@${offCommand} player@${offPlayer}`,
   );
   return consoleSession;
 }
 
 /**
+ * The live PlayerController: GameEngine.GameInstance → LocalPlayers[0] → PlayerController.
+ * Read on every call, since the controller is recreated on each level load.
+ */
+async function getPlayerController(bridge: Bridge, s: ConsoleSession): Promise<number> {
+  const offGameInstance = await findPropertyOffsetOf(bridge, s.engine, "GameInstance");
+  const gameInstance = offGameInstance == null ? 0 : ((await readU64At(bridge, s.engine + offGameInstance)) ?? 0);
+  if (!gameInstance) throw new Error("console: no GameInstance yet");
+  const offLocalPlayers = await findPropertyOffsetOf(bridge, gameInstance, "LocalPlayers");
+  const arrR = offLocalPlayers == null ? null : await bridge.game.readMemory(gameInstance + offLocalPlayers, 12);
+  const arr = arrR && "hex" in arrR ? parseHex(arrR.hex) : null;
+  const localPlayer = arr && readU32LE(arr, 8) > 0 ? ((await readU64At(bridge, readU64LE(arr, 0))) ?? 0) : 0;
+  if (!localPlayer) throw new Error("console: no LocalPlayer yet");
+  const offPc = await findPropertyOffsetOf(bridge, localPlayer, "PlayerController");
+  const pc = offPc == null ? 0 : ((await readU64At(bridge, localPlayer + offPc)) ?? 0);
+  if (!pc) throw new Error("console: no PlayerController (load a save first)");
+  return pc;
+}
+
+/**
  * Run a console command as if typed in the game console, through
  * UKismetSystemLibrary::ExecuteConsoleCommand on the game thread
- * (ProcessEvent detour). The first call scans the object table (~5-20 s).
+ * (ProcessEvent detour). The first call of a run takes a few seconds; the first
+ * call on a new game build also scans the object table (~1 min).
  */
 export async function runConsoleCommand(bridge: Bridge, command: string): Promise<void> {
   const s = await ensureConsoleSession(bridge);
+  const playerController = await getPlayerController(bridge, s);
   const chars = command.length + 1;
   if (chars * 2 > STR_BUF_SIZE) throw new Error("console: command too long");
   let str = "";
@@ -877,29 +975,45 @@ export async function runConsoleCommand(bridge: Bridge, command: string): Promis
   const put = (off: number, hex: string) => {
     for (let i = 0; i < hex.length / 2; i++) params[off + i] = hex.slice(i * 2, i * 2 + 2);
   };
-  put(s.offWorld, u64Hex(s.playerController));
+  put(s.offWorld, u64Hex(playerController));
   // FString = TArray<TCHAR> { Data, ArrayNum, ArrayMax }
   put(s.offCommand, u64Hex(s.strBuf) + u32Hex(chars) + u32Hex(chars));
-  put(s.offPlayer, u64Hex(s.playerController));
+  put(s.offPlayer, u64Hex(playerController));
   const r = await bridge.game.processEvent(s.kismetCdo, s.executeFn, params.join(""));
   if (r.ok === false) throw new Error(`console: processEvent failed: ${r.reason}`);
 }
 
+/** Found offsets by "classPtr:propName"; classes outlive the session's lookups. */
+const hierarchyOffsets = new Map<string, number>();
+
 /** findPropertyOffset on `classPtr`, then on each SuperStruct until one has `propName`. */
 async function findPropertyOffsetInHierarchy(bridge: Bridge, classPtr: number, propName: string): Promise<number | null> {
+  const key = `${classPtr}:${propName}`;
+  const known = hierarchyOffsets.get(key);
+  if (known != null) return known;
   let cls = classPtr;
   for (let depth = 0; cls && depth < 16; depth++) {
     const off = await findPropertyOffset(bridge, cls, propName, 4096);
-    if (off != null) return off;
+    if (off != null) {
+      hierarchyOffsets.set(key, off);
+      return off;
+    }
     cls = (await readU64At(bridge, cls + GSC.uStructSuperStruct)) ?? 0;
   }
   return null;
 }
 
+/** findPropertyOffsetInHierarchy on the class of the UObject at `obj`. */
+async function findPropertyOffsetOf(bridge: Bridge, obj: number, propName: string): Promise<number | null> {
+  const cls = (await readU64At(bridge, obj + GSC.uObjectClassPtr)) ?? 0;
+  return cls ? findPropertyOffsetInHierarchy(bridge, cls, propName) : null;
+}
+
 /** The player pawn's world location, read through reflected property names. */
 export async function getPlayerPawnLocation(bridge: Bridge): Promise<Vector3> {
   const s = await ensureConsoleSession(bridge);
-  const pcClass = (await readU64At(bridge, s.playerController + GSC.uObjectClassPtr)) ?? 0;
+  const playerController = await getPlayerController(bridge, s);
+  const pcClass = (await readU64At(bridge, playerController + GSC.uObjectClassPtr)) ?? 0;
   // APlayerController::AcknowledgedPawn is near the head of the chain; AController::Pawn
   // sits past the Blueprint class's own properties.
   const offPawn =
@@ -912,7 +1026,7 @@ export async function getPlayerPawnLocation(bridge: Bridge): Promise<Vector3> {
         chain.map((p) => `${p.name}@0x${p.off.toString(16)}`).join(","),
     );
   }
-  const pawn = (await readU64At(bridge, s.playerController + offPawn)) ?? 0;
+  const pawn = (await readU64At(bridge, playerController + offPawn)) ?? 0;
   if (!pawn) throw new Error("location: no pawn");
   const pawnClass = (await readU64At(bridge, pawn + GSC.uObjectClassPtr)) ?? 0;
   const offRoot = await findPropertyOffsetInHierarchy(bridge, pawnClass, "RootComponent");

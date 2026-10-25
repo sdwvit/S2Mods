@@ -51,8 +51,12 @@ which the DLL runs on the game thread via its ProcessEvent detour. `APlayerContr
 is not a UFunction. The player controller class is `BP_Stalker2PlayerContoller_C` (GSC spelling).
 
 During play, use the HTTP API in `Mods/NodeBridge/nodebridge/main.mts` (127.0.0.1:47811:
-`/cmd?c=`, `/pos`, `/squad?faction=&size=`). Every inject restarts node.exe and the first
-command then rescans GUObjectArray (~1 min), so don't edit bridge files mid-session.
+`/cmd?c=`, `/pos`, `/squad?faction=&size=`). The console session finds the PlayerController
+through GameEngine.GameInstance → LocalPlayers[0] → PlayerController on every command (level
+loads recreate it). The GameEngine and `Default__KismetSystemLibrary` object indices are cached
+per game build in `<Win64>/NodeBridge/cache/<PE timestamp>-<SizeOfImage>.json` and checked by name.
+Only a new build (or a mismatch) rescans GUObjectArray (~30 s). Every inject restarts node.exe,
+so don't edit bridge files mid-session.
 
 `USceneComponent`: `RelativeLocation` +0x130 (FVector3d, 24B). `ComponentToWorld` is **not**
 a UProperty in the GSC fork — the cached FTransform's Translation slot is at

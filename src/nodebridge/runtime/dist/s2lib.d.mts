@@ -41,6 +41,10 @@ export declare const BUILD_RVA: {
     readonly processEvent: 35039016;
 };
 export declare function getExeBase(bridge: Bridge): Promise<number>;
+/** "<PE TimeDateStamp>-<SizeOfImage>" of the running exe, read from its mapped headers. */
+export declare function getBuildId(bridge: Bridge): Promise<string>;
+export declare function readBuildCache(bridge: Bridge): Promise<Record<string, any>>;
+export declare function writeBuildCache(bridge: Bridge, patch: Record<string, unknown>): Promise<void>;
 export declare function readVector3At(bridge: Bridge, addr: number): Promise<Vector3 | null>;
 export declare function writeVector3At(bridge: Bridge, addr: number, v: Vector3): Promise<boolean>;
 /** Find a property's offset within a UClass instance by name.
@@ -160,14 +164,17 @@ export declare function readPlayerLocation(bridge: Bridge, session: PlayerSessio
 export declare function getObjectName(bridge: Bridge, obj: number): Promise<string>;
 /** Every UObject pointer in GUObjectArray (0 for free slots), read 170 items per call. */
 export declare function getObjectPointers(bridge: Bridge): Promise<number[]>;
+/** The UObject in GUObjectArray slot `index` (0 if free or out of range). */
+export declare function getObjectAt(bridge: Bridge, index: number): Promise<number>;
 /** First object named `name` within objects[from, to). /Script classes and CDOs sit low in the table. */
 export declare function findObjectByName(bridge: Bridge, objects: number[], name: string, from?: number, to?: number): Promise<number>;
-/** Newest live (non-CDO) instance whose class derives from `baseClass`. */
-export declare function findInstanceOf(bridge: Bridge, objects: number[], baseClass: number): Promise<number>;
+/** Newest (or with `newest = false`, oldest) live non-CDO instance whose class derives from `baseClass`. */
+export declare function findInstanceOf(bridge: Bridge, objects: number[], baseClass: number, newest?: boolean): Promise<number>;
 /**
  * Run a console command as if typed in the game console, through
  * UKismetSystemLibrary::ExecuteConsoleCommand on the game thread
- * (ProcessEvent detour). The first call scans the object table (~5-20 s).
+ * (ProcessEvent detour). The first call of a run takes a few seconds; the first
+ * call on a new game build also scans the object table (~1 min).
  */
 export declare function runConsoleCommand(bridge: Bridge, command: string): Promise<void>;
 /** The player pawn's world location, read through reflected property names. */
