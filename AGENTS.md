@@ -93,9 +93,12 @@ The following are git-ignored and should not be committed unless explicitly requ
 - Voiced dialogs: see the `eng-dialog-voiceover` skill. Mods must be installed under `Content/Paks/~mods/` (other
   folders mount as plain paks, and the game never registers the mod's assets by class, e.g. its voice data), and every
   TextTool speaker must be a known character (Skif is `PC`), or the editor drops that line's voice at cook.
-- A mod's named NPC needs `UseGeneratedName = false` on its NPCPrototype when it inherits a `GeneralNPC_*` one
-  (`HumanBase` sets it true, and the game then shows a generated name over `NameTextKey`); vanilla's named NPCs
-  inherit `[0]`.
+- A mod's named NPC: its own ObjPrototype (`NPCPrototypeSID`, `CustomMeshGeneratorPrototypeSID` for a fixed look, as
+  vanilla's Sultan) and NPCPrototype (`NameTextKey`, inheriting `[0]` like every vanilla named NPC). Never reuse a
+  spawn actor GUID that has already spawned something else: WolfArmorFetch's Bagor kept coming back as a generic
+  bandit from his old GUID until it was replaced, while a console spawn of his prototype was named (2026-10-25).
+  His TextTool speaker must be a character the editor knows (`textToolCharacter` in `Mods/WolfArmorFetch/dialog.mts`),
+  or his voice is dropped at cook.
 - An `End` node with `ExcludeAllNodesInContainer = true` excludes every node of its quest, and an excluded `Spawn`
   node despawns what it spawned (every `SpawnNodeExcludeType` does). A quest that spawns a reward (a stash, a
   body) must not End afterwards: vanilla's stash quests (EQ155_P) have no End. WolfArmorFetch's Falcon stash

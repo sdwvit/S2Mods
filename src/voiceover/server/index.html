@@ -511,8 +511,9 @@ function isGood(le) {
   });
   for (const e of allEvents) {
     const f = byId[e.feedback_id] || {};
-    if ((e.group || f.group) === g && (e.sid || f.sid) === sid && e.status === 'done' && /^Final:/.test(e.message || ''))
-      items.push([e.ts || '', true]);
+    // an "Unpicked:" logged after its "Final:" (late pick/unpick jobs) undoes it
+    if ((e.group || f.group) === g && (e.sid || f.sid) === sid && e.status === 'done' && /^(Final|Unpicked):/.test(e.message || ''))
+      items.push([e.ts || '', /^Final:/.test(e.message)]);
   }
   items.sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0);
   let good = false;
