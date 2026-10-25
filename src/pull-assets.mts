@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import { pathToFileURL } from "node:url";
 import { logger } from "./logger.mts";
 import { modFolderRaw, modName } from "./base-paths.mts";
-import { primarySdkModTarget } from "./mod-meta-paths.mts";
+import { modMeta, primarySdkModTarget } from "./mod-meta-paths.mts";
 import { isTransientCookArtifact } from "./mod-kinds.mts";
 import { cpSync } from "node:fs";
 import { writeModWorldSubsystemData } from "./world-subsystem-data.mts";
@@ -61,7 +61,11 @@ export async function pullAssets() {
   // Every mod ships the announce blueprint (see announce-installed.mts), in the SDK too: the cook
   // reads the SDK mod, and a pull of an SDK mod without it would leave raw/ ahead of the cook.
   if (announcesInstalled(modName)) {
-    writeAnnounceBlueprint([path.join(destinationPath, "Content"), path.join(sourcePath, "Content")], target.name);
+    writeAnnounceBlueprint(
+      [path.join(destinationPath, "Content"), path.join(sourcePath, "Content")],
+      target.name,
+      (await modMeta).gameStartCommand,
+    );
     writeGameFeatureData([path.join(destinationPath, "Content"), path.join(sourcePath, "Content")], target.name);
     markPluginAsMod([
       path.join(destinationPath, `${target.name}.uplugin`),

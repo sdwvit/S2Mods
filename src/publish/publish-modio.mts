@@ -128,7 +128,9 @@ const convertToHtml = (str: string) => {
     .replaceAll(/\[list]/g, "<ul>")
     .replaceAll(/\[\/list]/g, "</ul>")
     .replaceAll(/\[\*](.+)/g, "<li>$1</li>")
-    .replaceAll(/\[url=(.+)](.+)\[\/url]/g, '<a href="$1">$2</a>');
+    .replaceAll(/\[url=(.+)](.+)\[\/url]/g, '<a href="$1">$2</a>')
+    .replaceAll(/\[code](.+?)\[\/code]/gs, "<pre><code>$1</code></pre>")
+    .replaceAll(/\[(b|i|u)](.+?)\[\/\1]/gs, "<$1>$2</$1>");
 };
 
 /* -------------------------------------------------- */

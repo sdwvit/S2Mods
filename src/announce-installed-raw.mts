@@ -21,7 +21,8 @@ import {
 if (announcesInstalled(modName)) {
   const content = path.join(modFolderRaw, "Stalker2", "Content");
   mkdirSync(content, { recursive: true });
-  writeAnnounceBlueprint([content], modName);
+  // Only a first copy: meta.mts (and its gameStartCommand) isn't loaded yet; pullAssets() settles it.
+  writeAnnounceBlueprint([content], modName, undefined, { onlyIfMissing: true });
   writeGameFeatureData([content], modName);
   // The flag effect is a cfg, so it is what makes a mod with no cfgs of its own (CP77MenuMusic) a
   // split mod. prepare-configs writes it again at the end; writing it here as well means the

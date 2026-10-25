@@ -21,9 +21,11 @@ blueprint when its `prepare-configs` runs, except the repacks, NodeBridge and th
   same run. From then on it needs `cook-inject`; `pack-inject` no longer covers it.
 - `pullAssets()` writes the SDK copy, renamed to `/<SdkMod>/announce_mod_is_active`, then the
   subsystem list picks it up (step 3).
-- The template is `src/localization/fixtures/announce-mod-is-active.uasset`, a copy of HeadlessArmors'
-  blueprint. HeadlessArmors itself is never overwritten: edit the blueprint there in the Mod
-  Editor, then copy it over the fixture.
+- The template is `src/localization/fixtures/announce-mod-is-active.uasset`. Every mod's copy is
+  generated from it, renamed into the mod, so the package name inside the fixture doesn't matter
+  (it was saved in WolfArmorFetch). To change the graph: edit any mod's copy in the Mod Editor, then
+  `S2_MOD=<Mod> node src/refresh-announce-template.mts` copies it over the fixture and puts the
+  placeholder back (see "Game start command"). Never rename or hand-copy the fixture.
 - The renamer (`renameLocalizationPackage`) also rewrites the asset registry's
   `GeneratedClass` tag, which spells the package inside an object path.
 
@@ -88,6 +90,28 @@ SID string:
   the same string.
 - `XApplyEffectOnPlayer <EffectPrototypeSID>` is a stock console command (see
   `stalker_commands.txt`). The SID it builds must match the effect from step 1.
+
+## Game start command (`gameStartCommand` in meta.mts)
+
+After the flag, the blueprint runs a second **Execute Console Command**: the mod's optional
+`gameStartCommand` (meta.mts), on every world load. WolfArmorFetch uses
+`XStartQuestNodeBySID WolfArmorFetch_OnWorldLoad` to attach Wolf's topic on saves where he spawned before the
+mod was installed.
+
+- The template's Command pin holds a literal placeholder, `GAME_START_COMMAND_` padded with `x` to 159
+  characters (`GAME_START_COMMAND_PLACEHOLDER`). `writeAnnounceBlueprint` overwrites it in each copy with the
+  mod's command padded with spaces to the same length, or only spaces for a mod without one (an empty
+  console command does nothing).
+- The swap must keep the length. A pin literal is compiled into the blueprint's bytecode (and kept in the
+  graph's pin default); a length change would shift every jump offset behind it. `replaceExportStrings`
+  only handles top-level StrProperty tags, so it can't do this.
+- The placeholder appears twice in a saved blueprint (bytecode and pin default). Typing it by hand lost a
+  character once: check the saved file with the refresh script, which fails without it.
+- A command longer than 159 characters or with non-ASCII characters is refused at build time.
+- The early `raw/` write (`announce-installed-raw.mts`) runs before meta.mts is loaded, so it only writes a
+  copy when none exists; `pullAssets()` writes the patched one.
+- A node a command starts by SID can sit in any quest and needs no quest prefix in its SID
+  (`Skif_X16Scopes` works the same way). Put it in the quest whose nodes it launches.
 
 ## Step 3: the blueprint gets registered
 

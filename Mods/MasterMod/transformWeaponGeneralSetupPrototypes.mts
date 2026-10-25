@@ -16,24 +16,9 @@ function mapUniqueAttachmentsToGeneric(
   struct: WeaponGeneralSetupPrototype,
   context: MetaContext<WeaponGeneralSetupPrototype>,
 ) {
-  if (struct.PreinstalledAttachmentsItemPrototypeSIDs) {
-    fork.PreinstalledAttachmentsItemPrototypeSIDs = struct.PreinstalledAttachmentsItemPrototypeSIDs.filter(
-      // Scopes are handled by stripDefaultScopes: removed here, rolled by the item generators instead.
-      ([_k, e]) => !!uniqueAttachmentsToAlternatives[e.AttachSID] && !getDroppableScopeAlternative(e.AttachSID),
-    ).map(([_k, e]) => {
-      return Object.assign(e.fork(), {
-        AttachSID: uniqueAttachmentsToAlternatives[e.AttachSID],
-        bHiddenInInventory: false,
-      });
-    });
-
-    fork.PreinstalledAttachmentsItemPrototypeSIDs.__internal__.bskipref = false;
-    fork.PreinstalledAttachmentsItemPrototypeSIDs.__internal__.bpatch = true;
-
-    if (!fork.PreinstalledAttachmentsItemPrototypeSIDs.entries().length) {
-      delete fork.PreinstalledAttachmentsItemPrototypeSIDs;
-    }
-  }
+  // Preinstalled built-in magazines and silencers stay as shipped (hidden, integrated): remapping them
+  // to visible generic parts through a partial bpatch list replaced the whole list in game and stripped
+  // those guns' magazines (2026-10-22). Built-in scopes are handled by stripDefaultScopes.
 
   /**
    * 1. If a weapon has unique attachments, make it also compatible with standard alternatives.

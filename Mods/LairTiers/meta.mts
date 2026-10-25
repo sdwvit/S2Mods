@@ -26,6 +26,7 @@ Requires [b]Decoupled Ranks[/b], which provides the levels.[h1][/h1]
 DLC lairs are not affected yet.
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
+  nameOverride: "Decoupled Ranks Lair Extension",
   changenote: "Initial release.",
   // Saves from before the mod never ran rootgraph_Start with it, so its quest never started.
   gameStartCommand: `XStartQuestNodeBySID ${ON_WORLD_LOAD}`,

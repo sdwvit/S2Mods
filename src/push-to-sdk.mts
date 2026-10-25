@@ -34,9 +34,14 @@ export async function pushToSdk() {
     // what the `sdk` symlink points at) before anyone can open it there. Only the missing ones -
     // GSCCreatePlainMod on an existing mod folder is not something to run for nothing.
     for (const t of await sdkModTargets) {
-      if (existsSync(t.modFolder)) continue;
-      logger.log(`SDK mod ${t.name} doesn't exist, creating...`);
-      await createMod(t);
+      if (!existsSync(t.modFolder)) {
+        logger.log(`SDK mod ${t.name} doesn't exist, creating...`);
+        await createMod(t);
+      }
+      // GSCCreatePlainMod leaves no Content/, and pull-assets only writes the announce blueprint,
+      // GameFeatureData and WorldSubsystemData into existing dirs: without it a new mod's assets half
+      // stays empty and its cook dies with "/<Mod>/... Path does not map to any roots" (LairTiers).
+      mkdirSync(path.join(t.modFolder, "Content"), { recursive: true });
     }
     // Wwise inputs live outside raw/ (see mod-wwise.mts) and go in before the cfg early-out.
     installModWwiseBanks();

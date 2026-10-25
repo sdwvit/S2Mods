@@ -4,7 +4,7 @@
  * DesignDocs/DetectInstalledModSpec.md).
  *
  * The blueprint derives the SID from its own class path, so every mod ships the same graph: the
- * template is HeadlessArmors' `announce_mod_is_active`, renamed into `/<SdkMod>/`. The flag effect
+ * template (ANNOUNCE_TEMPLATE), renamed into `/<SdkMod>/`, with the mod's `gameStartCommand`. The flag effect
  * goes in its own `EffectPrototypes_patch_<SdkMod>Installed.cfg`, so it never collides with a
  * transformer that patches EffectPrototypes.cfg (one transformer per cfg, one file per transformer).
  */
@@ -18,7 +18,10 @@ import type { EDuplicateResolveType, EEffectType, EffectPrototype } from "s2cfgt
 import { logger } from "./logger.mts";
 import { parseUasset, renameLocalizationPackage, replaceExportStrings } from "./localization/uasset.mts";
 
-/** HeadlessArmors' blueprint as saved in the Mod Editor. Refresh it after editing it there. */
+/**
+ * The blueprint every mod's copy is made from, as saved in the Mod Editor. To change the graph, edit
+ * any mod's copy there, then run `S2_MOD=<Mod> node src/refresh-announce-template.mts`.
+ */
 export const ANNOUNCE_TEMPLATE = path.join(import.meta.dirname, "localization/fixtures/announce-mod-is-active.uasset");
 export const ANNOUNCE_BLUEPRINT = "announce_mod_is_active.uasset";
 
@@ -109,27 +112,71 @@ export function markPluginAsMod(upluginFiles: string[]) {
 /** The flag effect SID the blueprint applies, given the mod's SDK name. */
 export const installedEffectSid = (sdkModName: string) => `${sdkModName}Installed`;
 
-/** The mod the template was authored in. Its blueprint is edited there, so never overwrite it. */
-const templateHome = () => parseUasset(ANNOUNCE_TEMPLATE).summary.packageName.split("/")[1];
+/**
+ * The Command literal of the template's second Execute Console Command, run after the flag. It is
+ * compiled into the blueprint's bytecode, where a length change would move every jump offset behind
+ * it, so each mod's copy gets its `gameStartCommand` (meta.mts) padded with spaces to the same length
+ * (the console ignores them), or only spaces. Type it into the node exactly as written.
+ */
+export const GAME_START_COMMAND_PLACEHOLDER = "GAME_START_COMMAND_".padEnd(159, "x");
+
+/** The blueprint bytes with the placeholder swapped for `command` (empty: none), same length. */
+export function withGameStartCommand(blueprint: Buffer, command = "") {
+  const placeholder = Buffer.from(GAME_START_COMMAND_PLACEHOLDER, "latin1");
+  if (command.length > placeholder.length || /[^\x20-\x7e]/.test(command)) {
+    throw new Error(`gameStartCommand must be printable ASCII of at most ${placeholder.length} chars: ${command}`);
+  }
+  const value = Buffer.from(command.padEnd(placeholder.length, " "), "latin1");
+  const out = Buffer.from(blueprint);
+  let found = 0;
+  for (let at = out.indexOf(placeholder); at !== -1; at = out.indexOf(placeholder, at + placeholder.length)) {
+    value.copy(out, at);
+    found++;
+  }
+  if (!found && command) throw new Error(`the announce template has no ${GAME_START_COMMAND_PLACEHOLDER} node yet`);
+  return out;
+}
 
 /**
- * Write the blueprint, renamed to `/<sdkModName>/announce_mod_is_active`, into every existing dir
- * in `contentDirs`. Only rewritten when the bytes change, so an unchanged mod keeps its cook
- * fingerprint.
+ * A mod's copy of the blueprint as a template: its command (`gameStartCommand`, or none) swapped back
+ * for the placeholder, the reverse of withGameStartCommand.
  */
-export function writeAnnounceBlueprint(contentDirs: string[], sdkModName: string) {
-  if (sdkModName === templateHome()) return;
+export function asAnnounceTemplate(blueprint: Buffer, command = "") {
+  const value = Buffer.from(command.padEnd(GAME_START_COMMAND_PLACEHOLDER.length, " "), "latin1");
+  const placeholder = Buffer.from(GAME_START_COMMAND_PLACEHOLDER, "latin1");
+  const out = Buffer.from(blueprint);
+  let found = 0;
+  for (let at = out.indexOf(value); at !== -1; at = out.indexOf(value, at + value.length)) {
+    placeholder.copy(out, at);
+    found++;
+  }
+  if (!found && !out.includes(placeholder)) throw new Error(`no game start command node found (command: "${command}")`);
+  return out;
+}
+
+/**
+ * Write the blueprint, renamed to `/<sdkModName>/announce_mod_is_active` and running
+ * `gameStartCommand` (if any) on every world load, into every existing dir in `contentDirs`. Only
+ * rewritten when the bytes change, so an unchanged mod keeps its cook fingerprint. `onlyIfMissing`
+ * leaves an existing copy alone (the early raw/ write, which runs before the mod's meta.mts is loaded).
+ */
+export function writeAnnounceBlueprint(
+  contentDirs: string[],
+  sdkModName: string,
+  gameStartCommand?: string,
+  { onlyIfMissing = false } = {},
+) {
   const tmp = mkdtempSync(path.join(os.tmpdir(), "announce-installed-"));
   try {
     const built = path.join(tmp, ANNOUNCE_BLUEPRINT);
     renameLocalizationPackage(ANNOUNCE_TEMPLATE, `/${sdkModName}/announce_mod_is_active`, built, {
       keepNameOrder: true,
     });
-    const bytes = readFileSync(built);
+    const bytes = withGameStartCommand(readFileSync(built), gameStartCommand);
     for (const dir of contentDirs.filter(existsSync)) {
       const dest = path.join(dir, ANNOUNCE_BLUEPRINT);
-      if (existsSync(dest) && readFileSync(dest).equals(bytes)) continue;
-      copyFileSync(built, dest);
+      if (existsSync(dest) && (onlyIfMissing || readFileSync(dest).equals(bytes))) continue;
+      writeFileSync(dest, bytes);
       logger.info(`${sdkModName}: wrote ${ANNOUNCE_BLUEPRINT} to ${dir}`);
     }
   } finally {

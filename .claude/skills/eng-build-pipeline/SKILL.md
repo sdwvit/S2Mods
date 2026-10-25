@@ -10,6 +10,24 @@ Run `npm run prepare-configs` from the **mod's own folder** before any cook/inje
 `cook-inject` packages whatever is already in `raw/`; if `structTransformers` changed but
 `raw/` wasn't regenerated, you ship stale configs.
 
+Never use `SKIP_SDK_PUSH=1` before a publish or install. The cfg half is packed from the SDK's copy of
+the cfgs, but its fingerprint is taken from `raw/`. A skipped push leaves the SDK copy stale while the
+fingerprint matches, so the publish shipped the old cfgs and logged "matches raw/" (WolfArmorFetch,
+2026-10-25). Fix: a plain `prepare-configs`, then delete
+`SDK/Stalker2/SavedMods/Staged/<Mod>Cfg/.raw-hash` to force the repack.
+
+## Check what actually shipped
+Publishing does not install anything locally, and the game keeps what it loaded at startup. After
+`cook-inject`, unpack the installed cfg pak and grep it before asking for an in-game test:
+`"$REPAK_PATH" unpack -o <scratch> "<game>/Stalker2/Content/Paks/~mods/<Mod>/Windows/OverrideContent/Windows/Stalker2/Mods/<Mod>Cfg/Content/Paks/Windows/<Mod>CfgStalker2-Windows-OverrideContent.pak"`.
+Do the same with `steamworkshop/...` after a publish. The `.ucas` of a cfg half is 48 bytes; the cfgs
+are in the `.pak`. A restart then needs the game started after the inject (compare
+`ps -o lstart=` with the pak's mtime).
+
+To restart the game, kill it by pid (`ps aux | grep "[S]talker2-Win64-Shipping"`): `pkill -f
+Stalker2-Win64-Shipping` also matches the shell running it and kills that. Restart only when the user
+asks; they may be mid-test.
+
 ## "prepare" ≠ "cook"
 When the user says "prepare", that means `npm run prepare-configs` — nothing else.
 **Never run `cook-inject` without an explicit request.** It's heavy (builds paks, injects
@@ -127,6 +145,14 @@ there does the game register the mod plugin and append its AssetRegistry.bin). S
 `steamworkshop/` as its content folder, mod.io zips it, `zip-for-xbox` zips `raw/` (loose, no
 paks) — none of them needs to know there are two halves. `pull-staged` throws rather than
 publishing half a mod if only one half is staged.
+
+## Publishing what is already installed, without a cook
+`publish-steam` calls `ensureCooked()`, which may recook. When the user says not to: run
+`S2_MOD=<Mod> node src/pull-staged.mts` (stages the SDK's staged paks into `steamworkshop/`), check its paks
+match `~mods/<Mod>/Windows` by md5, then `DESC_ONLY=1 npm run publish-steam` from the mod folder. That
+skips the cook and the publish's git commit/tag. Steam answers "Failed to update workshop item (File Not
+Found)" when `<Mod>/512.png` is missing; it's the preview the vdf names (a scaled `Icon128.png` works as a
+placeholder). The login waits on the user's Steam Guard phone confirmation.
 
 ## The PackageClassifier is generated, not authored
 `GSCCookMod` cooks a mod twice and steers each pass with one of two package lists:

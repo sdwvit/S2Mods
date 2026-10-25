@@ -29,8 +29,7 @@ const cmd = () => {
   vdfData.workshopitem.description = sanitize(
     meta.description +
       `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[hr][/hr]
-      Mod compatibility:
-
+      [h3]Mod compatibility[/h3]
       This mod bPatches files, so it is compatible with other mods that don't modify the same lines. Modified files are listed on ${getModifiedFilesLink("steam")}. 
       `,
   );

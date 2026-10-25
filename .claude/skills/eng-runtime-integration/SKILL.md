@@ -57,6 +57,19 @@ loads recreate it). The GameEngine and `Default__KismetSystemLibrary` object ind
 per game build in `<Win64>/NodeBridge/cache/<PE timestamp>-<SizeOfImage>.json` and checked by name.
 Only a new build (or a mismatch) rescans GUObjectArray (~30 s). Every inject restarts node.exe,
 so don't edit bridge files mid-session.
+URL-encode the command (`curl "http://127.0.0.1:47811/cmd?c=$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))' 'XSetFactionGodMode Player true')"`).
+The reply `{"ok":true,"ran":...}` only means the command was sent; check the effect in game.
+
+Player god mode for test sessions (either one; user-provided 2026-10-23):
+- `XSetFactionGodMode Player true` (`false` to turn it off)
+- `XApplyEffectOnPlayer GodMode` (`XRemoveEffectFromPlayer GodMode` to remove)
+
+Teleport the player to world coordinates: `XTeleportTo X Y Z` (UE units, cm; not in
+stalker_commands.txt; user-provided 2026-10-23). Read the current position with `/pos`. Region
+centres are in `MarkerPrototypes.cfg` (`WorldPosition` of the region markers, e.g. `sircaa`
+659997 473997); their Z is about 0, so add height and let god mode absorb the drop.
+Other test-session helpers: `XCreateItemInInventoryByID <ItemSID> 0 <count> 1` puts items straight
+into the inventory; `XSpawnObjBySID <ObjPrototypeSID> <rank> 0 X Y Z 0 0 0` spawns an NPC.
 
 `USceneComponent`: `RelativeLocation` +0x130 (FVector3d, 24B). `ComponentToWorld` is **not**
 a UProperty in the GSC fork — the cached FTransform's Translation slot is at
@@ -69,3 +82,13 @@ pawn back.
 
 If a game patch drifts these, re-run `probeUStructLayout` (also in `main.mts`) — it sweeps
 candidate offsets and scores against expected pawn class names.
+
+## Inspecting live objects (HTTP)
+The C++ `listObjects({filter})` matches nothing in this build (it relies on the broken FName
+path). Use the JS endpoints instead: `/find?q=` (GUObjectArray scan decoding names via
+FNamePool, ~50 s), `/obj?addr=`, `/props?struct=` (property chain with field types),
+`/mem?addr=&n=`. Wwise example: `AkAudioEvent.EventCookedData` (+0x60) is
+`WwiseLocalizedEventCookedData`; its `EventLanguageMap` elements hold `WwiseEventCookedData`
+at +0x10, whose `Media` TArray (+0x18 inside it) lists `WwiseMediaCookedData` with `MediaId`
+at +0. Compare that id with the mod's `GeneratedSoundBanks/.../Event/<Event>.json` to tell
+whether the mod's override or the vanilla event is loaded.

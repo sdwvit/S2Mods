@@ -29,6 +29,7 @@
     "pull-staged": "node ./src/pull-staged.mts",
     "pull-assets": "node ./src/pull-assets.mts",
     "purge-caches": "find . -path '*/node_modules' -prune -o -type f -name '.*.cache.zlib' -exec rm -f {} +",
+    "create-mod": "node ./src/create-mod.mts",
     "create-git-branches": "node ./src/gitbranches/create-git-branches.mts",
     "test": "vitest run",
     "test:watch": "vitest"

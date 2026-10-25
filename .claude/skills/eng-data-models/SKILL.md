@@ -75,12 +75,46 @@ Verified in-game 2026-10-08 with WolfArmorFetch (Wolf, Rookie Village). Three th
   (`QuestSID = <Hub>`, patched into the hub's cfg), launched by the same nodes that attach the NPC's
   vanilla Info topics. Route each re-attach with `If` nodes holding Bridge conditions on your quest's
   nodes; vanilla points Bridge conditions across quests too. See `Mods/WolfArmorFetch/transformRookieVillageHub.mts`.
+  Gate each offer only on its own readiness node, the one its marker uses. Gating job 3 behind job 2's
+  "accepted" and "handed in" left a save with the marker and no topic (see "Mod quests on existing saves").
 - **Hearing the result back.** Your quest reacts to a hub-owned dialog with an `OnInfotopicFinishEvent`
   node (`EventType = OnDialogFinished`, `InfotopicLastPhrases` = the ending's last phrase SID), as
   E16_MQ02 does. A `SetDialog`'s own output pins are named after each ending's last phrase SID.
 
 A side-quest marker on the NPC is `EQuestNodeType::SetQuestGiver` (`TargetQuestGuid` = NPC,
 `MainQuest = false`). An `Excluding` launcher removes it again (E02_SQ01).
+
+## Mod quests on existing saves
+All verified in game with WolfArmorFetch, 2026-10-25.
+- **Your quest may not be running.** The rootgraph `XStartQuestBySID` launcher did not start it on a
+  save from before install. Hub-owned dialogs still showed and closed, but your quest's
+  `OnInfotopicFinishEvent` listeners never fired, so a hand-in took nothing and paid nothing. Every
+  world load (`gameStartCommand`), check `If` with a Bridge on `<Quest>_Start`, and on False run a
+  `ConsoleCommand` `XStartQuestBySID <Quest>`. Progress made while the quest wasn't running is never
+  recorded, so later checks must not depend on it.
+- **Does an NPC exist:** `ConditionType = IsCreated`, `ConditionComparance = Equal`,
+  `TargetPlaceholder = <GUID>` (`Mods/WolfArmorFetch/conditions.mts` `isCreated`). A Bridge condition on a
+  vanilla hub node (`OnNPCCreateEvent`, `Phase2`, `Technical_13`) read False on a save long past them;
+  vanilla never reads those nodes' state. Bridge conditions on your own quest's nodes do work.
+- **World load is too early.** A re-attach chain started by `gameStartCommand` at load did nothing,
+  while the same chain started from the console a minute later worked. Run it after a delay:
+  `Technical` `StartDelay = 5`, retrying every 5 s while `IsCreated` is False, and once more at 30 s.
+  No `OnTickEvent`: it runs every frame.
+- **Never chain off a `Spawn` node's output.** A node launched by `SpawnHook` never ran on a save that
+  did spawn him. Launch follow-ups from the spawn's own launchers (plus a `StartDelay`) and gate
+  walk-in pins on `IsCreated`.
+- **Start a node of another quest:** a `ConsoleCommand` node with `XStartQuestNodeBySID <SID>`. Use it to
+  attach a hub topic at the moment your quest turns ready. A hub `SetTimer` with the same length as the
+  quest's own timer raced it: the check ran before the quest was ready, and the marker came without the
+  topic. Vanilla `BridgeEvent` nodes are all `LaunchOnQuestStart`, and a `LaunchOnQuestStart` node added
+  to a quest that already started never launches on that save.
+- **NPC relationship:** `ChangeRelationships` with `UsePreset = true`, `RelationshipValue` 0 = enemies,
+  2 = neutral (`Terricon_Hub_NeutralsNeutral`), 3 = friends; player in `FirstTargetSID`. Make quest
+  NPCs neutral once spawned when their faction may be hostile to the player on that save.
+- **Debugging a quest graph in the running game:** start each node of the chain in turn with NodeBridge
+  `/cmd?c=XStartQuestNodeBySID <SID>` and ask the player one yes/no question (has the topic appeared?).
+  The first node that brings the result back sits right after the broken step. Asking the player to read
+  a stream of `ShowFadeScreen` messages is too much: they go by too fast.
 
 ## Quest conditions: one condition per group
 A `Conditions` struct holds groups `[0]`, `[1]`, … with one condition each, joined by

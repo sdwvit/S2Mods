@@ -31,6 +31,11 @@ export type MetaType<T = Struct> = {
   sdkModNameOverride?: string;
   originalAuthor?: string;
   changenote: string;
+  /**
+   * A console command the mod's announce blueprint runs on every world load, after the
+   * `<Mod>Installed` flag (for example `XStartQuestNodeBySID <node>`). See DesignDocs/DetectInstalledModSpec.md.
+   */
+  gameStartCommand?: string;
   description: string;
   structTransformers: StructTransformer<T>[];
   onFinish?(): void | Promise<void>;

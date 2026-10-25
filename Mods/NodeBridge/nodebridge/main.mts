@@ -4,9 +4,13 @@
 import http from "node:http";
 import type { Bridge, ModInit } from "@nodebridge/runtime";
 import {
+  decodeFName,
+  getObjectName,
+  getObjectPointers,
   getPlayerPawnLocation,
   parseHex,
   readU32LE,
+  readU64At,
   readU64LE,
   runConsoleCommand,
   waitForReflection,
@@ -14,13 +18,26 @@ import {
 
 const COMMAND_PORT = 47811;
 
+/** Endpoint docs, served by GET / (and with every 404). */
+const ENDPOINTS = [
+  { path: "/", usage: "GET /", doc: "this list" },
+  { path: "/cmd", usage: "GET /cmd?c=<console command>", doc: "run any console command" },
+  { path: "/find", usage: "GET /find?q=<substring>&limit=200", doc: "live UObjects whose name or class contains q" },
+  { path: "/mem", usage: "GET /mem?addr=<n>&n=256", doc: "raw memory read (max 4096 bytes)" },
+  {
+    path: "/props",
+    usage: "GET /props?struct=<n>",
+    doc: "property chain of a UStruct/UClass (name, offset, field class, inner pointers)",
+  },
+  { path: "/obj", usage: "GET /obj?addr=<n>", doc: "name, class and outer path of the UObject at addr" },
+  { path: "/pos", usage: "GET /pos", doc: "player location" },
+  { path: "/squad", usage: "GET /squad?faction=Spark&size=5", doc: "spawnSquad at the player" },
+];
+
 /**
  * Local control server, so one bridge process serves a whole play session: the object-table
  * scan behind runConsoleCommand runs once, and later commands reuse the cached session.
- * Bound to 127.0.0.1 only.
- *   GET /cmd?c=<console command>     run any console command
- *   GET /pos                         player location
- *   GET /squad?faction=Spark&size=5  spawnSquad at the player
+ * Bound to 127.0.0.1 only. Endpoints are listed in ENDPOINTS.
  */
 function startCommandServer(bridge: Bridge): void {
   const server = http.createServer(async (req, res) => {
@@ -30,6 +47,7 @@ function startCommandServer(bridge: Bridge): void {
       res.end(JSON.stringify(body));
     };
     try {
+      if (url.pathname === "/") return reply(200, { port: COMMAND_PORT, endpoints: ENDPOINTS });
       if (url.pathname === "/cmd") {
         const c = url.searchParams.get("c");
         if (!c) return reply(400, { error: "c required" });
@@ -37,13 +55,25 @@ function startCommandServer(bridge: Bridge): void {
         bridge.log(`[http] ran: ${c}`);
         return reply(200, { ok: true, ran: c });
       }
+      if (url.pathname === "/find") {
+        const q = url.searchParams.get("q");
+        if (!q) return reply(400, { error: "q required" });
+        return reply(200, await findObjects(bridge, q, Number(url.searchParams.get("limit") ?? 200)));
+      }
+      if (url.pathname === "/mem") {
+        const addr = Number(url.searchParams.get("addr"));
+        const n = Number(url.searchParams.get("n") ?? 256);
+        return reply(200, await bridge.game.readMemory(addr, Math.min(n, 4096)));
+      }
+      if (url.pathname === "/props") return reply(200, await describeProperties(bridge, Number(url.searchParams.get("struct"))));
+      if (url.pathname === "/obj") return reply(200, await describeObject(bridge, Number(url.searchParams.get("addr"))));
       if (url.pathname === "/pos") return reply(200, await getPlayerPawnLocation(bridge));
       if (url.pathname === "/squad") {
         const faction = url.searchParams.get("faction") ?? "Spark";
         const size = Number(url.searchParams.get("size") ?? 5);
         return reply(200, { ok: true, ran: await spawnSquad(bridge, faction, size) });
       }
-      return reply(404, { error: "unknown path" });
+      return reply(404, { error: "unknown path", endpoints: ENDPOINTS });
     } catch (e) {
       bridge.log.error(`[http] ${url.pathname}: ${(e as Error).message}`);
       return reply(500, { error: (e as Error).message });
@@ -53,7 +83,71 @@ function startCommandServer(bridge: Bridge): void {
   server.listen(COMMAND_PORT, "127.0.0.1", () => bridge.log(`[http] listening on 127.0.0.1:${COMMAND_PORT}`));
 }
 
-const SQUAD_ROLES = ["Stormtrooper", "Recon", "Sniper", "CloseCombat"];
+/**
+ * Live UObjects whose name or class contains `q` (case-insensitive). Names are
+ * decoded in JS from FNamePool: the C++ listObjects filter matches nothing in this build.
+ */
+async function findObjects(bridge: Bridge, q: string, limit: number) {
+  const objects = await getObjectPointers(bridge);
+  const names = new Map<number, string>();
+  const nameOf = async (obj: number) => {
+    let n = names.get(obj);
+    if (n == null) names.set(obj, (n = await getObjectName(bridge, obj)));
+    return n;
+  };
+  const needle = q.toLowerCase();
+  const items: Array<{ index: number; addr: number; name: string; className: string; path: string }> = [];
+  for (let i = 0; i < objects.length && items.length < limit; i++) {
+    const obj = objects[i];
+    if (!obj) continue;
+    const name = await nameOf(obj);
+    const cls = (await readU64At(bridge, obj + 0x10)) ?? 0;
+    const className = cls ? await nameOf(cls) : "";
+    if (!(name + " " + className).toLowerCase().includes(needle)) continue;
+    const outers: string[] = [];
+    for (let o = (await readU64At(bridge, obj + 0x20)) ?? 0, d = 0; o && d < 8; o = (await readU64At(bridge, o + 0x20)) ?? 0, d++) {
+      outers.unshift(await nameOf(o));
+    }
+    items.push({ index: i, addr: obj, name, className, path: [...outers, name].join(".") });
+  }
+  return { total: objects.length, returned: items.length, items };
+}
+
+async function describeObject(bridge: Bridge, obj: number) {
+  const name = await getObjectName(bridge, obj);
+  const cls = (await readU64At(bridge, obj + 0x10)) ?? 0;
+  const outers: string[] = [];
+  for (let o = (await readU64At(bridge, obj + 0x20)) ?? 0, d = 0; o && d < 8; o = (await readU64At(bridge, o + 0x20)) ?? 0, d++) {
+    outers.unshift(await getObjectName(bridge, o));
+  }
+  return { addr: obj, name, className: cls ? await getObjectName(bridge, cls) : "", path: [...outers, name].join(".") };
+}
+
+/** Field class name and the two pointers after FProperty (StructProperty's UStruct, ArrayProperty's Inner) per property. */
+async function describeProperties(bridge: Bridge, struct: number) {
+  const out: Array<{ name: string; off: number; type: string; p70: string; p78: string }> = [];
+  const seen = new Set<number>();
+  for (let cur = (await readU64At(bridge, struct + 0x70)) ?? 0; cur && !seen.has(cur) && out.length < 256; ) {
+    seen.add(cur);
+    const r = await bridge.game.readMemory(cur, 0x80);
+    if (!("hex" in r)) break;
+    const b = parseHex(r.hex);
+    const fieldClass = readU64LE(b, 0x8);
+    const typeR = fieldClass ? await bridge.game.readMemory(fieldClass, 8) : null;
+    const type = typeR && "hex" in typeR ? await decodeFName(bridge, readU32LE(parseHex(typeR.hex), 0), readU32LE(parseHex(typeR.hex), 4)) : "";
+    out.push({
+      name: await decodeFName(bridge, readU32LE(b, 0x20), readU32LE(b, 0x24)),
+      off: readU32LE(b, 0x44),
+      type,
+      p70: readU64LE(b, 0x70).toString(16),
+      p78: readU64LE(b, 0x78).toString(16),
+    });
+    cur = readU64LE(b, 0x48);
+  }
+  return out;
+}
+
+const SQUAD_ROLES =["Stormtrooper", "Recon", "Sniper", "CloseCombat"];
 
 /**
  * Spawns `size` soldiers of `faction` (GeneralNPC_<Faction>_<Role>) in a row 8 m along +X from
