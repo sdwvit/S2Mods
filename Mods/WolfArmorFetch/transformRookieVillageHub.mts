@@ -17,7 +17,7 @@ import {
   TURNIN,
   lastLineSID,
 } from "./dialog.mts";
-import { Q, hasRun, hasRunAny, questNode, setDialog } from "./nodes.mts";
+import { Q, WOLF_GUID, hasRun, questNode, setDialog } from "./nodes.mts";
 import {
   COVER_ACCEPT,
   COVER_ACCEPTED,
@@ -52,8 +52,9 @@ const WOLF_TOPIC_TRIGGERS = [
 /**
  * Started on every world load by the mod's announce blueprint (`XStartQuestNodeBySID`), for saves where
  * Wolf was created before the mod was installed: none of the triggers above runs again there. It
- * re-runs the same re-attach as they do, once Wolf exists: once any of them has run. A save can lack the
- * phase-1 creation (a user's save on 2026-10-25 did, and got no topic until the check took all four).
+ * re-runs the same re-attach as they do, once Wolf exists (`IsCreated`, as vanilla checks him). A Bridge
+ * condition on any of the triggers above came out False on a save past them (2026-10-25): vanilla never
+ * reads those nodes' state, only their outputs.
  */
 export const ON_WORLD_LOAD = `${Q}_OnWorldLoad`;
 
@@ -94,7 +95,15 @@ export const transformRookieVillageHub: StructTransformer<Struct> = () => {
       NodePrototypeVersion: 1,
       NodeType: "EQuestNodeType::If",
       Repeatable: true,
-      Conditions: hasRunAny(WOLF_TOPIC_TRIGGERS),
+      Conditions: new Struct({
+        0: new Struct({
+          0: new Struct({
+            ConditionType: "EQuestConditionType::IsCreated",
+            ConditionComparance: "EConditionComparance::Equal",
+            TargetPlaceholder: WOLF_GUID,
+          }),
+        }),
+      }),
     }),
     // The jobs' own quests, if rootgraph never started them on this save: the dialogs above live in the
     // hub, so they still showed, but nothing heard them end (a Falcon hand-in paid nothing, 2026-10-25).

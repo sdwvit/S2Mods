@@ -29,7 +29,7 @@ The second follows soon after and builds on what the first one turned up.[h1][/h
 The third takes you to Zaton, where you'll have to talk your way through a meeting. How well you're prepared changes your odds.[h1][/h1]
 Works on existing saves. Dialogs and journal text are translated into every language the game supports.[h1][/h1]
 `,
-  changenote: "Fixed Wolf's jobs not showing up or not paying out on some existing saves.",
+  changenote: "Wolf's jobs now show up on existing saves where the previous fix didn't help.",
   // Saves where Wolf spawned before the mod was installed never re-run his topic triggers.
   gameStartCommand: `XStartQuestNodeBySID ${ON_WORLD_LOAD}`,
   structTransformers: [
