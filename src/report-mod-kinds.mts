@@ -91,8 +91,7 @@ if (process.argv.includes("--json")) {
         .join(", "),
   );
 
-  // Several repo mods deliberately share one SDK mod via sdkModNameOverride (the three
-  // ShaysDistantHorizons* variants are all Release_Render). Their cfg halves share the suffixed
+  // Several repo mods may deliberately share one SDK mod via sdkModNameOverride. Their cfg halves share the suffixed
   // name in exactly the same way, so this is informational - but it is worth seeing.
   const owners = new Map<string, string[]>();
   for (const { mod, sdkMods } of rows) {

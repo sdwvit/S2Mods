@@ -26,13 +26,13 @@ export const ANNOUNCE_TEMPLATE = path.join(import.meta.dirname, "localization/fi
 export const ANNOUNCE_BLUEPRINT = "announce_mod_is_active.uasset";
 
 /**
- * Mods that don't announce: repacks of other authors' paks (they also carry `sdkModNameOverride`),
+ * Mods that don't announce: repacks of other authors' mods (kept cfg-only, so no blueprint to cook),
  * the runtime bridge, and test mods.
  */
 const NOT_ANNOUNCED = new Set([
-  "ShaysDistantHorizons150",
-  "ShaysDistantHorizons170",
   "ShaysDistantHorizons250",
+  "ShaysDistantHorizons300",
+  "ShaysDistantHorizons350",
   "NodeBridge",
   "AmokBodyDamageTest",
   "LairWarTest",

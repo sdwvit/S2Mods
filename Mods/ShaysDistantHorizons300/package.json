@@ -1,0 +1,12 @@
+{
+  "name": "@s2mods/shaysdistanthorizons300",
+  "private": true,
+  "scripts": {
+    "prepare-configs": "S2_MOD=ShaysDistantHorizons300 node ../../src/prepare-configs.mts",
+    "update-readme": "S2_MOD=ShaysDistantHorizons300 node ../../src/update-readme.mts",
+    "cook-inject": "S2_MOD=ShaysDistantHorizons300 node ../../src/cook-inject.mts",
+    "publish-steam": "S2_MOD=ShaysDistantHorizons300 node ../../src/publish/publish-steam.mts",
+    "publish-modio": "S2_MOD=ShaysDistantHorizons300 node ../../src/publish/publish-modio.mts",
+    "zip-for-xbox": "S2_MOD=ShaysDistantHorizons300 node ../../src/publish/zip-for-xbox.mts"
+  }
+}
