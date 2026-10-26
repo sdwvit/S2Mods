@@ -194,11 +194,11 @@ async function publishToModIO() {
     createModZip(undefined, undefined, `${modName}-modio`),
     Promise.resolve(getStoredModId() || createMod()),
   ]);
-  await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
+  const [updated] = await Promise.allSettled([updateMod(modId, true), uploadModfile(modId, outputZip)]);
   rmSync(outputZip);
-  logger.log(
-    `mod.io publish complete https://mod.io/g/stalker2/m/${modName.toLowerCase()}-by-${meta.originalAuthor || process.env.STEAM_USER}`,
-  );
+  // The slug comes from the mod's name at creation and never follows a rename, so take mod.io's own URL.
+  const profileUrl = updated.status === "fulfilled" ? updated.value?.profile_url : undefined;
+  logger.log(`mod.io publish complete ${profileUrl ?? `(mod ${modId}, page URL unknown)`}`);
   finalizePublish("modio", publishNote, publishedAt);
 }
 
