@@ -44,3 +44,4 @@ Mods/*/raw/Stalker2/S2_WwiseProject/
 # WolfArmorFetch voice assets (lip-sync AnimSequences, generated SoundBanks): too large for git
 Mods/WolfArmorFetch/raw/Stalker2/Content/Animations/
 Mods/WolfArmorFetch/wwise/GeneratedSoundBanks/
+/.nexusmods-browser/

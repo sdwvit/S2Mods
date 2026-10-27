@@ -65,7 +65,7 @@ fs.mkdirSync(modFolder, { recursive: true });
 
 const scripts = ["prepare-configs", "update-readme", "cook-inject"].map((s) => [s, `./src/${s}.mts`]);
 scripts.push(
-  ...["publish-steam", "publish-modio", "zip-for-xbox"].map((s) => [s, `./src/publish/${s}.mts`]),
+  ...["publish-steam", "publish-modio", "publish-nexus", "zip-for-xbox"].map((s) => [s, `./src/publish/${s}.mts`]),
 );
 writeFile("package.json", JSON.stringify({
   name: `@s2mods/${modName.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase()}`,
