@@ -13,6 +13,10 @@ support desk. The request needs two public links, so it always comes after the P
 1. **mod.io page.** Publish to mod.io first (`npm run publish-modio`, or `publish-platforms`,
    which runs mod.io, Steam and the zip step in order). The page URL is
    `https://mod.io/g/stalker2/m/<slug>`; `publish-modio` prints it ("mod.io publish complete ...").
+   The slug is fixed when the mod is created and never follows a rename or folder move: never
+   build it from the mod's name (ShaysDistantHorizons250 lives at `distant-horizons-150m-by-shay`;
+   the Xbox tickets got wrong links on 2026-10-26). Take the printed URL, or `profile_url` from
+   `GET /games/5761/mods/<id in Mods/<Mod>/.modio>`.
 2. **Google Drive link to the zip.** `npm run zip-for-xbox` (run with `S2_MOD=<ModName>` from the
    repo root, or from the mod folder) zips `Mods/<ModName>/raw/Stalker2` into `<ModName>.zip` at
    the repo root and uploads it with `src/upload-google-drive.mts`, which prints the Drive link.
@@ -94,6 +98,9 @@ goes to the email.
 When the user is signed in to the site (avatar top right), Name and Email are gone, a CCs field
 appears above the Drive field, and submitting opens the ticket page with its number
 (`/support/tickets/<id>`).
+Opened directly by URL, the create page can show no avatar and ask for Name and Email even while
+signed in; the ticket still lands on the account (bug report #45543, 2026-10-26). Judge sign-in from
+the tickets list, and after submitting find the new ticket's number there.
 
 Quirks (2026-10-22):
 - Clicks sent right after a navigation are ignored while the page hydrates. Screenshot first,
@@ -127,6 +134,11 @@ Specifications (CPU/RAM/GPU), Issue Type* (`Bug` / `Question`) and an attachment
 20 MB; `file_upload` onto the hidden "Uploader" input works). The description editor opens a
 command list on `/`, so put long text in with a synthetic `paste` event carrying `text/html`
 (javascript_tool) rather than typing it. Submitting with an attachment takes about 30 s.
+
+Replying on a ticket (`/support/tickets/<id>`): click the "Add message" box first, which opens the
+rich-text editor, then click inside it and paste (same `paste` event as above). **Update** sends; with
+no attachment it asks "Attachment Missing", answer **Send Anyway**. Files over 20 MB go as a Drive link
+(upload with `uploadFileToGoogleDrive` from `src/upload-google-drive.mts`, run with `node --env-file=.env`).
 
 Support replies on the ticket once the Xbox build is uploaded to mod.io; nothing else is needed
 from our side.
