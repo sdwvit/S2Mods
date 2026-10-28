@@ -16,9 +16,9 @@ import {
 } from "./dialog.mts";
 import { INSTALLED_EFFECT_SID as HEADLESS_ARMORS_INSTALLED } from "../HeadlessArmors/installed.mts";
 import { PLAYER_GUID as PLAYER, Q, WOLF_GUID, hasRun, onDialogEnding, questNode } from "./nodes.mts";
-import { allOf, hasEffect, itemInContainer } from "./conditions.mts";
+import { allOf, hasEffect, isCreated, itemCount, itemInContainer } from "./conditions.mts";
 import { coverNodes } from "./coverNodes.mts";
-import { REWARD_STASH_GUID as STASH_GUID } from "./coverPrototypes.mts";
+import { DECIDER_SPARE_GUID, REWARD_STASH_GUID as STASH_GUID } from "./coverPrototypes.mts";
 
 const node = (SID: string, fields: Record<string, unknown>) => questNode(Q, SID, fields);
 
@@ -96,6 +96,7 @@ function deciderNodes() {
       JournalQuestStageSID: `${QD}_FindGun`,
     }),
     returnToWolfStage(`${QD}_SetJournal_ReturnToWolf`, `${QD}_ListenItem`, QD, `${QD}_ReturnToWolf`),
+    ...spareDeciderNodes(),
 
     node(`${QD}_RemoveGun`, {
       NodeType: "EQuestNodeType::ItemRemove",
@@ -118,6 +119,77 @@ function deciderNodes() {
       JournalEntity: "EJournalEntity::Quest",
       JournalAction: "EJournalAction::Finish",
       JournalQuestSID: QD,
+    }),
+  ];
+}
+
+/** The debtor after SQ86 (SQ86_P's GenijAfterSQ86), who gets the Decider when vanilla hands it back. */
+const GENIJ_AFTER_GUID = "E4E98DCA4FE532EA307BE89BDEC39CF9";
+
+/** SQ86's journal entry in `state`. */
+const sq86 = (state: string) =>
+  new Struct({
+    ConditionType: "EQuestConditionType::JournalState",
+    ConditionComparance: "EConditionComparance::Equal",
+    JournalEntity: "EJournalEntity::Quest",
+    JournalState: `EJournalState::${state}`,
+    JournalQuestSID: "SQ86",
+  });
+
+/**
+ * The Decider comes from vanilla SQ86. On a save where SQ86 is over and Skif sold or dropped the gun,
+ * with no debtor carrying one, the job could never be finished: a spare is spawned where SQ86 left it,
+ * and the "find it" stage is started again with an area marker around it, as vanilla's SQ86_Find_AK_GunLost does.
+ * Checked on accepting, and on each re-attach while the job is open (the hub starts `${QD}_If_SQ86Over`
+ * from the console). The spawn runs once.
+ */
+export const DECIDER_SPARE_CHECK = `${QD}_If_SQ86Over`;
+function spareDeciderNodes() {
+  const If = (SID: string, launchers: { SID: string; Name?: string }[], Conditions: Struct) =>
+    node(SID, { NodePrototypeVersion: 1, NodeType: "EQuestNodeType::If", Repeatable: true, Launchers: getLaunchers(launchers), Conditions });
+  const sq86Over = new Struct({ ConditionCheckType: "EConditionCheckType::Or" });
+  ["Finished", "Failed", "Cancelled"].forEach((state) => sq86Over.addNode(new Struct({ 0: sq86(state) })));
+  const genijHasNone = itemCount(DECIDER_ITEM, "Equal", 0);
+  genijHasNone.TargetCharacter = GENIJ_AFTER_GUID;
+
+  return [
+    If(DECIDER_SPARE_CHECK, [{ SID: `${QD}_SetJournal_FindGun` }], sq86Over),
+    If(`${QD}_If_NoGun`, [{ SID: DECIDER_SPARE_CHECK, Name: "True" }], allOf([itemCount(DECIDER_ITEM, "Equal", 0)])),
+    If(`${QD}_If_GenijAround`, [{ SID: `${QD}_If_NoGun`, Name: "True" }], allOf([isCreated(GENIJ_AFTER_GUID)])),
+    If(`${QD}_If_GenijHasNone`, [{ SID: `${QD}_If_GenijAround`, Name: "True" }], allOf([genijHasNone])),
+    node(`${QD}_SpawnSpare`, {
+      NodeType: "EQuestNodeType::Spawn",
+      Launchers: getLaunchers([
+        { SID: `${QD}_If_GenijAround`, Name: "False" },
+        { SID: `${QD}_If_GenijHasNone`, Name: "True" },
+      ]),
+      TargetQuestGuid: DECIDER_SPARE_GUID,
+      SpawnHidden: false,
+      SpawnNodeExcludeType: "ESpawnNodeExcludeType::SeamlessDespawn",
+    }),
+    node(`${QD}_SpawnSpareDelay`, {
+      NodeType: "EQuestNodeType::Technical",
+      Launchers: getLaunchers([{ SID: `${QD}_SpawnSpare` }]),
+      StartDelay: 1,
+    }),
+    node(`${QD}_SetJournal_FindSpare`, {
+      NodeType: "EQuestNodeType::SetJournal",
+      Launchers: getLaunchers([{ SID: `${QD}_SpawnSpareDelay` }]),
+      JournalEntity: "EJournalEntity::QuestStage",
+      JournalAction: "EJournalAction::Start",
+      JournalQuestSID: QD,
+      JournalQuestStageSID: `${QD}_FindGun`,
+      // An area, as vanilla's own Find_AK marker: centred on where the debtor gave SQ86 (his SQ86 spawn
+      // actor 153027874EC8559F801C37982D03FABB), wide enough to hold the spare ~85 m off.
+      Markers: new Struct({
+        0: new Struct({
+          MarkerLocation: new Struct({ X: 517985.0, Y: 399264.0, Z: -8.0 }),
+          MarkerRadius: 10000.0,
+          ZoneSubMarkers: "",
+          AddOnCondition: false,
+          RemoveOnCondition: false,
+        }),
+      }),
     }),
   ];
 }
