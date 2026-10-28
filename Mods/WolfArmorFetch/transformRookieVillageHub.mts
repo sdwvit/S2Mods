@@ -30,6 +30,7 @@ import {
   MEETING_INTEL,
 } from "./coverDialog.mts";
 import { COVER_OFFER_CHECK, DEALER_PDA, QC } from "./cover.mts";
+import { DECIDER_SPARE_CHECK } from "./transformQuestNodes.mts";
 
 const HUB = "RookieVillage_Hub";
 /** Our nodes live in the hub quest, so their SIDs carry its prefix. */
@@ -181,6 +182,15 @@ export const transformRookieVillageHub: StructTransformer<Struct> = () => {
       ],
       `${QD}_OnAccepted`,
     ),
+
+    // Job open: check whether the Decider can still be had at all (see transformQuestNodes' spareDeciderNodes).
+    node(`${H}_DeciderSpareCheck`, {
+      NodePrototypeVersion: 1,
+      NodeType: "EQuestNodeType::ConsoleCommand",
+      Repeatable: true,
+      Launchers: getLaunchers([{ SID: `${H}_If_DeciderAccepted`, Name: "True" }]),
+      ConsoleCommand: `XStartQuestNodeBySID ${DECIDER_SPARE_CHECK}`,
+    }),
 
     setDialog(HUB, `${H}_DeciderAcceptDialog`, [{ SID: `${H}_If_DeciderAccepted`, Name: "False" }], DECIDER_ACCEPT, [
       { label: DECIDER_ACCEPTED, finish: true },

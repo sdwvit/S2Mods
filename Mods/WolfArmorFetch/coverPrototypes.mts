@@ -3,7 +3,7 @@ import path from "node:path";
 import { Struct } from "s2cfgtojson";
 import { baseCfgDir, modFolderRaw, rawCfgEnclosingFolder } from "../../src/base-paths.mts";
 import type { StructTransformer } from "../../src/meta-type.mts";
-import { BAGOR, CONTEXTUAL, DEALER_NOTE, DEALER_PDA, GUID, HOOK_NOTE, HOOK_PDA, NAME_NOTE, POS, ROLLS, VAR } from "./cover.mts";
+import { BAGOR, CONTEXTUAL, DECIDER_ITEM, DEALER_NOTE, DEALER_PDA, GUID, HOOK_NOTE, HOOK_PDA, NAME_NOTE, POS, ROLLS, VAR } from "./cover.mts";
 
 /**
  * Cover Story's new prototypes, one transformer per target cfg: its NPCs' spawn actors, the dealers'
@@ -163,6 +163,36 @@ const rewardStash = () =>
     }),
   });
 
+/**
+ * A spare Decider for the first job, on a save where vanilla's is gone: SQ86 over, Skif sold or dropped
+ * his, and the debtor doesn't carry one. A copy of SQ86's own gun placeholder 7D20AB7446B6F65B1FA334988FB844BA
+ * (where Skif first found it), 40 cm beside it.
+ */
+export const DECIDER_SPARE_GUID = "0195C442AC824222BDDEBE3E0A2D05EA";
+const deciderSpare = () =>
+  root(DECIDER_SPARE_GUID, {
+    SpawnOnStart: false,
+    PositionX: 514599.523754,
+    PositionY: 391521.205323,
+    PositionZ: -859.680325,
+    RotatorAngleYaw: -35.822558,
+    RotatorAnglePitch: 1.04882,
+    RotatorAngleRoll: -89.942758,
+    ScaleX: 1,
+    ScaleY: 1,
+    ScaleZ: 1,
+    TextAboveActor: "",
+    DLC: "None",
+    LevelName: "WorldMap_WP",
+    PlaceholderMapPath: "/Game/_Stalker_2/maps/_Stalker2_WorldMap/WorldMap_WP",
+    MeshPath: "SkeletalMesh'/Game/_STALKER2/SkeletalMeshes/weapons/ar/fora0/SK_fora0.SK_fora0'",
+    SpawnedPrototypeSID: DECIDER_ITEM,
+    SpawnType: "ESpawnType::Item",
+    ItemSID: DECIDER_ITEM,
+    Durability: 0.3,
+    DisablePhysicsAndCollision: true,
+  });
+
 /** The Weather Station marker's own file; the new actors are appended to it, next to the marker. */
 const SPAWN_FILE = "SpawnActorPrototypes/WorldMap_WP/59B744E544A3194779A169962ABDFBE2.cfg";
 
@@ -182,6 +212,7 @@ export const writeCoverSpawnActors = async () => {
     npcActor(GUID.guard1, POS.guard1, "GeneralNPC_SultanBandit_Stormtrooper", "Experienced"),
     npcActor(GUID.guard2, POS.guard2, "GeneralNPC_SultanBandit_Stormtrooper", "Experienced"),
     rewardStash(),
+    deciderSpare(),
   ];
   const vanilla = await readFile(path.join(baseCfgDir, "GameData", SPAWN_FILE), "utf8");
   const target = path.join(modFolderRaw, rawCfgEnclosingFolder, "GameData", SPAWN_FILE);

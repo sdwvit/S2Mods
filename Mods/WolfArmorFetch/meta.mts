@@ -47,7 +47,7 @@ The second follows soon after and builds on what the first one turned up.[h1][/h
 The third takes you to Zaton, where you'll have to talk your way through a meeting. How well you're prepared changes your odds.[h1][/h1]
 Works on existing saves. Dialogs and journal text are translated into every language the game supports.[h1][/h1]
 `,
-  changenote: "Fixed Wolf's last job not being offered after its marker appeared, a missing line along the way, and a fight starting early on saves where Skif is at odds with a faction.",
+  changenote: "Wolf's first job can now be finished on saves where Skif already got rid of the rifle it asks for.",
   // Saves where Wolf spawned before the mod was installed never re-run his topic triggers.
   gameStartCommand: `XStartQuestNodeBySID ${ON_WORLD_LOAD}`,
   structTransformers: [
