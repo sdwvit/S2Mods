@@ -53,5 +53,5 @@ export const meta: MetaType<EffectPrototype | ConsumablePrototype> = {
   [/list]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Compatible with 1.8.x",
+  changenote: "Pill effects now show their value and remaining time in the inventory.",
 };
