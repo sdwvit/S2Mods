@@ -2,7 +2,4 @@
 
 Here is a list of extended files (this mod bPatches files, so it is compatible with other mods that don't modify the same lines):
 
-`DialogPrototypes`:
- - `EQ197_QD_Orders`
-
-`QuestNodePrototypes`
+`Modified or added assets`: [see the mod's raw/ folder on GitHub](https://github.com/sdwvit/S2Mods/tree/master/Mods/MoreSideQuestOptions/raw)
