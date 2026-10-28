@@ -20,8 +20,9 @@ Just start a new game, hit escape, then back to fix the sound and you're good to
 
 function structTransformer(struct: QuestNodePrototype) {
   if (struct.SID === "E01_MQ01_Technical_NoIntro" || struct.SID === "E01_MQ01_PlayVideo") {
+    // 2.0 ships NoIntro with empty Launchers; it still has to be wired to Start.
     const launchers = (struct as any).Launchers;
-    if (typeof launchers === "string") {
+    if (typeof launchers === "string" && struct.SID !== "E01_MQ01_Technical_NoIntro") {
       return null;
     }
     const fork = struct.fork();
