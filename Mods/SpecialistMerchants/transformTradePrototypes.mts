@@ -83,6 +83,7 @@ export function buildTradeGeneratorLimitations(structSID: string): string[] {
         "EItemType::Detector",
         "EItemType::Grenade",
         "EItemType::NightVisionGoggles",
+        "EItemType::Binoculars",
       ],
     );
   }
@@ -99,6 +100,7 @@ export function buildTradeGeneratorLimitations(structSID: string): string[] {
         "EItemType::Grenade",
         "EItemType::Other",
         "EItemType::NightVisionGoggles",
+        "EItemType::Binoculars",
       ],
     );
   }
@@ -115,6 +117,7 @@ export function buildTradeGeneratorLimitations(structSID: string): string[] {
         "EItemType::Grenade",
         "EItemType::Other",
         "EItemType::NightVisionGoggles",
+        "EItemType::Binoculars",
       ],
     );
   }
@@ -156,6 +159,7 @@ export function getGuideTp() {
           7: "EItemType::MutantLoot",
           8: "EItemType::Ammo",
           9: "EItemType::NightVisionGoggles",
+          10: "EItemType::Binoculars",
         },
       },
     },
