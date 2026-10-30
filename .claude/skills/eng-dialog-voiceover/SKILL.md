@@ -12,8 +12,8 @@ A voiced phrase needs four things, all keyed by the phrase's cfg `TextToolPhrase
 
 | Piece | What it is | Made by |
 |---|---|---|
-| Wwise event | `VO_<speaker>_<SID>` with EN + UA sources, in the mod's banks | `eng-wwise` skill; WolfArmorFetch's `voice/wwise_import.py` |
-| Event asset | `AkAudioEvent` `.uasset` for that event | `Mods/WolfArmorFetch/voice/event-assets.mts` (example) |
+| Wwise event | `VO_<speaker>_<SID>` with EN + UA sources, in the mod's banks | `eng-wwise` skill |
+| Event asset | `AkAudioEvent` `.uasset` for that event | `writeWwiseEventAsset` in `src/wwise-event-asset.mts` |
 | Voiceover runtime data | `DialogRuntimeData`, `AssetType = Voiceover`: phrase SID -> event | `writeDialogRuntimeData` in `src/localization/uasset.mts` |
 | Face anim (optional) | `AS_FAC_<EN\|UA>_<speaker>_<SID>` + a `FaceAnimation` runtime data | `lipsync/` here, then `writeDialogRuntimeData` |
 
@@ -31,27 +31,30 @@ Files next to this skill (they work for any mod; the editor scripts take their i
 | `dialog_runtime_probe.py` | Linux | dumps the running game's merged voice/face maps (read-only) |
 
 Related: TTS generation and the review site are in `src/voiceover/README.md`; the cfg -> runtime data -> event -> bank
-trace is `DesignDocs/DialogVoiceoverSpec.md`; `Mods/WolfArmorFetch` is the complete reference mod (its `voice/`
-generators are tied to its own dialog model, so copy and adapt them).
+trace is `DesignDocs/DialogVoiceoverSpec.md`.
 
 **Editor scripts** run only when pasted into the Zone Kit editor's Output Log in Python mode (no remote execution):
 each script's header has the line to paste, `<inputs>; exec(open(r"Z:\...\<script>.py").read())`. They use Windows
-paths, so data must sit where Wine sees it (`S:\` is `/media/nvme`).
+paths, so data must sit where Wine sees it (`S:\` is `/media/nvme`, `Z:\` is `/`).
 
 ## Adding voiced lines to a mod
 1. **Takes**: one WAV per line and language (`src/voiceover/README.md` for TTS and picking). Before Wwise import, pad
-   each copy with 0.1 s of trailing silence (`PAD_END_S` in `wwise_import.py`): tightly trimmed takes make speaker
+   each copy with 0.1 s of trailing silence: tightly trimmed takes make speaker
    changes sound rushed, there is no per-phrase delay field in dialog cfgs (`PreblendTime` /
    `BlendExpForEaseInOut` are sequence camera blends), and a Wwise initial delay would put lip-sync out of step.
 2. **Wwise**, editor closed (`eng-wwise`): import the lines as Sound Voice objects + one Event each, generate banks
    for just those events, and copy their `Event/<lang>/*` and `Media/<lang>/*.wem` into
    `Mods/<Mod>/wwise/GeneratedSoundBanks/Windows`.
-3. **Event assets**: write one `AkAudioEvent` per event (`event-assets.mts` pattern).
+3. **Event assets**: one `AkAudioEvent` `.uasset` per event, so no Wwise Browser checkout is needed:
+   `writeWwiseEventAsset(template, dest, "/<Mod>/.../<Event>", guid, shortId)` with the GUID and `Id` from the event's
+   bank json (`SoundBanksInfo.SoundBanks[0].Events[0]`). The template must be an editor-saved event from any mod
+   (UE 1013); the vanilla ones in the Wwise pak are an older file version.
 4. **Face anims**, editor open: see the next section. Skip for lines spoken by the player.
 5. **Runtime data**: one `<ChainSID>_Voiceover` per chain (phrase SID -> `/<Mod>/.../<Event>.<Event>`) and, with face
    anims, one `<ChainSID>_FaceAnimation` (phrase SID -> anim object path), written from the templates in
-   `src/localization/fixtures/dialog-runtime-{voiceover,faceanimation}.uasset`. Write them to `raw/` and the SDK mod's
-   `Content/` (the cook reads only the latter). See `Mods/WolfArmorFetch/voice/runtime-data.mts [regex] [--face]`.
+   `src/localization/fixtures/dialog-runtime-{voiceover,faceanimation}.uasset` with `writeDialogRuntimeData` (both
+   writers emit soft object paths, `<path>.<name>`). Write assets to `raw/` and the SDK mod's `Content/` (the cook
+   reads only the latter).
 6. `npm run prepare-configs`, then `cook-inject`. Check the result with "Debugging" below.
 
 When adding a few lines to a mod that already has voice, run every step for the new lines only (a `--only <regex>` or
@@ -63,9 +66,9 @@ and no head or body motion. The player (`pc`) has none. The tools learn the mapp
 speaker's own lines, then bake new anims from copies of that speaker's anims.
 
 1. **Pick a vanilla speaker**: a folder of their `AS_FAC_*` anims under `/Game/_STALKER2/Animations/CharacterHead/...`
-   (Wolf: `Hubs/RookieVillage_Hub/volk`) whose voice files are
+   (e.g. `Hubs/<Hub>/<speaker>`) whose voice files are
    `<ZoneKit>/O/Voices/<English(US)|Ukrainian(UA)>/S2_Live/VO_<speaker>_<key>.wav` under the same keys. More lines fit
-   better. One model can serve every NPC speaker in the mod (WolfArmorFetch used Wolf's for all of them).
+   better. One model can serve every NPC speaker in the mod.
 2. **Dump** (editor, read-only): `dump_face_anim.py` with `VANILLA` (that folder) and `OUT` (the dump folder).
 3. **Fit** (Linux, venv with numpy, soundfile, torch, torchaudio; the voiceover Higgs venv has them):
    `python3 -I lipsync/fit_lipsync.py <dump_dir> <ZoneKit>/O/Voices <stage_dir> <pred.json>`, where `<stage_dir>`
@@ -103,11 +106,11 @@ Check a baked anim in the editor's anim viewer on the speaker's head, then in ga
 - **Unknown speaker.** The editor drops a runtime-data entry on load (so also at cook) when its phrase's TextTool
   `Character` is unknown or `None`. The player must be `PC` (`sid_character_PC`), NPCs a vanilla character SID. The
   known list is the `characters` array (`{ id, sid, name_sid }`) of the SDK's `TextDatabase_<part>.json` files
-  (FullEditor pak, `Stalker2/Content/TextToolBackup/`). A mod can't add its own file there: a custom NPC (e.g.
-  `WolfArmorFetch_Bagor`) stays silent until it is added to one. Cfg NPC prototypes don't count, since the cfg mod
+  (FullEditor pak, `Stalker2/Content/TextToolBackup/`). A mod can't add its own file there: a custom NPC stays
+  silent until it is added to one. Cfg NPC prototypes don't count, since the cfg mod
   (`<Mod>Cfg`) isn't loaded during the assets cook.
-- **Unapproved takes.** A runtime-data generator that writes only lines with a take (WolfArmorFetch's does, with no
-  dry run, into `raw/` and the SDK) silences any line whose take was unpicked since the last run.
+- **Missing takes.** A runtime-data generator that writes only lines that have a take silences any line whose take
+  was dropped since the last run.
 
 ## Animation during dialog
 - **Face**: the `FaceAnimation` entry plays from the phrase's start. Lip-sync carries no head or body motion.

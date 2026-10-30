@@ -1,5 +1,5 @@
 # Run in the Zone Kit editor's Output Log (Python mode), setting the inputs first on the same line:
-#   PRED = r"S:\vm\voice-clone\lipsync\pred.json"; VANILLA = "/Game/_STALKER2/Animations/CharacterHead/Hubs/RookieVillage_Hub/volk"; DEST = "/WolfArmorFetch/Animations"; exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\.claude\skills\eng-dialog-voiceover\lipsync\create_face_anims.py").read())
+#   PRED = r"S:\<work>\pred.json"; VANILLA = "/Game/_STALKER2/Animations/CharacterHead/Hubs/<Hub>/<speaker>"; DEST = "/<Mod>/Animations"; exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\.claude\skills\eng-dialog-voiceover\lipsync\create_face_anims.py").read())
 # PRED: Windows path of fit_lipsync.py's output. VANILLA: the folder dump_face_anim.py dumped (the base anims).
 # DEST: the mod's content folder for the anims. Optional: LIMIT (anims per run, default 10, 0 = all),
 # LOG_DIR (default: PRED's folder).
