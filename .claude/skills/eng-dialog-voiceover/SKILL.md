@@ -24,18 +24,18 @@ Files next to this skill (they work for any mod; the editor scripts take their i
 | File | Runs in | Does |
 |---|---|---|
 | `lipsync/dump_face_anim.py` | editor | dumps a vanilla speaker's face anims to JSON (read-only) |
-| `lipsync/fit_lipsync.py` | Linux | fits audio -> face channels, predicts tracks for new lines |
+| `lipsync/fit_lipsync.py` | shell | fits audio -> face channels, predicts tracks for new lines |
 | `lipsync/create_face_anims.py` | editor | bakes and saves the predicted `AS_FAC_*` anims |
 | `probe_voiceover_keys.py` | editor | lists the phrase keys the editor sees in one `_Voiceover` asset |
 | `probe_voiceover_reload.py` | editor | the same before and after a reload from disk (stale copy?) |
-| `dialog_runtime_probe.py` | Linux | dumps the running game's merged voice/face maps (read-only) |
+| `dialog_runtime_probe.py` | shell | dumps the running game's merged voice/face maps (read-only) |
 
 Related: TTS generation and the review site are in `src/voiceover/README.md`; the cfg -> runtime data -> event -> bank
 trace is `DesignDocs/DialogVoiceoverSpec.md`.
 
 **Editor scripts** run only when pasted into the Zone Kit editor's Output Log in Python mode (no remote execution):
-each script's header has the line to paste, `<inputs>; exec(open(r"Z:\...\<script>.py").read())`. They use Windows
-paths, so data must sit where Wine sees it (`S:\` is `/media/nvme`, `Z:\` is `/`).
+each script's header has the line to paste, `<inputs>; exec(open(r"<repo>\...\<script>.py").read())`. All paths in
+that line are as the editor sees them.
 
 ## Adding voiced lines to a mod
 1. **Takes**: one WAV per line and language (`src/voiceover/README.md` for TTS and picking). Before Wwise import, pad
@@ -70,8 +70,8 @@ speaker's own lines, then bake new anims from copies of that speaker's anims.
    `<ZoneKit>/O/Voices/<English(US)|Ukrainian(UA)>/S2_Live/VO_<speaker>_<key>.wav` under the same keys. More lines fit
    better. One model can serve every NPC speaker in the mod.
 2. **Dump** (editor, read-only): `dump_face_anim.py` with `VANILLA` (that folder) and `OUT` (the dump folder).
-3. **Fit** (Linux, venv with numpy, soundfile, torch, torchaudio; the voiceover Higgs venv has them):
-   `python3 -I lipsync/fit_lipsync.py <dump_dir> <ZoneKit>/O/Voices <stage_dir> <pred.json>`, where `<stage_dir>`
+3. **Fit** (shell, Python with numpy, soundfile, torch, torchaudio; the voiceover Higgs venv has them):
+   `python -I lipsync/fit_lipsync.py <dump_dir> <ZoneKit>/O/Voices <stage_dir> <pred.json>`, where `<stage_dir>`
    holds the padded takes as `{en,uk}/VO_<speaker>_<PhraseSID>.wav`. It fits a ridge regression from 40-band log-mel
    frames (±6 frames of context) to each face channel, keeps the channels the audio predicts on held-out lines
    (correlation > 0.35, printed), and takes every other channel from a base: the shortest vanilla line at least as
@@ -133,7 +133,7 @@ Walk the stages in order; the first one that's missing the key is the culprit.
    count the `VO_<speaker>_` names in it. The cook keeps only what the editor kept.
 4. **Mod registry**: `repak unpack` the NewContent `.pak` (it holds `AssetRegistry.bin` and the `.uplugin`) and grep
    for `DialogRuntimeData` and your asset names.
-5. **Live game**: `python3 -I .claude/skills/eng-dialog-voiceover/dialog_runtime_probe.py <pid> <exe base> <key>...`
-   lists the merged maps and their entries per package root, read-only through `/proc/<pid>/mem`. Use the wine process
-   whose `/proc/<pid>/maps` maps the exe (header has details). Missing here but present in the registry: check the
+5. **Live game**: `python -I .claude/skills/eng-dialog-voiceover/dialog_runtime_probe.py [key...]` finds the game
+   process and lists the merged maps and their entries per package root, read-only. Offsets are for one retail build
+   (see the header); after a game update they need re-finding. Missing here but present in the registry: check the
    install folder.

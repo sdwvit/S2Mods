@@ -1,28 +1,111 @@
 # Read-only probe of the running game (retail build of 2026-09-29): dumps the dialog asset subsystem's merged
 # Voiceover / FaceAnimation / VoiceGen maps, so you can see whether a mod's DialogRuntimeData was registered.
-# usage: python3 -I dialog_runtime_probe.py <pid> <exe base hex> [phrase key ...]
-#   pid: the process whose /proc/<pid>/maps maps Stalker2-Win64-Shipping.exe (several wine processes match the name)
-#   exe base: first address of that mapping (e.g. 6ffff0d80000)
-# Needs kernel.yama.ptrace_scope = 0. Never writes game memory.
+# usage: python -I dialog_runtime_probe.py [--pid <pid> --base <exe base hex>] [phrase key ...]
+# Finds the game process and its exe base by itself; pass --pid/--base when several processes match.
+# Windows: run as the same user as the game. Linux: needs ptrace access (kernel.yama.ptrace_scope = 0).
+# Never writes game memory.
+import os
 import struct
 import sys
 from collections import Counter
 
-PID = int(sys.argv[1])
-BASE = int(sys.argv[2], 16)
-WANT = sys.argv[3:]
+EXE = "Stalker2-Win64-Shipping.exe"
+args = sys.argv[1:]
+opts = {}
+while args and args[0] in ("--pid", "--base"):
+    opts[args[0]] = args[1]
+    args = args[2:]
+WANT = args
+
+
+def find_linux():
+    """(pid, base) of every process that maps the exe; several can match the name, only one maps it."""
+    found = []
+    for pid in filter(str.isdigit, os.listdir("/proc")):
+        try:
+            with open(f"/proc/{pid}/maps") as f:
+                for line in f:
+                    if line.rstrip().endswith(EXE):
+                        found.append((int(pid), int(line.split("-", 1)[0], 16)))
+                        break
+        except OSError:
+            pass
+    return found
+
+
+if os.name == "nt":
+    import ctypes
+    from ctypes import wintypes
+
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+
+    class MODULEENTRY32W(ctypes.Structure):
+        _fields_ = [("dwSize", wintypes.DWORD), ("th32ModuleID", wintypes.DWORD), ("th32ProcessID", wintypes.DWORD),
+                    ("GlblcntUsage", wintypes.DWORD), ("ProccntUsage", wintypes.DWORD),
+                    ("modBaseAddr", ctypes.c_void_p), ("modBaseSize", wintypes.DWORD), ("hModule", wintypes.HMODULE),
+                    ("szModule", ctypes.c_wchar * 256), ("szExePath", ctypes.c_wchar * 260)]
+
+    class PROCESSENTRY32W(ctypes.Structure):
+        _fields_ = [("dwSize", wintypes.DWORD), ("cntUsage", wintypes.DWORD), ("th32ProcessID", wintypes.DWORD),
+                    ("th32DefaultHeapID", ctypes.c_void_p), ("th32ModuleID", wintypes.DWORD),
+                    ("cntThreads", wintypes.DWORD), ("th32ParentProcessID", wintypes.DWORD),
+                    ("pcPriClassBase", ctypes.c_long), ("dwFlags", wintypes.DWORD), ("szExeFile", ctypes.c_wchar * 260)]
+
+    k32.CreateToolhelp32Snapshot.restype = wintypes.HANDLE
+    k32.OpenProcess.restype = wintypes.HANDLE
+    k32.ReadProcessMemory.argtypes = [wintypes.HANDLE, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t,
+                                      ctypes.POINTER(ctypes.c_size_t)]
+
+    def find_windows():
+        found = []
+        snap = k32.CreateToolhelp32Snapshot(0x2, 0)  # TH32CS_SNAPPROCESS
+        pe = PROCESSENTRY32W(dwSize=ctypes.sizeof(PROCESSENTRY32W))
+        ok = k32.Process32FirstW(snap, ctypes.byref(pe))
+        while ok:
+            if pe.szExeFile.lower() == EXE.lower():
+                ms = k32.CreateToolhelp32Snapshot(0x8 | 0x10, pe.th32ProcessID)  # TH32CS_SNAPMODULE(32)
+                me = MODULEENTRY32W(dwSize=ctypes.sizeof(MODULEENTRY32W))
+                if k32.Module32FirstW(ms, ctypes.byref(me)):
+                    found.append((pe.th32ProcessID, me.modBaseAddr))  # the first module is the exe
+                k32.CloseHandle(ms)
+            ok = k32.Process32NextW(snap, ctypes.byref(pe))
+        k32.CloseHandle(snap)
+        return found
+
+    found = [] if "--pid" in opts else find_windows()
+else:
+    found = [] if "--pid" in opts else find_linux()
+
+if "--pid" in opts:
+    PID, BASE = int(opts["--pid"]), int(opts["--base"], 16)
+elif len(found) == 1:
+    PID, BASE = found[0]
+else:
+    sys.exit(f"{len(found)} processes map {EXE}: {found}. Pass --pid <pid> --base <hex>.")
+print(f"pid {PID}, exe base {BASE:x}")
 D = BASE - 0x140000000  # addresses below are the image's own VAs
 FNAME_POOL = 0x149FF0C80
 OBJ_CHUNKS = 0x14A0E68D0  # FChunkedFixedUObjectArray: chunk table, 64K items of 24 bytes per chunk
 OBJ_COUNT = 0x14A0E68E4
 SUBSYSTEM_CLASS = 0x14A2E5850  # UDialogAssetReferenceSubsystem::StaticClass() result
 
-mem = open(f"/proc/{PID}/mem", "rb", buffering=0)
+if os.name == "nt":
+    handle = k32.OpenProcess(0x0010 | 0x0400, False, PID)  # PROCESS_VM_READ | PROCESS_QUERY_INFORMATION
+    if not handle:
+        sys.exit(f"OpenProcess({PID}) failed: {ctypes.get_last_error()}")
 
+    def rd(a, n):
+        buf = ctypes.create_string_buffer(n)
+        got = ctypes.c_size_t()
+        if not k32.ReadProcessMemory(handle, ctypes.c_void_p(a), buf, n, ctypes.byref(got)) or got.value != n:
+            raise OSError(f"ReadProcessMemory({a:#x}, {n}) failed: {ctypes.get_last_error()}")
+        return buf.raw
+else:
+    mem = open(f"/proc/{PID}/mem", "rb", buffering=0)
 
-def rd(a, n):
-    mem.seek(a)
-    return mem.read(n)
+    def rd(a, n):
+        mem.seek(a)
+        return mem.read(n)
 
 
 def q(a):

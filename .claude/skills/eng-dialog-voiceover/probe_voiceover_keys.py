@@ -1,5 +1,5 @@
 # Run in the Zone Kit editor's Output Log (Python mode):
-#   PKG = "/<Mod>/<ChainSID>_Voiceover"; OUT = r"S:\<work>\probe"; exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\.claude\skills\eng-dialog-voiceover\probe_voiceover_keys.py").read())
+#   PKG = "/<Mod>/<ChainSID>_Voiceover"; OUT = r"<work>\probe"; exec(open(r"<repo>\.claude\skills\eng-dialog-voiceover\probe_voiceover_keys.py").read())
 # Read-only: loads one of our _Voiceover runtime data assets and lists the phrase keys the editor sees,
 # to tell whether Skif's (pc) entries are lost on load or only at cook. Report: <OUT>\vo_keys.txt
 import os

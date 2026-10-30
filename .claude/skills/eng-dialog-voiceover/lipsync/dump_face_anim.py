@@ -1,7 +1,7 @@
 # Run in the Zone Kit editor's Output Log (Python mode), setting the inputs first on the same line:
-#   VANILLA = "/Game/_STALKER2/Animations/CharacterHead/Hubs/<Hub>/<speaker>"; OUT = r"S:\<work>\facedump"; exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\.claude\skills\eng-dialog-voiceover\lipsync\dump_face_anim.py").read())
+#   VANILLA = "/Game/_STALKER2/Animations/CharacterHead/Hubs/<Hub>/<speaker>"; OUT = r"<work>\facedump"; exec(open(r"<repo>\.claude\skills\eng-dialog-voiceover\lipsync\dump_face_anim.py").read())
 # VANILLA: content folder holding one vanilla speaker's AS_FAC_* face anims (searched recursively).
-# OUT: Windows path of the folder the JSONs go to (fit_lipsync.py's <facedump_dir>).
+# OUT: folder the JSONs go to (fit_lipsync.py's <facedump_dir>).
 # Dumps every face animation under VANILLA (float curves + per-frame bone transforms) to JSON so the
 # mouth channels can be found and fitted against the matching voice lines. Read-only: saves nothing.
 import json

@@ -1,5 +1,5 @@
 # Run in the Zone Kit editor's Output Log (Python mode):
-#   PKG = "/<Mod>/<ChainSID>_Voiceover"; OUT = r"S:\<work>\probe"; exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\.claude\skills\eng-dialog-voiceover\probe_voiceover_reload.py").read())
+#   PKG = "/<Mod>/<ChainSID>_Voiceover"; OUT = r"<work>\probe"; exec(open(r"<repo>\.claude\skills\eng-dialog-voiceover\probe_voiceover_reload.py").read())
 # Lists the keys of one _Voiceover runtime data asset as loaded, then reloads the package from disk and lists them
 # again: tells whether the editor holds a stale copy. Optional FILE: the .uasset path, to log its size. Nothing is saved. Report: <OUT>\vo_reload.txt
 import os
