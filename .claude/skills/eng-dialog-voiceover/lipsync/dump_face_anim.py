@@ -1,14 +1,18 @@
-# Run in the Zone Kit editor's Output Log (Python mode):
-#   exec(open(r"Z:\home\sdwvit\IdeaProjects\S2Mods\Mods\WolfArmorFetch\voice\dump_face_anim.py").read())
-# Dumps every vanilla Wolf face animation (float curves + per-frame bone transforms) to JSON so the
+# Run in the Zone Kit editor's Output Log (Python mode), setting the inputs first on the same line:
+#   VANILLA = "/Game/_STALKER2/Animations/CharacterHead/Hubs/RookieVillage_Hub/volk"; OUT = r"S:\vm\voice-clone\facedump"; exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\.claude\skills\eng-dialog-voiceover\lipsync\dump_face_anim.py").read())
+# VANILLA: content folder holding one vanilla speaker's AS_FAC_* face anims (searched recursively).
+# OUT: Windows path of the folder the JSONs go to (fit_lipsync.py's <facedump_dir>).
+# Dumps every face animation under VANILLA (float curves + per-frame bone transforms) to JSON so the
 # mouth channels can be found and fitted against the matching voice lines. Read-only: saves nothing.
 import json
 import unreal
 
-OUT = r"S:\vm\voice-clone\facedump"
-BASE = "/Game/_STALKER2/Animations/CharacterHead/Hubs/RookieVillage_Hub/volk"
+for _required in ("VANILLA", "OUT"):
+    if _required not in globals():
+        raise RuntimeError(f"dump_face_anim.py: set {_required} before exec (see the header)")
+BASE = VANILLA
 lib = unreal.AnimationLibrary
-# every Wolf face anim in the hub folder (EN + UA): training pairs for the audio -> mouth fit
+# every face anim in the folder (EN + UA): training pairs for the audio -> mouth fit
 NAMES = sorted(
     str(a.package_name)[len(BASE) + 1:]
     for a in unreal.AssetRegistryHelpers.get_asset_registry().get_assets_by_path(BASE, recursive=True)

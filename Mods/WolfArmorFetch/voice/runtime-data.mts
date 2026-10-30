@@ -9,7 +9,7 @@
  * of the plugin a chain names in its `DLC` field (`DLC = WolfArmorFetch`), as the SOC workshop mod does; with
  * `DLC = None` it only searches the base game's runtime data.
  * With `--face`, also `<ChainSID>_FaceAnimation` for the NPC lines (Skif has no face): phrase -> the lip-sync anims
- * `voice/create_face_anims.py` saves as /WolfArmorFetch/Animations/<speaker>/<EN|UA>/AS_FAC_<EN|UA>_<speaker>_<SID>
+ * `create_face_anims.py` (eng-dialog-voiceover skill) saves as /WolfArmorFetch/Animations/<speaker>/<EN|UA>/AS_FAC_<EN|UA>_<speaker>_<SID>
  * (a line with one language only uses that anim for both). Only pass it once those anims are in the SDK mod.
  * usage: node Mods/WolfArmorFetch/voice/runtime-data.mts [chain regex] [--face]
  */

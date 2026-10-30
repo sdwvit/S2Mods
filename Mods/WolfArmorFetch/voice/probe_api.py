@@ -1,4 +1,4 @@
-# Run in the Zone Kit editor's Output Log (Python mode), after dump_face_anim.py or on its own:
+# Run in the Zone Kit editor's Output Log (Python mode), after the eng-dialog-voiceover skill's dump_face_anim.py or on its own:
 #   exec(open(r"Z:\home\sdwvit\IdeaProjects\S2Mods\Mods\WolfArmorFetch\voice\probe_api.py").read())
 # Read-only: writes what Python can see of the dialog runtime data / anim editing API to
 # S:\vm\voice-clone\facedump\api.txt so the asset-creating scripts can be written against it.

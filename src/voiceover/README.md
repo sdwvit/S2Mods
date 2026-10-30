@@ -102,18 +102,5 @@ Adding audio makes a mod an asset mod (cook-inject).
 
 ### Lip sync
 
-Audio-driven face animation, fitted on the vanilla speaker's own lines (Wolf's hub lines for WolfArmorFetch):
-
-1. `Mods/WolfArmorFetch/voice/dump_face_anim.py` (Zone Kit editor, Output Log in Python mode) dumps every vanilla face
-   anim of that speaker (float curves and per-frame bone transforms) to JSON. Read-only.
-2. `pipeline/fit_lipsync.py <facedump_dir> <ZoneKit>/O/Voices <stage_dir> <out.json>` (Higgs venv: numpy, soundfile,
-   torch, torchaudio) fits a ridge regression from log-mel frames (with ±6 frames of context) to each channel, keeps
-   the channels the audio predicts on held-out lines (correlation > 0.35), and predicts them for every new line in
-   `<stage_dir>/{en,uk}/VO_<speaker>_<SID>.wav` (Skif, `pc`, has no face anim). The other channels come from a base:
-   the shortest vanilla line at least as long.
-3. `Mods/WolfArmorFetch/voice/create_face_anims.py` (editor) copies each base anim, sets it to 30 fps and the line's
-   length, writes the predicted keys and saves `AS_FAC_<EN|UA>_<speaker>_<SID>`. It builds the next 10 missing anims
-   per run (paste it again for the next chunk): one run over all of them stalled after ~20. Delete an anim to have it
-   rebuilt.
-   Run it from the Output Log (Python mode):
-   `exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\Mods\WolfArmorFetch\voice\create_face_anims.py").read())`.
+Audio-driven face animation, fitted on a vanilla speaker's own lines: the scripts and the steps are in the
+`eng-dialog-voiceover` skill (`.claude/skills/eng-dialog-voiceover/`, section "Making lip-sync anims").

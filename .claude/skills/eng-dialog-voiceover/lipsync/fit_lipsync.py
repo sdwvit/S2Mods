@@ -1,10 +1,13 @@
-"""Fit audio -> face-channel regression on vanilla Wolf face anims and predict tracks for new lines.
+"""Fit audio -> face-channel regression on one vanilla speaker's face anims and predict tracks for new lines.
 
 usage: python -I fit_lipsync.py <facedump_dir> <voices_root> <final_dir> <out_json>
-facedump_dir: JSONs from dump_face_anim.py (curves + per-frame bone transforms)
-voices_root:  <ZoneKit>/O/Voices (English(US)/S2_Live/VO_volk_<key>.wav ...)
+facedump_dir: JSONs from dump_face_anim.py (curves + per-frame bone transforms) of one vanilla speaker; the speaker
+              is read from the anim names (AS_FAC_<EN|UA>_<speaker>_<key>)
+voices_root:  <ZoneKit>/O/Voices (English(US)/S2_Live/VO_<speaker>_<key>.wav ...)
 final_dir:    {en,uk}/VO_<speaker>_<SID>.wav (the new lines, e.g. wwise_stage/); every speaker but pc (Skif has no face)
-Writes out_json: {"fps", "channels": {name: held-out corr}, "anims": {asset_name: {"length", "base", "tracks": {channel: [v per frame]}}}}
+Writes out_json: {"fps", "channels": {name: held-out corr},
+                  "anims": {asset_name: {"length", "frames", "base", "base_path", "tracks": {channel: [v per frame]}}}}
+"base_path" is the base anim's path under the dumped folder (dump_face_anim.py's VANILLA).
 Channel names: "curve:<name>" or "bone:<bone>:<tx|ty|tz|roll|pitch|yaw>".
 """
 import glob, json, os, sys
@@ -49,14 +52,16 @@ def features(wav, n_frames, length):
 
 # ---- training pairs
 pairs = []
+base_path = {}  # asset name -> its path under the dumped folder
 for p in sorted(glob.glob(f"{dump_dir}/*.json")):
     d, n, length, ch = load_anim(p)
-    asset = os.path.basename(d["name"])  # AS_FAC_EN_volk_<key>
-    lang, key = asset.split("_")[2], asset.split("_volk_", 1)[1]
-    wav = f"{voices_root}/{LANG[lang]}/S2_Live/VO_volk_{key}.wav"
+    asset = os.path.basename(d["name"])  # AS_FAC_EN_<speaker>_<key>
+    _, _, lang, speaker, key = asset.split("_", 4)
+    wav = f"{voices_root}/{LANG[lang]}/S2_Live/VO_{speaker}_{key}.wav"
     if not os.path.exists(wav):
         print("no wav for", asset)
         continue
+    base_path[asset] = d["name"]
     pairs.append((asset, n, length, ch, features(wav, n, length)))
 print(len(pairs), "training pairs")
 fps = np.median([(n - 1) / l for _, n, l, _, _ in pairs])
@@ -111,7 +116,7 @@ for lang_dir, lang in (("en", "EN"), ("uk", "UA")):
         cands = sorted([(l, a) for a, _, l, _, _ in pairs if a.split("_")[2] == lang and l >= length]) or \
                 sorted([(-l, a) for a, _, l, _, _ in pairs if a.split("_")[2] == lang])
         out["anims"][f"AS_FAC_{lang}_{speaker}_{key}"] = {
-            "length": length, "frames": n, "base": cands[0][1],
+            "length": length, "frames": n, "base": cands[0][1], "base_path": base_path[cands[0][1]],
             "tracks": {names[j]: [round(float(v), 4) for v in pred[:, j]] for j in driven},
         }
         print(f"AS_FAC_{lang}_{speaker}_{key}: {length:.2f}s, base {cands[0][1]}")

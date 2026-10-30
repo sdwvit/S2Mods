@@ -1,12 +1,13 @@
 # Run in the Zone Kit editor's Output Log (Python mode):
-#   exec(open(r"Z:\home\sdwvit\IdeaProjects\S2Mods\Mods\WolfArmorFetch\voice\probe_voiceover_keys.py").read())
+#   PKG = "/<Mod>/<ChainSID>_Voiceover"; OUT = r"S:\vm\voice-clone\probe"; exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\.claude\skills\eng-dialog-voiceover\probe_voiceover_keys.py").read())
 # Read-only: loads one of our _Voiceover runtime data assets and lists the phrase keys the editor sees,
-# to tell whether Skif's (pc) entries are lost on load or only at cook. Report: S:\vm\voice-clone\probe\vo_keys.txt
+# to tell whether Skif's (pc) entries are lost on load or only at cook. Report: <OUT>\vo_keys.txt
 import os
 import unreal
 
-OUT = r"S:\vm\voice-clone\probe"
-PKG = "/WolfArmorFetch/WolfArmorFetch_Decider_Accept_Voiceover"
+for _required in ("PKG", "OUT"):
+    if _required not in globals():
+        raise RuntimeError(f"probe_voiceover_keys.py: set {_required} before exec (see the header)")
 lines = []
 log = lines.append
 try:

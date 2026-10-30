@@ -1,21 +1,23 @@
-# Run in the Zone Kit editor's Output Log (Python mode):
-#   exec(open(r"Z:\home\sdwvit\IdeaProjects\S2Mods\Mods\WolfArmorFetch\voice\create_face_anims.py").read())
-# Builds the mod's lip-sync AnimSequences from S:\vm\voice-clone\lipsync\pred.json (fit_lipsync.py output): each one
-# is a copy of a vanilla Wolf face anim (SKEL_fac, same compression), trimmed to the line's length, with the
-# audio-driven curves and bone channels replaced by the predicted keys. Saved as
-# /WolfArmorFetch/Animations/<speaker>/<EN|UA>/AS_FAC_<EN|UA>_<speaker>_<PhraseSID>.
+# Run in the Zone Kit editor's Output Log (Python mode), setting the inputs first on the same line:
+#   PRED = r"S:\vm\voice-clone\lipsync\pred.json"; VANILLA = "/Game/_STALKER2/Animations/CharacterHead/Hubs/RookieVillage_Hub/volk"; DEST = "/WolfArmorFetch/Animations"; exec(open(r"Z:\home\<user>\IdeaProjects\S2Mods\.claude\skills\eng-dialog-voiceover\lipsync\create_face_anims.py").read())
+# PRED: Windows path of fit_lipsync.py's output. VANILLA: the folder dump_face_anim.py dumped (the base anims).
+# DEST: the mod's content folder for the anims. Optional: LIMIT (anims per run, default 10, 0 = all),
+# LOG_DIR (default: PRED's folder).
+# Builds the lip-sync AnimSequences in PRED: each one is a copy of a vanilla face anim of the fitted speaker (SKEL_fac,
+# same compression), trimmed to the line's length, with the audio-driven curves and bone channels replaced by the
+# predicted keys. Saved as <DEST>/<speaker>/<EN|UA>/AS_FAC_<EN|UA>_<speaker>_<PhraseSID>.
 # Runs in chunks: each run builds the next LIMIT anims that aren't saved yet (paste it again for the next chunk), and
 # collects garbage between anims, since one run over all of them slowed to a stall after ~20.
 import json
 import os
 import unreal
 
-LIMIT = 10
+for _required in ("PRED", "VANILLA", "DEST"):
+    if _required not in globals():
+        raise RuntimeError(f"create_face_anims.py: set {_required} before exec (see the header)")
+LIMIT = globals().get("LIMIT", 10)
+OUT = globals().get("LOG_DIR") or os.path.dirname(PRED)
 FPS = 30  # fit_lipsync.py predicts at the median vanilla rate, 29.9: keyed here at exactly 30
-PRED = r"S:\vm\voice-clone\lipsync\pred.json"
-OUT = r"S:\vm\voice-clone\probe"
-VANILLA = "/Game/_STALKER2/Animations/CharacterHead/Hubs/RookieVillage_Hub/volk"
-DEST = "/WolfArmorFetch/Animations"
 lib = unreal.AnimationLibrary
 eal = unreal.EditorAssetLibrary
 lines = []
@@ -47,7 +49,7 @@ def frame_pose(anim, bone, frame):
 
 def build(name, a, fps):
     speaker, lang = name.split("_")[3], name.split("_")[2]
-    src = f"{VANILLA}/{lang}/{a['base']}"
+    src = f"{VANILLA}/{a['base_path']}" if "base_path" in a else f"{VANILLA}/{lang}/{a['base']}"
     dst = f"{DEST}/{speaker}/{lang}/{name}"
     if eal.does_asset_exist(dst):
         eal.delete_asset(dst)
@@ -56,7 +58,7 @@ def build(name, a, fps):
     ctrl = controller_of(anim)
     log(f"{name}: from {src}, {n} frames, controller {ctrl}")
     if ctrl:
-        ctrl.open_bracket(unreal.Text("WolfArmorFetch lipsync"), False)
+        ctrl.open_bracket(unreal.Text("lipsync"), False)
     # Vanilla face anims are 60 fps (EN) or 30 fps (UA); the predictions are per 1/FPS frame, so the copy has to
     # run at FPS before it is resized, or an EN base plays the line at double speed.
     try:
