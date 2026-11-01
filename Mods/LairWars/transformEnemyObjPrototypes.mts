@@ -7,3 +7,4 @@ export const transformEnemyObjPrototypes: StructTransformer<ObjPrototype> = (str
   enemyClonesByArchetype[struct.__internal__.rawName]?.map(buildEnemyClone) ?? null;
 
 transformEnemyObjPrototypes.files = enemyCloneFileSuffixes;
+transformEnemyObjPrototypes.inheritDuplicates = true;

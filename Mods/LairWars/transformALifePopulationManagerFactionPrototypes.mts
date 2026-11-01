@@ -29,3 +29,4 @@ export function transformALifePopulationManagerFactionPrototypes(struct: Struct)
 }
 
 transformALifePopulationManagerFactionPrototypes.files = ["/ALifePopulationManagerFactionPrototypes.cfg"];
+transformALifePopulationManagerFactionPrototypes.inheritDuplicates = true;

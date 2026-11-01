@@ -7,3 +7,4 @@ export const transformAbilityPrototypes: StructTransformer<Struct> = (struct) =>
   abilityClonesByAbility[struct.__internal__.rawName]?.map(buildAbilityClone) ?? null;
 
 transformAbilityPrototypes.files = abilityCloneFileSuffixes;
+transformAbilityPrototypes.inheritDuplicates = true;

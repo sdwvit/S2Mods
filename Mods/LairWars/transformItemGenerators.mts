@@ -21,3 +21,4 @@ export const transformItemGenerators: StructTransformer<ItemGeneratorPrototype> 
 };
 
 transformItemGenerators.files = ["/ItemGeneratorPrototypes.cfg", "/DynamicItemGenerator.cfg"];
+transformItemGenerators.inheritDuplicates = true;

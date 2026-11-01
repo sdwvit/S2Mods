@@ -1,5 +1,7 @@
 import type { Struct } from "s2cfgtojson";
 import type { MetaContext } from "../../src/meta-type.mts";
+import { tierArchetypes, variantPrototype, variantPrototypeSIDs, type RankName } from "./lairTiers.mts";
+import { addedFactionBlocks } from "./openLairs.mts";
 
 /**
  * Expansion only sends out a squad of ExpansionResolverFactory.MinSquadSize (2) or more, so a lair needs a few
@@ -60,6 +62,7 @@ const rankBlocks = (struct: Struct) =>
   );
 
 const groupOf = (struct: Struct) => LAIR_GROUPS.find((g) => g.match(struct.SID));
+const isScaled = (group: Group | undefined): group is Group => !!(group?.range || group?.factor);
 
 /** Vanilla [min, max] of every group, filled on first use from the whole file. */
 let vanillaExtents: Map<Group, Range> | undefined;
@@ -84,32 +87,69 @@ const scale = (group: Group, vanilla: number, rankKey: string) => {
   return Math.round(lo + t * (hi - lo));
 };
 
-export function transformGenericLairPrototypes(struct: Struct, context: MetaContext<Struct>) {
-  const group = groupOf(struct);
-  const factions = struct.Preset?.PossibleInhabitantFactions;
-  if (!factions || !group || (!group.range && !group.factor)) {
-    return null;
+/** Scales every rank's MaxSpawnQuantity of a faction block in place (a full block, not a patch). */
+function scaleFactionBlock(faction: Struct, group: Group) {
+  for (const [rankKey, rank] of faction.SpawnSettingsPerPlayerRanks?.entries() ?? []) {
+    if (rank.MaxSpawnQuantity !== undefined) rank.MaxSpawnQuantity = scale(group, rank.MaxSpawnQuantity, rankKey);
   }
+}
+
+let once = false;
+
+/**
+ * Patches every vanilla lair prototype: tier mixes in its player-rank blocks (lairTiers.mts), bigger sizes
+ * (LAIR_GROUPS) and every faction allowed in (openLairs.mts). The first call also emits the prototypes the mod
+ * adds, so they come first in the file.
+ */
+export function transformGenericLairPrototypes(struct: Struct, context: MetaContext<Struct>) {
   vanillaExtents ??= extentsFrom(context.array);
+  const out: Struct[] = [];
+  if (!once) {
+    once = true;
+    // Variants inherit their vanilla prototype, patched below with sizes, tiers and factions.
+    out.push(...variantPrototypeSIDs.map(variantPrototype));
+  }
+  const patch = patchVanillaLair(struct);
+  if (patch) out.push(patch);
+  return out.length ? out : null;
+}
+
+function patchVanillaLair(struct: Struct) {
+  const group = groupOf(struct);
+  const scaled = isScaled(group);
+  const tiered = tierArchetypes[struct.__internal__.rawName];
+  const factions = struct.Preset?.PossibleInhabitantFactions;
+  const added = addedFactionBlocks(struct as any);
+  if (!factions || (!scaled && !tiered && !added.length)) return null;
 
   const fork = struct.fork();
   fork.Preset = patched(struct.Preset);
   fork.Preset.PossibleInhabitantFactions = patched(factions);
 
-  for (const [factionKey, faction] of factions.entries()) {
-    const ranks = faction.SpawnSettingsPerPlayerRanks;
-    if (!ranks) continue;
-    const factionFork = patched(faction);
-    factionFork.SpawnSettingsPerPlayerRanks = patched(ranks);
-    for (const [rankKey, rank] of ranks.entries()) {
-      if (rank.MaxSpawnQuantity === undefined) continue;
-      const rankFork = patched(rank);
-      rankFork.MaxSpawnQuantity = scale(group, rank.MaxSpawnQuantity, rankKey);
-      factionFork.SpawnSettingsPerPlayerRanks[rankKey] = rankFork;
+  if (scaled || tiered) {
+    for (const [factionKey, faction] of factions.entries()) {
+      const ranks = faction.SpawnSettingsPerPlayerRanks;
+      if (!ranks) continue;
+      const tieredRanks = tiered?.[factionKey];
+      const factionFork = patched(faction);
+      factionFork.SpawnSettingsPerPlayerRanks = patched(ranks);
+      for (const [rankKey, rank] of ranks.entries()) {
+        const rankFork = patched(rank);
+        if (scaled && rank.MaxSpawnQuantity !== undefined) rankFork.MaxSpawnQuantity = scale(group, rank.MaxSpawnQuantity, rankKey);
+        // Without bpatch: the tier's archetype list replaces vanilla's whole.
+        const archetypes = tieredRanks?.[rankKey as RankName];
+        if (archetypes) rankFork.SpawnSettingsPerArchetypes = archetypes;
+        factionFork.SpawnSettingsPerPlayerRanks[rankKey] = rankFork;
+      }
+      fork.Preset.PossibleInhabitantFactions[factionKey] = factionFork;
     }
-    fork.Preset.PossibleInhabitantFactions[factionKey] = factionFork;
+  }
+  for (const [factionKey, block] of added) {
+    if (scaled) scaleFactionBlock(block, group);
+    fork.Preset.PossibleInhabitantFactions.addNode(block, factionKey);
   }
   return fork;
 }
 
 transformGenericLairPrototypes.files = ["/GenericLairPrototypes.cfg"];
+transformGenericLairPrototypes.inheritDuplicates = true;

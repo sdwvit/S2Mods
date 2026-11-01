@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createHash } from "node:crypto";
 import type {
   GenericLairPrototype,
   ItemGeneratorPrototype,
@@ -8,25 +7,34 @@ import type {
   SpawnActorPrototype,
 } from "s2cfgtojson";
 import { Struct } from "s2cfgtojson";
-import { baseCfgDir, modName } from "../../src/base-paths.mts";
+import { baseCfgDir } from "../../src/base-paths.mts";
 import { getCfgFiles, getDlcCfgFiles } from "../../src/get-cfg-files.mts";
 import { readFileAndGetStructs } from "../../src/read-file-and-get-structs.mts";
 
 /**
- * Lair tiers: every LEVELS_PER_TIER DecoupledRanks levels each lair moves one tier up.
- * Tier 0 is the vanilla lair (repointed at its `_LT0` prototype), tiers 1..9 are copies stacked on
- * the same spot and switched on by quest nodes. A tier prototype spawns a spread of enemy ranks
- * (vanilla per-rank archetypes and gear) and the enemies' HP scales with the tier.
+ * Lair tiers, one per player rank, all inside the vanilla lair prototypes: the game spawns from the
+ * `SpawnSettingsPerPlayerRanks` block of the player's rank, and DecoupledRanks sets that rank from the level
+ * (Newbie 1-9, Experienced 10-19, Veteran 20-29, Master 30). Each rank block gets the tier of its rank's first
+ * level: a spread of enemy ranks (vanilla per-rank archetypes and gear) with HP scaled by that level.
+ * No copies, no quests: until 2026-11-01 six tiers were stacked lair copies switched by ~8,000 quest nodes.
  * See DesignDocs/LairTiers.md.
  */
-export const TIER_COUNT = 10;
-export const LEVELS_PER_TIER = 3;
-export const TIERS = Array.from({ length: TIER_COUNT }, (_, n) => n);
 export const RANKS = ["Newbie", "Experienced", "Veteran", "Master"] as const;
 export type RankName = (typeof RANKS)[number];
+/** Tier n is the block of RANKS[n]. */
+export const TIER_COUNT = RANKS.length;
+export const TIERS = Array.from({ length: TIER_COUNT }, (_, n) => n);
+/** DecoupledRanks level at which the player reaches each rank (its `XSwitchPlayerRank` thresholds). */
+const RANK_START_LEVELS = [1, 10, 20, 30];
 
-/** Human HP (and weak mutants' HP): 1x at level 1, 2x at 10, 3x at 19-21, 4x at 28-30. */
-export const tierMultiplier = (tier: number) => 1 + tier / 3;
+/** First DecoupledRanks level of a tier. */
+export const tierStartLevel = (tier: number) => RANK_START_LEVELS[tier];
+
+/** Scaling follows the tier's first level: 0 at level 1, 1 at 10, 2.1 at 20, 3.2 at 30. */
+const tierProgress = (tier: number) => (tierStartLevel(tier) - 1) / 9;
+
+/** Human HP (and weak mutants' HP): 1x as Newbie, 2x Experienced, 3.1x Veteran, 4.2x Master. */
+export const tierMultiplier = (tier: number) => 1 + tierProgress(tier);
 
 /**
  * Mutants scale by rank through their attack cooldowns, divided by this (a Master attacks twice as often).
@@ -43,15 +51,12 @@ export const MUTANT_COOLDOWN_DIVISOR_BY_RANK: Record<RankName, number> = {
 /** Mutants below this vanilla MaxHP also get the tier HP multiplier. */
 export const WEAK_MUTANT_MAX_HP = 200;
 
-/** First DecoupledRanks level of a tier. */
-export const tierStartLevel = (tier: number) => tier * LEVELS_PER_TIER + 1;
-
 /**
- * Share of each enemy rank in a tier: a Gaussian around rank index tier/3 (sigma 1), so Master
- * shows up from level 1 (0.6%) and takes over late (57% at tier 9).
+ * Share of each enemy rank in a tier: a Gaussian around rank index (first level - 1) / 9 (sigma 1), so
+ * Master shows up from level 1 (0.6%) and takes over late (about half from level 26).
  */
 export function rankShares(tier: number): number[] {
-  const centre = tier / 3;
+  const centre = tierProgress(tier);
   const raw = RANKS.map((_, r) => Math.exp(-((r - centre) ** 2) / 2));
   const total = raw.reduce((a, b) => a + b, 0);
   return raw.map((w) => w / total);
@@ -62,62 +67,27 @@ const dominantRank = (tier: number): RankName => {
   return RANKS[shares.indexOf(Math.max(...shares))];
 };
 
-export const tierLairPrototypeSID = (lairPrototypeSID: string, tier: number) =>
-  `${lairPrototypeSID}_LT${tier}`;
 export const rankItemGeneratorSID = (generatorSID: string, rank: RankName) =>
   `${generatorSID}_LT${rank}`;
-
-/** Deterministic GUID-shaped SID for a lair copy, so regenerating keeps save references valid. */
-export const lairCopySID = (lairSID: string, tier: number) =>
-  tier === 0
-    ? lairSID
-    : createHash("md5").update(`${modName}:${lairSID}:T${tier}`).digest("hex").toUpperCase();
-
-/** Per-lair flag: 1 while a vanilla quest holds the lair switched off. */
-export const lairHeldOffVariableSID = (lairSID: string) => `${modName}HeldOff_${lairSID}`;
-export const LAIR_TIER_GLOBAL_VARIABLE_SID = `${modName}Applied`;
-/** Per-lair tier currently switched on (0 = the vanilla lair). */
-export const lairTierVariableSID = (lairSID: string) => `${modName}Lair_${lairSID}`;
 
 const rel = (fullPath: string) => path.relative(path.join(baseCfgDir, "GameData"), fullPath);
 
 // ---------------------------------------------------------------------------------------------
-// Vanilla quests that switch lairs on and off.
+// Lairs some quest (base game or DLC) switches on and off: the mod leaves their ActiveLair alone.
 
-const questNodeFiles = (await getCfgFiles("/QuestNodePrototypes/", true)).filter((f) =>
-  f.includes("/GameData/QuestNodePrototypes/"),
-);
-/** Quest node files that hold at least one ToggleLairActivity node. */
-export const lairToggleQuestFiles: string[] = [];
-/** Lairs that some vanilla quest switches off with ForceDespawn = true. */
-export const forceDespawnLairs = new Set<string>();
-const toggledLairsIn = (text: string) => {
-  const guids: string[] = [];
-  for (const block of text.split(/\n(?=\S+\s*:\s*struct\.begin)/)) {
-    if (!block.includes("EQuestNodeType::ToggleLairActivity")) continue;
-    const guid = block.match(/TargetQuestGuid\s*=\s*(\w+)/)?.[1];
-    if (!guid) continue;
-    guids.push(guid);
-    if (/ForceDespawn\s*=\s*true/.test(block)) forceDespawnLairs.add(guid);
-  }
-  return guids;
-};
+const toggledLairsIn = (text: string) =>
+  text
+    .split(/\n(?=\S+\s*:\s*struct\.begin)/)
+    .filter((node) => node.includes("EQuestNodeType::ToggleLairActivity"))
+    .map((node) => node.match(/TargetQuestGuid\s*=\s*(\w+)/)?.[1])
+    .filter(Boolean) as string[];
 const questToggledLairs = new Set<string>();
-for (const file of questNodeFiles) {
+for (const file of [
+  ...(await getCfgFiles("/QuestNodePrototypes/", true)).filter((f) => f.includes("/GameData/QuestNodePrototypes/")),
+  ...(await getDlcCfgFiles("/QuestNodePrototypes.cfg")),
+]) {
   const text = fs.readFileSync(file, "utf8");
-  if (!text.includes("EQuestNodeType::ToggleLairActivity")) continue;
-  lairToggleQuestFiles.push(file);
-  toggledLairsIn(text).forEach((guid) => questToggledLairs.add(guid));
-}
-
-/**
- * Base-game lairs that DLC quests switch (DLC1 24, Deluxe 2). Their toggles would have to be mirrored
- * from a `dlc` companion mod, so these lairs keep only tier 0 (no stacked copies a DLC scene can't
- * switch off).
- */
-const dlcToggledLairs = new Set<string>();
-for (const file of await getDlcCfgFiles("/QuestNodePrototypes.cfg")) {
-  toggledLairsIn(fs.readFileSync(file, "utf8")).forEach((guid) => dlcToggledLairs.add(guid));
+  if (text.includes("EQuestNodeType::ToggleLairActivity")) toggledLairsIn(text).forEach((guid) => questToggledLairs.add(guid));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -131,8 +101,8 @@ export const vanillaLairPrototypes: Record<string, GenericLairPrototype> = Objec
 
 /**
  * Spawn-pool additions for specific lairs. The listed lairs use a variant of their lair prototype,
- * `<prototype>_<name>`, with `archetype` added to every player-rank block of `faction` at the weight
- * `weightOf` has there. The variant only feeds the tier prototypes (`<prototype>_<name>_LT<n>`).
+ * `<prototype>_<name>`: a new prototype that inherits the vanilla one (`refkey`) and restates only the tiered
+ * archetype lists of `faction`, with `archetype` added at the weight `weightOf` has there.
  */
 const LAIR_POOL_ADDITIONS = [
   {
@@ -147,57 +117,48 @@ const LAIR_POOL_ADDITIONS = [
 ];
 /** Lair SID -> the variant lair prototype it uses instead of its own. */
 const lairPrototypeOverride: Record<string, string> = {};
-/** Variant lair prototype SID -> the vanilla prototype it is emitted next to. */
-export const lairPrototypeVariantBase: Record<string, string> = {};
+/** Variant lair prototype SID -> its addition. */
+const variants: Record<string, (typeof LAIR_POOL_ADDITIONS)[number]> = {};
 for (const add of LAIR_POOL_ADDITIONS) {
   const sid = `${add.prototype}_${add.name}`;
-  const variant = vanillaLairPrototypes[add.prototype].clone();
-  variant.__internal__.rawName = sid;
-  variant.SID = sid;
-  forEachFaction(variant, (factionKey, blocks) => {
-    if (factionKey !== add.faction) return;
-    Object.values(blocks).forEach((block) => {
-      const archetypes = (block as any).SpawnSettingsPerArchetypes as Struct | undefined;
-      const like = archetypes?.[add.weightOf];
-      if (!like) return;
-      archetypes.addNode(new Struct({ MinQuantityPerArchetype: 0, SpawnWeight: like.SpawnWeight }), add.archetype);
-    });
-  });
-  vanillaLairPrototypes[sid] = variant;
-  lairPrototypeVariantBase[sid] = add.prototype;
+  variants[sid] = add;
   add.lairs.forEach((lair) => (lairPrototypeOverride[lair] = sid));
 }
+/** The vanilla prototype a lair prototype SID stands for (a variant's base, else itself). */
+const vanillaOf = (sid: string) => vanillaLairPrototypes[variants[sid]?.prototype ?? sid];
 
-type RankBlocks = Partial<Record<RankName, Struct>>;
+type Archetypes = Array<[string, { MinQuantityPerArchetype?: number; SpawnWeight?: number }]>;
+/** A faction's vanilla archetype list per player-rank block. */
+type RankArchetypes = Partial<Record<RankName, Archetypes>>;
 
-function forEachFaction(
-  lairPrototype: GenericLairPrototype,
-  callback: (factionKey: string, blocks: RankBlocks) => void,
-) {
-  lairPrototype.Preset?.PossibleInhabitantFactions?.forEach(([factionKey, faction]) => {
-    const blocks: RankBlocks = {};
-    faction?.SpawnSettingsPerPlayerRanks?.forEach(([rank, block]) => {
-      if (RANKS.includes(rank as RankName) && block instanceof Struct) blocks[rank as RankName] = block;
-    });
-    callback(String(factionKey), blocks);
-  });
-}
-
-function archetypesOf(block: Struct | undefined): Array<[string, { MinQuantityPerArchetype?: number; SpawnWeight?: number }]> {
-  const result = [];
+function archetypesOf(block: Struct | undefined): Archetypes {
+  const result: Archetypes = [];
   (block as any)?.SpawnSettingsPerArchetypes?.forEach(([key, value]) => {
     if (value instanceof Struct) result.push([String(key), value]);
   });
   return result;
 }
 
-const spawnsArchetypes = (lairPrototype: GenericLairPrototype) => {
-  let any = false;
-  forEachFaction(lairPrototype, (_, blocks) => {
-    Object.values(blocks).forEach((block) => (any ||= archetypesOf(block).length > 0));
+/** Per faction key, its archetype lists per rank; a variant's addition joins its faction's lists. */
+function factionArchetypes(sid: string) {
+  const add = variants[sid];
+  const result: Record<string, RankArchetypes> = {};
+  vanillaOf(sid)?.Preset?.PossibleInhabitantFactions?.forEach(([factionKey, faction]) => {
+    const ranks: RankArchetypes = {};
+    faction?.SpawnSettingsPerPlayerRanks?.forEach(([rank, block]) => {
+      if (!RANKS.includes(rank as RankName) || !(block instanceof Struct)) return;
+      const archetypes = archetypesOf(block);
+      const like = add?.faction === factionKey && archetypes.find(([key]) => key === add.weightOf);
+      if (like) archetypes.push([add.archetype, { MinQuantityPerArchetype: 0, SpawnWeight: like[1].SpawnWeight }]);
+      ranks[rank as RankName] = archetypes;
+    });
+    result[String(factionKey)] = ranks;
   });
-  return any;
-};
+  return result;
+}
+
+const spawnsArchetypes = (sid: string) =>
+  Object.values(factionArchetypes(sid)).some((ranks) => Object.values(ranks).some((list) => list!.length > 0));
 
 // ---------------------------------------------------------------------------------------------
 // Enemy prototypes (archetypes) and their item generators.
@@ -379,8 +340,8 @@ function rankAbilities(archetype: string, rank: RankName) {
 }
 
 /**
- * `<Ability>_LT<Rank>`: inherits the ability, cooldowns divided by the rank's speed. TriggeredCooldowns
- * are restated by index (`[0]`, `[1]`, ...), the way vanilla children override array entries.
+ * `<Ability>_LT<Rank>`: inherits the ability, cooldowns divided by the rank's speed. Only the TriggeredCooldowns
+ * entries that change are restated, by index (`[0]`, `[1]`, ...), the way vanilla children override array entries.
  */
 export function buildAbilityClone(cloneSID: string) {
   const { ability, rank } = abilityClones[cloneSID];
@@ -392,13 +353,12 @@ export function buildAbilityClone(cloneSID: string) {
   clone.__internal__.isRoot = true;
   clone.__internal__.refkey = source.__internal__.rawName;
   clone.SID = cloneSID;
-  if (entries.length) {
-    const triggered = new Struct();
-    entries.forEach(({ tag, duration, vanilla }) =>
-      triggered.addNode(new Struct({ CooldownTag: tag, Duration: vanilla ? duration : round(duration * factor) })),
-    );
-    clone.TriggeredCooldowns = triggered;
-  }
+  // Merges with the inherited list by index, so only the entries that change are restated.
+  const triggered = new Struct();
+  entries.forEach(({ duration, vanilla }, index) => {
+    if (!vanilla && duration > 0) triggered.addNode(new Struct({ Duration: round(duration * factor) }), index);
+  });
+  if (triggered.entries().length) clone.TriggeredCooldowns = triggered;
   Object.entries(fields).forEach(([field, value]) => (clone[field] = round(value * factor)));
   return clone;
 }
@@ -511,10 +471,10 @@ function effectiveWeights(archetypes: ReturnType<typeof archetypesOf>) {
  * vanilla block R at `SpawnWeight / blockTotal x share(R)`. Minimum quantities come from the
  * player-rank block being filled, carried over to the tier's dominant rank.
  */
-export function tierArchetypeMix(blocks: RankBlocks, playerRankBlock: Struct, tier: number) {
+export function tierArchetypeMix(ranks: RankArchetypes, own: Archetypes, tier: number) {
   const shares = rankShares(tier);
   const usable = RANKS.map((rank, r) => {
-    const archetypes = archetypesOf(blocks[rank]);
+    const archetypes = ranks[rank] ?? [];
     const weights = effectiveWeights(archetypes);
     const total = weights.reduce((sum, w) => sum + w, 0);
     return { rank, share: total > 0 ? shares[r] : 0, archetypes, weights, total };
@@ -532,7 +492,7 @@ export function tierArchetypeMix(blocks: RankBlocks, playerRankBlock: Struct, ti
     });
   });
   const dominant = dominantRank(tier);
-  archetypesOf(playerRankBlock).forEach(([archetype, s]) => {
+  own.forEach(([archetype, s]) => {
     const min = Number(s.MinQuantityPerArchetype ?? 0);
     if (!min) return;
     const key = enemyFor(archetype, dominant, tier);
@@ -542,24 +502,20 @@ export function tierArchetypeMix(blocks: RankBlocks, playerRankBlock: Struct, ti
   return mix;
 }
 
-/** Builds `<LairProto>_LT<n>`: the vanilla prototype with every block's archetypes replaced. */
-export function buildTierLairPrototype(lairPrototype: GenericLairPrototype, tier: number) {
-  const sid = tierLairPrototypeSID(lairPrototype.__internal__.rawName, tier);
-  const clone = lairPrototype.clone();
-  clone.__internal__.rawName = sid;
-  clone.__internal__.isRoot = true;
-  clone.SID = sid;
-  const vanillaBlocks: Record<string, RankBlocks> = {};
-  forEachFaction(lairPrototype, (factionKey, blocks) => (vanillaBlocks[factionKey] = blocks));
-  forEachFaction(clone, (factionKey, blocks) => {
-    Object.values(blocks).forEach((block) => {
-      const mix = tierArchetypeMix(vanillaBlocks[factionKey], block, tier);
-      const archetypes = new Struct() as any;
-      Object.entries(mix).forEach(([key, settings]) => archetypes.addNode(new Struct(settings), key));
-      (block as any).SpawnSettingsPerArchetypes = archetypes;
+/** The tier mixes of a lair prototype: per faction key and player rank, the new `SpawnSettingsPerArchetypes`. */
+function tierArchetypeLists(sid: string) {
+  const result: Record<string, Partial<Record<RankName, Struct>>> = {};
+  Object.entries(factionArchetypes(sid)).forEach(([factionKey, ranks]) => {
+    result[factionKey] = {};
+    Object.entries(ranks).forEach(([rank, own]) => {
+      const archetypes = new Struct();
+      Object.entries(tierArchetypeMix(ranks, own!, RANKS.indexOf(rank as RankName))).forEach(([key, settings]) =>
+        archetypes.addNode(new Struct(settings), key),
+      );
+      result[factionKey][rank as RankName] = archetypes;
     });
   });
-  return clone;
+  return result;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -569,21 +525,16 @@ export type Lair = {
   sid: string;
   file: string;
   lairPrototypeSID: string;
-  /** A vanilla quest switches it on/off, so it gets a held-off flag. */
-  questToggled: boolean;
-  /** Initial flag value: vanilla starts it switched off. */
-  startsHeldOff: boolean;
-  /** Only tier 0 (repointed vanilla lair), see dlcToggledLairs. */
-  tierZeroOnly: boolean;
-  /** Off in vanilla and no quest switches it on: the mod switches the vanilla lair on. */
+  /** Off in vanilla and no quest switches it on: the mod switches it on. */
   enabledByMod: boolean;
-  /** World position (UE units), for the "player within 1 km" check. */
+  /** World position (UE units). */
   position: { X: number; Y: number; Z: number };
 };
 
 const spawnActorFiles = (await getCfgFiles("/SpawnActorPrototypes/WorldMap_WP/", true)).filter((f) =>
   f.includes("/GameData/SpawnActorPrototypes/WorldMap_WP/"),
 );
+/** World-map lairs with tiers (not guards, not resting lairs, not quest-spawned). */
 export const lairs: Lair[] = [];
 for (const file of spawnActorFiles) {
   if (!fs.readFileSync(file, "utf8").includes("ESpawnType::LairSpawner")) continue;
@@ -593,38 +544,49 @@ for (const file of spawnActorFiles) {
     // Guard lairs (hub guards) are left exactly as vanilla has them.
     if (String(s.LairPrototypeSID).startsWith("Guard")) continue;
     const lairPrototypeSID = lairPrototypeOverride[sid] ?? s.LairPrototypeSID;
-    const lairPrototype = vanillaLairPrototypes[lairPrototypeSID];
-    if (!lairPrototype || !spawnsArchetypes(lairPrototype)) continue;
-    // Spawned by quest nodes on demand; a stacked copy would never be spawned.
+    if (!vanillaOf(lairPrototypeSID) || !spawnsArchetypes(lairPrototypeSID)) continue;
+    // Spawned by quest nodes on demand.
     if (String(s.SpawnOnStart) === "false") continue;
-    const questToggled = questToggledLairs.has(sid);
-    const inactive = String(s.ActiveLair) === "false";
     lairs.push({
       sid,
       file,
       lairPrototypeSID,
-      questToggled,
       // A quest decides when a quest-toggled lair starts; the rest of the vanilla-off lairs are switched on.
-      startsHeldOff: inactive && questToggled,
-      tierZeroOnly: dlcToggledLairs.has(sid),
-      enabledByMod: inactive && !questToggled,
+      enabledByMod: String(s.ActiveLair) === "false" && !questToggledLairs.has(sid),
       position: { X: Number(s.PositionX), Y: Number(s.PositionY), Z: Number(s.PositionZ) },
     });
   }
 }
 export const lairsBySID = Object.fromEntries(lairs.map((l) => [l.sid, l]));
-/** Lairs with stacked tier copies. */
-export const tieredLairs = lairs.filter((l) => !l.tierZeroOnly);
-export const lairFileSuffixes = [
-  ...new Set(lairs.map((l) => l.file.slice(l.file.indexOf("/SpawnActorPrototypes/")))),
-];
 
-/** Tier lair prototypes, built once so enemyClones/rankedGenerators are complete up front. */
-export const tierLairPrototypes: Record<string, GenericLairPrototype[]> = {};
-for (const lairPrototypeSID of new Set(lairs.map((l) => l.lairPrototypeSID))) {
-  tierLairPrototypes[lairPrototypeSID] = TIERS.map((tier) =>
-    buildTierLairPrototype(vanillaLairPrototypes[lairPrototypeSID], tier),
+/**
+ * Tier mixes by lair prototype SID, built once so enemyClones/rankedGenerators are complete up front: every
+ * vanilla prototype that spawns archetypes (guards excepted, as everywhere) and the spawn-pool variants.
+ */
+export const tierArchetypes: Record<string, ReturnType<typeof tierArchetypeLists>> = {};
+for (const sid of [...Object.keys(vanillaLairPrototypes), ...Object.keys(variants)]) {
+  if (!sid.startsWith("Guard") && spawnsArchetypes(sid)) tierArchetypes[sid] = tierArchetypeLists(sid);
+}
+
+/** SIDs of the variant prototypes the mod adds. */
+export const variantPrototypeSIDs = Object.keys(variants);
+
+/**
+ * A variant prototype: inherits its vanilla prototype (patched with tiers, sizes and factions in the same file)
+ * and restates only the tiered archetype lists of the faction it adds to.
+ */
+export function variantPrototype(sid: string) {
+  const { prototype, faction } = variants[sid];
+  const ranks = new Struct();
+  Object.entries(tierArchetypes[sid][faction]).forEach(([rank, archetypes]) =>
+    ranks.addNode(new Struct({ SpawnSettingsPerArchetypes: archetypes }), rank),
   );
+  const variant = new Struct({ SID: sid }) as GenericLairPrototype;
+  Object.assign(variant.__internal__, { rawName: sid, isRoot: true, refkey: prototype });
+  variant.Preset = new Struct({
+    PossibleInhabitantFactions: new Struct({ [faction]: new Struct({ SpawnSettingsPerPlayerRanks: ranks }) }),
+  }) as any;
+  return variant;
 }
 
 export const enemyCloneFileSuffixes = [
@@ -706,4 +668,39 @@ export function buildRankItemGenerator(generator: ItemGeneratorPrototype, rank: 
   });
   clone.ItemGenerator = entries;
   return clone;
+}
+
+/**
+ * Bpatch of a vanilla lair prototype that puts the tiers into its player-rank blocks: each block's
+ * `SpawnSettingsPerArchetypes` replaced whole (no bpatch on it) by the tier's mix. Null when the prototype has
+ * no tiers (guards, prototypes that spawn nothing). LairTiers emits this alone; LairWars merges it with its
+ * own changes.
+ */
+export function tierPatch(struct: GenericLairPrototype) {
+  const tiered = tierArchetypes[struct.__internal__.rawName];
+  const factions = struct.Preset?.PossibleInhabitantFactions;
+  if (!tiered || !factions) return null;
+  const patched = <T extends Struct>(s: T) => {
+    const fork = s.fork();
+    fork.__internal__.bpatch = true;
+    return fork;
+  };
+  const fork = struct.fork();
+  fork.Preset = patched(struct.Preset);
+  fork.Preset.PossibleInhabitantFactions = patched(factions);
+  factions.forEach(([factionKey, faction]) => {
+    const ranks = (faction as any)?.SpawnSettingsPerPlayerRanks as Struct | undefined;
+    if (!ranks) return;
+    const factionFork = patched(faction as Struct) as any;
+    factionFork.SpawnSettingsPerPlayerRanks = patched(ranks);
+    ranks.forEach(([rankKey, rank]) => {
+      const archetypes = tiered[String(factionKey)]?.[rankKey as RankName];
+      if (!archetypes) return;
+      const rankFork = patched(rank as Struct) as any;
+      rankFork.SpawnSettingsPerArchetypes = archetypes;
+      factionFork.SpawnSettingsPerPlayerRanks[rankKey] = rankFork;
+    });
+    (fork.Preset.PossibleInhabitantFactions as any)[factionKey] = factionFork;
+  });
+  return fork;
 }
