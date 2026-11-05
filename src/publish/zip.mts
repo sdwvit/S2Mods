@@ -25,7 +25,10 @@ export async function writeWithZip(filePath: string, data: string): Promise<void
   await writeFile(filePath, zipped);
 }
 
-export async function createModZip(sourceDir?: string, dest?: string | false, zipName?: string) {
+/** One folder to add to a zip: `glob` limits it to matching paths, `prefix` is its folder in the zip. */
+export type ZipSource = { dir: string; glob?: string; prefix?: string };
+
+export async function createModZip(sourceDir?: string | ZipSource[], dest?: string | false, zipName?: string) {
   if (!sourceDir) {
     // steamworkshop/ already mirrors the installed shape (Windows/<variant>/...), so it is zipped as is.
     sourceDir = modFolderSteam;
@@ -36,8 +39,11 @@ export async function createModZip(sourceDir?: string, dest?: string | false, zi
   const outZipPath = path.join(projectRoot, `${zipName ?? modName}.zip`);
   logger.log(`Creating mod ZIP ${modName}…`);
 
-  if (!fs.existsSync(sourceDir)) {
-    throw new Error(`Source folder does not exist: ${sourceDir}`);
+  const sources: ZipSource[] = typeof sourceDir === "string" ? [{ dir: sourceDir, prefix: dest || undefined }] : sourceDir;
+  for (const { dir } of sources) {
+    if (!fs.existsSync(dir)) {
+      throw new Error(`Source folder does not exist: ${dir}`);
+    }
   }
 
   await fs.promises.mkdir(path.dirname(outZipPath), { recursive: true });
@@ -61,7 +67,10 @@ export async function createModZip(sourceDir?: string, dest?: string | false, zi
 
     archive.pipe(output);
 
-    archive.directory(sourceDir, dest);
+    for (const { dir, glob, prefix } of sources) {
+      if (glob) archive.glob(glob, { cwd: dir }, prefix ? { prefix } : {});
+      else archive.directory(dir, prefix || false);
+    }
 
     archive.finalize();
   });
