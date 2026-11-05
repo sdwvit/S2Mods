@@ -1,4 +1,4 @@
-import type { GetStructType } from "s2cfgtojson";
+import type { ESpawnType, GetStructType } from "s2cfgtojson";
 import type { StructTransformer } from "../../src/meta-type.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 
@@ -9,6 +9,8 @@ type MeshGeneratorPrototype = GetStructType<{
   Materials: {};
   CustomData: {};
 }>;
+
+const a = '' as ESpawnType;
 
 /**
  * Sets bullet (Strike) protection to 0 for all mobs.

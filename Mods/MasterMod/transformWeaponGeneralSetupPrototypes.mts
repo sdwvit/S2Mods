@@ -108,7 +108,7 @@ function addUdpScopeCompatibility(fork: WeaponGeneralSetupPrototype, struct: Wea
   fork.CompatibleAttachments ||= struct.CompatibleAttachments?.fork() || new Struct({}) as any;
   fork.CompatibleAttachments.addNode(
     Object.assign(getCompatibleAttachmentDefinition("EN_ColimScope_1"), {
-      Socket: "ColimScopeSocket_corrected",
+      Socket: "ColimScopeSocket",
       WeaponSpecificIcon:
         `Texture2D'/Game/${modName}/FPS_Game/UIRemaster/UITextures/Inventory/WeaponAndAttachments/UDP/T_inv_w_en_colim_scope.T_inv_w_en_colim_scope'`,
     }),
