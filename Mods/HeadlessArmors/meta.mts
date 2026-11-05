@@ -30,6 +30,7 @@ import { getGdocsArmorData } from "./gdocs-armors.mts";
 import { backfillDef } from "../../src/backfill-def.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { getDropChance, maxDropChance } from "./calculateArmorScore.mts";
+import { writeHeadlessArmorsLocalization } from "./writeLocalization.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 const finishedTransformers = new Set<string>();
@@ -49,7 +50,7 @@ export const meta: MetaType = {
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
 
-  changenote: `Other mods can now detect HeadlessArmors through a HeadlessArmorsInstalled flag effect on the player. It replaces the HeadlessArmorsInstalled global variable.`,
+  changenote: `Helmetless suits and the added helmets now have their own names and descriptions in every game language.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,
@@ -194,6 +195,7 @@ export async function transformArmorPrototypes(
 
   addArmorsRunOnce = true;
   const { gdocsArmorSIDs, referenceMap } = await getHeadlessArmorBuildData();
+  writeHeadlessArmorsLocalization(gdocsArmorSIDs);
   gdocsArmorSIDs.forEach((SID) => {
     const newArmor = referenceMap[SID];
     if (!newArmor) {
@@ -205,6 +207,8 @@ export async function transformArmorPrototypes(
     fixUpgradePrototypeSIDs(clone);
     dedupeUpgradePrototypeSIDs(clone);
     clone.__internal__.isRoot = true;
+    // Own text from writeLocalization.mts; the sheet's LocalizationSID borrows a vanilla item's.
+    clone.LocalizationSID = SID;
     delete clone.PreinstalledUpgrades;
     extraStructs.push(clone);
   });
