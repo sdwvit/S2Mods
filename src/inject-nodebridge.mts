@@ -3,6 +3,7 @@ import path from "node:path";
 import fs from "node:fs";
 import fsp from "node:fs/promises";
 import crypto from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { gameRootFolder, modFolder, modName, projectRoot } from "./base-paths.mts";
 import { logger } from "./logger.mts";
 import { withSdkMutationLock } from "./sdk-mutation-lock.mts";
@@ -14,6 +15,12 @@ const distDir = path.join(projectRoot, "src", "nodebridge", "dist");
 const distDll = path.join(distDir, "dwmapi.dll");
 const distNode = path.join(distDir, "node");
 const srcRuntime = path.join(projectRoot, "src", "nodebridge", "runtime");
+const tscBin = path.join(projectRoot, "node_modules", "typescript", "bin", "tsc");
+
+/** Mods import the compiled runtime/dist/s2lib.mjs, never s2lib.mts: rebuild it on every inject. */
+function buildRuntime(): void {
+  execFileSync(process.execPath, [tscBin, "-p", srcRuntime], { stdio: "inherit" });
+}
 
 async function hashFile(p: string): Promise<string | null> {
   try {
@@ -71,6 +78,10 @@ async function main(): Promise<void> {
     }
     // Bundled Node + runtime live under <Win64>/NodeBridge/
     changed += await copyTreeIfChanged(distNode, path.join(gameBridgeRoot, "node"));
+    // dist/ first: the bridge reloads on the first runtime file it sees change, and must load
+    // the new build then.
+    buildRuntime();
+    changed += await copyTreeIfChanged(path.join(srcRuntime, "dist"), path.join(gameBridgeRoot, "runtime", "dist"));
     changed += await copyTreeIfChanged(srcRuntime, path.join(gameBridgeRoot, "runtime"));
     // Per-mod JS payload. Folder presence = enabled; no registry file needed.
     const modDst = path.join(gameBridgeRoot, "mods", modName);
@@ -138,6 +149,10 @@ async function watch(): Promise<void> {
     setTimeout(async () => {
       try {
         if (!fs.existsSync(src)) return;
+        if (/^(s2lib|types)\.mts$/.test(filename.toString())) {
+          buildRuntime();
+          await copyTreeIfChanged(path.join(srcRuntime, "dist"), path.join(gameBridgeRoot, "runtime", "dist"));
+        }
         if (await copyIfChanged(src, dst)) logger.log(`[watch] runtime/${filename}`);
       } catch (err) {
         logger.error(`[watch] runtime sync failed:`, err);

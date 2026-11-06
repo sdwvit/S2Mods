@@ -59,6 +59,8 @@ This mod bPatches files, so it is compatible with other mods that don't modify t
 /** The card text: the description without BBCode, cut to Nexus's 350 characters. */
 function shortDescription() {
   const plain = meta.description
+    // The donation footer belongs in the full description only.
+    .replace(/If you enjoy my mods[\s\S]*$/i, "")
     .replace(/\[\/?[a-z0-9*]+(=[^\]]*)?]/gi, " ")
     // The draft dialog's Create button does nothing on a short description with emoji.
     .replace(/\p{Extended_Pictographic}️?/gu, "")
@@ -121,7 +123,23 @@ async function fillGeneral(page: Page, gameScopedId: string, setName = false) {
   await page.locator("#author-name").fill(author);
   await page.locator("#short-description").fill(shortDescription());
   await fillFullDescription(page, fullDescription);
+  await fillAiUsage(page);
   await save(page);
+}
+
+/** Nexus requires a "Generative AI usage" answer before Publish enables: the user's pick is Mod Content > AI Assisted. */
+async function fillAiUsage(page: Page) {
+  const box = page.getByRole("checkbox", { name: /^AI Assisted/ });
+  if (await box.count()) {
+    if (!(await box.first().isChecked())) await box.first().check({ force: true });
+  } else {
+    await page.getByText("AI Assisted", { exact: true }).click();
+  }
+  const describe = page.getByLabel("Describe how AI assisted you");
+  const field = (await describe.count())
+    ? describe.first()
+    : page.getByText("Describe how AI assisted you").locator("xpath=following::textarea[1]");
+  await field.fill("I used ai to click this checkbox");
 }
 
 async function uploadLogo(page: Page, gameScopedId: string) {

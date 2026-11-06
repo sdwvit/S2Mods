@@ -1,15 +1,13 @@
 /**
  * Lists new user comments on every published mod, on mod.io and Steam Workshop.
  *
- *   npm run check-comments                 # new comments since the last --mark-seen (read-only)
- *   npm run check-comments -- --mark-seen  # acknowledge everything the previous run reported
- *   npm run check-comments -- --since 7d   # ignore saved state, look back 7 days (also: 12h, 2026-10-01)
+ *   npm run check-comments                 # comments from the last 7 days
+ *   npm run check-comments -- --since 30d  # look back 30 days (also: 12h, 2026-10-01)
  *   npm run check-comments -- --mod UberToz --context 5
  *   npm run check-comments -- --json
  *
  * Mod ids come from Mods/<Mod>/.modio and the publishedfileid in Mods/<Mod>/workshopitem.vdf.
- * The report run never moves the "seen" watermark; it writes .comments-pending.json, and
- * --mark-seen promotes that file into .comments-seen.json (both git-ignored, repo root).
+ * Stateless: nothing is written to disk.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -18,9 +16,7 @@ import { projectRoot } from "../ensure-env.mts";
 
 const MODIO_GAME_ID = "5761";
 const STEAM_ID64_BASE = 76561197960265728n;
-const FIRST_RUN_LOOKBACK_S = 14 * 24 * 3600;
-const SEEN_FILE = path.join(projectRoot, ".comments-seen.json");
-const PENDING_FILE = path.join(projectRoot, ".comments-pending.json");
+const DEFAULT_SINCE = "7d";
 const modsDir = path.join(projectRoot, "Mods");
 
 type Platform = "modio" | "steam";
@@ -39,10 +35,7 @@ type ItemReport = {
   url: string;
   newComments: Comment[];
   context: Comment[];
-  latest: number;
 };
-// { modio: { [modId]: unixSeconds }, steam: { [publishedFileId]: unixSeconds } }
-type Watermarks = Record<Platform, Record<string, number>>;
 
 const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(`--${name}`);
@@ -50,34 +43,6 @@ const option = (name: string) => {
   const i = args.indexOf(`--${name}`);
   return i >= 0 ? args[i + 1] : undefined;
 };
-
-function readJson<T>(file: string, fallback: T): T {
-  try {
-    return JSON.parse(fs.readFileSync(file, "utf8"));
-  } catch {
-    return fallback;
-  }
-}
-
-if (flag("mark-seen")) {
-  const pending = readJson<Watermarks | null>(PENDING_FILE, null);
-  if (!pending) {
-    console.log("Nothing pending; run check-comments first.");
-    process.exit(0);
-  }
-  const seen = readJson<Watermarks>(SEEN_FILE, { modio: {}, steam: {} });
-  for (const platform of ["modio", "steam"] as const) {
-    for (const [id, t] of Object.entries(pending[platform] ?? {})) {
-      seen[platform][id] = Math.max(seen[platform][id] ?? 0, t);
-    }
-  }
-  fs.writeFileSync(SEEN_FILE, JSON.stringify(seen, null, 2));
-  fs.rmSync(PENDING_FILE);
-  console.log(
-    `Marked as seen: ${Object.keys(pending.modio).length} mod.io, ${Object.keys(pending.steam).length} Steam items.`,
-  );
-  process.exit(0);
-}
 
 function parseSince(value: string): number {
   const rel = /^(\d+)([hd])$/.exec(value);
@@ -87,13 +52,9 @@ function parseSince(value: string): number {
   return Math.floor(abs / 1000);
 }
 
-const sinceOverride = option("since") ? parseSince(option("since")!) : undefined;
+const since = parseSince(option("since") ?? DEFAULT_SINCE);
 const onlyMod = option("mod");
 const contextCount = Number(option("context") ?? 3);
-const seen = readJson<Watermarks>(SEEN_FILE, { modio: {}, steam: {} });
-const firstRunSince = Math.floor(Date.now() / 1000) - FIRST_RUN_LOOKBACK_S;
-const sinceFor = (platform: Platform, id: string) =>
-  sinceOverride ?? seen[platform][id] ?? firstRunSince;
 
 function readFileIds() {
   const result: { mod: string; modio?: string; steam?: string }[] = [];
@@ -278,7 +239,6 @@ function toReport(
     url,
     newComments: newest,
     context: older,
-    latest: Math.max(since, ...all.map((c) => c.time)),
   };
 }
 
@@ -302,7 +262,6 @@ const [owners, creators] = await Promise.all([
 const tasks: (() => Promise<ItemReport>)[] = [];
 for (const { mod, modio, steam } of items) {
   if (modio) {
-    const since = sinceFor("modio", modio);
     tasks.push(async () =>
       toReport(
         mod,
@@ -315,7 +274,6 @@ for (const { mod, modio, steam } of items) {
     );
   }
   if (steam && creators.get(steam)) {
-    const since = sinceFor("steam", steam);
     tasks.push(async () =>
       toReport(
         mod,
@@ -335,10 +293,6 @@ const failures = settled.flatMap((r) =>
   r.status === "rejected" ? [String(r.reason?.message ?? r.reason)] : [],
 );
 const withNew = reports.filter((r) => r.newComments.some((c) => !c.own));
-
-const pending: Watermarks = { modio: {}, steam: {} };
-for (const r of reports) pending[r.platform][r.itemId] = r.latest;
-if (!sinceOverride) fs.writeFileSync(PENDING_FILE, JSON.stringify(pending, null, 2));
 
 if (flag("json")) {
   console.log(JSON.stringify({ items: withNew, failures }, null, 2));
@@ -360,6 +314,4 @@ if (flag("json")) {
   }
   if (failures.length)
     console.log(`## Fetch failures\n${failures.map((f) => `- ${f}`).join("\n")}`);
-  if (!sinceOverride)
-    console.log(`\nRun \`npm run check-comments -- --mark-seen\` once these are handled.`);
 }

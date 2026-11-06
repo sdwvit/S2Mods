@@ -190,3 +190,15 @@ Pass `-nocompile -nocompileuat` (the SDK's own `PakPlainMod.bat` does): the SDK 
 build, and without them RunUAT rebuilds AutomationTool and the project script modules first.
 `-UnrealExe=Stalker2ModEditor-Win64-Shipping-Cmd.exe` is mandatory for the same reason — there
 is no `UnrealEditor-Cmd.exe`, and the cook dies with *"Needs to be built first"* without it.
+
+## Asset gotchas
+- Textures for import must be 8-bit PNGs. A 16-bit PNG imports as linear 16-bit and looks washed out;
+  ImageMagick's `xc:` canvas writes 16-bit unless given `-depth 8` (X16Scopes, 2026-10-23).
+- Some vanilla Niagara systems don't compile in the Mod Editor: the FullEditor pak lacks some GSC module
+  scripts (e.g. `IronWind/Niagara/NMS_Camera_Spikes`), and one missing script cascades into hundreds of
+  errors. Delete the module that calls it (the greyed-out `NMS Camera ...` rows in `NS_IronWind_Loop`) and
+  recompile (VisibleRazorAnomaly, 2026-10-24).
+- A string typed into a blueprint node pin is compiled into its bytecode: patch it only with a same-length
+  byte swap (pad with spaces), never with `replaceExportStrings`.
+- Cook timing: measure the current run with `time` and the UAT `Log.json`; see
+  `DesignDocs/CookSpeedupLearnings.md`. Cache state and mod content change it a lot.

@@ -114,17 +114,72 @@ export async function decodeFName(bridge: Bridge, comp: number, num: number): Pr
 }
 
 /**
- * Static addresses in the 2026-09-29 game build, from an offline scan of
- * Stalker2-Win64-Shipping.exe on 2026-10-18. FNamePool is the instance all 34
- * inlined `lea rcx, [pool]; call FNamePool::FNamePool` sites agree on;
- * GUObjectArray is what the AllocateObjectPool AOB in ue_reflection.cpp resolves.
+ * Static addresses, resolved at runtime so a game update can't leave them stale (the
+ * 2026-10-29 update moved every one; a hardcoded ProcessEvent RVA then hooked an unrelated
+ * function).
+ * - GUObjectArray: the FUObjectArray::AllocateObjectPool AOB ue_reflection.cpp also uses;
+ *   the first `mov [rip+disp32], edx` writes MaxObjectsNotConsideredByGC (+0x8).
+ * - FNamePool: a fixed distance from GUObjectArray in .data (-0xf5c40 in both the
+ *   2026-09-29 and 2026-10-29 builds; checked by decoding entry 0 as "None").
+ * - ProcessEvent: UObject vtable slot 79 (0x4F), read from obj[0]; checks FUNC_Native at
+ *   UFunction+0xB1 (`F6 83 B1 00 00 00`), which the resolver verifies.
  */
-export const BUILD_RVA = {
-  fNamePool: 0x9ff0c80,
-  guObjectArray: 0xa0e68c0,
-  /** UObject vtable slot 79 (0x4F). Checks FUNC_Native at UFunction+0xB1, allocas PropertiesSize (+0x58). */
-  processEvent: 0x216a728,
-} as const;
+const ALLOC_OBJECT_POOL_AOB = "89 15 ? ? ? ? 31 C0 85 D2 0F 9F C0 F7 D8 89 05 ? ? ? ?";
+const FNAME_POOL_FROM_GUOBJECTARRAY = -0xf5c40;
+const PROCESS_EVENT_VTABLE_SLOT = 79;
+
+export interface BuildAddrs {
+  guObjectArray: number;
+  fNamePool: number;
+  processEvent: number;
+}
+
+let buildAddrs: Promise<BuildAddrs> | null = null;
+export function getBuildAddrs(bridge: Bridge): Promise<BuildAddrs> {
+  buildAddrs ??= resolveBuildAddrs(bridge).catch((e) => {
+    buildAddrs = null;
+    throw e;
+  });
+  return buildAddrs;
+}
+
+async function readBytesAt(bridge: Bridge, addr: number, n: number): Promise<Uint8Array | null> {
+  const r = await bridge.game.readMemory(addr, n);
+  return "hex" in r ? parseHex(r.hex) : null;
+}
+
+async function resolveBuildAddrs(bridge: Bridge): Promise<BuildAddrs> {
+  const base = await getExeBase(bridge);
+  const aob = await bridge.game.scanAOB(ALLOC_OBJECT_POOL_AOB);
+  if (!("hit" in aob) || !aob.hit) throw new Error("GUObjectArray: AllocateObjectPool AOB not found");
+  const dispB = await readBytesAt(bridge, aob.hit + 2, 4);
+  if (!dispB) throw new Error("GUObjectArray: AOB hit unreadable");
+  const guObjectArray = aob.hit + 6 + (readU32LE(dispB, 0) | 0) - 0x8;
+
+  const fNamePool = guObjectArray + FNAME_POOL_FROM_GUOBJECTARRAY;
+  const block0 = (await readU64At(bridge, fNamePool + 0x10)) ?? 0;
+  const none = block0 ? await readBytesAt(bridge, block0 + 2, 4) : null;
+  if (!none || String.fromCharCode(...none) !== "None") {
+    throw new Error(`FNamePool: entry 0 at 0x${fNamePool.toString(16)} is not "None"`);
+  }
+
+  const chunks = (await readU64At(bridge, guObjectArray + 0x10)) ?? 0;
+  const chunk0 = chunks ? ((await readU64At(bridge, chunks)) ?? 0) : 0;
+  const obj0 = chunk0 ? ((await readU64At(bridge, chunk0)) ?? 0) : 0;
+  const vtable = obj0 ? ((await readU64At(bridge, obj0)) ?? 0) : 0;
+  const processEvent = vtable ? ((await readU64At(bridge, vtable + PROCESS_EVENT_VTABLE_SLOT * 8)) ?? 0) : 0;
+  const body = processEvent ? await readBytesAt(bridge, processEvent, 0x100) : null;
+  const bodyHex = body ? Array.from(body, (b) => b.toString(16).padStart(2, "0")).join("") : "";
+  if (!/f6(83|81|82|86|87)b1000000/.test(bodyHex)) {
+    throw new Error(`ProcessEvent: vtable slot ${PROCESS_EVENT_VTABLE_SLOT} (0x${processEvent.toString(16)}) has no FUNC_Native check`);
+  }
+
+  bridge.log(
+    `build addrs: GUObjectArray +0x${(guObjectArray - base).toString(16)} FNamePool +0x${(fNamePool - base).toString(16)} ` +
+      `ProcessEvent +0x${(processEvent - base).toString(16)}`,
+  );
+  return { guObjectArray, fNamePool, processEvent };
+}
 
 let exeBase: number | null = null;
 export async function getExeBase(bridge: Bridge): Promise<number> {
@@ -192,7 +247,7 @@ async function readPoolName(bridge: Bridge, comp: number): Promise<string> {
   const blockIdx = comp >>> 16;
   let block = poolBlocks.get(blockIdx);
   if (block == null) {
-    const pool = (await getExeBase(bridge)) + BUILD_RVA.fNamePool;
+    const pool = (await getBuildAddrs(bridge)).fNamePool;
     block = (await readU64At(bridge, pool + 0x10 + blockIdx * 8)) ?? 0;
     poolBlocks.set(blockIdx, block);
   }
@@ -754,7 +809,7 @@ export async function readPlayerLocation(
 
 // ---------------------------------------------------------------------------
 // Object table walking + console commands. These read GUObjectArray and the
-// FNamePool directly (BUILD_RVA), so they work while the C++ name resolver
+// FNamePool directly (getBuildAddrs), so they work while the C++ name resolver
 // has no trusted FName::ToString candidate.
 
 /** FUObjectItem stride in FChunkedFixedUObjectArray (UE 5.1). */
@@ -771,7 +826,7 @@ export async function getObjectName(bridge: Bridge, obj: number): Promise<string
 
 /** Every UObject pointer in GUObjectArray (0 for free slots), read 170 items per call. */
 export async function getObjectPointers(bridge: Bridge): Promise<number[]> {
-  const arr = (await getExeBase(bridge)) + BUILD_RVA.guObjectArray;
+  const arr = (await getBuildAddrs(bridge)).guObjectArray;
   const chunks = (await readU64At(bridge, arr + 0x10)) ?? 0;
   const numR = await bridge.game.readMemory(arr + 0x24, 4);
   const num = "hex" in numR ? readU32LE(parseHex(numR.hex), 0) : 0;
@@ -793,7 +848,7 @@ export async function getObjectPointers(bridge: Bridge): Promise<number[]> {
 /** The UObject in GUObjectArray slot `index` (0 if free or out of range). */
 export async function getObjectAt(bridge: Bridge, index: number): Promise<number> {
   if (!(index >= 0)) return 0;
-  const arr = (await getExeBase(bridge)) + BUILD_RVA.guObjectArray;
+  const arr = (await getBuildAddrs(bridge)).guObjectArray;
   const numR = await bridge.game.readMemory(arr + 0x24, 4);
   if (!("hex" in numR) || index >= readU32LE(parseHex(numR.hex), 0)) return 0;
   const chunks = (await readU64At(bridge, arr + 0x10)) ?? 0;
@@ -899,8 +954,7 @@ async function findConsoleRoots(bridge: Bridge): Promise<{ engine: number; kisme
 
 async function ensureConsoleSession(bridge: Bridge): Promise<ConsoleSession> {
   if (consoleSession) return consoleSession;
-  const base = await getExeBase(bridge);
-  const hook = await bridge.game.installProcessEventHook(base + BUILD_RVA.processEvent);
+  const hook = await bridge.game.installProcessEventHook((await getBuildAddrs(bridge)).processEvent);
   if ("error" in hook) throw new Error(`installProcessEventHook: ${hook.error}`);
 
   const { engine, kismetCdo } = await findConsoleRoots(bridge);

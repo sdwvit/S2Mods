@@ -159,3 +159,69 @@ and NPC spawned" gate fired on spawn). `Mods/WolfArmorFetch/conditions.mts` `all
   `SpawnOnStart = false` plus a quest `Spawn` node spawns it.
 - A stay `SetAIBehavior` with `GoalPriority = HigherThanCombat` keeps the NPC from fighting back;
   `HigherThanALife` holds it in place but lets combat win.
+
+## Quest-node gotchas (verified in game)
+- An `End` node with `ExcludeAllNodesInContainer = true` excludes every node of its quest, and an excluded
+  `Spawn` node despawns what it spawned (every `SpawnNodeExcludeType` does). A quest that spawns a reward (a
+  stash, a body) must not End afterwards; vanilla's stash quests (EQ155_P) have no End (WolfArmorFetch, 2026-10-20).
+- Reward stashes: spawn a stash actor of the mod's own (`SpawnOnStart = false`). Vanilla world stashes are
+  also spawned or revealed by other systems and mods (StashClueRework turns their spawn on start off).
+- Named NPC: never reuse a spawn actor GUID that already spawned something else. Bagor kept coming back as a
+  generic bandit from his old GUID until it was replaced (WolfArmorFetch, 2026-10-25).
+- Keep running quests small: a running quest costs game-thread time per node. One always-on quest of ~14,000
+  nodes, and a 4,100-node quest left running, each dropped the game to a few fps (LairTiers, 2026-10-24). Put
+  bulk work in quests started on demand that finish with a vanilla `End` node; a `ConsoleCommand`
+  `XEndQuestBySID` from inside the quest did not end it.
+- Each `XResetQuestBySID` costs ~10 ms of game thread, however small the quest: it walks the whole UObject
+  array under a lock (exe+0x93df70, profiled 2026-10-29). Don't issue them per lair or in a loop. Ending
+  quests from the console while their ConsoleCommand nodes were mid-flight crashed the game (LairTiers, 2026-10-29).
+- Don't make nodes `Repeatable` by default. A Repeatable node fires again on every quest update (~200 ms) while
+  its launcher counts as done, even after the quest's End: LairTiers' ConsoleCommand reset a quest ~19 times a
+  second, and 341 SetGlobalVariable nodes rewrote their flags on every update (2026-10-29). Vanilla never
+  makes a ConsoleCommand Repeatable outside launcher-less debug nodes. A non-Repeatable node fires once per
+  run of its quest, so put work that repeats in a quest that ends and is reset each time it should run again.
+- Never make a `ConsoleCommand` node `Repeatable` (vanilla's only Repeatable ones are launcher-less debug nodes).
+  LairTiers' Repeatable `RunScan`/`MarkDirty` consoles in an always-on quest kept firing about once a frame:
+  ~19 `XResetQuestBySID` a second plus every dirty flag rewritten each time (2026-10-29). A non-Repeatable one
+  fires once per run of its quest, so put it in a quest that ends and is reset each time it should fire again.
+- `ItemRemove` on an absent inventory item doesn't fail the chain (DecoupledRanks).
+- Saves store quest-node names in a table with a 16-bit count and 16-bit indices. Past 65,535 names the count
+  wraps, the save is written truncated and crashes on load (or at boot before the main menu). A late vanilla
+  playthrough already holds 46–50k, so all mods together get roughly 15k. No N × M node fan-out (LairMarkerTest
+  and LairWars' `LairTiers_Switch_*` pushed saves over, 2026-10-31). Details: `DesignDocs/SaveNameTableLimit.md`; check saves with the `game-saves` skill.
+
+## Lairs and map markers (LairMarkerTest, 2026-10-27)
+- Lair owner: an `If` with `ConditionType = EQuestConditionType::IsLairOwnedByFaction`,
+  `TargetLairPlaceholder = <lair spawn-actor GUID>`, `Faction = <Faction>` works outside DLC1's war (base-game
+  lair `CCCEA3EA...` near Zalissya). With LairTiers installed, ask the live instance: the tier copy named by
+  `LairTiersBatch_<seed>` of the lair's batch (LairWars `lairBatches`; copy GUIDs: `lairCopySID`). A cleared lair stays owned by its last faction; another
+  faction's NPCs standing in it did not capture it. `XStartQuestNodeBySID <If node>` from the console
+  evaluates the If and runs its True branch.
+- Lair capture (retail exe, 2026-10-29 build, static RE): an owner changes only when a squad finishes a capture
+  step: the FactionWars squad capture (checks `CanBeCaptured` and the `gsc.fw.*` distances), the A-Life
+  Expansion need's `AttachToLair` step, or `AttackLairGoal` (A-Life director `CaptureLairs` scenarios). The last
+  two have no FactionWars check. Only these fire `OnLairOwnershipHasChanged`; preset changes (`FWChangePreset`,
+  `InitialInhabitantFaction`) change the owner silently. Nothing captures by presence. The faction must be in
+  the lair prototype's `PossibleInhabitantFactions`. In play, no capturable hostile Lesser Zone lair changed
+  hands in about an hour (2026-10-29), so the non-war paths are rare.
+- A lair is a capture target for expansion only while its owner faction isn't in `Aggressive` mode (retail exe,
+  2026-10-29). Each faction's mode follows its lair count against the ranges in
+  `ALifePopulationManagerFactionPrototypes.cfg` (`Default.Factions`, `Aggressive`/`Normal`/`Defensive`
+  `MinLairs`/`MaxLairs`); a faction down to a few lairs (Aggressive, e.g. [1-3]) has them protected. Factions
+  with no entry there (Scientists, NeutralMSOP, IkarVarta, ShevchenkoStalkers...) never have capturable lairs.
+  Making `Aggressive` unreachable (Min > Max) and adding entries for the missing factions opens every lair.
+  Expansion still targets an uncapturable lair when a faction has no capturable candidate.
+- Map marker: a new `MarkerPrototype` (`MarkType = EMarkerType::Guide`, `WorldPosition`,
+  `InitDiscoverState = EMarkerState::Explored`) plus an `ESpawnType::Marker` spawn actor shows an icon. Its cfg
+  `Title` is not displayed on a Guide marker, but `EQuestNodeType::SetLocationName` (`Location = <marker SID>`,
+  `NewTitle = <loc key>`) labels it and can relabel it any number of times. `ShowMarker` with
+  `Discovered = false` does not hide a shown marker. Nor does despawning its spawn actor (`Despawn`,
+  `ForceDespawn`) or switching its `MarkType` to `EMarkerType::None`: the save keeps a marker it has shown
+  (2026-10-29). Nor does moving its `WorldPosition` and spawn actor off the map: the icon stays at its old
+  position, so the save keeps the marker's position too. Why (retail exe, 2026-10-29 build, static RE): `ShowMarker` creates a
+  marker record keyed by the MarkerPrototype SID, copying position, type and state from the prototype once;
+  it can only raise the state (never Hidden). `Despawn` on an `ESpawnType::Marker` actor removes a record by
+  the handle its quest's own Spawn node stored, never by SID, and is a silent no-op without that handle. No
+  quest node, prototype field or console command removes a record by SID (`XDiscoverMarker`,
+  `XListMapMarkers`, `XRevealAllMarkers` are empty stubs in shipping). So never `ShowMarker` a marker you may
+  need to remove: create it with a quest `Spawn` node and remove it with that quest's `Despawn`, untested.

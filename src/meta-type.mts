@@ -23,6 +23,11 @@ export type StructTransformer<T> = ((
    */
   dlc?: boolean;
   contents?: string[];
+  /**
+   * Write nested structs that repeat an earlier one in the same file as `{refkey=<Root>.<Path>}`
+   * (src/inherit-duplicate-structs.mts). For transformers that generate large, repetitive files.
+   */
+  inheritDuplicates?: boolean;
   files: string[];
   extraStructs?: Struct[]; // optional place for transformer to populate, so that other transformers can await for this information
 };

@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import numpy as np  # noqa: E402
 import soundfile as sf  # noqa: E402
 import vo_env  # noqa: E402
+from keep_version import keep  # noqa: E402
 os.chdir(vo_env.ROOT)
 args = sys.argv[1:]
 i = args.index("--alt"); alt = args[i + 1]; del args[i:i + 2]
@@ -29,7 +30,6 @@ def event(status, message):
 s = json.load(open(f"higgs/{batch}.json", encoding="utf-8"))
 line = next(l for l in s["lines"] if l["sid"] == sid)
 name = f"{line['n']:02d}_{sid}"
-event("working", f"Stitching {len(parts)} sentences: {' '.join(parts)}")
 audio = []
 with tempfile.TemporaryDirectory() as tmp:
     lines = [dict(line, n=k, sid=f"p{k}", text=p) for k, p in enumerate(parts)]
@@ -49,7 +49,7 @@ with tempfile.TemporaryDirectory() as tmp:
         audio.append(a)
     dst = f"higgs/{batch}/{name}/alt-{alt}.wav"
     os.makedirs(os.path.dirname(dst), exist_ok=True)
+    keep(dst)  # the take it replaces stays as a version
     sf.write(dst, np.concatenate(audio), sr)
 open(dst[:-4] + ".txt", "w", encoding="utf-8").write(" ".join(parts) + "\n")
-event("regenerated", f"Added alt-{alt} (stitched from {len(parts)} sentences): {' '.join(parts)}")
 print("->", dst)

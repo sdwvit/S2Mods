@@ -65,6 +65,20 @@ function at `0x146ca347c`; addresses are build-specific).
 - `refurl` is only for inheriting from a struct in **another** file.
 - `refurl` on a bpatch struct is unnecessary — bpatch only patches existing fields, so
   don't bother clearing it on forks.
+- Any nested struct can inherit too, from a root struct or from a sub-struct of one by dotted path:
+  `Bandits : struct.begin {refkey=Bandits_LT3.Preset.PossibleInhabitantFactions.Bandits}`, then restate
+  only what differs (nested structs merge by key). Vanilla does this with `{refurl=../ref/refs.cfg;
+  refkey=FleshBoneDamageMap}`. Keep path segments to named keys (no `[0]`).
+- `transformer.inheritDuplicates = true` does this automatically for exact repeats: every nested struct
+  equal to an earlier one in the same output file becomes an empty `{refkey=<path>}` stub
+  (`src/inherit-duplicate-structs.mts`; skips bpatch roots and `[*]` lists). LairWars: 50 MB -> 29 MB.
+  Don't set `useAsterisk` on a struct that carries a refkey: s2cfgtojson then renders it `{refkey=[*]}`.
+- `[*]` entries are `[0]`, `[1]`, `[2]`... in file order. To add an entry to a vanilla `[*]` list, bpatch the
+  list with the next index (`useAsterisk = false`, `addNode(entry, n)`); a `[*]` in a bpatch appends again on
+  every apply. To change one entry of an inherited list, restate only that index.
+- Don't `clone()` a vanilla struct to change it: `fork()` + bpatch, restating only changed fields. A new struct
+  inherits (`refkey`, nested or root) and restates only what differs. Clone only for a new struct that must drop
+  inherited entries, or for `bskipref` content.
 
 ### A relative `refurl` resolves against the *patched* file, not the patch file
 A patch lives one folder deeper than its target: `ItemPrototypes/DetectorPrototypes/DetectorPrototypes_patch_<Mod>.cfg`
@@ -115,3 +129,18 @@ resolvable `refurl` are skipped. Output lands in
 
 Any mod that changes a whole prototype family (weapons, armors, attachments, consumables)
 should set `dlc = true` so DLC variants behave the same.
+
+## Known traps
+- `PreinstalledAttachmentsItemPrototypeSIDs`: never bpatch a single entry. A partial `{bpatch}` list replaced
+  the shipped one in game and stripped the guns' hidden built-in magazines and silencers (X16Scopes,
+  2026-10-22). Re-emit the whole list without bpatch, keeping the vanilla `bskipref` and cloning every other
+  entry (MasterMod's `stripDefaultScopes`).
+- s2cfgtojson up to 9.2.0 renders a `refkey` (or nested key) that starts with digits as an array index: GUID
+  `38475DEF...` becomes `refkey=[38475]` (fixed in the S2CfgToJSON source 2026-10-28, unreleased). With an
+  affected version, copy a GUID-keyed struct (SpawnActorPrototypes) as a full `clone()` without `refkey`;
+  LairWars' `transformLairSpawnActors.mts` (from LairTiers) probes the installed version.
+- Patching a vanilla SpawnActorPrototype (lairs, items, NPCs placed on the map): add
+  `NodePrototypeAppliedMods { <ModName> { NodePrototypeModVersion = N } }` as a bpatch child, or an existing
+  save keeps the actor it already spawned. With it, the game deletes that actor and respawns it from the
+  patched prototype. Bump N whenever the patch changes. See `DesignDocs/patchingExistignSpawnActorPrototypes.md`
+  and `Mods/LairWars/transformSpawnActorPrototypes.mts`.

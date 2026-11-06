@@ -1,10 +1,14 @@
-# Lair tiers (LairTiers mod)
+# Lair tiers (part of LairWars)
 
-Lairs that change what they spawn as the player levels up, built from cfgs and quest nodes only.
-Code: `Mods/LairTiers/lairTiers.mts` (data and builders), `lairTierQuestNodes.mts` (quest graph),
-`transformLair*.mts`, `transformEnemyObjPrototypes.mts`, `transformItemGenerators.mts`.
-Hard dependency on DecoupledRanks: it reads its `DecoupledRanksLevel` global variable and copies its
-faction-patch drop (the XP source) onto the gear clones.
+Lairs that change what they spawn as the player ranks up, built from cfgs only: no quest nodes, no lair copies.
+Part of LairWars (since 2026-10-29), and shipped alone as LairTiers ("Decoupled Ranks Lair Extension"): its
+`meta.mts` reuses LairWars' tier code and emits only the tiers (`tierPatch`, `variantPrototype`), without LairWars'
+sizes, open factions and capturing. Use one or the other.
+Code: `Mods/LairWars/lairTiers.mts` (data and builders), `openLairs.mts`, `hubLairs.mts`,
+`transformGenericLairPrototypes.mts`, `transformSpawnActorPrototypes.mts`, `transformEnemyObjPrototypes.mts`,
+`transformAbilityPrototypes.mts`, `transformItemGenerators.mts`.
+Hard dependency on DecoupledRanks: it sets the player's rank from its level, and its faction-patch drop (the XP
+source) is copied onto the gear clones.
 
 ## Source cfgs
 
@@ -29,7 +33,12 @@ faction-patch drop (the XP source) onto the gear clones.
 
 ## Mechanism
 
-- Tier `n` = DecoupledRanks levels `3n+1 .. 3n+3` (10 tiers). Human HP ×(1 + n/3).
+- The game spawns a lair from the `SpawnSettingsPerPlayerRanks` block of the player's rank, and DecoupledRanks
+  sets that rank from the level: Newbie 1-9, Experienced 10-19, Veteran 20-29, Master 30. So a tier is a rank
+  block: tier n = `RANKS[n]`, at that rank's first level `L` (1, 10, 20, 30). The vanilla lair prototypes are
+  patched in place: each rank block's `SpawnSettingsPerArchetypes` is replaced whole (a non-bpatch struct inside
+  the bpatch) by the tier's mix; quantities and timers stay per block (scaled by LAIR_GROUPS).
+- Scaling follows `L`: human HP ×(1 + (L-1)/9): 1x Newbie, 2x Experienced, 3.1x Veteran, 4.2x Master.
 - Zombies (`IsZombie = true`, GeneralZombie_*) are humans for HP and gear.
 - Mutants (every archetype outside GeneralNPCObjPrototypes) scale by rank through attack cooldowns,
   divided by 1, 4/3, 5/3, 2 (Newbie..Master). Only mutants under 200 vanilla `MaxHP` (blind dogs, tushkans,
@@ -45,57 +54,37 @@ faction-patch drop (the XP source) onto the gear clones.
   Shield/...): `TriggeredCooldowns[*].Duration` and `Min/MaxCooldown`, `CooldownMin/Max`. Clones
   `<Ability>_LT<Rank>` restate TriggeredCooldowns by index; the mutant clone repoints `Abilities.<key>.SID`.
   Roar, Berserk, Empty and TrickSound abilities keep vanilla timings.
-- Enemy rank shares per tier: Gaussian around rank index `n/3`, sigma 1 (Master 0.6% at tier 0, 57% at 9).
-- `<LairProto>_LT<n>`: every player-rank block keeps its own quantities and timers; its archetype list
-  is replaced by enemy rank R's vanilla archetypes at `SpawnWeight / blockTotal × share(R)`. Minimum
-  quantities move to the tier's dominant rank.
+- Enemy rank shares per tier: Gaussian around rank index `(L-1)/9`, sigma 1 (Master 0.6% as Newbie, about
+  60% as Master). Each enemy rank R contributes the vanilla archetypes of block R at
+  `SpawnWeight / blockTotal × share(R)`; minimum quantities move to the tier's dominant rank.
 - Enemies: `<Archetype>_LT<Rank>T<n>` (`refkey` the archetype) use `<Gen>_LT<Rank>`, a generator clone
   with only that rank's entries and `PlayerRank` dropped, so a Master enemy carries Master gear at any
   player rank. Mutants are `<Archetype>_LT<Rank>` (`_LT<Rank>T<n>` for weak ones).
-- The vanilla lair is repointed at `_LT0`; tiers 1..9 are full copies in the same file
-  (deterministic MD5 GUIDs, `ActiveLair = false`).
-- Quest graph. Only lairs near the player switch, lazily, and every quest stays small: a running quest
-  costs game-thread time per node (14,000 nodes always on, and a 4,100-node quest left running, each
-  dropped the game to a few fps, 2026-10-23/24).
-  - `LairTiers` (always on, ~65 nodes): a 30 s poll (`PollA`/`PollB`, started once by `Kick`) and
-    `LairTiers_Sync` (also every world load) pick the tier the level calls for with one If chain from the
-    top down (`Pick_9`..`Pick_1`, `DecoupledRanksLevel >= ` the tier's first level; `Pick_1` False is
-    tier 0, the level is 0 on a new game), record it in `LairTiersApplied` (`Apply_<T>`) and restart
-    batch 0 of that tier's scan. Per-tier range checks with `Less` picked every tier from 0 up to the
-    right one: the scans cycled 0-1-2-3 and the Militaries camp stacked 30+ NPCs.
-  - Scan: a chain of batch quests `LairTiers_Scan_<T>_<b>` (~10 lairs, <130 nodes each). A batch checks
-    its lairs (`DistanceToPoint` player <= 1 km, `LairTiersLair_<GUID>` != T, held-off flag 0 for
-    quest-toggled lairs), switches the matching ones (every other instance off, tier T on, tier recorded),
-    restarts the next batch 0.5 s after its own start and ends with an `End` node. A batch first checks
-    `LairTiersApplied == T` and ends (`_Stale`) otherwise: a scan of the old tier still running after a
-    tier change switched lairs back to it (0-1-2-0-1-2), and every switch leaves a squad.
-  - Old squads are not despawned on a tier switch (no `ForceDespawn`); they stay until killed.
-  - Vanilla toggles are mirrored inside their quest. Off: `LairTiersHeldOff_<GUID>` = 1, the lair's tier
-    = 0, and a restart of `LairTiers_Lair_<GUID>` (176 quests), which switches every copy off (with
-    ForceDespawn when a vanilla node uses it) and ends. On: flag 0 and tier 0; the next nearby scan
-    upgrades it.
-- Quest mechanics learned here (2026-10-24):
-  - `XResetQuestBySID` alone restarts a quest; adding `XStartQuestBySID` started it twice, and the
-    scan chain multiplied without end.
-  - A `ConsoleCommand` `XEndQuestBySID` from inside the quest did not end it; vanilla's `End` node does.
-  - Conditions that must all hold go in separate groups (`[0] { [0] = A } [1] { [0] = B }`, `And`);
-    conditions sharing a group are not ANDed. With them in one group the applied tier flipped 0 <-> 9.
-  - `LAIRTIERS_DEBUG=1` at prepare-configs time shows "LairTiers switch <guid6> <proto> to T" on screen
-    for every lair switch. Publish without it.
-- Verified in game (2026-10-24, new game, level 10, Militaries camp lairs 282BB7C6 / AD113E58): a
-  switched-on tier copy spawns its own squads (no map actor needed), but only after
-  `InitialSpawnQuantityRespawnTimeSeconds` (180 s); the camp sat empty until then. It filled to the
-  prototype cap (2 x 6) and stayed there over several polls, FPS normal.
+- Every vanilla prototype that spawns archetypes is tiered (guards excepted), so quest-spawned and DLC lairs that
+  use a base-game prototype get tiers too. DLC1's own prototypes (`DLCGameData/DLC1`) are not patched.
+- Old squads keep their makeup until they die; a new spawn after a rank-up uses the new block.
+- History: 2026-10-23 to 10-31 tiers were stacked lair copies (`<Proto>_LT<n>` prototypes, MD5-GUID spawn actor
+  copies) switched near the player by quest graphs: 45,000 nodes, then 17,000, then ~8,000 in batches. Quest
+  nodes lagged the game thread and filled the save's quest-node name table (DesignDocs/SaveNameTableLimit.md).
+  Saves from those builds still hold `LairTiers*` quests and variables; the cfgs no longer define them.
+  Quest lessons from that work:
+    - `XResetQuestBySID` alone restarts a quest; adding `XStartQuestBySID` started it twice, and the
+      scan chain multiplied without end.
+    - A `ConsoleCommand` `XEndQuestBySID` from inside the quest did not end it; vanilla's `End` node does.
+    - Conditions that must all hold go in separate groups (`[0] { [0] = A } [1] { [0] = B }`, `And`);
+      conditions sharing a group are not ANDed. With them in one group the applied tier flipped 0 <-> 9.
+    - `LAIRTIERS_DEBUG=1` at prepare-configs time shows "LairTiers switch <guid6> <proto> to T" on screen
+      for every lair switch. Publish without it.
 
 ## Spawn changes beyond scaling
 
 - Zero-weight archetypes (vanilla `SpawnWeight = 0`, e.g. Bandit Heavy at every rank) spawn at the weight of
   the rarest enabled archetype in their block (`effectiveWeights`).
-- Lairs that are `ActiveLair = false` and that no quest switches on start switched on (tier 0).
-- Every modded lair and copy spawns for every player rank (`MinSpawnRank` Newbie, `MaxSpawnRank` Master).
+- Lairs that are `ActiveLair = false` and that no quest switches on start switched on (DLC quests count as quests).
+- Every tiered lair spawns for every player rank (`MinSpawnRank` Newbie, `MaxSpawnRank` Master).
 - A placed lair spawns only its starting faction's list (`InitialInhabitantFaction`), even when its lair
   type allows several factions. Per-lair pool additions therefore go through a variant lair prototype:
-  `LAIR_POOL_ADDITIONS` (`<Proto>_<name>`, emitted as `<Proto>_<name>_LT<n>` next to the vanilla one).
+  `LAIR_POOL_ADDITIONS` (`<Proto>_<name>`, a new prototype the two lairs are pointed at, inheriting the vanilla one and restating only the tiered archetype lists of that faction).
   The two Zaton Blinddog lairs (nearest `MarkerPrototypes` region marker: zaton) add MoldyBlinddog at
   the Blinddog weight.
 - Guards are not scaled: `Guard*` lairs are left untouched, `GuardNPC_*` archetypes stay vanilla anywhere.
@@ -103,16 +92,39 @@ faction-patch drop (the XP source) onto the gear clones.
   anomaly activation and throw; Cat BlinkTeleport; Burer Throw) or single TriggeredCooldowns tags inside
   scaled abilities (Cat Growl, Bloodsucker Roar).
 
-## Exclusions and quirks
+## Open lairs and hubs (LairWars)
 
-- Skipped: lairs whose prototype spawns no archetypes (resting lairs), `SpawnOnStart = false` lairs
-  (quest-spawned), lairs inactive in vanilla that no quest switches on.
-- Lairs toggled by DLC quests get tier 0 only; mirroring DLC toggles needs a `dlc = true` companion.
-- s2cfgtojson 9.1.0 renders a `refkey` that starts with digits as an index (`refkey=[38475]`), because
-  `isNumber` uses `parseInt`. GUID-keyed copies are therefore full clones.
+- A squad sets out when its NPCs' `AI.Need.Expansion` (NPCNeedsPresetPrototypes GoalNeeds) fills, resolved by
+  `ExpansionResolverFactory` (NeedsResolvers). Vanilla gives it to the generic human preset (and its refkey
+  children), zombies and MutantGenericNeedsPreset only. `transformNPCNeedsPresetPrototypes` speeds it up to
+  100/min and adds need and resolver at the next index to Militaries, Noon, Spark, Corpus and
+  MutantGenericNeedsNoExpansionPreset (Controller, Pseudodog, Poltergeist, Pseudogiant, Burer, rat swarms, Cat,
+  Deer, Chimera). `_Guard` presets restate both lists and stay without; Scientists are no A-Life faction.
+- Expansion only moves a faction into a lair whose prototype lists it in `PossibleInhabitantFactions`, and
+  vanilla lists only the lair's own faction in most prototypes. `openLairs.mts` adds every faction of
+  `ALifePopulationManagerFactionPrototypes` Default.Factions (29: humans, zombies, mutants; Scientists,
+  IkarVarta, NeutralMSOP and the like are not there and never expand) to every prototype except `Guard*`,
+  SIRCAA/MALACHITE scientists and `ELairType::RestingLair`.
+- An added block inherits the donor's own block (the prototype named after the faction; Zombie:
+  NeutralZombies) by nested refkey (`{refkey=Bandits.Preset.PossibleInhabitantFactions.Bandits}`): the donor as
+  patched in the same file, tiers included. It restates only the per-rank `MaxSpawnQuantity` of the lair's own
+  faction. Any nested struct can inherit a root struct or a
+  sub-struct of one by a dotted path (vanilla: `BoneDamageMap {refurl=../ref/refs.cfg; refkey=FleshBoneDamageMap}`).
+- Hub lairs (`hubLairs.mts`): guard lairs, plus lairs vanilla marks `CanBeCaptured = false` within 100 m of a
+  guard lair (65 lairs; residents' camps sit 20-85 m from their guards, the nearest field camp 135 m). They
+  keep vanilla's flag; every other lair and tier copy gets `CanBeCaptured = true`.
+
+## Sizes (2026-11-01)
+
+- LairWars cfgs: 4.7 MB (29 MB with copies and quests, 92 MB before inheritance); LairTiers 3.8 MB. Zero
+  quest nodes in both. Nothing copies a vanilla struct: patches are bpatches, new structs (variants, enemy and
+  ability clones) inherit by refkey and restate only what changes (ability TriggeredCooldowns by index). The
+  rank item generators are full copies: they drop the other ranks' entries.
 
 ## Unverified
 
-- That `ToggleLairActivity` reaches lairs that are offline / far away.
-- Load time with ~3,300 lair copies and ~17,000 extra quest nodes.
-- That a two-node `StartDelay` loop keeps polling for the whole session.
+- That a lair already on the map takes its next spawn from the new rank block after a rank-up.
+- That a faction actually moves into a single-faction lair once listed there.
+- That a nested refkey inside a bpatch struct (the added-faction stubs) resolves, and to the donor as patched
+  (tiers) rather than vanilla. Same question for the Zaton variant's `refkey=Blinddog`.
+- Saves from the copy/quest builds: their spawned tier copies and `LairTiers*` quests have no cfg any more.

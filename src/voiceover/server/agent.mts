@@ -1,7 +1,7 @@
 // A Claude Code agent kept alive next to the review server. It receives review notes that need an agent (a
 // hand-written comment) as stream-json user messages, one batch at a time, and starts the generation jobs itself.
 // The session id is saved, so a restarted server resumes the same conversation (`claude --resume`).
-// Each finished turn is logged with its cost to review/agent_runs.jsonl; no note is sent once today's runs
+// Each finished turn is logged with its cost (the runs table of review/review.sqlite); no note is sent once today's runs
 // reach the daily budget (notes wait for the next day).
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import fs from "node:fs";

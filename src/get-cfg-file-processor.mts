@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 import { logger } from "./logger.mts";
 import { getOrUpdateFromL1Cache } from "./cache/l1-cache.mts";
 import { deepMerge } from "./deep-merge.mts";
+import { inheritDuplicateStructs } from "./inherit-duplicate-structs.mts";
 
 /**
  * Deeply merged structs will be stored here.
@@ -86,7 +87,8 @@ export function getCfgFileProcessor<T extends Struct>(transformer: StructTransfo
           ? `${pathToSave.name}.cfg_patch_${modName}`
           : `${pathToSave.name}_patch_${modName}.cfg`,
       );
-      await writeFile(resultingFilename, processedStructs.map((s) => s.toString()).join("\n\n"));
+      const written = transformer.inheritDuplicates ? inheritDuplicateStructs(processedStructs) : processedStructs;
+      await writeFile(resultingFilename, written.map((s) => s.toString()).join("\n\n"));
     }
     return processedStructs;
   };

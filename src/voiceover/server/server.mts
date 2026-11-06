@@ -4,6 +4,8 @@
 // Usage: node src/voiceover-server/server.mts [port]   (env VOICEOVER_ROOT = voice workspace, REVIEW_PORT = port)
 import "../../ensure-env.mts";
 import { createAgent } from "./agent.mts";
+import { createQueue } from "./queue.mts";
+import { openStore } from "./store.mts";
 import { spawn } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
@@ -19,10 +21,8 @@ if (!process.env.VOICEOVER_ROOT || !fs.existsSync(path.join(ROOT, "higgs"))) {
 const REVIEW = path.join(ROOT, "review");
 const HIGGS = path.join(ROOT, "higgs");
 const TEST = path.join(ROOT, "higgs_test");
-const FEEDBACK = path.join(REVIEW, "feedback.jsonl");
-const EVENTS = path.join(REVIEW, "agent_events.jsonl");
-const JOBS = path.join(REVIEW, "jobs");
-const RUNS = path.join(REVIEW, "agent_runs.jsonl");
+const JOBS = path.join(REVIEW, "jobs"); // queue job logs and the GPU lock
+const store = openStore(REVIEW); // feedback, agent events and agent runs (review/review.sqlite)
 // generation scripts (src/voiceover/pipeline); tests point this at stubs
 const PIPELINE = path.resolve(
   process.env.VOICEOVER_PIPELINE_DIR || path.join(import.meta.dirname, "..", "pipeline"),
@@ -30,13 +30,13 @@ const PIPELINE = path.resolve(
 const RUNLOG = path.join(HIGGS, "run.log");
 const INDEX = path.join(import.meta.dirname, "index.html");
 const PORT = Number(process.argv[2] || process.env.REVIEW_PORT || 8765);
-const STATUSES = new Set(["seen", "queued", "working", "regenerated", "done", "question"]);
+const STATUSES = new Set(["seen", "queued", "done", "question"]);
 
 type Rec = Record<string, any>;
 
 // ---- files ----
 
-/** JSON with Python's separators, so the .jsonl files keep one format whoever writes them. */
+/** JSON with Python's separators, as the API has always returned it. */
 function dumps(v: unknown): string {
   if (Array.isArray(v)) return "[" + v.map(dumps).join(", ") + "]";
   if (v && typeof v === "object")
@@ -58,25 +58,6 @@ function loadJson<T>(p: string, fallback: T): T {
     return fallback;
   }
 }
-
-function readJsonl(p: string): Rec[] {
-  let text = "";
-  try {
-    text = fs.readFileSync(p, "utf8");
-  } catch {
-    return [];
-  }
-  const out: Rec[] = [];
-  for (const ln of text.split("\n")) {
-    if (!ln.trim()) continue;
-    try {
-      out.push(JSON.parse(ln));
-    } catch {}
-  }
-  return out;
-}
-
-const appendJsonl = (p: string, obj: Rec) => fs.appendFileSync(p, dumps(obj) + "\n", "utf8");
 
 function now() {
   const d = new Date(),
@@ -179,6 +160,14 @@ function take(p: string, label?: string, finalHash?: string | null) {
   const side = p.slice(0, -4) + ".txt"; // A/B alternative: sidecar with the exact (tagged) text used
   if (fs.existsSync(side))
     t.alt_text = cached(side, "txt", (s) => fs.readFileSync(s, "utf8").trim());
+  // earlier audio of this take (pipeline/keep_version.py): <line dir>/versions/<name>/NNN.wav, oldest first
+  const name = path.basename(p).slice(0, -4);
+  const vs = wavs(path.join(path.dirname(p), "versions", name));
+  if (vs.length)
+    t.versions = vs.map((v, i) => ({
+      ...take(v, `v${i + 1}`, finalHash),
+      file: `versions/${name}/${path.basename(v)}`,
+    }));
   return t;
 }
 
@@ -422,97 +411,87 @@ function runStatus() {
 
 // ---- feedback state ----
 
-/** Latest agent event per feedback item (by feedback_id, or by group+sid for later events without id). */
-function statuses(fb: Rec[], ev: Rec[]) {
+/** What is happening on each line right now, from the queue alone (the event history never decides it):
+ * working = its job runs, queued = a job or note waits its turn, held = its job is on hold, paused = the whole queue is
+ * paused. Lines with no active entry are idle ('done' once they have any history). Each also carries the line's
+ * latest event as its message. */
+function lineStates() {
+  const paused = queue.paused();
+  const rank: Rec = { working: 3, queued: 2, held: 1, paused: 1 };
+  const out: Rec = {};
+  // idle lines that have a history (events, or jobs that ended): 'done', so the page can flash the change
+  for (const e of store.all("events")) {
+    if (!e.group || !e.sid) continue;
+    out[e.group + "|" + e.sid] = { state: "done", ts: e.ts || "", message: `${e.status}: ${e.message || ""}` };
+  }
+  for (const j of queue.list(true))
+    if (j.group && j.sid) out[j.group + "|" + j.sid] ??= { state: "done", ts: j.finished || "", message: "" };
+  for (const j of [...queue.list(), ...waitingNotes()]) {
+    if (!j.group || !j.sid || j.status === "failed") continue; // a failed job stays listed but is not in progress
+    const st =
+      j.status === "running" ? "working" : j.status === "held" ? "held" : paused ? "paused" : "queued";
+    const k = j.group + "|" + j.sid,
+      cur = (out[k] ??= { state: null, ts: "", message: "" });
+    if (!cur.state || cur.state === "done" || rank[st] > rank[cur.state]) cur.state = st;
+  }
+  return out;
+}
+
+/** Each note with its current status: its job's state while it has one in the queue, waiting while no job has taken
+ * it up, else the latest event about it (from the history). */
+function statuses() {
+  const fb = store.all("feedback"),
+    ev = store.all("events");
+  const jobOf = new Map<string, Rec>();
+  for (const j of queue.list()) if (j.feedback_id) jobOf.set(j.feedback_id, j);
+  const waiting = new Set(pending().map((f) => f.id));
   for (const f of fb) {
     f.latest = null;
-    for (const e of ev) {
+    for (const e of ev)
       if (
         e.feedback_id === f.id ||
         (!e.feedback_id && e.group === f.group && e.sid === f.sid && (e.ts || "") >= (f.ts || ""))
       )
         f.latest = e;
-    }
-    if (f.latest) f.status = f.latest.status ?? f.status;
+    const j = jobOf.get(f.id);
+    f.status = j
+      ? j.status === "running"
+        ? "working"
+        : j.status
+      : waiting.has(f.id)
+        ? "waiting"
+        : (f.latest?.status ?? "new");
   }
   return fb;
 }
 
-/** Per group|sid: pending-redo state. redo/apply_text feedback or seen/queued -> queued, working -> working,
- * regenerated/done/question -> done (a question waits on the user, no job runs). */
-function lineStates(fb: Rec[], ev: Rec[]) {
-  const byId = new Map(fb.map((f) => [f.id, f]));
-  type Item = [string, string, string, string | null, string, string];
-  const items: Item[] = fb
-    .filter((f) => f.verdict === "redo" || f.verdict === "apply_text")
-    .map((f) => [
-      f.ts || "",
-      f.group,
-      f.sid,
-      "queued",
-      f.comment || f.verdict,
-      "feedback " + f.verdict,
-    ]);
-  const map: Rec = {
-    seen: "queued",
-    queued: "queued",
-    working: "working",
-    regenerated: "done",
-    done: "done",
-    question: "done",
-  };
-  for (const e of ev) {
-    const f = byId.get(e.feedback_id) || {};
-    const g = e.group || f.group,
-      sid = e.sid || f.sid;
-    if (g && sid)
-      items.push([e.ts || "", g, sid, map[e.status] ?? null, e.message || "", e.status]);
-  }
-  items.sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
-  const out: Rec = {};
-  for (const [ts, g, sid, st, msg, raw] of items) {
-    const cur = (out[g + "|" + sid] ??= { state: null });
-    if (st) cur.state = st;
-    Object.assign(cur, { ts, message: `${raw}: ${msg}` });
-  }
-  return out;
+/** Notes from the page that no job or agent has taken up yet: listed at the end of the queue as 'waiting', so a line
+ * that shows as pending always has an entry in the queue. */
+function waitingNotes() {
+  return pending().map((f) => ({
+    id: "note:" + f.id,
+    key: `note:${f.group}|${f.sid}`,
+    // a note on a take gets a new version of it, a note on the line a new take
+    label: `note on ${f.sid} → ${f.take ? `new version of ${String(f.take).replace(/^versions\/([^/]+)\/.*$/, "$1").replace(/\.wav$/, "")}` : "new take"}`,
+    status: "waiting",
+    group: f.group,
+    sid: f.sid,
+    feedback_id: f.id,
+    created: f.ts,
+    request: String(f.comment || "").trim() || f.suggested_text || f.verdict,
+  }));
 }
 
-/** Line jobs (pipeline line_job.sh, alt_jobs.sh) still alive: running (latest event for the sid is 'working') or queued on the GPU lock. */
-function jobs() {
-  const last = new Map<string, Rec>();
-  for (const e of readJsonl(EVENTS)) if (e.sid) last.set(e.sid, e);
-  const out: Rec[] = [];
-  for (const f of listDir(JOBS)
-    .filter((f) => f.endsWith(".pid"))
-    .sort()) {
-    const sid = f.slice(0, -4);
-    let pid: number;
-    try {
-      pid = parseInt(fs.readFileSync(path.join(JOBS, f), "utf8").trim(), 10);
-      process.kill(pid, 0);
-    } catch {
-      continue;
-    }
-    let args: string[] = [];
-    try {
-      args = fs.readFileSync(`/proc/${pid}/cmdline`).toString("utf8").split("\0");
-    } catch {}
-    const i = args.indexOf("_"); // bash -c '...' _ <batch> <sid> <text> ...
-    const [batch, text] = i >= 0 && args.length > i + 3 ? [args[i + 1], args[i + 3]] : ["", ""];
-    const e = last.get(sid) || {},
-      running = e.status === "working";
-    const group = running || !batch ? e.group : `batch:${batch}`; // a queued job's batch is in its args
-    out.push({
-      sid,
-      group: group || "",
-      status: running ? "working" : "queued",
-      ts: running ? e.ts || "" : "",
-      feedback_id: running ? e.feedback_id || "" : "",
-      message: running ? e.message || "" : text,
-    });
-  }
-  return out.sort((a, b) => Number(a.status !== "working") - Number(b.status !== "working"));
+/** Jobs started for a note from the page carry the user's request: the comment, else the edited text. */
+function withRequests(jobs: Rec[]) {
+  const ids = new Set(jobs.map((j) => j.feedback_id).filter(Boolean));
+  if (!ids.size) return jobs;
+  const fb = new Map(store.all("feedback").filter((f) => ids.has(f.id)).map((f) => [f.id, f]));
+  return jobs.map((j) => {
+    const f = fb.get(j.feedback_id);
+    const request = f && (String(f.comment || "").trim() || f.suggested_text);
+    return request ? { ...j, request } : j;
+  });
 }
 
 /** Move a take (and its alt-*.txt sidecar) to archive/deleted/<date>/<same path>. Final copies can't be deleted here. */
@@ -564,7 +543,8 @@ function autoKind(rec: Rec): "final" | "redo" | null {
 /** Records an agent still has to handle: no event yet and not the server's job, or a comment no agent event answers
  * (a pick with a comment is finalized here and still needs new audio for the comment). */
 function pending() {
-  const events = readJsonl(EVENTS);
+  const taken = queue.feedbackIds(); // a job was started for it
+  const events = store.all("events");
   const ev = new Set(events.filter((e) => e.feedback_id).map((e) => e.feedback_id));
   const agentEv = new Set(
     events
@@ -573,9 +553,10 @@ function pending() {
       )
       .map((e) => e.feedback_id),
   );
-  return readJsonl(FEEDBACK).filter(
+  return store.all("feedback").filter(
     (f) =>
-      (!ev.has(f.id) && !autoKind(f)) || (String(f.comment || "").trim() && !agentEv.has(f.id)),
+      !taken.has(f.id) &&
+      ((!ev.has(f.id) && !autoKind(f)) || (String(f.comment || "").trim() && !agentEv.has(f.id))),
   );
 }
 
@@ -600,7 +581,7 @@ function missing() {
 
 /** Agent runs with cost totals, overall, per model and today. */
 function runsSummary() {
-  const runs = readJsonl(RUNS);
+  const runs = store.all("runs");
   const byModel: Rec = {};
   for (const r of runs) byModel[r.model] = (byModel[r.model] || 0) + Number(r.cost_usd || 0);
   const total = runs.reduce((a, r) => a + Number(r.cost_usd || 0), 0);
@@ -626,7 +607,7 @@ function lineInfo(rec: Rec) {
   };
 }
 
-const postEvent = (e: Rec) => appendJsonl(EVENTS, { ts: now(), ...e });
+const postEvent = (e: Rec) => store.add("events", { ts: now(), ...e });
 const lineDirs = (batch: string, sid: string) =>
   listDir(path.join(HIGGS, batch))
     .filter((f) => f.endsWith("_" + sid) && isDir(path.join(HIGGS, batch, f)))
@@ -636,12 +617,12 @@ const lineDirs = (batch: string, sid: string) =>
  * archive/unfinal/, post a done event for each, then run backup_finals.sh from the pipeline. */
 function finalize() {
   const handled = new Set(
-    readJsonl(EVENTS)
-      .filter((e) => e.status === "done" || e.status === "regenerated")
+    store.all("events")
+      .filter((e) => e.status === "done")
       .map((e) => e.feedback_id),
   );
   let changed = false;
-  for (const fb of readJsonl(FEEDBACK)) {
+  for (const fb of store.all("feedback")) {
     if (handled.has(fb.id) || !AUTO_FINAL.has(fb.verdict) || !String(fb.group).startsWith("batch:"))
       continue;
     const batch = fb.group.slice(6),
@@ -679,7 +660,8 @@ function finalize() {
     const takes = listDir(dirs[0]).sort();
     const tk =
       fb.take || (takes.includes("s2024.wav") ? "s2024.wav" : takes.length === 1 ? takes[0] : null);
-    if (!tk || !takes.includes(tk)) continue; // which take? left for an agent
+    const isVersion = !!tk && /^versions\/[^/]+\/\d+\.wav$/.test(tk) && isFile(path.join(dirs[0], tk));
+    if (!tk || !(takes.includes(tk) || isVersion)) continue; // which take? left for an agent
     fs.mkdirSync(path.join(HIGGS, "final", finalBatch), { recursive: true });
     const dst = path.join(HIGGS, "final", finalBatch, path.basename(dirs[0]) + ".wav");
     fs.copyFileSync(path.join(dirs[0], tk), dst);
@@ -725,13 +707,6 @@ function runAuto(rec: Rec) {
       } else if (kind === "redo") {
         const script = path.join(PIPELINE, "line_job.sh");
         if (!fs.existsSync(script)) return;
-        postEvent({
-          feedback_id: rec.id,
-          group: rec.group,
-          sid: rec.sid,
-          status: "queued",
-          message: "Queued: regenerating with the edited text",
-        });
         await runScript(script, [rec.sid, rec.group.slice(6), rec.sid, rec.suggested_text, rec.id]);
       }
     } catch (e) {
@@ -748,13 +723,11 @@ let sigs = new Map<string, string>();
 function snapshot() {
   const s = new Map<string, string>();
   for (const gid of groupIds()) s.set(gid, treeSig(groupPaths(gid)).join(","));
+  for (const k of ["feedback", "events", "runs"] as const) s.set(k, store.sig(k));
+  s.set("jobs", treeSig([JOBS]).join(",") + "," + queue.sig());
   for (const [k, p] of [
-    ["feedback", FEEDBACK],
-    ["events", EVENTS],
-    ["jobs", JOBS],
     ["run", RUNLOG],
     ["page", INDEX],
-    ["runs", RUNS],
   ])
     s.set(k, treeSig([p]).join(","));
   if (agent) {
@@ -865,7 +838,7 @@ function handleGet(req: http.IncomingMessage, res: http.ServerResponse, u: URL) 
       );
     }
     case "/api/feedback":
-      return sendJson(res, statuses(readJsonl(FEEDBACK), readJsonl(EVENTS)));
+      return sendJson(res, statuses());
     case "/api/pending":
       return sendJson(res, pending());
     case "/api/runs":
@@ -873,11 +846,18 @@ function handleGet(req: http.IncomingMessage, res: http.ServerResponse, u: URL) 
     case "/api/missing":
       return sendJson(res, missing());
     case "/api/linestatus":
-      return sendJson(res, lineStates(readJsonl(FEEDBACK), readJsonl(EVENTS)));
+      return sendJson(res, lineStates());
     case "/api/events":
-      return sendJson(res, readJsonl(EVENTS).slice(-Number(q.get("n") || 30)));
-    case "/api/jobs":
-      return sendJson(res, jobs());
+      return sendJson(res, store.all("events").slice(-Number(q.get("n") || 30)));
+    case "/api/queue/state":
+      return sendJson(res, { paused: queue.paused() });
+    case "/api/queue":
+      return sendJson(
+        res,
+        q.has("id")
+          ? queue.get(Number(q.get("id"))) || null
+          : [...withRequests(queue.list(q.get("all") === "1")), ...waitingNotes()],
+      );
     case "/api/run":
       return sendJson(res, runStatus());
     case "/api/stream":
@@ -904,19 +884,39 @@ function handlePost(res: http.ServerResponse, u: URL, data: Rec) {
       suggested_text: data.suggested_text || null,
       status: "new",
     };
-    appendJsonl(FEEDBACK, rec);
+    store.add("feedback", rec);
     if (autoKind(rec)) runAuto(rec);
     agent?.pump();
     return sendJson(res, rec);
   }
   if (u.pathname === "/api/delete") return sendJson(res, ...deleteTake(data.path || ""));
+  if (u.pathname.startsWith("/api/queue")) {
+    try {
+      if (u.pathname === "/api/queue") return sendJson(res, queue.enqueue(data as any));
+      if (u.pathname === "/api/queue/cancel") {
+        if (data.feedback_id) {
+          // dismiss a waiting note: an event closes it, so it leaves the queue and its line
+          const f = store.all("feedback").find((x) => x.id === data.feedback_id);
+          if (!f) return sendJson(res, { error: "no such note" }, 400);
+          postEvent({ feedback_id: f.id, group: f.group, sid: f.sid, status: "done", message: "Dismissed from the queue" });
+          return sendJson(res, { cancelled: 1 });
+        }
+        return sendJson(res, { cancelled: queue.cancel(data) });
+      }
+      if (u.pathname === "/api/queue/retry") return sendJson(res, queue.retry(Number(data.id)));
+      if (u.pathname === "/api/queue/pause") return sendJson(res, queue.setPaused(data.paused !== false));
+      if (u.pathname === "/api/queue/hold") return sendJson(res, { changed: queue.hold(data, data.held !== false) });
+    } catch (e) {
+      return sendJson(res, { error: String((e as Error).message || e) }, 400);
+    }
+  }
   if (u.pathname === "/api/event") {
     if (!STATUSES.has(data.status))
       return sendJson(res, { error: `status must be one of ${dumps([...STATUSES].sort())}` }, 400);
     const rec: Rec = { ts: now() };
     for (const k of ["feedback_id", "group", "sid", "status", "message"])
       if (k in data) rec[k] = data[k];
-    appendJsonl(EVENTS, rec);
+    store.add("events", rec);
     return sendJson(res, rec);
   }
   sendJson(res, { error: "not found" }, 404);
@@ -968,17 +968,26 @@ const agent =
         pending,
         lineInfo,
         postEvent,
-        runs: () => readJsonl(RUNS),
-        appendRun: (r) => appendJsonl(RUNS, r),
+        runs: () => store.all("runs"),
+        appendRun: (r) => store.add("runs", r),
         now,
       });
+// generation jobs (queue.mts): one GPU job at a time unless VOICEOVER_GPU_SLOTS says otherwise
+const queue = createQueue({
+  db: store.db,
+  root: ROOT,
+  slots: Number(process.env.VOICEOVER_GPU_SLOTS || 1),
+  now,
+});
 for (const sig of ["SIGTERM", "SIGINT"] as const)
   process.on(sig, () => {
+    queue.shutdown();
     agent?.stop();
     process.exit(0);
   });
 
 sigs = snapshot();
+queue.pump(); // jobs queued while the server was down
 setInterval(watch, 1000);
 setTimeout(() => runAuto({ group: "batch:", verdict: "pick" }), 1000); // picks made while the server was down
 if (agent) {

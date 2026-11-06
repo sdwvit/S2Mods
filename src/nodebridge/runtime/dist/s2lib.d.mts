@@ -28,18 +28,12 @@ export declare function readU32LE(b: Uint8Array, off: number): number;
 export declare function readU64LE(b: Uint8Array, off: number): number;
 export declare function readU64At(bridge: Bridge, addr: number): Promise<number | null>;
 export declare function decodeFName(bridge: Bridge, comp: number, num: number): Promise<string>;
-/**
- * Static addresses in the 2026-09-29 game build, from an offline scan of
- * Stalker2-Win64-Shipping.exe on 2026-10-18. FNamePool is the instance all 34
- * inlined `lea rcx, [pool]; call FNamePool::FNamePool` sites agree on;
- * GUObjectArray is what the AllocateObjectPool AOB in ue_reflection.cpp resolves.
- */
-export declare const BUILD_RVA: {
-    readonly fNamePool: 167709824;
-    readonly guObjectArray: 168716480;
-    /** UObject vtable slot 79 (0x4F). Checks FUNC_Native at UFunction+0xB1, allocas PropertiesSize (+0x58). */
-    readonly processEvent: 35039016;
-};
+export interface BuildAddrs {
+    guObjectArray: number;
+    fNamePool: number;
+    processEvent: number;
+}
+export declare function getBuildAddrs(bridge: Bridge): Promise<BuildAddrs>;
 export declare function getExeBase(bridge: Bridge): Promise<number>;
 /** "<PE TimeDateStamp>-<SizeOfImage>" of the running exe, read from its mapped headers. */
 export declare function getBuildId(bridge: Bridge): Promise<string>;

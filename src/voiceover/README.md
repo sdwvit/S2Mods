@@ -40,7 +40,7 @@ Game audio and generated takes never go into the repo: everything lives in a wor
 | `higgs/<spk>_<lang>/<NN>_<sid>/alt-<name>.wav` + `.txt` | an alternative and the exact text it used                                                           |
 | `higgs/final/<spk>_<lang>/<NN>_<sid>.wav`               | the approved take (written by the server on a pick)                                                 |
 | `higgs_test/`                                           | ad-hoc experiments that are not script lines (`higgs_dialog.py` output)                             |
-| `review/`                                               | `feedback.jsonl`, `agent_events.jsonl`, `jobs/` (pid files, GPU lock), agent session, runs and logs |
+| `review/`                                               | `review.sqlite` (feedback, events, agent runs), `jobs/` (queue job logs, GPU lock), agent session and logs |
 | `archive/<date>/`                                       | everything superseded: old takes, unpicked seeds, deleted takes. Nothing is deleted outright.       |
 
 `sid` is the game's dialog phrase SID, so a take maps one-to-one to a subtitle line. `same_as` marks a line with

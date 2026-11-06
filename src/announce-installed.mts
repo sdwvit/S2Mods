@@ -36,6 +36,7 @@ const NOT_ANNOUNCED = new Set([
   "NodeBridge",
   "AmokBodyDamageTest",
   "LairWarTest",
+  "LairMarkerTest",
   "SpawnSquads",
 ]);
 

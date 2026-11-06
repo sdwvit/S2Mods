@@ -9,6 +9,7 @@ import path from "node:path";
 import net from "node:net";
 import { fileURLToPath } from "node:url";
 import { JSDOM, VirtualConsole } from "jsdom";
+import { openStore } from "./store.mts";
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 vi.setConfig({ testTimeout: 20000, hookTimeout: 20000 });
@@ -199,21 +200,29 @@ afterEach(async () => {
   fs.rmSync(ws, { recursive: true, force: true });
 });
 
+/** Records of one table in the workspace's review/review.sqlite, read through the store like the server does. */
+function table(name) {
+  if (!fs.existsSync(path.join(ws, "review", "review.sqlite"))) return [];
+  const st = openStore(path.join(ws, "review"));
+  try {
+    return st.all(name);
+  } finally {
+    st.close();
+  }
+}
+/** Write events straight into the store, as another writer would (the server only reads them back). */
+function addEvents(list) {
+  const st = openStore(path.join(ws, "review"));
+  try {
+    for (const e of list) st.add("events", e);
+  } finally {
+    st.close();
+  }
+}
 const line = (sid) => doc.querySelector(`.line[data-sid="${sid}"]`);
 const take = (sid, file) =>
   [...line(sid).querySelectorAll(".take")].find((t) => t.dataset.file === file);
-const feedback = () => {
-  try {
-    return fs
-      .readFileSync(path.join(ws, "review", "feedback.jsonl"), "utf8")
-      .trim()
-      .split("\n")
-      .filter(Boolean)
-      .map(JSON.parse);
-  } catch {
-    return [];
-  }
-};
+const feedback = () => table("feedback");
 const takeFile = (f) => path.join(ws, "higgs", "test_uk", "01_" + SID_A, f);
 const refreshGroups = () => FakeEventSource.last.emit("change", { changed: ["batch:test_uk"] });
 
@@ -348,8 +357,13 @@ test("there is no mark-good button: a line becomes good only through a pick", ()
 test("✎ on a take, then Enter, sends a redo about that take", async () => {
   const le = line(SID_A),
     cmt = le.querySelector(".cmt");
+  const pill = le.querySelector(".tpill");
+  assert.ok(pill.hidden);
   take(SID_A, "alt-x.wav").querySelector("button.tnote").click();
-  assert.match(cmt.placeholder, /alt-x/);
+  assert.ok(!pill.hidden);
+  assert.equal(pill.textContent, "alt-x");
+  assert.match(cmt.placeholder, /makes a new version of alt-x/);
+  assert.match(pill.title, /alt-x/);
   cmt.value = "lower pitch";
   cmt.dispatchEvent(new win.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
   await waitFor(() => feedback().length === 1, "feedback saved");
@@ -358,7 +372,18 @@ test("✎ on a take, then Enter, sends a redo about that take", async () => {
     take: "alt-x.wav",
     comment: "lower pitch",
   });
-  await waitFor(() => cmt.value === "" && !/alt-x/.test(cmt.placeholder), "form reset");
+  await waitFor(() => cmt.value === "" && pill.hidden, "form reset");
+});
+
+test("the take pill shows the first 16 characters, the full name on hover, and clears on click", () => {
+  const le = line(SID_A),
+    pill = le.querySelector(".tpill");
+  win.eval(`noteTake(document.querySelector('.line[data-sid="${SID_A}"]'), "alt-a-very-long-take-name.wav")`);
+  assert.equal(pill.textContent, "alt-a-very-long-…");
+  assert.equal(pill.title, "about alt-a-very-long-take-name (click to clear)");
+  pill.click();
+  assert.ok(pill.hidden);
+  assert.equal(le.dataset.take, "");
 });
 
 test("pick + Apply folds the line away with the approved lines and moves on", async () => {
@@ -384,69 +409,6 @@ test("Apply with an empty comment sends nothing", async () => {
   assert.equal(feedback().length, 0);
 });
 
-test("agent activity lists only jobs in progress: running first, then queued; finished events and dead jobs are hidden", async () => {
-  const jobs = path.join(ws, "review", "jobs");
-  fs.mkdirSync(jobs);
-  // live jobs shaped like scripts/line_job.sh: bash -c '...' _ <batch> <sid> <text> ...
-  const live = (sid) =>
-    spawn(
-      "bash",
-      ["-c", "sleep 30; true", "_", "test_uk", sid, "Text for " + sid, "fb1", "--alt", "x"],
-      { stdio: "ignore" },
-    );
-  const pa = live(SID_A),
-    pb = live(SID_B);
-  try {
-    fs.writeFileSync(path.join(jobs, SID_A + ".pid"), String(pa.pid));
-    fs.writeFileSync(path.join(jobs, SID_B + ".pid"), String(pb.pid));
-    fs.writeFileSync(path.join(jobs, SID_C + ".pid"), "999999999"); // stale pid file
-    fs.writeFileSync(
-      path.join(ws, "review", "agent_events.jsonl"),
-      [
-        {
-          ts: "t1",
-          group: "batch:test_uk",
-          sid: SID_A,
-          status: "regenerated",
-          message: "old take done",
-        },
-        {
-          ts: "t2",
-          group: "batch:test_uk",
-          sid: SID_B,
-          status: "working",
-          feedback_id: "fb2",
-          message: "Regenerating B",
-        },
-        { ts: "t3", group: "batch:aa_uk", sid: SID_C, status: "done", message: "Final C" },
-      ]
-        .map((e) => JSON.stringify(e))
-        .join("\n") + "\n",
-    );
-    FakeEventSource.last.emit("change", { changed: ["events", "jobs"] });
-    const feed = doc.querySelector("#feed");
-    await waitFor(() => feed.querySelectorAll("div").length === 2, "two jobs listed");
-    const rows = [...feed.querySelectorAll("div")].map((d) =>
-      d.textContent.replace(/\s+/g, " ").trim(),
-    );
-    assert.match(rows[0], /^working t2 batch:test_uk Test_Line_B #fb2 ?Regenerating B$/);
-    assert.match(rows[1], /^queued batch:test_uk Test_Line_A ?Text for Test_Line_A$/);
-    assert.ok(!feed.textContent.includes("Final C") && !feed.textContent.includes("old take done"));
-    assert.equal(doc.querySelector("#feedbox summary").textContent, "Agent activity (2)");
-
-    pa.kill();
-    pb.kill();
-    await waitFor(() => pa.exitCode !== null || pa.signalCode, "job A gone");
-    await waitFor(() => pb.exitCode !== null || pb.signalCode, "job B gone");
-    FakeEventSource.last.emit("change", { changed: ["jobs"] });
-    await waitFor(() => feed.textContent.includes("no jobs in progress"), "empty list");
-    assert.equal(doc.querySelector("#feedbox summary").textContent, "Agent activity");
-  } finally {
-    pa.kill();
-    pb.kill();
-  }
-});
-
 // ---- server-side actions: picks are finalized and edited text is regenerated without an agent ----
 function installScripts() {
   const sd = path.join(ws, "scripts");
@@ -458,18 +420,7 @@ function installScripts() {
   stub("backup_finals.sh", 'cd "$(dirname "$0")/.."; echo backup >> scripts/backup.log');
   stub("line_job.sh", 'cd "$(dirname "$0")/.."; printf "%s\\n" "$@" > scripts/line_job.args');
 }
-const events = () => {
-  try {
-    return fs
-      .readFileSync(path.join(ws, "review", "agent_events.jsonl"), "utf8")
-      .trim()
-      .split("\n")
-      .filter(Boolean)
-      .map(JSON.parse);
-  } catch {
-    return [];
-  }
-};
+const events = () => table("events");
 const postFeedback = (body) =>
   fetch(base + "/api/feedback", {
     method: "POST",
@@ -544,8 +495,6 @@ test("edited text with no comment is queued and regenerated by the server", asyn
     "Нова друга лінія.",
     rec.id,
   ]);
-  const ev = events().find((e) => e.feedback_id === rec.id);
-  assert.equal(ev.status, "queued");
 });
 
 test("anything with a comment, and redo, is left for the agent", async () => {
@@ -751,7 +700,7 @@ const note = (sid, comment) =>
 test("a note with a comment goes to the agent; its cost is logged and shown on the page", async () => {
   await withAgent();
   const rec = await note(SID_A, "lower pitch");
-  await waitFor(() => readLines("agent_runs.jsonl").length === 1, "run logged");
+  await waitFor(() => table("runs").length === 1, "run logged");
   const r = await runs();
   assert.equal(r.runs[0].cost_usd, 0.05);
   assert.deepEqual(r.runs[0].feedback_ids, [rec.id]);
@@ -769,7 +718,7 @@ test("a note with a comment goes to the agent; its cost is logged and shown on t
   );
   // a second note: same process, cost is the difference of the cumulative total
   await note(SID_B, "faster");
-  await waitFor(() => readLines("agent_runs.jsonl").length === 2, "second run");
+  await waitFor(() => table("runs").length === 2, "second run");
   assert.equal((await runs()).runs[1].cost_usd, 0.05);
   assert.equal(readLines("stub_args.jsonl").length, 1, "the agent process is kept");
 
@@ -782,8 +731,8 @@ test("a note with a comment goes to the agent; its cost is logged and shown on t
     "header cost",
   );
   await waitFor(
-    () => /\$0\.050/.test(line(SID_A).querySelector(".agent").textContent),
-    "note cost under the line",
+    () => /\$0\.050/.test(line(SID_A).querySelector(".fbl").textContent),
+    "note cost on the note",
   );
 });
 
@@ -793,7 +742,7 @@ test("notes sent while the agent works go together in the next message", async (
   await sleep(200);
   await note(SID_A, "two");
   await note(SID_B, "three");
-  await waitFor(() => readLines("agent_runs.jsonl").length === 2, "two runs");
+  await waitFor(() => table("runs").length === 2, "two runs");
   assert.deepEqual(
     readLines("stub_msgs.jsonl").map((m) => m.length),
     [1, 2],
@@ -815,7 +764,7 @@ test("a note the agent leaves without an event gets its summary; a restarted ser
 test("the daily budget holds notes back until the next day", async () => {
   await withAgent({ VOICEOVER_AGENT_DAILY_USD: "0.05" });
   await note(SID_A, "one");
-  await waitFor(() => readLines("agent_runs.jsonl").length === 1, "first run");
+  await waitFor(() => table("runs").length === 1, "first run");
   const held = await note(SID_B, "two");
   await sleep(1000);
   assert.equal(readLines("stub_msgs.jsonl").length, 1, "second note not sent");
@@ -829,4 +778,334 @@ test("the daily budget holds notes back until the next day", async () => {
     () => /paused: daily budget reached/.test(doc.querySelector("#cost").textContent),
     "paused in header",
   );
+});
+
+// ---- job queue ----
+const enqueue = (spec) =>
+  fetch(base + "/api/queue", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(spec),
+  }).then((r) => r.json());
+const job = (id) => fetch(base + "/api/queue?id=" + id).then((r) => r.json());
+const sh = (cmd) => [["bash", "-c", cmd]];
+const statusIs = (id, st) => async () => (await job(id)).status === st;
+const wsFile = (f) => fs.readFileSync(path.join(ws, f), "utf8");
+
+test("queue: one job at a time, by priority then age, from the workspace root under the GPU lock, with a log", async () => {
+  const a = await enqueue({ key: "a", steps: sh("sleep 0.3; echo a >> order.txt") });
+  const b = await enqueue({ key: "b", steps: sh("echo b >> order.txt") });
+  const c = await enqueue({ key: "c", steps: sh("echo c >> order.txt; echo hi"), priority: 5 });
+  assert.equal(a.status, "running");
+  await waitFor(statusIs(b.id, "done"), "b done");
+  assert.equal(wsFile("order.txt"), "a\nc\nb\n");
+  assert.equal(wsFile((await job(c.id)).log), "hi\n");
+  assert.ok(fs.existsSync(path.join(ws, "review", "jobs", "gpu.lock")));
+});
+
+test("queue: a job with the same key supersedes the queued one and stops the running one; cancel by key", async () => {
+  const x1 = await enqueue({ key: "line:x", steps: sh("sleep 1; touch late"), gpu: false });
+  await waitFor(statusIs(x1.id, "running"), "x1 running");
+  const x2 = await enqueue({ key: "line:x", steps: sh("touch new"), gpu: false });
+  await waitFor(statusIs(x2.id, "done"), "x2 done");
+  assert.equal((await job(x1.id)).status, "superseded");
+
+  const block = await enqueue({ key: "block", steps: sh("sleep 30"), gpu: false });
+  const y1 = await enqueue({ key: "line:y", steps: sh("touch y1"), gpu: false });
+  const y2 = await enqueue({ key: "line:y", steps: sh("touch y2"), gpu: false });
+  assert.equal((await job(y1.id)).status, "superseded");
+  assert.equal((await job(block.id)).status, "running");
+  const r = await fetch(base + "/api/queue/cancel", {
+    method: "POST",
+    body: JSON.stringify({ key: "block" }),
+  }).then((r) => r.json());
+  assert.equal(r.cancelled, 1);
+  await waitFor(statusIs(y2.id, "done"), "y2 done");
+  await sleep(1200);
+  assert.ok(!fs.existsSync(path.join(ws, "late")), "the superseded job was stopped");
+  assert.ok(!fs.existsSync(path.join(ws, "y1")) && fs.existsSync(path.join(ws, "y2")));
+});
+
+test("queue: a job is skipped while its outputs are newer than its inputs and its commands are unchanged", async () => {
+  fs.writeFileSync(path.join(ws, "in.txt"), "1");
+  await sleep(20);
+  const spec = {
+    key: "conv",
+    steps: sh("cat in.txt > out.txt"),
+    gpu: false,
+    inputs: ["in.txt"],
+    outputs: ["out.txt"],
+  };
+  const j1 = await enqueue(spec);
+  await waitFor(statusIs(j1.id, "done"), "first run");
+  const j2 = await enqueue(spec);
+  assert.deepEqual([j2.status, j2.message], ["skipped", "up to date"]);
+  await sleep(20);
+  fs.writeFileSync(path.join(ws, "in.txt"), "2"); // newer input
+  const j3 = await enqueue(spec);
+  await waitFor(statusIs(j3.id, "done"), "rerun on a newer input");
+  assert.equal(wsFile("out.txt"), "2");
+  const j4 = await enqueue({ ...spec, steps: sh("cat in.txt in.txt > out.txt") }); // changed command
+  await waitFor(statusIs(j4.id, "done"), "rerun on a changed command");
+  assert.equal(wsFile("out.txt"), "22");
+});
+
+test("queue: every step runs, a failed step fails the job and keeps it listed; retry queues it again", async () => {
+  const f = await enqueue({
+    key: "f",
+    steps: [["bash", "-c", "exit 3"], ["bash", "-c", "echo second > second.txt"]],
+    gpu: false,
+    group: "batch:test_uk",
+    sid: SID_B,
+    label: "broken job",
+  });
+  await waitFor(statusIs(f.id, "failed"), "failed");
+  assert.equal((await job(f.id)).exit_code, 3);
+  assert.ok(fs.existsSync(path.join(ws, "second.txt")));
+  const listed = await fetch(base + "/api/queue").then((r) => r.json());
+  assert.deepEqual(listed.map((j) => [j.id, j.status]), [[f.id, "failed"]], "a failed job stays in the queue");
+  const again = await fetch(base + "/api/queue/retry", {
+    method: "POST",
+    body: JSON.stringify({ id: f.id }),
+  }).then((r) => r.json());
+  assert.ok(again.id > f.id && again.key === "f");
+});
+
+test("queue: the page shows the queue, running job first, each with a cancel button", async () => {
+  const j = await enqueue({
+    key: "line:" + SID_A,
+    steps: sh("sleep 30"),
+    gpu: false,
+    group: "batch:test_uk",
+    sid: SID_A,
+    label: "slow job",
+  });
+  const note = await postFeedback({ group: "batch:test_uk", sid: SID_B, verdict: "redo", comment: "calmer please" });
+  const next = await enqueue({ key: "later", steps: sh("true"), gpu: false, label: "next job", feedback_id: note.id });
+  FakeEventSource.last.emit("change", { changed: ["jobs"] });
+  const queue = doc.querySelector("#queue");
+  await waitFor(() => queue.querySelectorAll(".jobx").length === 2, "two jobs listed");
+  const rows = [...queue.querySelectorAll("div")].map((d) => d.textContent.replace(/\s+/g, " ").trim());
+  assert.match(rows[0], /^running slow job /);
+  assert.match(rows[1], /^queued next job “calmer please” \d\d:\d\d:\d\d · 00:00:0\d ago ⏸ ✕$/);
+  assert.equal(doc.querySelector("#queuebox summary").textContent, "Queue (2)");
+  queue.querySelector(".jobx").click();
+  await waitFor(statusIs(j.id, "cancelled"), "cancelled");
+  await waitFor(statusIs(next.id, "done"), "the next job ran");
+  FakeEventSource.last.emit("change", { changed: ["jobs"] });
+  await waitFor(() => queue.textContent.includes("queue is empty"), "queue empty");
+  assert.equal(doc.querySelector("#queuebox summary").textContent, "Queue");
+});
+
+test("queue: a job running when the server stops runs again after a restart", async () => {
+  const j = await enqueue({ key: "r", steps: sh("sleep 1; echo x >> runs.txt"), gpu: false });
+  await waitFor(statusIs(j.id, "running"), "running");
+  server.kill();
+  await waitFor(() => server.exitCode !== null || server.signalCode, "server stopped");
+  server = startServer(Number(new URL(base).port));
+  await waitFor(
+    () =>
+      fetch(base + "/api/run").then(
+        (r) => r.ok,
+        () => false,
+      ),
+    "server restart",
+  );
+  await waitFor(statusIs(j.id, "done"), "rerun", 8000);
+  assert.equal(wsFile("runs.txt"), "x\n");
+});
+
+test("queue: a line shows working only while its job runs; finished, failed and cancelled jobs clear it", async () => {
+  const state = async (sid) =>
+    (await fetch(base + "/api/linestatus").then((r) => r.json()))["batch:test_uk|" + sid]?.state;
+  const line = { group: "batch:test_uk", gpu: false };
+  const ok = await enqueue({ ...line, sid: SID_A, key: "a", steps: sh("sleep 0.5") });
+  const fail = await enqueue({ ...line, sid: SID_B, key: "b", steps: sh("exit 1") });
+  await waitFor(async () => (await state(SID_A)) === "working", "A working while it runs");
+  assert.equal(await state(SID_B), "queued");
+  await waitFor(statusIs(fail.id, "failed"), "B failed");
+  assert.equal(await state(SID_A), "done");
+  assert.equal(await state(SID_B), "done");
+  assert.deepEqual(events(), [], "the queue posts no events");
+
+  const block = await enqueue({ ...line, sid: SID_A, key: "block", steps: sh("sleep 30") });
+  const waiting = await enqueue({ ...line, sid: SID_B, key: "w", steps: sh("true") });
+  await waitFor(async () => (await state(SID_A)) === "working", "A working again");
+  await fetch(base + "/api/queue/cancel", { method: "POST", body: JSON.stringify({ id: waiting.id }) });
+  await fetch(base + "/api/queue/cancel", { method: "POST", body: JSON.stringify({ id: block.id }) });
+  assert.equal(await state(SID_A), "done", "a cancelled running job clears its line");
+  assert.equal(await state(SID_B), "done", "a cancelled queued job clears its line");
+  const left = await fetch(base + "/api/queue").then((r) => r.json());
+  assert.deepEqual(left.map((j) => [j.id, j.status]), [[fail.id, "failed"]]);
+  await fetch(base + "/api/queue/cancel", { method: "POST", body: JSON.stringify({ id: fail.id }) }); // ✕ dismisses it
+  assert.deepEqual(await fetch(base + "/api/queue").then((r) => r.json()), []);
+});
+
+test("queue: a note no job has taken up waits in the queue with its text; a job for it replaces it; ✕ dismisses one", async () => {
+  const queueNow = () => fetch(base + "/api/queue").then((r) => r.json());
+  const state = async (sid) =>
+    (await fetch(base + "/api/linestatus").then((r) => r.json()))["batch:test_uk|" + sid]?.state;
+  const a = await postFeedback({ group: "batch:test_uk", sid: SID_A, take: "alt-x.wav", verdict: "redo", comment: "slower" });
+  const b = await postFeedback({ group: "batch:test_uk", sid: SID_B, verdict: "redo", comment: "angrier" });
+  let q = await queueNow();
+  assert.deepEqual(
+    q.map((j) => [j.status, j.label, j.request]),
+    [
+      ["waiting", `note on ${SID_A} → new version of alt-x`, "slower"],
+      ["waiting", `note on ${SID_B} → new take`, "angrier"],
+    ],
+  );
+  assert.equal(await state(SID_A), "queued", "the line's pending dot matches a queue entry");
+
+  const j = await enqueue({ key: "line:" + SID_A, steps: sh("sleep 30"), gpu: false, group: "batch:test_uk", sid: SID_A, feedback_id: a.id, label: "redo A" });
+  q = await queueNow();
+  assert.deepEqual(q.map((x) => [x.status, x.label]), [["running", "redo A"], ["waiting", `note on ${SID_B} → new take`]]);
+  assert.equal(q[0].request, "slower");
+
+  FakeEventSource.last.emit("change", { changed: ["jobs"] });
+  const panel = doc.querySelector("#queue");
+  await waitFor(() => panel.querySelectorAll(".jobx").length === 2, "job and note listed");
+  assert.match(panel.textContent.replace(/\s+/g, " "), /waiting note on Test_Line_B → new take “angrier”/);
+  panel.querySelector(".jobx[data-fb]").click();
+  await waitFor(async () => (await queueNow()).length === 1, "note dismissed");
+  assert.equal(await state(SID_B), "done");
+  await fetch(base + "/api/queue/cancel", { method: "POST", body: JSON.stringify({ id: j.id }) });
+});
+
+test("queue: pausing stops the running job and starts nothing until resumed, also across a restart", async () => {
+  const post = (p, body) =>
+    fetch(base + p, { method: "POST", body: JSON.stringify(body) }).then((r) => r.json());
+  const j1 = await enqueue({ key: "p1", steps: sh("sleep 1; echo 1 >> ran.txt"), gpu: false });
+  await waitFor(statusIs(j1.id, "running"), "running");
+  assert.deepEqual(await post("/api/queue/pause", { paused: true }), { paused: true });
+  assert.equal((await job(j1.id)).status, "queued", "the running job goes back to the queue");
+  const j2 = await enqueue({ key: "p2", steps: sh("echo 2 >> ran.txt"), gpu: false });
+  await sleep(1500);
+  assert.equal((await job(j2.id)).status, "queued");
+  assert.ok(!fs.existsSync(path.join(ws, "ran.txt")), "nothing ran while paused");
+
+  FakeEventSource.last.emit("change", { changed: ["jobs"] });
+  await waitFor(() => doc.querySelector("#queuebox summary").textContent === "Queue (2) · paused", "page shows paused");
+
+  server.kill();
+  await waitFor(() => server.exitCode !== null || server.signalCode, "server stopped");
+  server = startServer(Number(new URL(base).port));
+  await waitFor(
+    () =>
+      fetch(base + "/api/queue/state").then(
+        (r) => r.ok,
+        () => false,
+      ),
+    "server restart",
+  );
+  assert.deepEqual(await fetch(base + "/api/queue/state").then((r) => r.json()), { paused: true });
+  await sleep(500);
+  assert.equal((await job(j1.id)).status, "queued", "still paused after a restart");
+
+  doc.querySelector("#qpause").click(); // resume from the page
+  await waitFor(statusIs(j2.id, "done"), "resumed", 8000);
+  await waitFor(statusIs(j1.id, "done"), "first job ran", 8000);
+  assert.equal(wsFile("ran.txt"), "1\n2\n");
+});
+
+test("queue: a held job stays queued but does not run until released; holding a running job stops it", async () => {
+  const post = (p, body) =>
+    fetch(base + p, { method: "POST", body: JSON.stringify(body) }).then((r) => r.json());
+  const run = await enqueue({ key: "h1", steps: sh("sleep 1; echo 1 >> ran.txt"), gpu: false });
+  const later = await enqueue({ key: "h2", steps: sh("echo 2 >> ran.txt"), gpu: false });
+  const other = await enqueue({ key: "h3", steps: sh("echo 3 >> ran.txt"), gpu: false });
+  await waitFor(statusIs(run.id, "running"), "running");
+  assert.equal((await post("/api/queue/hold", { id: later.id, held: true })).changed, 1);
+  assert.equal((await post("/api/queue/hold", { id: run.id, held: true })).changed, 1);
+  assert.equal((await job(run.id)).status, "held", "a held running job is stopped");
+  await waitFor(statusIs(other.id, "done"), "the job not held runs");
+  await sleep(1200);
+  assert.equal(wsFile("ran.txt"), "3\n", "held jobs did not run");
+  const q = await fetch(base + "/api/queue").then((r) => r.json());
+  assert.deepEqual(q.map((j) => [j.id, j.status]), [[run.id, "held"], [later.id, "held"]]);
+
+  FakeEventSource.last.emit("change", { changed: ["jobs"] });
+  const panel = doc.querySelector("#queue");
+  await waitFor(() => panel.querySelectorAll(".jobh[data-held='1']").length === 2, "release buttons");
+  panel.querySelector(`.jobh[data-job="${later.id}"]`).click(); // release one from the page
+  await waitFor(statusIs(later.id, "done"), "released job ran");
+  assert.equal((await job(run.id)).status, "held", "the other one stays held");
+  await post("/api/queue/hold", { id: run.id, held: false });
+  await waitFor(statusIs(run.id, "done"), "released", 5000);
+  assert.equal(wsFile("ran.txt"), "3\n2\n1\n");
+});
+
+test("versions: a replaced take keeps its old audio; ‹ › switches versions, and pick/✎ act on the version shown", async () => {
+  const dir = path.join(ws, "higgs", "test_uk", "01_" + SID_A);
+  // what pipeline/keep_version.py leaves: two earlier versions, the current file is the newest
+  fs.mkdirSync(path.join(dir, "versions", "s2024"), { recursive: true });
+  writeWav(path.join(dir, "versions", "s2024", "001.wav"));
+  writeWav(path.join(dir, "versions", "s2024", "002.wav"));
+  fs.writeFileSync(path.join(dir, "versions", "s2024", "002.txt"), "Друга версія.\n");
+  const g = (await fetch(base + "/api/groups?ids=batch:test_uk").then((r) => r.json()))[0];
+  const t = g.lines.find((l) => l.sid === SID_A).takes.find((x) => x.file === "s2024.wav");
+  assert.deepEqual(
+    t.versions.map((v) => [v.file, v.label, !!v.alt_text]),
+    [
+      ["versions/s2024/001.wav", "v1", false],
+      ["versions/s2024/002.wav", "v2", true],
+    ],
+  );
+
+  FakeEventSource.last.emit("change", { changed: ["batch:test_uk"] });
+  const te = await waitFor(() => take(SID_A, "s2024.wav")?.querySelector(".ver") && take(SID_A, "s2024.wav"), "pager");
+  const pager = () => te.querySelector(".ver").textContent.replace(/\s+/g, " ").trim();
+  assert.equal(pager(), "‹ 3/3 ›", "the newest (current file) shows first");
+  assert.ok(te.querySelector(".vn").disabled);
+  te.querySelector(".vp").click();
+  assert.equal(pager(), "‹ 2/3 ›");
+  assert.match(te.querySelector("audio").getAttribute("src"), /versions\/s2024\/002\.wav/);
+  assert.match(te.querySelector(".alt").textContent, /версія/);
+
+  te.querySelector("button.tnote").click();
+  assert.equal(line(SID_A).querySelector(".tpill").textContent, "s2024 v2");
+  line(SID_A).querySelector(".tpill").click();
+
+  installScripts();
+  te.querySelector("button.tpick").click();
+  line(SID_A).querySelector(".apply").click();
+  await waitFor(() => feedback().some((f) => f.verdict === "pick"), "pick sent");
+  assert.equal(feedback().find((f) => f.verdict === "pick").take, "versions/s2024/002.wav");
+  await waitFor(() => fs.existsSync(finalA()), "the version is copied to finals");
+  assert.deepEqual(
+    fs.readFileSync(finalA()),
+    fs.readFileSync(path.join(dir, "versions", "s2024", "002.wav")),
+  );
+});
+
+test("queue: ⏸ on a running job stops it at once; the row shows held and the line's dot stops spinning", async () => {
+  const j = await enqueue({ key: "line:" + SID_A, steps: sh("sleep 1; touch finished"), gpu: false, group: "batch:test_uk", sid: SID_A, label: "long job" });
+  await waitFor(statusIs(j.id, "running"), "running");
+  FakeEventSource.last.emit("change", { changed: ["jobs"] });
+  const panel = doc.querySelector("#queue"),
+    dot = () => line(SID_A).querySelector(".dot").className;
+  await waitFor(() => panel.querySelector(`.jobh[data-job="${j.id}"]`) && dot() === "dot working", "running row and spinning dot");
+  panel.querySelector(`.jobh[data-job="${j.id}"]`).click();
+  await waitFor(statusIs(j.id, "held"), "held");
+  await waitFor(() => /^held long job/.test(panel.textContent.replace(/\s+/g, " ").trim()), "row shows held");
+  await waitFor(() => dot() === "dot held", "still grey dot");
+  await sleep(1500);
+  assert.ok(!fs.existsSync(path.join(ws, "finished")), "the stopped job did not finish");
+  panel.querySelector(`.jobh[data-job="${j.id}"]`).click(); // release: it starts again from the beginning
+  await waitFor(statusIs(j.id, "done"), "ran after release", 5000);
+  assert.ok(fs.existsSync(path.join(ws, "finished")));
+});
+
+test("queue: while the queue is paused no line pulses; lines show a still dot until it resumes", async () => {
+  const post = (p, body) => fetch(base + p, { method: "POST", body: JSON.stringify(body) }).then((r) => r.json());
+  await post("/api/queue/pause", { paused: true });
+  await enqueue({ key: "a", steps: sh("true"), gpu: false, group: "batch:test_uk", sid: SID_A });
+  await postFeedback({ group: "batch:test_uk", sid: SID_B, verdict: "redo", comment: "slower" }); // a waiting note
+  FakeEventSource.last.emit("change", { changed: ["jobs"] });
+  const dot = (sid) => line(sid).querySelector(".dot").className;
+  await waitFor(() => dot(SID_A) === "dot paused" && dot(SID_B) === "dot paused", "still dots");
+  assert.equal(doc.querySelectorAll(".dot.queued, .dot.working").length, 0, "nothing pulses or spins");
+  await post("/api/queue/pause", { paused: false });
+  FakeEventSource.last.emit("change", { changed: ["jobs"] });
+  await waitFor(() => dot(SID_B) === "dot queued", "the waiting note pulses again");
 });

@@ -3,8 +3,8 @@
 How an agent works with the review site (`server/`) and the voice workspace (`VOICEOVER_ROOT`). The workflow as a
 whole is in `README.md`.
 
-The page writes the user's feedback to `review/feedback.jsonl`; progress goes to `review/agent_events.jsonl`. Both are
-append-only JSON Lines: never rewrite or truncate them. The page picks up changes within about a second.
+The page's feedback and the agents' progress events are kept by the server in `review/review.sqlite`. Read and write
+them only through the HTTP API below, never the database file. The page picks up changes within about a second.
 Run commands from the workspace root. The scripts named here are in `pipeline/` of this folder.
 
 ## Who handles what
@@ -25,6 +25,9 @@ Run commands from the workspace root. The scripts named here are in `pipeline/` 
 
 - The user works only on the website and cannot answer there. Never post `question`, never suggest an edit for the
   user to apply. Every note is a request for new audio: generate it.
+- Where the audio goes: a note with a `take` (the user pressed ✎ on it) makes a **new version of that take**: write
+  to the same file name, and `pipeline/keep_version.py` (called by every take writer) keeps the old audio under
+  `versions/`. A note without a take makes a **new take** (`alt-<name>.wav`). Never delete or overwrite audio by hand.
 - When a note gives new wording, voice exactly that text (no extra edits of your own) and update the line's subtitle
   in the mod source to match.
 - When the note is open-ended ("use context", "better emotion") or you are unsure, generate 2-3 alternatives:
@@ -34,9 +37,10 @@ Run commands from the workspace root. The scripts named here are in `pipeline/` 
   script text. A new job for a line cancels that line's running job.
 - Read the neighbouring lines (the batch script and the mod's dialog) before choosing emotion or emphasis.
 - Tags: see "Tagging" in `README.md`. One tag at a sentence start, never two stacked.
-- Don't wait for generation; jobs post `working` and `regenerated` themselves. Never edit `higgs/final/` by hand.
+- Jobs go through the server's queue (one GPU job at a time; see `server/README.md`). Don't wait for generation:
+  the queue shows which job runs, and a new take shows up on the page by itself. Never edit `higgs/final/` by hand.
 
-## Feedback record (`review/feedback.jsonl`)
+## Feedback record (`GET /api/feedback`)
 
 ```json
 {
@@ -59,7 +63,7 @@ Run commands from the workspace root. The scripts named here are in `pipeline/` 
 - `verdict`: `pick` / `unpick` (a take), `good` (old records), `redo` (comment), `apply_text` (`suggested_text`),
   `comment` (a note).
 - `suggested_text`: null unless the user edited the text; may contain Higgs tags and U+0301 stress marks. Use it verbatim.
-- `status` in the file is always `new`; the current status is the latest matching event.
+- `status` is stored as `new`; `/api/feedback` returns the current status, from the latest matching event.
 
 ## Finding work
 
@@ -72,16 +76,16 @@ Run commands from the workspace root. The scripts named here are in `pipeline/` 
 
 ## Events
 
-`curl -s -XPOST 127.0.0.1:8765/api/event -d '{"feedback_id":"…","group":"batch:pc_uk","sid":"…","status":"regenerated","message":"new take s7.wav"}'`
+`curl -s -XPOST 127.0.0.1:8765/api/event -d '{"feedback_id":"…","group":"batch:pc_uk","sid":"…","status":"done","message":"new take s7.wav"}'`
 
-Status is one of `seen`, `queued`, `working`, `regenerated`, `done`, `question`. Include `feedback_id` whenever you act
+Status is one of `seen`, `queued`, `done`, `question`. Include `feedback_id` whenever you act
 on a record; without it, the event applies to all feedback on that `group`+`sid` submitted before it.
 
 On the page:
 
-- **Pulsing dot:** `queued`/`seen`, or `redo`/`apply_text` feedback with no event yet.
-- **Spinning ring:** `working`.
-- **Green check, for a few seconds:** `regenerated` or `done`; clears the pending state.
-- The newest event message shows under the line text when it is newer than the user's last note.
+- The dot on a line comes from the queue alone (events never set it): **pulsing** while the line's job or note waits
+  its turn, **spinning** while its job runs, a **still grey dot** when the job is held or the queue is paused, and a
+  **green check** for a few seconds when it leaves the queue.
+- Events are a history record only: the page does not show them on lines. Progress shows in the queue.
 - "Needs me" lists lines with unheard takes, lines never reviewed, and lines where an agent replied after the
   user's last note. Lines with no takes are shown with a "no takes yet" badge but are not in "Needs me".

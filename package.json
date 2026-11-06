@@ -33,6 +33,7 @@
     "purge-caches": "find . -path '*/node_modules' -prune -o -type f -name '.*.cache.zlib' -exec rm -f {} +",
     "create-mod": "node ./src/create-mod.mts",
     "create-git-branches": "node ./src/gitbranches/create-git-branches.mts",
+    "savefiles": "node ./src/savefiles/s2sav.mts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -43,10 +44,11 @@
     "archiver": "^7.0.1",
     "dotenv": "^17.2.0",
     "jsdom": "26.1.0",
+    "koffi": "^3.3.6",
     "playwright": "^1.64.1",
     "prettier": "^3.6.2",
-    "s2cfgtojson": "9.1.0",
+    "s2cfgtojson": "9.2.1",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4"
+    "vitest": "5.0.5"
   }
 }

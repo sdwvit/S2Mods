@@ -1,7 +1,6 @@
 import path from "node:path";
-import { existsSync, readFileSync, statSync, writeFileSync, openSync, readSync, closeSync } from "node:fs";
+import { existsSync, openSync, readSync, closeSync } from "node:fs";
 import { logger } from "./logger.mts";
-import { projectRoot } from "./base-paths.mts";
 
 /**
  * `Stalker2/Releases/<Version>/Windows/AssetRegistry.bin` is the registry the mod cook is
@@ -11,8 +10,6 @@ import { projectRoot } from "./base-paths.mts";
  */
 export const referenceRegistryPath = (release = "Latest") =>
   path.join(process.env.SDK_PATH, "Stalker2", "Releases", release, "Windows", "AssetRegistry.bin");
-
-const cachePath = path.join(projectRoot, ".asset-registry-cache.json");
 
 /** FNameHash::AlgorithmId, written as the name batch's hash version. */
 const NAME_HASH_ALGORITHM_ID = 0xc1640000n;
@@ -76,8 +73,7 @@ let memo: Set<string> | null = null;
  * Every `/Game/...` package name in the reference registry, lowercased - Unreal compares
  * package names case-insensitively, so callers must lowercase their query too.
  *
- * Parsing costs a second or two, so the result is cached in the project root and invalidated
- * on the registry's size and mtime. Returns null when the registry is missing.
+ * Parsed once per process (a second or two). Returns null when the registry is missing.
  */
 export function baseGamePackages(release = "Latest"): Set<string> | null {
   if (memo) return memo;
@@ -86,21 +82,6 @@ export function baseGamePackages(release = "Latest"): Set<string> | null {
     logger.warn(`Reference asset registry not found at ${file}.`);
     return null;
   }
-  const { size, mtimeMs } = statSync(file);
-  const stamp = `${size}:${mtimeMs}`;
-
-  if (existsSync(cachePath)) {
-    try {
-      const cached = JSON.parse(readFileSync(cachePath, "utf8")) as {
-        stamp: string;
-        packages: string[];
-      };
-      if (cached.stamp === stamp) return (memo = new Set(cached.packages));
-    } catch {
-      // fall through and rebuild
-    }
-  }
-
   const packages = new Set<string>();
   for (const name of readNameBatch(file)) {
     if (!name.startsWith("/Game/")) continue;
@@ -108,7 +89,6 @@ export function baseGamePackages(release = "Latest"): Set<string> | null {
     const dot = name.indexOf(".", name.lastIndexOf("/"));
     packages.add((dot < 0 ? name : name.slice(0, dot)).toLowerCase());
   }
-  writeFileSync(cachePath, JSON.stringify({ stamp, packages: [...packages].sort() }));
   logger.log(`Parsed ${packages.size} base-game package names from ${path.basename(file)}.`);
   return (memo = packages);
 }

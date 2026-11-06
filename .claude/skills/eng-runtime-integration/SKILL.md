@@ -23,7 +23,8 @@ constants instead, never patch those offsets.
 
 ## Iteration loop — skip typecheck
 1. Edit `Mods/NodeBridge/nodebridge/main.mts`
-2. `npm run inject-nodebridge` (hot-reload is wired)
+2. `npm run inject-nodebridge` (hot-reload is wired; it rebuilds `runtime/dist/`, which mods
+   import in place of `s2lib.mts`)
 3. Read the last ~50–100 lines of
    `$STALKER2_FOLDER/Stalker2/Binaries/Win64/NodeBridge/logs/bridge.log`
 
@@ -38,7 +39,11 @@ in-game JS probes 2026-10-19/20. A game update can move any of them; re-probe be
 - `FField.NamePrivate` @ +0x20 (stock +0x28: FFieldVariant Owner is 8 bytes in this build)
 - `FProperty.offset_internal` @ +0x44, `PropertyLinkNext` @ +0x48 (+0x50 is the RefLink chain)
 - `UObjectBase.class_ptr` @ +0x10, `NamePrivate` @ +0x18
-- RVAs: GUObjectArray 0xa0e68c0, FNamePool 0x9ff0c80, UObject::ProcessEvent 0x216a728 (vtable slot 79)
+- GUObjectArray, FNamePool and UObject::ProcessEvent are resolved at runtime (`getBuildAddrs`):
+  AllocateObjectPool AOB, GUObjectArray-0xf5c40 (checked by decoding "None"), UObject vtable slot 79
+  (checked for the FUNC_Native `+0xB1` test). The 2026-10-29 update moved all three; a hardcoded
+  ProcessEvent RVA then hooked an unrelated function. The DLL keeps the first ProcessEvent hook of a
+  game run, so a wrong hook needs a game restart.
 - C++ FName::ToString has no trusted candidate in this build; `decodeFName` falls back to
   reading FNamePool in JS.
 

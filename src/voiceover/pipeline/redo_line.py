@@ -5,12 +5,13 @@ With --alt NAME the take is added as alt-NAME.wav (+ alt-NAME.txt with the text)
 so several alternatives can sit on one line for the user to pick from.
 Updates higgs/<batch>.json (and higgs/<base>.json for *_fix batches), generates one s2024 take
 (rerolling seeds if the length is off), replaces higgs/<batch>/<NN>_<sid>/s2024.wav and posts
-working/regenerated events.
+working events.
 """
 import json, os, shutil, subprocess, sys, tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vo_env  # noqa: E402
+from keep_version import keep  # noqa: E402
 os.chdir(vo_env.ROOT)
 args = sys.argv[1:]
 alt = None
@@ -47,7 +48,6 @@ if ref_spk:
     assert alt and ref_spk in refs, "--ref needs --alt and a key in the script's refs"
     line = dict(line, speaker=ref_spk)
 
-event("working", f"Regenerating: {text}")
 with tempfile.TemporaryDirectory() as tmp:
     json.dump({"refs": refs, "lines": [line]}, open(f"{tmp}/line.json", "w", encoding="utf-8"), ensure_ascii=False)
     subprocess.run([sys.executable, "-I", os.path.join(vo_env.PIPE, "higgs_lines.py"), f"{tmp}/line.json", f"{tmp}/out", "1", "6"], check=True,
@@ -59,8 +59,8 @@ with tempfile.TemporaryDirectory() as tmp:
         sys.exit(1)
     os.makedirs(f"higgs/{batch}/{name}", exist_ok=True)
     dst = f"higgs/{batch}/{name}/" + (f"alt-{alt}.wav" if alt else "s2024.wav")
+    keep(dst)  # the take it replaces stays as a version
     if alt:
         open(dst[:-4] + ".txt", "w", encoding="utf-8").write(text + "\n")
     shutil.move(f"{tmp}/out/{name}/{takes[0]}", dst)  # tmp may be on another filesystem
-event("regenerated", (f"Added alt-{alt} ({takes[0][:-4]}) from: " if alt else f"New take ({takes[0][:-4]}) from: ") + text)
 print("->", dst)
