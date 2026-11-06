@@ -20,6 +20,19 @@ support desk. The request needs two public links, so it always comes after the P
 2. **Google Drive link to the zip.** `npm run zip-for-xbox` (run with `S2_MOD=<ModName>` from the
    repo root, or from the mod folder) zips `Mods/<ModName>/raw/Stalker2` into `<ModName>.zip` at
    the repo root and uploads it with `src/upload-google-drive.mts`, which prints the Drive link.
+   - **Mods with Wwise audio (voiced dialogs, radio, SFX) need the SDK zip.** `raw/Stalker2`
+     holds only the cooked event `.uasset`s, so the vendor can't build Xbox soundbanks from it
+     and the console build ends up with subtitles but no voice. The WolfArmorFetch zip went out
+     this way on 2026-11-05 and had to be re-uploaded. Before zipping, check for
+     `<SDK>/Stalker2/Mods/<Mod>/S2_WwiseProject` (or `Mods/<Mod>/wwise/`) or for
+     `<SDK>/O/Voices/*/<Mod>`. If either exists, the mod's `zip-for-xbox` script must set
+     `XBOX_ZIP_FROM_SDK=1` (see `Mods/WolfArmorFetch/package.json`). Add it if it's missing.
+     With the flag, the zip holds the SDK plugin `<Mod>` (Content, Resources, `.uplugin`,
+     `S2_WwiseProject`), the `Content` of `<Mod>Cfg` merged into the same tree, and the source
+     WAVs under `O/Voices/<lang>/<Mod>/`. The `.wproj` Originals path (`..\..\..\..\O`) resolves
+     that path from the Zone Kit root. Expect roughly 185 MB for two languages.
+     After uploading, list the zip (`unzip -l <Mod>.zip | grep -E 'wwu|\.wav' | head`) and
+     check that the `.wwu` files and WAVs are in it before you file or reply.
    - Auth is usually a short-lived `GDRIVE_ACCESS_TOKEN` in `.env` (about an hour). When the
      upload fails with "Google Drive token expired ..." or "auth is not configured", ask the user
      to generate a new token at
@@ -136,7 +149,9 @@ command list on `/`, so put long text in with a synthetic `paste` event carrying
 (javascript_tool) rather than typing it. Submitting with an attachment takes about 30 s.
 
 Replying on a ticket (`/support/tickets/<id>`): click the "Add message" box first, which opens the
-rich-text editor, then click inside it and paste (same `paste` event as above). **Update** sends; with
+rich-text editor, then click inside it and paste (same `paste` event as above). Don't type URLs into
+the editor: its auto-linker cuts a typed link at `?` or `-` (the mod.io link pointed at `.../m/lairtiers`,
+2026-11-01); paste `<a href>` anchors in the `text/html` payload. **Update** sends; with
 no attachment it asks "Attachment Missing", answer **Send Anyway**. Files over 20 MB go as a Drive link
 (upload with `uploadFileToGoogleDrive` from `src/upload-google-drive.mts`, run with `node --env-file=.env`).
 
