@@ -5,6 +5,7 @@ import { waitFor } from "../../src/wait-for.mts";
 import { finishedTransformers } from "./finished-transformers.mts";
 import { transformWeaponGeneralSetupPrototypes } from "./transformWeaponGeneralSetupPrototypes.mts";
 import { withScopeChance } from "./defaultScopes.mts";
+import { scarceChance } from "./scarcity.mts";
 import { allDefaultAmmoPrototypesRecord, allDefaultConsumablePrototypesRecord, allDefaultGrenadePrototypesRecord } from "../../src/consts.mts";
 
 export const transformItemGeneratorPrototypes: StructTransformer<ItemGeneratorPrototype> = async (struct, context) => {
@@ -31,7 +32,7 @@ export const transformItemGeneratorPrototypes: StructTransformer<ItemGeneratorPr
         chance /= 2;
       }
       const fork = possibleItem.fork();
-      fork.Chance = parseFloat(chance.toFixed(4));
+      fork.Chance = scarceChance(possibleItem.ItemPrototypeSID, parseFloat(chance.toFixed(4)));
       if (possibleItem.MinCount) fork.MinCount = 1;
       if (isConsumable || isGrenade) {
         if (possibleItem.MaxCount) fork.MaxCount = 1;

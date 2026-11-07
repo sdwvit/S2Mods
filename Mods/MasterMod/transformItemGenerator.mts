@@ -7,6 +7,7 @@ import { waitFor } from "../../src/wait-for.mts";
 import { finishedTransformers } from "./finished-transformers.mts";
 import { transformWeaponGeneralSetupPrototypes } from "./transformWeaponGeneralSetupPrototypes.mts";
 import { withScopeChance } from "./defaultScopes.mts";
+import { scarceChance } from "./scarcity.mts";
 
 function transformTrade(struct: ItemGeneratorPrototype) {
   const fork = struct.fork();
@@ -116,7 +117,7 @@ function transformConsumables(e: ItemGeneratorPrototype["ItemGenerator"]["0"], i
     while (chance > 0.02) {
       chance /= 2;
     }
-    chance = precision(chance);
+    chance = scarceChance(pi.ItemPrototypeSID, precision(chance));
     return Object.assign(pi.fork(), { Chance: chance });
   });
   if (!PossibleItems.entries().length) {
