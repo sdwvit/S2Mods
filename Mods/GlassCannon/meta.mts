@@ -1,4 +1,4 @@
-import type { DifficultyPrototype } from "s2cfgtojson";
+import { Struct, type DifficultyPrototype } from "s2cfgtojson";
 import type { MetaType } from "../../src/meta-type.mts";
 
 export const DIFFICULTY_FACTOR = 4;
@@ -17,7 +17,7 @@ Mod is meant to be used in other collections of mods. Does not conflict with any
 
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Now also applies on the Custom difficulty preset.",
+  changenote: "Fixed the damage multipliers not applying on any difficulty.",
   structTransformers: [structTransformer],
 };
 
@@ -25,11 +25,18 @@ function structTransformer(struct: DifficultyPrototype) {
   if (struct.SID !== "Hard" && struct.SID !== "Stalker" && struct.SID !== "Custom") {
     return null;
   }
+  // The game reads these only inside their sub-structs; top-level keys are ignored.
   return Object.assign(struct.fork(), {
-    Weapon_BaseDamage: DIFFICULTY_FACTOR,
-    NPC_Weapon_BaseDamage: DIFFICULTY_FACTOR,
-    Mutant_BaseDamage: DIFFICULTY_FACTOR,
+    EnvironmentDifficulty: patchStruct({ Weapon_BaseDamage: DIFFICULTY_FACTOR }),
+    NPCCombatDifficulty: patchStruct({ NPC_Weapon_BaseDamage: DIFFICULTY_FACTOR }),
+    MutantCombatDifficulty: patchStruct({ Mutant_BaseDamage: DIFFICULTY_FACTOR }),
   } as Partial<DifficultyPrototype>);
+}
+
+function patchStruct(values: Record<string, number>) {
+  const s = Object.assign(new Struct({}), values);
+  s.__internal__.bpatch = true;
+  return s as any;
 }
 
 structTransformer.files = ["/DifficultyPrototypes.cfg"];
