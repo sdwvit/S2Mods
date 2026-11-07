@@ -137,6 +137,18 @@ function transformGarbageL(struct: QuestNodePrototype) {
               NodeState: "EQuestNodeState::Activated",
             },
           },
+          // One run per save: without these, every world load relaunched the clone once the
+          // quest was taken (SQ103 is Active, not Finished), which re-offered Diode's topic and
+          // tore down the running lab quest's triggers.
+          3: { 0: journalCondition("SQ103", "NotEqual", "Active") },
+          4: {
+            0: {
+              ConditionType: "EQuestConditionType::NodeState",
+              ConditionComparance: "EConditionComparance::Equal",
+              TargetNode: CLONE_CONTAINER,
+              NodeState: "EQuestNodeState::None",
+            },
+          },
           ConditionCheckType: "EConditionCheckType::And",
       });
       const pin = newRootNode(CLONE_CONTAINER_PIN, {
@@ -246,7 +258,7 @@ XStartQuestNodeBySID SQ103_P_EarlyX18Lab_SetDialog_SQ103_QC_DiodFirstCall
 [h1][/h1]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "The quest's start is now also checked every time a save loads, for very late saves where it never triggered.",
+  changenote: "Fixed the quest being offered again after a reload and the lab triggers stopping mid-quest.",
   gameStartCommand: "XStartQuestNodeBySID EarlyX18Lab_OnWorldLoad",
   structTransformers: [
     transformGarbageL,
