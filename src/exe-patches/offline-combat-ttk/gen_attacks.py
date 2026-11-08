@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+"""Bake each mutant's strongest attack into attacks.h for cave.c.
+
+Reads the vanilla cfgs in <repo>/GameLite/GameData: ObjPrototypes (with refkey/refurl inheritance)
+give every prototype's Abilities list; AbilityPrototypes (same inheritance) give each ability's
+Damage and ArmorPiercing. For every ObjPrototype that is not a human (no NPCBase in its chain) and
+has an attack with Damage > 0, the table holds the hash of its SID, the best Damage and that
+attack's ArmorPiercing. The cave hashes the unit's ObjPrototype SID the same way (FNV-1a over the
+lower-cased UTF-16 code units) and looks it up.
+
+Usage: gen_attacks.py <GameData dir> <out attacks.h>
+"""
+import glob
+import os
+import re
+import sys
+
+HEAD = re.compile(r"^\s*([A-Za-z0-9_\[\]*]+)\s*:\s*struct\.begin\s*(\{[^}]*\})?")
+END = re.compile(r"^\s*struct\.end")
+KV = re.compile(r"^\s*([A-Za-z0-9_]+)\s*=\s*(.*?)\s*(//.*)?$")
+
+
+def parse(files):
+    """{name: {file, refkey, refurl, fields{k:v}, abilities[list of SIDs] or None}}, plus first struct per file."""
+    protos, first = {}, {}
+    for f in files:
+        depth, cur, sub, in_ab, ab_depth = 0, None, None, False, 0
+        for line in open(f, encoding="utf-8-sig", errors="replace"):
+            line = line.split("//")[0] if "://" not in line else line
+            h = HEAD.match(line)
+            if h:
+                depth += 1
+                name, meta = h.group(1), h.group(2) or ""
+                if depth == 1:
+                    rk = re.search(r"refkey=([^;}]+)", meta)
+                    ru = re.search(r"refurl=([^;}]+)", meta)
+                    cur = {"file": f, "refkey": rk and rk.group(1).strip(), "refurl": ru and ru.group(1).strip(),
+                           "fields": {}, "abilities": None}
+                    protos[name] = cur
+                    first.setdefault(os.path.realpath(f), name)
+                elif depth == 2 and cur is not None and name == "Abilities":
+                    in_ab, ab_depth = True, depth
+                    if cur["abilities"] is None:
+                        cur["abilities"] = []
+                elif in_ab and depth == ab_depth + 1:
+                    sub = name
+                    cur["abilities"].append(name)  # entry key; replaced by its SID below if given
+                continue
+            if END.match(line):
+                if in_ab and depth == ab_depth:
+                    in_ab = False
+                depth -= 1
+                if depth == 0:
+                    cur = None
+                continue
+            kv = KV.match(line)
+            if not kv or cur is None:
+                continue
+            k, v = kv.group(1), kv.group(2)
+            if depth == 1:
+                cur["fields"][k] = v
+            elif in_ab and depth == ab_depth + 1 and k == "SID" and sub:
+                cur["abilities"][-1] = v
+    return protos, first
+
+
+def parent(protos, first, name):
+    p = protos[name]
+    rk = p["refkey"]
+    if not rk:
+        return None
+    if rk == "[0]":
+        target = os.path.realpath(os.path.join(os.path.dirname(p["file"]), p["refurl"]) if p["refurl"] else p["file"])
+        par = first.get(target)
+    else:
+        par = rk
+    return par if par in protos and par != name else None
+
+
+def chain(protos, first, name):
+    out, seen = [], set()
+    while name and name not in seen:
+        seen.add(name)
+        out.append(name)
+        name = parent(protos, first, name)
+    return out
+
+
+def num(v):
+    m = re.match(r"-?[0-9.]+", v or "")
+    return float(m.group(0)) if m else 0.0
+
+
+def resolve_field(protos, first, name, key):
+    for n in chain(protos, first, name):
+        if key in protos[n]["fields"]:
+            return num(protos[n]["fields"][key])
+    return 0.0
+
+
+def fnv(s):
+    h = 0x811C9DC5
+    for ch in s.lower():
+        h ^= ord(ch) & 0xFFFF
+        h = (h * 0x01000193) & 0xFFFFFFFF
+    return h
+
+
+def main():
+    gd, out = sys.argv[1:]
+    objs, ofirst = parse([os.path.join(gd, "ObjPrototypes.cfg")] + sorted(glob.glob(os.path.join(gd, "ObjPrototypes", "*.cfg"))))
+    abis, afirst = parse([os.path.join(gd, "AbilityPrototypes.cfg")] + sorted(glob.glob(os.path.join(gd, "AbilityPrototypes", "*.cfg"))))
+    rows = {}
+    for name in objs:
+        ch = chain(objs, ofirst, name)
+        if "NPCBase" in ch or "MutantBase" not in ch:
+            continue
+        ab = set()
+        for n in ch:
+            ab.update(objs[n]["abilities"] or [])
+        best = (0.0, 0.0, "")
+        for a in ab:
+            if a not in abis:
+                continue
+            dmg = resolve_field(abis, afirst, a, "Damage")
+            if dmg > best[0]:
+                best = (dmg, resolve_field(abis, afirst, a, "ArmorPiercing"), a)
+        if best[0] > 0:
+            rows[fnv(name)] = (name, best)
+    if len({k for k in rows}) != len(rows):
+        sys.exit("hash collision")
+    with open(out, "w") as f:
+        f.write("/* generated by gen_attacks.py from GameLite/GameData; do not edit */\n")
+        f.write("/* {SID hash, Damage, ArmorPiercing * 16} sorted by hash */\n")
+        f.write(f"#define ATTACK_COUNT {len(rows)}\n")
+        f.write("static const struct attack { u32 hash; u16 dmg; u16 ap16; } ATTACKS[ATTACK_COUNT] = {\n")
+        for h in sorted(rows):
+            name, (dmg, ap, a) = rows[h]
+            f.write(f"    {{0x{h:08x}u, {int(round(dmg))}, {int(round(ap * 16))}}}, /* {name}: {a} */\n")
+        f.write("};\n")
+    print(f"attacks: {len(rows)} mutant prototypes -> {out}")
+
+
+if __name__ == "__main__":
+    main()
