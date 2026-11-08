@@ -50,6 +50,12 @@ export const LAIR_GROUPS: Group[] = [
 
 const RANKS = ["Newbie", "Experienced", "Veteran", "Master"];
 
+/** Every scaled lair holds this much more than its LAIR_GROUPS size (applied after the range mapping). */
+export const CAPACITY_FACTOR = 1.5;
+/** Refill and wipe timers of every scaled lair, as a share of vanilla (180/480/480 s -> 60/160/160 s). */
+export const RESPAWN_TIME_FACTOR = 1 / 3;
+const RESPAWN_TIME_FIELDS = ["InitialSpawnQuantityRespawnTimeSeconds", "MaxSpawnQuantityRespawnTimeSeconds", "WipeRespawnTimeoutSeconds"] as const;
+
 const patched = (s: Struct) => {
   const fork = s.fork();
   fork.__internal__.bpatch = true;
@@ -79,7 +85,9 @@ const extentsFrom = (structs: Struct[]) => {
   return extents;
 };
 
-const scale = (group: Group, vanilla: number, rankKey: string) => {
+const scale = (group: Group, vanilla: number, rankKey: string) => Math.round(scaleToGroup(group, vanilla, rankKey) * CAPACITY_FACTOR);
+
+const scaleToGroup = (group: Group, vanilla: number, rankKey: string) => {
   if (group.factor) return Math.ceil(vanilla * group.factor);
   const [lo, hi] = group.range!;
   const [vLo, vHi] = vanillaExtents!.get(group)!;
@@ -136,6 +144,11 @@ function patchVanillaLair(struct: Struct) {
       for (const [rankKey, rank] of ranks.entries()) {
         const rankFork = patched(rank);
         if (scaled && rank.MaxSpawnQuantity !== undefined) rankFork.MaxSpawnQuantity = scale(group, rank.MaxSpawnQuantity, rankKey);
+        if (scaled) {
+          for (const field of RESPAWN_TIME_FIELDS) {
+            if (rank[field] !== undefined) rankFork[field] = Math.round(Number(rank[field]) * RESPAWN_TIME_FACTOR);
+          }
+        }
         // Without bpatch: the tier's archetype list replaces vanilla's whole.
         const archetypes = tieredRanks?.[rankKey as RankName];
         if (archetypes) rankFork.SpawnSettingsPerArchetypes = archetypes;
