@@ -57,10 +57,11 @@ A collection of various configs aimed to increase game difficulty and make it mo
  [*] [Balance] Rifles default scopes can now be detached and sold.
  [*] [Challenge] Weapons that always came with a scope now spawn with one only 10% of the time.
  [*] [QoL] Allows buying/selling/dropping quest items.
+ [*] [Balance] On Hard and Stalker, player weapons hit harder and human enemies have matching extra health, so big mutants take a fair number of shots while gunfights stay the same.
 [/list]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: `Antiradiation drugs, bandages, energy drinks and grenades now turn up far less often in loot, and the higher repair, upgrade and hunger settings on hard difficulties now actually apply.`,
+  changenote: `On Hard and Stalker, big mutants now go down in a fair number of shots, while human enemies take as many hits as before.`,
   structTransformers: structTransformers as any,
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
