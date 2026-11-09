@@ -21,7 +21,6 @@ Lairs grow tougher as your rank goes up.[h1][/h1]
 [hr][/hr]
 Requires [b]Decoupled Ranks[/b], which ties your rank to your level.[h1][/h1]
 Already part of [b]Lair Wars[/b]: use one or the other.
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   nameOverride: "Decoupled Ranks Lair Extension",
   changenote: "Lairs now move up a tier with your rank, built into the lair data with no background quests.",

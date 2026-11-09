@@ -9,8 +9,6 @@ export const meta: MetaType<QuestNodePrototype> = {
     This mod fixes the bug with the Bar mutant quest auto finishes moment after you start it.
     [hr][/hr]
     bpatches RSQ08_C01_K_M.cfg
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "The fix now replaces the quest’s broken completion check outright, so it holds on the current game version.",
   structTransformers: [structTransformer],

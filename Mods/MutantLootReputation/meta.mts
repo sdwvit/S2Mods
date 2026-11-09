@@ -147,8 +147,6 @@ transformSQ94P.files = ["/SQ94_P.cfg"];
 export const meta: MetaType = {
   description: `
 Mutant loot turn-in orders now also grant faction reputation on top of the coupons: +${RELATIONSHIP_DELTA} with the [b]Scientists[/b] for Viktoria Doroznuk's orders at Malachite, +${RELATIONSHIP_DELTA} with the [b]Neutrals[/b] for Gonta's. Roughly 21 orders takes a faction from neutral to friendly; money rewards and the orders themselves are untouched.
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Initial release.",
   structTransformers: [transformBodyPartsMalahit, transformSQ94P],

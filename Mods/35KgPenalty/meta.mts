@@ -6,8 +6,6 @@ export const meta: MetaType = {
 This mod was commissioned by a mod.io user. Reduces threshold for carry weight movement penalty by 35kg.
 [hr][/hr]
 Maximum immersion[h1][/h1]
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Initial release",
   structTransformers: [structTransformer, coreVarsTransformer],

@@ -22,7 +22,6 @@ Compatible with UberToz, which makes the same scope detachable the same way.
 Logo photo: [url=https://commons.wikimedia.org/wiki/File:Mosin_pu_hungarian_M52.jpg]B4Ctom1, Wikimedia Commons[/url], CC BY-SA 3.0.
 [hr][/hr]
 bPatches WeaponGeneralSetupPrototypes, AttachPrototypes, ItemGeneratorPrototypes and A-life_interrupts quest nodes.
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Initial release.",
   structTransformers: [

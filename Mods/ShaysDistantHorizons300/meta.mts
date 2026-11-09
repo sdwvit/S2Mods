@@ -15,8 +15,6 @@ It turns on the game's dynamic A-Life streaming range on every platform and rais
 [*] Raises the UObject limit for the extra NPCs (applies after a game restart).
 [/list]
 More info here: [url=https://www.nexusmods.com/stalker2heartofchornobyl/mods/1879?tab=description]nexus[/url]
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   nameOverride: "Distant Horizons 2.1 - 300m",
   originalAuthor: "Shay",

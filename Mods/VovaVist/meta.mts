@@ -7,8 +7,6 @@ export const meta: MetaType = {
 With the new game on the new Unreal Engine, mod structure changes — some mods are now part of the base game. Replacements will be released as separate mods.
 [hr][/hr]
 Vova Vist icon for Master difficulty.
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Initial release",
   structTransformers: [structTransformer],

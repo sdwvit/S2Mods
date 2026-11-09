@@ -8,8 +8,6 @@ export const meta: MetaType = {
       [hr][/hr]
       This mod changes Player config to remove slowness effect in shallow water.[h1][/h1]
       It still can kill you tho if you go too deep.[h1][/h1]
-  
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Update to 1.8.1",
   structTransformers: [transformObjPrototypes],

@@ -14,7 +14,6 @@ This mode does only one thing: removes all 650+ medkits placed around the map fo
 It is meant to be used in other collections of mods. Does not conflict with anything.
 [hr][/hr]
 Thanks @rbwadle for suggesting how to modify map objects.
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Updated for 2.0: patches regenerated against 2.0 game data.",
   structTransformers: [transformItems],

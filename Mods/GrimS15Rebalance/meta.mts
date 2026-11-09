@@ -35,8 +35,6 @@ Rebalances the Grim S-15 assault rifle.[h3][/h3]
   [*] Increased magazine: 45 rounds
   [*] Large magazine: 60 rounds
 [/list]
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Removed base durability increase; now only reduces durability damage per shot",
   structTransformers: [

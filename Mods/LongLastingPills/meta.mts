@@ -51,7 +51,6 @@ export const meta: MetaType<EffectPrototype | ConsumablePrototype> = {
   [*] 🏋️ Hercules: Weight buff duration increased from 5 minutes to 50 minutes
   [*] 🔢 All of the above show numeric effect values instead of level bars
   [/list]
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Pill effects now show their value and remaining time in the inventory.",
 };

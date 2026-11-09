@@ -23,7 +23,6 @@ Requires [b]Decoupled Ranks[/b], which ties your rank to your level.[h1][/h1]
 [*] Every lair outside the hubs can be captured, and any faction or mutant species can move into it.
 [*] Each time your rank goes up, every lair moves up a tier: tougher inhabitants with better gear.
 [/list]
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Fixed a crash on loading a save, caused by the tougher lair Bayuns from the last update.",
   structTransformers: [

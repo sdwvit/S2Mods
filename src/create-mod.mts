@@ -39,8 +39,6 @@ if (fs.existsSync(modFolder)) {
   process.exit(1);
 }
 
-const DONATE =
-  "[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.";
 
 const transformers = values.files.map((group) => {
   const files = group
@@ -100,7 +98,6 @@ ${values.description || modName}[h1][/h1]
 [list]
 [*] TODO
 [/list]
-${DONATE}
 \`,
   changenote: "Initial release.",
   structTransformers: [${names.join(", ")}] as MetaType<Struct>["structTransformers"],

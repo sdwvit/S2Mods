@@ -218,8 +218,6 @@ bPatches:
  [*] ArmorPrototypes.cfg
  [*] NPCPrototypes.cfg
 [/list]
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Fixed the mod disabling all upgrades at every technician. Weapon/armor UpgradePrototypeSIDs and the technician Upgrades list are indexed arrays; the extra tiers were appended under SID-named keys instead of indices, which corrupted those arrays on merge and left technicians with an empty upgrade list. They are now appended as numeric indices.",
   structTransformers: [transformUpgrades, transformWeaponsAndArmors, transformTechnicians] as any,

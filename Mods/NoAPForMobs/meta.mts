@@ -8,8 +8,6 @@ Specifically: sets Strike AP to 0 for mutants, making expansive ammo truly the b
 Meant to be used in other collections of mods.[h1][/h1]
 [h1][/h1]
 Compatibility: this mods does not modify any existing .cfg files, only extends mutant's object prototypes via new files.
- 
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Every mutant variant now has zero bullet armor too, including the ones that inherit it from another mutant.",
   structTransformers: [transformMobs],

@@ -8,8 +8,6 @@ export const meta: MetaType<WeaponPrototype> = {
 Allow any weapon to fit pistol slot.
 [hr][/hr]
 bPatches WeaponPrototypes.cfg
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote:
     "Updated for 2.0: patches regenerated against 2.0 game data, now covering the weapons 2.0 added. DLC weapon prototypes are no longer patched.",

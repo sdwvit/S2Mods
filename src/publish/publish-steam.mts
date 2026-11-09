@@ -11,6 +11,7 @@ import { sanitize } from "../sanitize.mts";
 import { logger } from "../logger.mts";
 import { getModifiedFilesLink } from "../get-modified-files.mts";
 import { finalizePublish } from "./publish-tracker.mts";
+import { publishedDescription } from "./donate.mts";
 import { ensureCooked } from "../ensure-cooked.mts";
 const meta = await modMeta;
 const cmd = () => {
@@ -27,7 +28,7 @@ const cmd = () => {
     `${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} by ${meta.originalAuthor || "sdwvit"}`,
   );
   vdfData.workshopitem.description = sanitize(
-    meta.description +
+    publishedDescription(meta) +
       `[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[hr][/hr]
       [h3]Mod compatibility[/h3]
       This mod bPatches files, so it is compatible with other mods that don't modify the same lines. Modified files are listed on ${getModifiedFilesLink("steam")}. 

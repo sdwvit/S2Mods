@@ -9,6 +9,7 @@ import { createModZip } from "./zip.mts";
 import { logger } from "../logger.mts";
 import { getModifiedFilesLink } from "../get-modified-files.mts";
 import { finalizePublish } from "./publish-tracker.mts";
+import { publishedDescription } from "./donate.mts";
 
 const meta = await modMeta;
 
@@ -40,7 +41,7 @@ function setNameSummaryDescription(form: FormData) {
     "description",
     sanitize(
       convertToHtml(
-        meta.description +
+        publishedDescription(meta) +
           `<br/>This mod is open source and hosted on github (click on homepage link).
           <hr/>
           Mod compatibility:

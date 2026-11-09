@@ -17,7 +17,6 @@ Specialist merchants: each trader category can only buy items relevant to their 
  [*] Guides buy and sell key items like PDAs, with rank-based discounts.
  [*] Technicians and guides across the Zone now offer trading.
 [/list]
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Salvaged lab electronics now sell only to technicians and regular stalkers.",
   structTransformers: [transformTradePrototypes, transformQuestObjPrototypes, transformQuestItemPrototypes] as any,

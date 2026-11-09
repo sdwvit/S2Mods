@@ -3,7 +3,7 @@ import type { MetaType } from "../../src/meta-type.mts";
 
 export const meta: MetaType<QuestNodePrototype> = {
   description:
-    `This mod does only one thing: reduces cooldown between barkeep/vendor/mechanic quests to 3 in-game hours. [hr][/hr] Because Waiting Is for the Weak. [hr][/hr] It is meant to be used in other collections of mods. Modifies recurring quest node InGameHours. [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.`,
+    `This mod does only one thing: reduces cooldown between barkeep/vendor/mechanic quests to 3 in-game hours. [hr][/hr] Because Waiting Is for the Weak. [hr][/hr] It is meant to be used in other collections of mods. Modifies recurring quest node InGameHours.`,
   changenote: "Improved compatibility with recent game updates.",
   structTransformers: [reduceQuestCooldownTransformer],
 };

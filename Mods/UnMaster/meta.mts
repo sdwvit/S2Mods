@@ -14,8 +14,6 @@ Brings back unlimited saves, compass, crosshair, stash and dead body markers, an
 Rest of Master specific things are left intact.[h1][/h1]
 [hr][/hr]
 bpatches DifficultyPrototypes
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote:
     "Now also applies to the Custom difficulty preset: unlimited saves, compass, crosshair, stash and dead body markers, and unlocked settings work when you play on Custom, not just Master.",

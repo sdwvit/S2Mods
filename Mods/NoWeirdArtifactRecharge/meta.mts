@@ -35,7 +35,6 @@ Removes the need to recharge Weird Flower and Weird Bolt uber artifacts.
 [*] Weird Bolt: charge capacity massively increased so it effectively never runs out
 [/list]
 bPatches ArtifactPrototypes.cfg
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Updated for 2.0: 2.0 renamed the Weird Flower's effect list to WakeUpEffectSIDs; the mod now reads whichever list exists.",
 };

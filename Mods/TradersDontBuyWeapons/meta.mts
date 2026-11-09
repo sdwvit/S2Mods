@@ -7,8 +7,6 @@ export const meta: MetaType<TradePrototype> = {
 This mod makes traders refuse to purchase Weapons.
 [hr][/hr]  
 bPatches TradePrototypes.cfg
-   
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Fix an issue with overriding structs",
   structTransformers: [entriesTransformer],

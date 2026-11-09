@@ -38,8 +38,6 @@ To get a TOZ-34 with the top rail installed and all three scopes in Skif's inven
 Known issue: during the reload animation a mounted scope can clip through the gun.
 [hr][/hr]
 bPatches WeaponGeneralSetupPrototypes, UpgradePrototypes, AttachPrototypes, NPCPrototypes, EffectPrototypes, ItemGeneratorPrototypes and A-life_interrupts quest nodes.
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: `The PU 3.5X scope gets a real-world description.`,
   structTransformers: [structTransformer, transformEffectPrototypes, transformItemGeneratorPrototypes, transformQuestNodePrototypes],

@@ -28,8 +28,6 @@ Attachments are still rare: 1-attachment weapons are 10x rarer than base, each e
 For debugging, this console command rolls every NPC weapon generator this mod touches straight into Skif's inventory:
 [h2][/h2]
 [u]XStartQuestNodeBySID Skif_Give_All_NPC_Weapons[/u]
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote:
     "Fixed the generated Attaches/Upgrades nodes on NPC weapon rolls not being marked as patch structs, which could make the added attachment combos fail to apply on top of the base game's item generators.",

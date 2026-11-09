@@ -35,8 +35,6 @@ To get both X16 scopes, both X8 scopes, the underbarrel launchers and a curated 
 With attach animations (some are placeholders) and inventory icons for every supported gun.
 [hr][/hr]
 bPatches AttachPrototypes, MeshPrototypes, EffectPrototypes, WeaponPrototypes, WeaponGeneralSetupPrototypes, DynamicItemGenerator, QuestItemGeneratorPrototypes, ItemGeneratorPrototypes and QuestNodePrototypes.
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: `X8 and X16 support for 15 more guns, with their own inventory icons; guns with a built-in scope now only sometimes spawn with a regular scope you can detach, and the test console command also gives the underbarrel launchers.`,
   structTransformers: [

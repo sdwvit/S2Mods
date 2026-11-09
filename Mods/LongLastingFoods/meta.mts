@@ -94,7 +94,6 @@ export const meta: MetaType<EffectPrototype | ConsumablePrototype | QuestItemPro
   [*] 🧠 Dvupalov Vodka: PSY Protection duration increased from 90 seconds to 900 seconds
   [*] 🔢 Each item shows its main effect as a numeric value + time (other effects unchanged)
   [/list]
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Energy Drink: the second Reduced Cost of Stamina Per Action effect now also lasts 10x longer (5s to 50s). Description fixes: Limited Edition Energy Drink stamina buff is 45s to 450s, and the Dvupalov Vodka radiation line is gone because the game never applies that effect.",
 };

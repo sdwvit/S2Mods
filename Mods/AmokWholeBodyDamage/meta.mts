@@ -16,8 +16,6 @@ This mod brings him down to boss-tier numbers so that shooting him anywhere actu
 The back modules are untouched, so the phase transitions they drive still happen normally.[h1][/h1]
 Protection is left alone (4 across the board, the same as Pseudogiant, Burer and Controller), and the back modules are untouched — destroying them still drives the phases.[h1][/h1]
 DLC1 (Iron Forest) only. No other mutant is affected.[h1][/h1]
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Initial release",
 };

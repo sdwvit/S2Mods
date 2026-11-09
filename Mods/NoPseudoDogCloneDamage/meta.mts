@@ -22,9 +22,7 @@ This mod removes damage from pseudodog psy clones (combat summons).[h1][/h1]
 [*] Pseudodog clones no longer deal physical damage and cause no bleeding.
 [*] Instead, their hits build up psy points, which fits their nature as psy phantoms.
 [*] The real pseudodog is unaffected — only its summoned copies are changed.
-[/list] 
-  
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
+[/list]
 `,
   changenote:
     "Clone hits now build up psy instead of dealing physical damage: damage and bleeding stay at 0, and each hit applies 3 points of Psy Damage.",

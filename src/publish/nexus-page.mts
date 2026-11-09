@@ -7,6 +7,7 @@ import { modFolder, modName, projectRoot } from "../base-paths.mts";
 import { modMeta } from "../mod-meta-paths.mts";
 import { logger } from "../logger.mts";
 import { getModifiedFilesLink } from "../get-modified-files.mts";
+import { publishedDescription } from "./donate.mts";
 import { NEXUS_GAME_DOMAIN, api, getStoredIds, publishToNexus, storeIds } from "./publish-nexus.mts";
 
 /**
@@ -50,7 +51,7 @@ function toNexusBBCode(steam: string) {
 }
 
 const fullDescription = toNexusBBCode(
-  meta.description.trim() +
+  publishedDescription(meta).trim() +
   `\n[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[hr][/hr]
 [h3]Mod compatibility[/h3]
 This mod bPatches files, so it is compatible with other mods that don't modify the same lines. Modified files are listed on ${getModifiedFilesLink("steam")}.`,

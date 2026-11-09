@@ -35,6 +35,8 @@ export type MetaType<T = Struct> = {
   nameOverride?: string;
   sdkModNameOverride?: string;
   originalAuthor?: string;
+  /** Publish without the donation footer that src/publish/donate.mts appends to every description. */
+  noDonate?: boolean;
   changenote: string;
   /**
    * A console command the mod's announce blueprint runs on every world load, after the

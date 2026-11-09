@@ -30,8 +30,6 @@ Version 1.1, Faction Alliances: NPC patrols get more varied, with factions sendi
 [/list]
 Not made for balance: expect an easier endgame with plenty of early gear around.
 You can build your own loadouts with PriestSL's [url=https://dev.s2-loadout-creator.cc/]loadout creator[/url].
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   nameOverride: "BNPL Complete Variety",
   originalAuthor: "flushestpoem4",

@@ -54,8 +54,6 @@ XP table:[h1][/h1]
 - Level 28: 211000 XP[h1][/h1]
 - Level 29: 264000 XP[h1][/h1]
 - Level 30: 330000 XP — Master[h1][/h1]
-
-[hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
   changenote: "Rank and level items show their proper names in every language, quest-only pickups say how much XP they are worth, and the mod now also works on saves made before it was installed.",
   // Saves from before the mod never ran rootgraph_Start with it, so its quest never started.
