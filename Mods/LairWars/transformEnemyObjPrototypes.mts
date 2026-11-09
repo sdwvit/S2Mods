@@ -22,7 +22,10 @@ export const transformEnemyObjPrototypes: StructTransformer<ObjPrototype> = (str
   const rawName = struct.__internal__.rawName;
   const out = [
     ...(PACK_MUTANTS.has(rawName) ? [packNeeds(struct)] : []),
-    ...(enemyClonesByArchetype[rawName]?.map(buildEnemyClone) ?? []),
+    // A clone that refkeys a struct bpatched above would inherit the bpatch block, so it copies the vanilla struct.
+    ...(enemyClonesByArchetype[rawName]?.map((key) =>
+      buildEnemyClone(key, PACK_MUTANTS.has(rawName) ? { NeedsPresetSID: PACK_NEEDS_PRESET } : undefined),
+    ) ?? []),
   ];
   return out.length ? out : null;
 };

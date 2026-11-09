@@ -606,9 +606,38 @@ export const abilityCloneFileSuffixes = [
   ...new Set(Object.values(abilityClones).map((c) => c.file.slice(c.file.indexOf("/AbilityPrototypes/")))),
 ];
 
-/** Nested structs inherit field by field (vanilla zombies restate only `VitalParams.MaxHP`). */
-export function buildEnemyClone(key: string) {
+/** Fills `target` with `source`, merging nested structs field by field. */
+function deepMerge(target: Struct, source: Struct) {
+  const fields = target as unknown as Record<string, unknown>;
+  for (const [field, value] of source.entries() as [string, unknown][]) {
+    const existing = fields[field];
+    if (value instanceof Struct && existing instanceof Struct) deepMerge(existing, value);
+    else fields[field] = value;
+  }
+  return target;
+}
+
+/**
+ * Nested structs inherit field by field (vanilla zombies restate only `VitalParams.MaxHP`).
+ *
+ * `overrides` is for an archetype that this mod also bpatches in the same file (transformEnemyObjPrototypes.mts).
+ * There `refkey=<archetype>` resolves to the bpatch block, which has no AgentType, so the game gives the clone
+ * EAgentType::PluginAgent and NPC setup crashes on its null agent component (exe+0x8484b5; Bayun_LT*, 2026-11-08).
+ * Such a clone is a full copy of the vanilla struct instead, keeping its refurl/refkey, with the bpatched fields
+ * (`overrides`) and the tier fields merged in.
+ */
+export function buildEnemyClone(key: string, overrides?: Record<string, unknown>) {
   const { archetype, rank, tier, mutant } = enemyClones[key];
+  const clone = buildEnemyCloneFields(key, archetype, rank, tier, mutant);
+  if (!overrides) return clone;
+  const copy = objByKey[archetype].struct.clone() as ObjPrototype;
+  copy.__internal__.rawName = key;
+  copy.__internal__.isRoot = true;
+  Object.assign(copy, overrides);
+  return deepMerge(copy, clone) as ObjPrototype;
+}
+
+function buildEnemyCloneFields(key: string, archetype: string, rank: RankName | undefined, tier: number, mutant: boolean) {
   const clone = new Struct() as ObjPrototype;
   clone.__internal__.rawName = key;
   clone.__internal__.isRoot = true;

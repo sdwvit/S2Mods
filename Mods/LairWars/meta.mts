@@ -25,7 +25,7 @@ Requires [b]Decoupled Ranks[/b], which ties your rank to your level.[h1][/h1]
 [/list]
 [hr][/hr]If you enjoy my mods and would like to support me, you can donate here: [url=https://donate.stripe.com/3cIbJ21Ld7u4clXfyb5Rm03]donate[/url]. Feel free to mention which mod you're donating for — it helps me understand what you're interested in.
 `,
-  changenote: "Lairs grow bigger and refill faster even near you, squads leave a few at a time so lairs keep defenders, big mutants can set out alone, and winning factions and species keep expanding until one side can take over the Zone.",
+  changenote: "Fixed a crash on loading a save, caused by the tougher lair Bayuns from the last update.",
   structTransformers: [
     transformNPCNeedsPresetPrototypes,
     transformGenericLairPrototypes,
