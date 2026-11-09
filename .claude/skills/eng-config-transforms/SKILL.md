@@ -131,6 +131,16 @@ Any mod that changes a whole prototype family (weapons, armors, attachments, con
 should set `dlc = true` so DLC variants behave the same.
 
 ## Known traps
+- Never put a `{bpatch}` block and a struct with `refkey=<same name>` in the same patch file. The refkey
+  resolves to the bpatch block (only the patched fields), not to the vanilla struct. For an ObjPrototype that
+  means no `AgentType` in the chain: the parser (exe 0x140c3320e) defaults it to `EAgentType::PluginAgent` (17),
+  the agent component factory (0x848e35) returns nullptr, and the game crashes on load or spawn with an
+  access violation reading 0x0 at `exe+0x8484b5` (NPC setup, no log line). LairWars 2026-11-08:
+  `Bayun {bpatch}` above `Bayun_LT<Rank> {refkey=Bayun}`. Fix: such a struct copies the vanilla struct with its
+  own refurl/refkey and restates the bpatched fields (`buildEnemyClone(key, overrides)` in
+  `Mods/LairWars/lairTiers.mts`). Diagnose a crash at `exe+0x8484b5` with
+  `scripts/agenttype-walk.py` (NodeBridge `/mem`, read-only): it lists every live ObjPrototype with
+  AgentType >= 17 by SID. Crash dumps hold only stacks, so they can't name the prototype.
 - `PreinstalledAttachmentsItemPrototypeSIDs`: never bpatch a single entry. A partial `{bpatch}` list replaced
   the shipped one in game and stripped the guns' hidden built-in magazines and silencers (X16Scopes,
   2026-10-22). Re-emit the whole list without bpatch, keeping the vanilla `bskipref` and cloning every other
