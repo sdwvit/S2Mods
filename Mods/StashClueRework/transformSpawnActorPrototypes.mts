@@ -1,8 +1,7 @@
-import type { QuestNodePrototype, QuestNodePrototypeItemAdd, SpawnActorPrototype } from "s2cfgtojson";
+import type { SpawnActorPrototype } from "s2cfgtojson";
 import type { MetaContext } from "../../src/meta-type.mts";
 import { readFileSync } from "node:fs";
 import { getCfgFiles } from "../../src/get-cfg-files.mts";
-import { readFileAndGetStructs } from "../../src/read-file-and-get-structs.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 
 export const allStashes: Map<string, number> = new Map();
@@ -34,27 +33,31 @@ export async function transformSpawnActorPrototypes(struct: SpawnActorPrototype,
 let unhookedQuestStashes: Promise<Set<string>> | undefined;
 
 /**
- * Stashes a quest puts items into (ItemAdd) from a quest file outside
- * transformQuestNodePrototypes.files. hookStashSpawners never sees those ItemAdds, so
- * nothing would spawn the stash once hidden (e.g. the X18 key chest in SQ103); they keep
- * their vanilla spawn instead.
+ * Stashes a quest uses without going through hookStashSpawners: an ItemAdd from a quest file
+ * outside transformQuestNodePrototypes.files (e.g. the X18 key chest in SQ103), or any other
+ * node that targets the container — Spawn, ItemRemove, MoveInventory MoveFrom/MoveTo, ...
+ * (e.g. the Rostok arena safes that hold the player's gear between rounds in SQ20).
+ * Hiding those breaks the quest, so they keep their vanilla spawn. Stashes with a hooked
+ * ItemAdd stay in the pool: hookStashSpawners spawns them when the quest fills them.
  */
 function getUnhookedQuestStashes() {
   unhookedQuestStashes ??= (async () => {
     const hooked = transformQuestNodePrototypes.files;
-    const files = (await getCfgFiles("/GameData/QuestNodePrototypes/", true)).filter(
-      (f) => !hooked.some((h) => f.endsWith(h)) && readFileSync(f, "utf8").includes("EQuestNodeType::ItemAdd"),
-    );
-    const sids = new Set<string>();
+    const files = await getCfgFiles("/GameData/QuestNodePrototypes/", true);
+    const referenced = new Set<string>();
+    const hookedItemAdds = new Set<string>();
     for (const file of files) {
-      const structs = await readFileAndGetStructs<QuestNodePrototype>(file.split("/GameData/")[1]);
-      structs.forEach((node) => {
-        if (node.NodeType === "EQuestNodeType::ItemAdd" && (node as QuestNodePrototypeItemAdd).TargetQuestGuid) {
-          sids.add((node as QuestNodePrototypeItemAdd).TargetQuestGuid);
+      const isHooked = hooked.some((h) => file.endsWith(h));
+      // Plain-text scan of top-level node fields; parsing all ~1300 quest files is too slow.
+      for (const block of readFileSync(file, "utf8").split(/^\S[^\n]* : struct\.begin/m)) {
+        const isItemAdd = /^\s*NodeType = EQuestNodeType::ItemAdd\s*$/m.test(block);
+        for (const [, guid] of block.matchAll(/^(?:\t| {2,4})(?:TargetQuestGuid|MoveFrom|MoveTo) = ([0-9A-F]{32})\s*$/gm)) {
+          (isItemAdd && isHooked ? hookedItemAdds : referenced).add(guid);
         }
-      });
+      }
     }
-    return sids;
+    hookedItemAdds.forEach((guid) => referenced.delete(guid));
+    return referenced;
   })();
   return unhookedQuestStashes;
 }
