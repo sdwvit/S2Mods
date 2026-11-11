@@ -17,6 +17,8 @@ import {
 } from "../../src/localization/text.mts";
 import type { LocalizedTextEntry } from "../../src/localization/uasset.mts";
 import vanillaSuitText from "./vanillaSuitText.json" with { type: "json" };
+import type { ProtectionKey } from "../ArmorStatsInDescriptions/armorStats.mts";
+import { withProtectionStats } from "../ArmorStatsInDescriptions/writeLocalization.mts";
 
 type SuitText = { name: TemplateByLanguage; description: TemplateByLanguage };
 const VANILLA_SUITS = vanillaSuitText as Record<string, SuitText>;
@@ -182,6 +184,21 @@ export function headlessArmorsLocalization(itemSIDs: string[]): LocalizedTextEnt
   });
 }
 
-export function writeHeadlessArmorsLocalization(itemSIDs: string[]) {
-  return writeModLocalization(import.meta.url, headlessArmorsLocalization(itemSIDs));
+/**
+ * `protectionOf` gives each item's final protection values; every description gets them appended
+ * as the same stat block ArmorStatsInDescriptions adds to vanilla armor.
+ */
+export function writeHeadlessArmorsLocalization(
+  itemSIDs: string[],
+  protectionOf: (SID: string) => Record<ProtectionKey, number>,
+) {
+  const entries = headlessArmorsLocalization(itemSIDs).map((entry) => {
+    const SID = entry.SID.match(/^sid_items_(.+)_description$/)?.[1];
+    if (!SID) return entry;
+    return {
+      ...entry,
+      LanguagesToLocalizedStrings: withProtectionStats(entry.LanguagesToLocalizedStrings, protectionOf(SID)),
+    };
+  });
+  return writeModLocalization(import.meta.url, entries);
 }

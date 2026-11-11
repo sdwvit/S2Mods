@@ -31,6 +31,7 @@ import { backfillDef } from "../../src/backfill-def.mts";
 import { deepMerge } from "../../src/deep-merge.mts";
 import { getDropChance, maxDropChance } from "./calculateArmorScore.mts";
 import { writeHeadlessArmorsLocalization } from "./writeLocalization.mts";
+import { PROTECTION_KEYS, type ProtectionKey } from "../ArmorStatsInDescriptions/armorStats.mts";
 
 dotEnv.config({ path: path.join(import.meta.dirname, "..", ".env") });
 const finishedTransformers = new Set<string>();
@@ -48,7 +49,7 @@ export const meta: MetaType = {
     [u]XStartQuestNodeBySID Skif_ItemGen_Skif_All_Gdocs_Armors[/u]
 `,
 
-  changenote: `Helmetless suits and the added helmets now have their own names and descriptions in every game language.`,
+  changenote: `Descriptions of the added suits and helmets now list their protection values.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,
@@ -193,7 +194,12 @@ export async function transformArmorPrototypes(
 
   addArmorsRunOnce = true;
   const { gdocsArmorSIDs, referenceMap } = await getHeadlessArmorBuildData();
-  writeHeadlessArmorsLocalization(gdocsArmorSIDs);
+  writeHeadlessArmorsLocalization(gdocsArmorSIDs, (SID) => {
+    const protection = referenceMap[SID]?.Protection;
+    return Object.fromEntries(
+      PROTECTION_KEYS.map((key) => [key, Number(String(protection?.[key] ?? 0).replace(/f$/, ""))]),
+    ) as Record<ProtectionKey, number>;
+  });
   gdocsArmorSIDs.forEach((SID) => {
     const newArmor = referenceMap[SID];
     if (!newArmor) {
