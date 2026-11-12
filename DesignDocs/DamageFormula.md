@@ -128,7 +128,7 @@ authored value [cfg]:
          bone       pen - prot = -1
 ```
 
-11.5 off the NPC's 200 HP -> ~18 shots to kill.
+11.5 off the NPC's 100 HP -> ~9 shots to kill.
 
 Same shot, other cases:
 
@@ -157,7 +157,7 @@ and `1 - 0.6 * min(prot/5, 1)`.
 percentage: `dmg * (100 - prot)/100`, with protections capped at 90 [cfg].
 
 **Health** is just the pool the result is subtracted from — `MaxHP = 100` for the player,
-`200` for the human NPC base [cfg], scaled by difficulty `NPC_HP`. `HPThresholdToKill = 0.1`
+`100` for the human NPC base (`NPCBase`; `GuardBase` has 200) [cfg], scaled by difficulty `NPC_HP`. `HPThresholdToKill = 0.1`
 [cfg]. Nothing in the armor chain reads HP.
 
 ## Caveats / not traced
