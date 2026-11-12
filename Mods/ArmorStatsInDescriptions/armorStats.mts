@@ -22,6 +22,8 @@ export type ArmorStats = {
   /** The key the game reads text under: `LocalizationSID` when set, else `SID`. */
   textSID: string;
   protection: Record<ProtectionKey, number>;
+  /** `BaseDurability`, the item's condition points when new. */
+  durability: number;
 };
 
 const projectRoot = path.join(import.meta.dirname, "../..");
@@ -94,6 +96,7 @@ export function readArmorStats(): ArmorStats[] {
         SID: node.struct.SID,
         textSID: typeof loc === "string" && loc && loc !== "empty" ? loc : node.struct.SID,
         protection,
+        durability: Number(String(resolve(node, "BaseDurability") ?? 0).replace(/f$/, "")),
       };
     });
 }
