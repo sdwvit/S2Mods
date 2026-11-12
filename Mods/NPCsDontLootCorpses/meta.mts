@@ -2,10 +2,10 @@ import type { MetaContext, MetaType } from "../../src/meta-type.mts";
 import { isHumanNpc, type NpcPrototype } from "../../src/human-npc-prototypes.mts";
 
 export const meta: MetaType<NpcPrototype> = {
-  description:
-    `[b]Known issue:[/b] due to some circumstances, NPCs still loot bodies at times. I've asked GSC to look into it; no ETA was given, and it's a low-priority fix.[hr][/hr]This mod prevents NPCs from looting corpses.[hr][/hr]Prevents situations where when you loot a body you find 15 armors and 25 weapons on them.`,
-  changenote:
-    "Added a known-issue note: NPCs can still loot bodies in some cases, and GSC has been asked to look into it.",
+  description: `[h1]Deprecated for now[/h1]
+[h1][/h1]
+NPCs still loot bodies: the game has a second corpse-looting path (A-Life) that ignores the setting this mod changes, so no config mod can fully stop it. The mod will come back if GSC fixes it.[hr][/hr]This mod prevents NPCs from looting corpses.[hr][/hr]Prevents situations where when you loot a body you find 15 armors and 25 weapons on them.`,
+  changenote: "Marked as deprecated: the game loots bodies through a second path that ignores this mod's setting.",
   structTransformers: [transformNpcCorpseProcessing],
 };
 
