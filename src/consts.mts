@@ -810,6 +810,17 @@ export const allUniqueWeaponGeneralSetupPrototypesSIDs = new Set([
   "Gun_Trophy_AR_GS",
   "Gun_Decider_AR_GS",
   "Gun_Kaimanov_HG_GS",
+  // DLC1 (Iron Forest) named weapons
+  "GunArevLight_AR_GS",
+  "GunTundra_DMR_GS",
+  "GunClapper_SG_GS",
+  "GunDefender_SG",
+  "GunFallschirmjager_DMR_GS",
+  "GunHSG72_DMR_GS",
+  "GunSVU_CQB_SP",
+  "GunSPSA_Sniper_SG",
+  "GunKharodFreedom_ST",
+  "GunDniproDuty_ST",
 ]);
 
 function guessArmor(SID: string | number, refkey?: string | number) {

@@ -2,19 +2,19 @@ import { Refs, Struct } from "s2cfgtojson";
 import type {
   ItemGeneratorPrototype,
   WeaponGeneralSetupPrototype,
-  ItemGeneratorPrototypeItemGeneratorItem,
   WeaponGeneralSetupPrototypePreinstalledAttachmentsItemPrototypeSIDsItem,
   WeaponPrototype,
   QuestNodePrototypeSetItemGenerator,
 } from "s2cfgtojson";
 import type { MetaContext, MetaType } from "../../src/meta-type.mts";
 import { waitFor } from "../../src/wait-for.mts";
-import {
-  allDefaultDroppableAttachments,
-  guessAttachmentSlot,
-  allUniqueWeaponGeneralSetupPrototypesSIDs,
-} from "../../src/consts.mts";
 import type { DeeplyPartial } from "../../src/consts.mts";
+import {
+  addAttachmentVariants,
+  getAttachmentCombos,
+  getAttachmentRarity,
+  type AttachmentVariant,
+} from "./attachment-variants.mts";
 const finishedTransformers = new Set<string>();
 
 export const meta: MetaType = {
@@ -48,43 +48,6 @@ For debugging, this console command rolls every NPC weapon generator this mod to
  * Then I need to modify DynamicItemGeneratorPrototypes to add these new weapons to NPCs
  */
 
-function getCombinations(items: string[]) {
-  const result: { slots: Set<string>; items: string[] }[] = [];
-
-  const currentItems: string[] = [];
-  const usedSlots = new Set<string>();
-
-  function build(startIndex: number) {
-    for (let i = startIndex; i < items.length; i++) {
-      const item = items[i];
-
-      const slot = guessAttachmentSlot(item);
-      if (!slot) continue;
-      if (usedSlots.has(slot)) continue;
-
-      // choose
-      currentItems.push(item);
-      usedSlots.add(slot);
-
-      // record snapshot
-      result.push({
-        items: [...currentItems],
-        slots: new Set(usedSlots),
-      });
-
-      // explore
-      build(i + 1);
-
-      // un-choose
-      usedSlots.delete(slot);
-      currentItems.pop();
-    }
-  }
-
-  build(0);
-  return result;
-}
-
 const newlyCreatedWeaponParamsWithPreinstalledAttachments: Record<
   string,
   WeaponGeneralSetupPrototype[]
@@ -100,20 +63,11 @@ function createWeaponParamsWithPreinstalledAttachments(
   struct: WeaponGeneralSetupPrototype,
   context: MetaContext<WeaponGeneralSetupPrototype>,
 ) {
-  if (!struct.CompatibleAttachments || allUniqueWeaponGeneralSetupPrototypesSIDs.has(struct.SID)) {
-    return;
-  }
-
-  const compatibleDroppableAttachments = struct.CompatibleAttachments.filter(([_, a]) =>
-    allDefaultDroppableAttachments.has(a.AttachPrototypeSID),
-  );
-  if (!compatibleDroppableAttachments.entries().length) {
+  const combos = getAttachmentCombos(struct);
+  if (!combos.length) {
     return;
   }
   const extraStructs = [];
-  const compatibleDroppableAttachmentsRecord = Object.fromEntries(
-    compatibleDroppableAttachments.entries().map((e) => [e[1].AttachPrototypeSID, e[1]]),
-  );
   // Build lookup: attachment SID → set of upgrade IDs that block it
   const blockingUpgradesByAttach = new Map<string, Set<string>>();
   struct.CompatibleAttachments.entries().forEach(([_, a]) => {
@@ -124,16 +78,7 @@ function createWeaponParamsWithPreinstalledAttachments(
       );
     }
   });
-  const combos = getCombinations(
-    compatibleDroppableAttachments.entries().map((e) => e[1].AttachPrototypeSID),
-  );
-  combos.forEach(({ items }) => {
-    const requiredUpgrades = items
-      .map((a) =>
-        compatibleDroppableAttachmentsRecord[a].RequiredUpgradeIDs?.entries().map((e) => e[1]),
-      )
-      .flat()
-      .filter((e) => !!e);
+  combos.forEach(({ attaches: items, upgrades: requiredUpgrades }) => {
     const requiredUpgradesSet = new Set(requiredUpgrades);
     const newSID = `${struct.SID}_with_${items.join("_")}`;
 
@@ -203,16 +148,8 @@ function createWeaponParamsWithPreinstalledAttachments(
 
 createWeaponParamsWithPreinstalledAttachments.files = ["/WeaponGeneralSetupPrototypes.cfg"];
 
-const newlyCreatedWeaponsRarity: Record<string, number> = {};
-/**
- * For each generated weapon variant: how to reproduce it through the vanilla
- * ItemGenerator Attaches/Upgrades system instead of a dedicated weapon prototype.
- */
-const newWeaponGenerationRecipe: Record<
-  string,
-  { baseItemPrototypeSID: string; attaches: string[]; upgrades: string[] }
-> = {};
-const newlyCreatedWeaponsWithPreinstalledAttachments: Record<string, WeaponPrototype[]> = {};
+/** Generator variants per base weapon SID, reproduced through ItemGenerator Attaches/Upgrades. */
+const attachmentVariantsByWeaponSID: Record<string, AttachmentVariant[]> = {};
 /**
  * 2
  */
@@ -241,18 +178,17 @@ async function createWeapons(struct: WeaponPrototype) {
       if (!requiredUpgradesRecord[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID].length) {
         delete newWeapon.PreinstalledUpgrades;
       }
-      newlyCreatedWeaponsWithPreinstalledAttachments[struct.SID] ||= [];
-      newlyCreatedWeaponsWithPreinstalledAttachments[struct.SID].push(newWeapon);
 
       const attachCount =
         newWeaponAttachCount[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID];
-      newlyCreatedWeaponsRarity[newWeapon.SID] = 1 / (10 * Math.pow(10, attachCount - 1));
-      newWeaponGenerationRecipe[newWeapon.SID] = {
-        baseItemPrototypeSID: struct.SID,
+      attachmentVariantsByWeaponSID[struct.SID] ||= [];
+      attachmentVariantsByWeaponSID[struct.SID].push({
+        key: newWeapon.SID,
+        rarity: getAttachmentRarity(attachCount),
         attaches: newWeaponAttachItems[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID],
         upgrades:
           requiredUpgradesRecord[newlyCreatedWeaponParamsWithPreinstalledAttachment.SID] || [],
-      };
+      });
       extraStructs.push(newWeapon);
     },
   );
@@ -271,75 +207,8 @@ async function addNewWeaponsToDynamicItemGenerators(struct: ItemGeneratorPrototy
   }
 
   await waitFor(() => finishedTransformers.has(createWeapons.name));
-  const fork = struct.fork();
-  struct.ItemGenerator.forEach(([k1, ig]) => {
-    ig.PossibleItems.forEach(([k2, pi]) => {
-      const newWeapons = newlyCreatedWeaponsWithPreinstalledAttachments[pi.ItemPrototypeSID];
-      if (!newWeapons?.length) {
-        return;
-      }
-      fork.ItemGenerator ||= struct.ItemGenerator.fork();
-      fork.ItemGenerator.__internal__.useAsterisk = false;
-      fork.ItemGenerator[k1] ||= struct.ItemGenerator[
-        k1
-      ].fork() as ItemGeneratorPrototypeItemGeneratorItem;
-      // fork.ItemGenerator[k1].bAllowSameCategoryGeneration = true;
-      const baseChance = struct.ItemGenerator[k1].PossibleItems[k2].Chance;
-      const baseWeight = struct.ItemGenerator[k1].PossibleItems[k2].Weight;
-
-      newWeapons.forEach((weapon) => {
-        const rarity = newlyCreatedWeaponsRarity[weapon.SID];
-        const recipe = newWeaponGenerationRecipe[weapon.SID];
-        if (!recipe?.attaches.length) {
-          return;
-        }
-
-        const newOption = struct.ItemGenerator[k1].PossibleItems[k2].clone();
-        // Scale whichever field the base entry actually uses: Weight for weighted
-        // pick-one lists, Chance for independently rolled entries. Writing Weight on a
-        // Chance-based entry leaves the cloned Chance untouched, which would make the
-        // variant spawn unconditionally on top of the base weapon.
-        if (baseWeight > 0) {
-          newOption.Weight = rarity * baseWeight;
-        } else if (baseChance > 0) {
-          newOption.Chance = rarity * baseChance;
-        } else {
-          return;
-        }
-        // The base weapon is generated as-is; the attachments (and the upgrades they
-        // require) are applied by the vanilla ItemGenerator Attaches/Upgrades system.
-        newOption.ItemPrototypeSID = recipe.baseItemPrototypeSID;
-        newOption.addNode(
-          new Struct({
-            MinCount: recipe.attaches.length,
-            MaxCount: recipe.attaches.length,
-            Chance: 1,
-            PossibleItems: recipe.attaches.join(", "),
-          }),
-          "Attaches",
-        );
-        newOption.Attaches.__internal__.bpatch = true;
-        if (recipe.upgrades.length) {
-          newOption.addNode(
-            new Struct({
-              MinCount: recipe.upgrades.length,
-              MaxCount: recipe.upgrades.length,
-              Chance: 1,
-              PossibleItems: recipe.upgrades.join(", "),
-            }),
-            "Upgrades",
-          );
-          newOption.Upgrades.__internal__.bpatch = true;
-        }
-
-        fork.ItemGenerator[k1].PossibleItems ||= struct.ItemGenerator[k1].PossibleItems.fork();
-        fork.ItemGenerator[k1].PossibleItems.__internal__.useAsterisk = false;
-
-        fork.ItemGenerator[k1].PossibleItems.addNode(newOption, weapon.SID);
-      });
-    });
-  });
-  if (fork.entries().length) {
+  const fork = addAttachmentVariants(struct, attachmentVariantsByWeaponSID);
+  if (fork) {
     patchedDynamicItemGeneratorSIDs.push(struct.SID);
     return fork;
   }
