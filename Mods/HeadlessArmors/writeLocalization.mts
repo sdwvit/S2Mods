@@ -84,22 +84,29 @@ const HEADLESS_NAME: TemplateByLanguage = {
 
 /** `{d}` is the suit's vanilla description. Psi wording follows `sid_effects_armor_protectionPsi_name`. */
 const HEADLESS_DESCRIPTION: TemplateByLanguage = {
-  English: "{d}\n\nThis version comes without a helmet and has no psi-protection. Wear a separate helmet.",
+  English:
+    "{d}\n\nThis version comes without a helmet and has no psi-protection. Wear a separate helmet.",
   Ukrainian: "{d}\n\nЦя версія без шолома і не має псі-захисту. Носіть окремий шолом.",
-  German: "{d}\n\nDiese Version hat keinen Helm und bietet keinen Psi-Schutz. Trage einen separaten Helm.",
-  French: "{d}\n\nCette version est sans casque et n'offre aucune protection psi. Portez un casque à part.",
+  German:
+    "{d}\n\nDiese Version hat keinen Helm und bietet keinen Psi-Schutz. Trage einen separaten Helm.",
+  French:
+    "{d}\n\nCette version est sans casque et n'offre aucune protection psi. Portez un casque à part.",
   SpanishEuropean: "{d}\n\nEsta versión no tiene casco ni protección psi. Usa un casco aparte.",
-  Italian: "{d}\n\nQuesta versione è priva di casco e non offre protezione psionica. Indossa un casco a parte.",
+  Italian:
+    "{d}\n\nQuesta versione è priva di casco e non offre protezione psionica. Indossa un casco a parte.",
   Polish: "{d}\n\nTa wersja nie ma hełmu ani ochrony psionicznej. Załóż osobny hełm.",
   Czech: "{d}\n\nTato verze nemá přilbu ani psí-ochranu. Noste samostatnou přilbu.",
   Turkish: "{d}\n\nBu sürüm başlıksızdır ve Psi Koruması yoktur. Ayrı bir başlık takın.",
   Serbian: "{d}\n\nОва верзија нема шлем ни пси-заштиту. Носите засебан шлем.",
-  PortugalBrazilian: "{d}\n\nEsta versão vem sem capacete e não tem psicoproteção. Use um capacete separado.",
-  SpanishLatinoAmerican: "{d}\n\nEsta versión no tiene casco ni psiprotección. Usa un casco aparte.",
+  PortugalBrazilian:
+    "{d}\n\nEsta versão vem sem capacete e não tem psicoproteção. Use um capacete separado.",
+  SpanishLatinoAmerican:
+    "{d}\n\nEsta versión no tiene casco ni psiprotección. Usa un casco aparte.",
   Arabic: "{d}\n\nتأتي هذه النسخة بدون خوذة ولا توفر الوقاية من انبعاثات Psi. ارتدِ خوذة منفصلة.",
   ChineseSimplified: "{d}\n\n此版本不带头盔，没有心灵防护。请另外佩戴头盔。",
   ChineseTraditional: "{d}\n\n此版本不含頭盔，沒有心靈保護。請另外佩戴頭盔。",
-  Japanese: "{d}\n\nこのバージョンはヘルメットが付属せず、プサイ防護がない。別途ヘルメットを着用すること。",
+  Japanese:
+    "{d}\n\nこのバージョンはヘルメットが付属せず、プサイ防護がない。別途ヘルメットを着用すること。",
   Korean: "{d}\n\n이 버전은 헬멧이 없으며 정신파 방호력이 없습니다. 별도의 헬멧을 착용하세요.",
 };
 
@@ -127,26 +134,36 @@ const HELMET_NAME: TemplateByLanguage = {
 const HELMET_DESCRIPTION: TemplateByLanguage = {
   English:
     "A standalone helmet that matches the {s}. Suits without a helmet have no psi-protection, and this helmet provides it.",
-  Ukrainian: "Окремий шолом. Пасує до: {s}. Костюми без шолома не мають псі-захисту, а цей шолом його дає.",
-  German: "Ein separater Helm. Passend zu: {s}. Anzüge ohne Helm bieten keinen Psi-Schutz – dieser Helm gleicht das aus.",
-  French: "Un casque indépendant. Assorti à : {s}. Les tenues sans casque n'offrent aucune protection psi, ce casque y remédie.",
+  Ukrainian:
+    "Окремий шолом. Пасує до: {s}. Костюми без шолома не мають псі-захисту, а цей шолом його дає.",
+  German:
+    "Ein separater Helm. Passend zu: {s}. Anzüge ohne Helm bieten keinen Psi-Schutz – dieser Helm gleicht das aus.",
+  French:
+    "Un casque indépendant. Assorti à : {s}. Les tenues sans casque n'offrent aucune protection psi, ce casque y remédie.",
   SpanishEuropean:
     "Un casco independiente. A juego con: {s}. Los trajes sin casco no ofrecen protección psi; este casco la proporciona.",
   Italian:
     "Un casco a sé stante. Abbinato a: {s}. Le tute senza casco non offrono protezione psionica; questo casco la fornisce.",
-  Polish: "Osobny hełm. Pasuje do: {s}. Kombinezony bez hełmu nie zapewniają ochrony psionicznej, a ten hełm ją daje.",
-  Czech: "Samostatná přilba. Hodí se k: {s}. Obleky bez přilby nemají psí-ochranu; tato přilba ji poskytuje.",
-  Turkish: "Ayrı bir başlık. Uyumlu olduğu donanım: {s}. Başlıksız kıyafetlerin Psi Koruması yoktur; bu başlık bunu sağlar.",
-  Serbian: "Засебан шлем. Пристаје уз: {s}. Одела без шлема немају пси-заштиту, а овај шлем је пружа.",
+  Polish:
+    "Osobny hełm. Pasuje do: {s}. Kombinezony bez hełmu nie zapewniają ochrony psionicznej, a ten hełm ją daje.",
+  Czech:
+    "Samostatná přilba. Hodí se k: {s}. Obleky bez přilby nemají psí-ochranu; tato přilba ji poskytuje.",
+  Turkish:
+    "Ayrı bir başlık. Uyumlu olduğu donanım: {s}. Başlıksız kıyafetlerin Psi Koruması yoktur; bu başlık bunu sağlar.",
+  Serbian:
+    "Засебан шлем. Пристаје уз: {s}. Одела без шлема немају пси-заштиту, а овај шлем је пружа.",
   PortugalBrazilian:
     "Um capacete avulso. Combina com: {s}. Trajes sem capacete não oferecem psicoproteção; este capacete a fornece.",
   SpanishLatinoAmerican:
     "Un casco independiente. Combina con: {s}. Los trajes sin casco no ofrecen psiprotección; este casco la proporciona.",
-  Arabic: "خوذة منفصلة. تناسب: {s}. البدلات التي بدون خوذة لا توفر الوقاية من انبعاثات Psi، وهذه الخوذة توفرها.",
+  Arabic:
+    "خوذة منفصلة. تناسب: {s}. البدلات التي بدون خوذة لا توفر الوقاية من انبعاثات Psi، وهذه الخوذة توفرها.",
   ChineseSimplified: "独立头盔，与{s}搭配。无头盔的护甲没有心灵防护，这顶头盔可以弥补。",
   ChineseTraditional: "獨立頭盔，與{s}搭配。無頭盔的護甲沒有心靈保護，這頂頭盔可以彌補。",
-  Japanese: "単体のヘルメット。対応装備：{s}。ヘルメットなしのスーツにはプサイ防護がないため、このヘルメットで補える。",
-  Korean: "별도의 헬멧입니다. 어울리는 장비: {s}. 헬멧이 없는 전투복은 정신파 방호력이 없으며, 이 헬멧이 이를 보완합니다.",
+  Japanese:
+    "単体のヘルメット。対応装備：{s}。ヘルメットなしのスーツにはプサイ防護がないため、このヘルメットで補える。",
+  Korean:
+    "별도의 헬멧입니다. 어울리는 장비: {s}. 헬멧이 없는 전투복은 정신파 방호력이 없으며, 이 헬멧이 이를 보완합니다.",
 };
 
 function suitText(suitSID: string): SuitText {
@@ -185,19 +202,25 @@ export function headlessArmorsLocalization(itemSIDs: string[]): LocalizedTextEnt
 }
 
 /**
- * `protectionOf` gives each item's final protection values; every description gets them appended
- * as the same stat block ArmorStatsInDescriptions adds to vanilla armor.
+ * `protectionOf` and `durabilityOf` give each item's final protection values and durability; every
+ * description gets them appended as the same stat block ArmorStatsInDescriptions adds to vanilla
+ * armor.
  */
 export function writeHeadlessArmorsLocalization(
   itemSIDs: string[],
   protectionOf: (SID: string) => Record<ProtectionKey, number>,
+  durabilityOf: (SID: string) => number,
 ) {
   const entries = headlessArmorsLocalization(itemSIDs).map((entry) => {
     const SID = entry.SID.match(/^sid_items_(.+)_description$/)?.[1];
     if (!SID) return entry;
     return {
       ...entry,
-      LanguagesToLocalizedStrings: withProtectionStats(entry.LanguagesToLocalizedStrings, protectionOf(SID)),
+      LanguagesToLocalizedStrings: withProtectionStats(
+        entry.LanguagesToLocalizedStrings,
+        protectionOf(SID),
+        durabilityOf(SID),
+      ),
     };
   });
   return writeModLocalization(import.meta.url, entries);
