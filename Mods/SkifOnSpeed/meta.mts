@@ -14,7 +14,7 @@ Now you can speedrun main questline and easily outrun bloodsuckers.
 [*] Total 50% movement speed increase possible
 [/list]
 `,
-  changenote: "Updated for 2.0: patches regenerated against 2.0 game data.",
+  changenote: "Fixed the missing name and icon of the speed effect.",
   structTransformers: [transformEffectPrototypes, transformArtifactPrototypes, transformConsumablePrototypes],
 };
 
@@ -22,6 +22,9 @@ let oncePerFile = false;
 
 export const getMovementSpeedEffectSID = (n: number) => `MovementSpeedEffect${n}PSID`;
 export const MovementSpeedEffect5PTmpSID = "MovementSpeedEffect5PTmp";
+// Vanilla "Speed increase" text (sid_effects_increase_movement_speed_name, all languages) and the HUD running icon.
+const LocalizationSID = "increase_movement_speed";
+const Icon = "Texture2D'/Game/GameLite/FPS_Game/UIRemaster/UITextures/HUD/Stat/T_run_forest_run.T_run_forest_run'";
 
 export function transformEffectPrototypes(s: EffectPrototype) {
   if (!oncePerFile) {
@@ -39,6 +42,8 @@ export function transformEffectPrototypes(s: EffectPrototype) {
           },
           SID: getMovementSpeedEffectSID(f),
           Text: `Add Run ${f}%`,
+          LocalizationSID,
+          Icon,
           Type: "EEffectType::VelocityChange" as EEffectType,
           ValueMin: `${f}.0%`,
           ValueMax: `${f}.0%`,
@@ -59,6 +64,8 @@ export function transformEffectPrototypes(s: EffectPrototype) {
         },
         SID: MovementSpeedEffect5PTmpSID,
         Text: "Add Run 5%",
+        LocalizationSID,
+        Icon,
         Type: "EEffectType::VelocityChange",
         ValueMin: "5.0%",
         ValueMax: "5.0%",
