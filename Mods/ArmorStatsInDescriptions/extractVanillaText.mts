@@ -1,6 +1,6 @@
 /**
  * Regenerates `vanillaText.json` from the repo's `locale/` dump (git-ignored, see the
- * eng-localization skill): every armor's and firearm's vanilla description and the inventory
+ * eng-localization skill): every armor's, firearm's, ammo's, detector's, attachment's and grenade's vanilla description and the inventory
  * tooltip's protection and weapon stat labels, in all eighteen languages. The build reads only the committed JSON, so a checkout without
  * `locale/` still builds. Rerun after a game patch changes the shipped wording:
  *
@@ -10,6 +10,10 @@ import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { LANGUAGES, type Language } from "../../src/localization/text.mts";
 import { PROTECTION_KEYS, readArmorStats } from "./armorStats.mts";
+import { readAmmoStats } from "./ammoStats.mts";
+import { readAttachStats } from "./attachStats.mts";
+import { readGrenadeStats } from "./grenadeStats.mts";
+import { readDetectorStats } from "./detectorStats.mts";
 import { readWeaponStats } from "./weaponStats.mts";
 
 const CULTURES: Record<Language, string> = {
@@ -52,14 +56,25 @@ const labels = Object.fromEntries([
     key,
     byLanguage(`sid_misc_item_tooltip_protection_damage_${key}`),
   ]),
-  ...["damage", "penetration", "distance", "fire_rate", "durability"].map((key) => [
+  ...["damage", "penetration", "distance", "fire_rate", "durability", "magazine"].map((key) => [
     key,
     byLanguage(`sid_misc_item_tooltip_${key}`),
   ]),
+  // Attachment effect names, keyed by the effect's LocalizationSID.
+  ...[...new Set(readAttachStats().flatMap((a) => a.effects.map((e) => e.label)))]
+    .filter((loc) => dumps.English[`sid_effects_${loc}_name`])
+    .map((loc) => [`effect_${loc}`, byLanguage(`sid_effects_${loc}_name`)]),
 ]);
 
 const descriptions: Record<string, Record<string, string>> = {};
-for (const { textSID } of [...readArmorStats(), ...readWeaponStats()]) {
+for (const { textSID } of [
+  ...readArmorStats(),
+  ...readWeaponStats(),
+  ...readAmmoStats(),
+  ...readDetectorStats(),
+  ...readAttachStats(),
+  ...readGrenadeStats(),
+]) {
   const sid = `sid_items_${textSID}_description`;
   if (dumps.English[sid]) descriptions[sid] = byLanguage(sid);
 }

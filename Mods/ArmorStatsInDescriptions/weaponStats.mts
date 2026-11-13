@@ -27,13 +27,27 @@ export type WeaponStats = {
   /** `ArmorPiercing`, on the same 0-4 scale as an armor's physical protection. */
   penetration: number;
   /**
-   * 60 / `FireInterval`, or undefined when that interval does not set the real rate: semi-auto
-   * guns fire as fast as you click and many inherit the template's 0.1 s, so only full-auto guns
-   * and slow cyclers (pump, bolt, revolver: 0.3 s and up) get one.
+   * Shots per minute. Full-auto guns and slow cyclers (pump, bolt, revolver: 0.3 s and up) fire
+   * at 60 / `FireInterval`. Semi-auto guns fire as fast as you click, capped by the interval and
+   * by `CLICKS_PER_MINUTE`. Break-action shotguns and the DP-12 use `SHOTGUN_SHOTS_PER_MINUTE`.
    */
-  shotsPerMinute?: number;
+  shotsPerMinute: number;
   /** `BaseDurability`, the item's condition points when new. */
   durability: number;
+};
+
+/** Sustained fast clicking, 6 clicks a second: the limit for a semi-auto gun. */
+const CLICKS_PER_MINUTE = 360;
+
+/**
+ * Real-world rates for shotguns whose cfg interval is not their mechanical limit: the
+ * break-actions inherit the template's 0.1 s and the DP-12 pump sets 0.1 s itself.
+ * Keyed by the base weapon; variants match through their `refkey` chain.
+ */
+const SHOTGUN_SHOTS_PER_MINUTE: Record<string, number> = {
+  GunObrez_SG: 120, // double barrel, both barrels back to back
+  GunTOZ_SG: 120, // double barrel
+  GunRam2_SG: 120, // DP-12: pump, two shots per stroke
 };
 
 const projectRoot = path.join(import.meta.dirname, "../..");
@@ -165,6 +179,9 @@ export function readWeaponStats(): WeaponStats[] {
       if (!weaponSettings || !setup) return [];
       const fireInterval = num(resolve(setup, "FireInterval"));
       const automatic = fireTypes(setup).includes("EFireType::Automatic");
+      const realWorldRate = chain(node)
+        .map((n) => SHOTGUN_SHOTS_PER_MINUTE[n.struct.SID])
+        .find((rate) => rate !== undefined);
       const caliber = String(resolve(setup, "AmmoCaliber"));
       const loc = resolve(node, "LocalizationSID");
       return [
@@ -175,7 +192,10 @@ export function readWeaponStats(): WeaponStats[] {
           rangeUI: num(resolve(weaponSettings, "RangeUI")),
           penetration: num(resolve(weaponSettings, "ArmorPiercing")),
           shotsPerMinute:
-            fireInterval > 0 && (automatic || fireInterval >= 0.3) ? 60 / fireInterval : undefined,
+            realWorldRate ??
+            (fireInterval > 0 && (automatic || fireInterval >= 0.3)
+              ? 60 / fireInterval
+              : Math.min(CLICKS_PER_MINUTE, fireInterval > 0 ? 60 / fireInterval : Infinity)),
           durability: num(resolve(node, "BaseDurability")),
         },
       ];
