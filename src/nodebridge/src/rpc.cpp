@@ -112,9 +112,13 @@ void Router::ingest(std::string_view frame) {
     // crashes the game we can tell which RPC method we were in. Logger
     // flushes each line — if only the "dispatch" line exists for a given
     // id with no matching "completed" line, that's the offender.
-    auto params_str = msg.value("params", json(nullptr)).dump();
-    if (params_str.size() > 256) params_str = params_str.substr(0, 253) + "...";
-    nb::log::info("rpc", "dispatch id={} method='{}' params={}", id, method, params_str);
+    // game.readMemory is polled constantly; logging it floods the log.
+    const bool quiet = method == "game.readMemory";
+    if (!quiet) {
+      auto params_str = msg.value("params", json(nullptr)).dump();
+      if (params_str.size() > 256) params_str = params_str.substr(0, 253) + "...";
+      nb::log::info("rpc", "dispatch id={} method='{}' params={}", id, method, params_str);
+    }
     json response = {{"type", "response"}, {"id", id}};
     if (!fn) {
       response["error"] = "no handler: " + method;
@@ -125,7 +129,7 @@ void Router::ingest(std::string_view frame) {
         response["error"] = e.what();
       }
     }
-    nb::log::info("rpc", "completed id={} method='{}'", id, method);
+    if (!quiet) nb::log::info("rpc", "completed id={} method='{}'", id, method);
     impl_->send(response);
     return;
   }
