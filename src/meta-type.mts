@@ -28,6 +28,11 @@ export type StructTransformer<T> = ((
    * (src/inherit-duplicate-structs.mts). For transformers that generate large, repetitive files.
    */
   inheritDuplicates?: boolean;
+  /**
+   * Write new structs to `<Name>_patch_New_<Mod>.cfg`, apart from the `{bpatch}` blocks in `<Name>_patch_<Mod>.cfg`.
+   * A `refkey=X` in the file that also holds `X {bpatch}` inherits only the bpatch block.
+   */
+  splitNewStructs?: boolean;
   files: string[];
   extraStructs?: Struct[]; // optional place for transformer to populate, so that other transformers can await for this information
 };
@@ -44,6 +49,8 @@ export type MetaType<T = Struct> = {
    */
   gameStartCommand?: string;
   description: string;
+  /** The previous release's section: shown on every platform; outside Nexus it ends with a link to the Nexus page that hosts the file. */
+  previousVersion?: string;
   structTransformers: StructTransformer<T>[];
   onFinish?(): void | Promise<void>;
   onTransformerFinish?(transformer: StructTransformer<T>): void;

@@ -51,7 +51,7 @@ function toNexusBBCode(steam: string) {
 }
 
 const fullDescription = toNexusBBCode(
-  publishedDescription(meta).trim() +
+  publishedDescription(meta, "nexus").trim() +
   `\n[hr][/hr]This mod is open source and hosted on [url=https://github.com/sdwvit/S2Mods/tree/master/Mods/${modName}]github[/url].[hr][/hr]
 [h3]Mod compatibility[/h3]
 This mod bPatches files, so it is compatible with other mods that don't modify the same lines. Modified files are listed on ${getModifiedFilesLink("steam")}.`,

@@ -30,18 +30,16 @@ function storeModId(modId: string) {
 }
 
 function setNameSummaryDescription(form: FormData) {
-  form.append(
-    "name",
-    sanitize(
-      `${(meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim()} by ${meta.originalAuthor || process.env.STEAM_USER}`,
-    ),
-  );
+  const baseName = (meta.nameOverride || modName).replace(/([A-Z]\w])/g, " $1").trim();
+  const fullName = `${baseName} by ${meta.originalAuthor || process.env.STEAM_USER}`;
+  // mod.io rejects names over 50 characters; the summary already credits the author.
+  form.append("name", sanitize(fullName.length <= 50 ? fullName : baseName));
   form.append("summary", `Mod by ${meta.originalAuthor || process.env.STEAM_USER}`);
   form.append(
     "description",
     sanitize(
       convertToHtml(
-        publishedDescription(meta) +
+        publishedDescription(meta, "modio") +
           `<br/>This mod is open source and hosted on github (click on homepage link).
           <hr/>
           Mod compatibility:

@@ -57,4 +57,4 @@ export function transformALifePopulationManagerFactionPrototypes(struct: Struct)
 }
 
 transformALifePopulationManagerFactionPrototypes.files = ["/ALifePopulationManagerFactionPrototypes.cfg"];
-transformALifePopulationManagerFactionPrototypes.inheritDuplicates = true;
+// No inheritDuplicates: it writes dotted sub-struct refkeys, which the game doesn't resolve (transformEnemyObjPrototypes.mts).

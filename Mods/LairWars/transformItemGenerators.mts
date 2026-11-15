@@ -21,4 +21,4 @@ export const transformItemGenerators: StructTransformer<ItemGeneratorPrototype> 
 };
 
 transformItemGenerators.files = ["/ItemGeneratorPrototypes.cfg", "/DynamicItemGenerator.cfg"];
-transformItemGenerators.inheritDuplicates = true;
+// No inheritDuplicates: it writes dotted sub-struct refkeys, which the game doesn't resolve (transformEnemyObjPrototypes.mts).

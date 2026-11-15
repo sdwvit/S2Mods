@@ -6,6 +6,7 @@ import { readFileAndGetStructs } from "../../../src/read-file-and-get-structs.mt
 import { lairs as tieredLairs, RANKS } from "../lairTiers.mts";
 import { hubLairs, lairActorFiles } from "../hubLairs.mts";
 import { regionTier } from "../regionTiers.mts";
+import { addedLairAttacks } from "../transformRelationPrototypes.mts";
 import { mutantLairs } from "../mutantLairs.mts";
 import { EXPANDING_FACTIONS } from "../openLairs.mts";
 
@@ -95,6 +96,7 @@ export async function loadWorld() {
   return {
     lairs,
     capacity: sizes.capacity,
+    minSum: sizes.minSum,
     startTiming: sizes.startTiming as typeof sizes.startTiming | undefined,
     missingSizes: sizes.missing,
     ...relations,
@@ -127,7 +129,10 @@ async function loadSizes() {
   };
   const read = (proto: Struct | undefined, faction: string, rank: string, field = "MaxSpawnQuantity") => {
     const n = factionBlock(proto, faction)?.SpawnSettingsPerPlayerRanks?.[rank]?.[field];
-    return n === undefined ? undefined : Number(n);
+    if (n === undefined) return undefined;
+    // SpawnSettingsPerArchetypes: the sum of MinQuantityPerArchetype, the low end of the game's capacity roll
+    if (n instanceof Struct) return n.entries().reduce((sum, [, a]) => sum + Number((a as Struct)?.MinQuantityPerArchetype ?? 0), 0);
+    return Number(n);
   };
   /** A rank field of a faction block: patch -> refkey chain in the patch -> vanilla prototype of the same name. */
   const lookup = (sid: string, faction: string, rank: string, field: string) => {
@@ -169,10 +174,13 @@ async function loadSizes() {
       fullAt: lookup(sid, faction, rank, "MaxSpawnQuantityRespawnTimeSeconds") ?? 480,
     };
   };
-  return { capacity, startTiming, missing };
+  /** Sum of MinQuantityPerArchetype in the rank block: the game's capacity roll starts there. */
+  const minSum = (sid: string, faction: string, tier: number): number =>
+    lookup(sid, faction, RANKS[tier], "SpawnSettingsPerArchetypes") ?? 0;
+  return { capacity, minSum, startTiming, missing };
 }
 
-/** Faction parents and AttackLairRestrictions from vanilla RelationPrototypes.cfg. */
+/** Faction parents and AttackLairRestrictions from vanilla RelationPrototypes.cfg, plus the attacks LairWars adds. */
 export async function loadRelations() {
   const [def] = (await readFileAndGetStructs<Struct>("RelationPrototypes.cfg")).filter(
     (s) => s.SID === "Default",
@@ -189,6 +197,7 @@ export async function loadRelations() {
     named.add(a).add(d);
     if (String(v) === "true") attack.add(`${a}->${d}`);
   }
+  for (const [a, ds] of Object.entries(addedLairAttacks(def))) for (const d of ds) named.add(a).add(d), attack.add(`${a}->${d}`);
   const ancestors = (f: string) => {
     const out: string[] = [];
     for (let x: string | undefined = f; x && out.length < 10; x = parent[x]) out.push(x);

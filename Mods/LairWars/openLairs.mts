@@ -2,6 +2,7 @@ import type { GenericLairPrototype } from "s2cfgtojson";
 import { Struct } from "s2cfgtojson";
 import { readFileAndGetStructs } from "../../src/read-file-and-get-structs.mts";
 import { isGuardLairPrototype } from "./hubLairs.mts";
+import { tierArchetypes, type RankName } from "./lairTiers.mts";
 
 /**
  * Open lairs: every lair prototype outside the hubs lists every faction the A-Life population manager expands
@@ -13,11 +14,13 @@ import { isGuardLairPrototype } from "./hubLairs.mts";
  * Left as vanilla: `Guard*` (hub guards), the hub scientists (SIRCAA, Malachite) and resting lairs
  * (`ELairType::RestingLair`: rest stops for passing squads, no inhabitants of their own).
  *
- * An added faction inherits its block from a donor lair where that faction lives (`DONOR_OVERRIDES`, else the
- * prototype named after it, else the first one that lists it) through a nested refkey
- * (`Bandits.Preset.PossibleInhabitantFactions.Bandits`): the donor's block as patched in the same file, tiers
- * included. It restates only the per-rank `MaxSpawnQuantity` of the lair's starting faction, so a lair keeps its
- * size whoever holds it. A placed lair still starts with its `InitialInhabitantFaction` only.
+ * An added faction copies its block from a donor lair where that faction lives (`DONOR_OVERRIDES`, else the
+ * prototype named after it, else the first one that lists it): the donor's vanilla block in full, with the donor's
+ * tier mixes (lairTiers.mts) and the per-rank `MaxSpawnQuantity` of the lair's starting faction. The lair transformer
+ * then caps it at the donor's own size, so a holder gets min(lair size, its own lair size). A placed lair still starts with its `InitialInhabitantFaction` only.
+ *
+ * Full copies: until 2026-11-14 the block inherited the donor's through a dotted refkey
+ * (`Bandits.Preset.PossibleInhabitantFactions.Bandits`), which the game doesn't resolve (Bayun HP, the same day).
  */
 const HUB_SCIENTIST_PROTOTYPES = new Set(["SIRCAA_Scientists", "MALACHITE_Scientists"]);
 const DONOR_OVERRIDES: Record<string, string> = { Zombie: "NeutralZombies" };
@@ -61,6 +64,9 @@ for (const faction of EXPANDING_FACTIONS) {
   if (donor) donors[faction] = donor;
 }
 
+/** The vanilla lair a faction's open-lair blocks copy from (its home species' lair for a mutant). */
+export const donorOf = (faction: string): Donor | undefined => donors[faction];
+
 /**
  * Faction blocks a lair prototype lacks (none for hub, guard and resting lairs): each inherits its donor's
  * block and restates the lair's own MaxSpawnQuantity per player rank.
@@ -71,14 +77,16 @@ export function addedFactionBlocks(lair: GenericLairPrototype): Array<[string, F
   const listed = new Set(own.map((block) => String(block.Faction)));
   const sizeOf = own.find((block) => String(block.Faction) === String(lair.Preset.InitialInhabitantFaction)) ?? own[0];
   return EXPANDING_FACTIONS.filter((faction) => !listed.has(faction) && donors[faction]).map((faction) => {
-    const ranks = new Struct();
-    donors[faction].block.SpawnSettingsPerPlayerRanks?.forEach(([rank]) => {
+    const { lairSID, key, block: donorBlock } = donors[faction];
+    const block = donorBlock.clone() as FactionBlock;
+    const tiers = tierArchetypes[lairSID]?.[key];
+    block.SpawnSettingsPerPlayerRanks?.forEach(([rank, rankBlock]) => {
+      if (!(rankBlock instanceof Struct)) return;
       const size = sizeOf?.SpawnSettingsPerPlayerRanks?.[rank]?.MaxSpawnQuantity;
-      if (size !== undefined) ranks.addNode(new Struct({ MaxSpawnQuantity: size }), rank);
+      if (size !== undefined) rankBlock.MaxSpawnQuantity = size;
+      const mix = tiers?.[rank as RankName];
+      if (mix) rankBlock.SpawnSettingsPerArchetypes = mix.clone();
     });
-    const block = new Struct({ SpawnSettingsPerPlayerRanks: ranks }) as FactionBlock;
-    const { lairSID, key } = donors[faction];
-    block.__internal__.refkey = `${lairSID}.Preset.PossibleInhabitantFactions.${key}`;
     return [faction, block];
   });
 }

@@ -48,6 +48,13 @@ export const MUTANT_COOLDOWN_DIVISOR_BY_RANK: Record<RankName, number> = {
   Veteran: 5 / 3,
   Master: 2,
 };
+/**
+ * Monolith fighters get extra HP on top of the tier multiplier, more the higher the tier: x1.1 Experienced,
+ * x1.2 Veteran, x1.3 Master (Newbie stays). Monolith should win more of its fights against the other humans.
+ */
+export const monolithHpBonus = (tier: number) => 1 + 0.1 * tier;
+const isMonolith = (archetype: string) => archetype.includes("_Monolith_");
+
 /** Mutants below this vanilla MaxHP also get the tier HP multiplier. */
 export const WEAK_MUTANT_MAX_HP = 200;
 
@@ -125,7 +132,7 @@ for (const add of LAIR_POOL_ADDITIONS) {
   add.lairs.forEach((lair) => (lairPrototypeOverride[lair] = sid));
 }
 /** The vanilla prototype a lair prototype SID stands for (a variant's base, else itself). */
-const vanillaOf = (sid: string) => vanillaLairPrototypes[variants[sid]?.prototype ?? sid];
+export const vanillaOf = (sid: string) => vanillaLairPrototypes[variants[sid]?.prototype ?? sid];
 
 type Archetypes = Array<[string, { MinQuantityPerArchetype?: number; SpawnWeight?: number }]>;
 /** A faction's vanilla archetype list per player-rank block. */
@@ -626,6 +633,21 @@ function deepMerge(target: Struct, source: Struct) {
  * Such a clone is a full copy of the vanilla struct instead, keeping its refurl/refkey, with the bpatched fields
  * (`overrides`) and the tier fields merged in.
  */
+/** Shared sub-structs (`ref/refs.cfg`) by name; copies inline them. */
+const sharedRefs = Object.fromEntries((await readFileAndGetStructs<Struct>("ref/refs.cfg")).map((s) => [s.__internal__.rawName, s]));
+const inlineRefs = (s: Struct) => {
+  for (const [k, v] of Object.entries(s)) {
+    if (!(v instanceof Struct)) continue;
+    const ref = v.__internal__.refurl?.includes("refs.cfg") ? sharedRefs[v.__internal__.refkey as string] : undefined;
+    if (ref) {
+      const copy = ref.clone();
+      copy.__internal__.rawName = k;
+      copy.__internal__.isRoot = false;
+      (s as any)[k] = copy;
+    } else inlineRefs(v);
+  }
+};
+
 export function buildEnemyClone(key: string, overrides?: Record<string, unknown>) {
   const { archetype, rank, tier, mutant } = enemyClones[key];
   const clone = buildEnemyCloneFields(key, archetype, rank, tier, mutant);
@@ -634,6 +656,13 @@ export function buildEnemyClone(key: string, overrides?: Record<string, unknown>
   copy.__internal__.rawName = key;
   copy.__internal__.isRoot = true;
   Object.assign(copy, overrides);
+  // Keep ../: with the vanilla refurl=MutantBase.cfg the copies took no damage in game; with ../ they die but fall
+  // back to ObjPrototypes.cfg [0] and lose MutantBase's BinocularsParamsSID, so it's restated (2026-11-14).
+  if (copy.__internal__.refurl) {
+    copy.__internal__.refurl = `../${copy.__internal__.refurl}`;
+    copy.BinocularsParamsSID ??= resolveObjField(archetype, (s) => s.BinocularsParamsSID) ?? "HumanBinocularsParams";
+  }
+  inlineRefs(copy);
   return deepMerge(copy, clone) as ObjPrototype;
 }
 
@@ -647,7 +676,8 @@ function buildEnemyCloneFields(key: string, archetype: string, rank: RankName | 
   if (!mutant && rank && generator) clone.ItemGeneratorPrototypeSID = rankItemGeneratorSID(generator, rank);
   const maxHP = num(resolveObjField(archetype, (s) => s.VitalParams?.MaxHP));
   if (maxHP && tier > 0 && (!mutant || maxHP < WEAK_MUTANT_MAX_HP)) {
-    clone.VitalParams = new Struct({ MaxHP: round(maxHP * tierMultiplier(tier)) }) as any;
+    const bonus = isMonolith(archetype) ? monolithHpBonus(tier) : 1;
+    clone.VitalParams = new Struct({ MaxHP: round(maxHP * tierMultiplier(tier) * bonus) }) as any;
   }
   if (mutant && rank) Object.assign(clone, mutantRankFields(archetype, rank));
   return clone;

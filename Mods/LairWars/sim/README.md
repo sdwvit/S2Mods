@@ -5,10 +5,8 @@ and culling, over game days. It reads the current LairWars build, so it follows 
 
 ```sh
 # from the S2Mods root
-node Mods/LairWars/sim/run.mts --days 10 --rank 1 --runs 3        # rank: 0 Newbie .. 3 Master
-node Mods/LairWars/sim/run.mts --set sizeByOccupant=true           # override an assumed rule (rules.mts)
-node Mods/LairWars/sim/run.mts --json out.json                     # full results, events and timeline
-node Mods/LairWars/sim/calibrate.mts --seeds 3                     # fit against tracker recordings
+node Mods/LairWars/sim/run.mts --days 10 --rank 1 --seed 1 --runs 1    # rank 0 Newbie .. 3 Master; rules in rules.mts
+node Mods/LairWars/sim/calibrate.mts --seeds 3 --min-hours 0.4 --dir <session_logs>
 ```
 
 A 10-day run takes about 10 s (2.5 s of it is reading the built 39 MB lair cfg).

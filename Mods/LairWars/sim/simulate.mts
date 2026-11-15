@@ -1,5 +1,8 @@
 import type { World } from "./world.mts";
-import { fromMod as modRules, assumed, maxSquad, unitPower, speciesTier } from "./rules.mts";
+import { fromMod as modRules, assumed, maxSquad, speciesTier } from "./rules.mts";
+import { regionOf } from "../regionTiers.mts";
+import { MONOLITH_EXPANSION_SPEED } from "../transformNPCNeedsPresetPrototypes.mts";
+import { fighter, duel, type Combat, type Fighter } from "./combat.mts";
 
 /**
  * Offline A-Life of the whole Zone at lair level, stepped every expansion check (5 s real time):
@@ -17,7 +20,7 @@ import { fromMod as modRules, assumed, maxSquad, unitPower, speciesTier } from "
  * The player is not simulated (all of it runs offline). See rules.mts for what is known and what is assumed.
  */
 
-type Unit = { need: number; rate: number; power: number };
+type Unit = { need: number; rate: number; f: Fighter };
 type Lair = {
   i: number;
   id: string;
@@ -33,6 +36,7 @@ type Lair = {
   cap: number;
   units: Unit[];
   wipedAt: number | null;
+  homeOwner: string;
   lastRefill: number;
   near: Array<[number, number]>; // [lair index, distance m], nearest first, within the expansion radius
   /** Filling for the first time (fresh game): spawn timing of its prototype, until it is full or taken. */
@@ -47,7 +51,7 @@ type Squad = {
   returning: boolean;
 };
 
-export type Options = { days: number; rankTier: number; seed: number; snapshotsPerDay?: number };
+export type Options = { days: number; rankTier: number; seed: number; snapshotsPerDay?: number; combat?: Combat; evenSizes?: [number, number]; s4Solo?: boolean; s4Safe?: boolean; capturedShare?: number; capturedRefill?: number; bases?: number; basesPerRegion?: boolean; buff?: { group: string; squad: number; camp: number; speed: number; weightAdd: number } };
 
 export type Event = {
   t: number;
@@ -72,6 +76,7 @@ function rng(seed: number) {
 
 export function simulate(world: World, opt: Options) {
   const rand = rng(opt.seed);
+  const combat: Combat = opt.combat ?? "vanilla";
   const fromMod = { ...modRules, ...world.overrides };
   const realSeconds = (opt.days * 86400) / assumed.gameTimeScale;
   // seconds between expansion checks; the cfg value's unit is unknown (assumed.checkUnit)
@@ -81,22 +86,43 @@ export function simulate(world: World, opt: Options) {
     (perMinute / 60) * (assumed.needClock === "game" ? assumed.gameTimeScale : 1);
   const effTier = (region: number) => Math.max(opt.rankTier, region - 1);
 
-  const newUnit = (l: Lair, need = fromMod.needStart): Unit => ({
-    need,
-    rate: needPerSecond(fromMod.needRateMin + rand() * (fromMod.needRateMax - fromMod.needRateMin)),
-    power: unitPower(l.group, l.tier, world.isMutant(l.owner)),
-  });
+  /** what-if: one faction group buffed (bigger squads, camps, faster need and expansion, extra weight) */
+  const buff = (group: string) => (opt.buff && opt.buff.group === group ? opt.buff : undefined);
+  const newUnit = (l: Lair, need = fromMod.needStart): Unit => {
+    const b = buff(l.group);
+    const f = fighter(l.group, l.tier, world.isMutant(l.owner));
+    if (b) f.weight += b.weightAdd;
+    return {
+      need,
+      rate:
+        needPerSecond(fromMod.needRateMin + rand() * (fromMod.needRateMax - fromMod.needRateMin)) *
+        (b?.speed ?? 1) *
+        (l.group === "Monolith" ? MONOLITH_EXPANSION_SPEED : 1), // the mod's Monolith preset
+      f,
+    };
+  };
   /**
-   * Lair size for a holder. As built, a lair's block for a faction that moved in is sized for the lair's own species
-   * (a tushkan lair taken by chimeras holds 30-45). With assumed.sizeByOccupant a mutant holder gets the size of its
-   * own species' lair prototype instead (what-if for a fix in the mod).
+   * Lair size for a holder, rolled the way the game does (retail exe 0x143215e0c, on lair init and on every owner
+   * change; Stalker2Disasm/re/lair_capacity.mjs): uniform from the rank block's sum of MinQuantityPerArchetype to its
+   * MaxSpawnQuantity, never below the current inhabitants, at least 1. 0 when the lair has no block for the owner.
    */
   const capFor = (l: Lair, owner: string) => {
-    const own = world.capacity(l.prototype, owner, l.tier);
-    if (!assumed.sizeByOccupant || !world.isMutant(owner)) return own;
-    const species = world.capacity(world.group(owner), world.group(owner), l.tier);
-    return own > 0 && species > 0 ? species : own;
+    let max = world.capacity(l.prototype, owner, l.tier);
+    if (max <= 0) return 0;
+    let min = world.minSum?.(l.prototype, owner, l.tier) ?? max; // recordings carry the rolled capacity
+    if (opt.evenSizes) {
+      // what-if: every lair block sized into [lo, hi]
+      const [lo, hi] = opt.evenSizes;
+      max = Math.min(hi, Math.max(lo, max));
+      min = Math.min(min, max);
+    }
+    const cap = max >= min ? min + Math.floor((max - min + 1) * rand()) : min;
+    // what-if: a holder outside its starting lair gets only part of the roll
+    const share = opt.capturedShare !== undefined && owner !== l.homeOwner ? opt.capturedShare : 1;
+    return Math.max(1, Math.round(cap * share * (buff(world.group(owner))?.camp ?? 1)), l.units.length);
   };
+  /** what-if: refill cooldowns for a holder outside its starting lair are this many times longer */
+  const refillMult = (l: Lair) => (opt.capturedRefill !== undefined && l.owner !== l.homeOwner ? opt.capturedRefill : 1);
   const setOwner = (l: Lair, owner: string) => {
     l.owner = owner;
     l.group = world.group(owner);
@@ -108,6 +134,7 @@ export function simulate(world: World, opt: Options) {
     const l: Lair = {
       ...w,
       i,
+      homeOwner: w.owner,
       group: "",
       tier,
       cap: 0,
@@ -118,6 +145,8 @@ export function simulate(world: World, opt: Options) {
       fresh: null,
     };
     setOwner(l, w.owner);
+    // what-if: S4 species' own lairs can't be captured (spawn actor CanBeCaptured = false)
+    if (opt.s4Safe && speciesTier(l.group, world.isMutant(l.owner)) === 4) l.capturable = false;
     if (!l.active) return l;
     if (w.pop !== undefined)
       for (let n = 0; n < w.pop; n++) l.units.push(newUnit(l, rand() * assumed.startNeedMax));
@@ -130,6 +159,22 @@ export function simulate(world: World, opt: Options) {
     return l;
   });
   const R = fromMod.expansionRadiusM;
+  if (opt.bases !== undefined || opt.basesPerRegion) {
+    // what-if: every faction group keeps bases that can't be captured (spawn actor CanBeCaptured = false):
+    // max(1, share x its starting lairs), the ones with the most of its own lairs within the expansion radius
+    // with basesPerRegion: one base per faction group in each of the 22 regions it starts in
+    const byGroup = new Map<string, Lair[]>();
+    for (const l of lairs) {
+      if (!l.active || !l.capturable) continue;
+      const key = opt.basesPerRegion ? `${l.group}|${regionOf(l.x * 100, l.y * 100).name}` : l.group;
+      byGroup.set(key, [...(byGroup.get(key) ?? []), l]);
+    }
+    for (const own of byGroup.values()) {
+      const near = (a: Lair) => own.filter((b) => Math.hypot(a.x - b.x, a.y - b.y) <= R).length;
+      const n = opt.basesPerRegion ? 1 : Math.max(1, Math.round(own.length * opt.bases!));
+      own.map((l) => [near(l), l] as const).sort((a, b) => b[0] - a[0]).slice(0, n).forEach(([, l]) => (l.capturable = false));
+    }
+  }
   for (const a of lairs) {
     for (const b of lairs) {
       if (a === b || !b.active || !b.capturable) continue;
@@ -183,21 +228,25 @@ export function simulate(world: World, opt: Options) {
     for (let k = 0; k < cands.length; k++) if ((r -= w[k]) <= 0) return cands[k];
     return cands[cands.length - 1];
   };
-  const removeRandom = (arr: Unit[], n: number) => {
-    for (let k = 0; k < n && arr.length; k++) arr.splice(Math.floor(rand() * arr.length), 1);
-  };
-  const power = (us: Unit[]) => us.reduce((s, u) => s + u.power, 0);
 
   for (let t = 0; t <= realSeconds; t += dt) {
     // 1-2. needs and squads. Which lairs the population manager looks at in this check: see assumed.expansionMode.
-    const chosen =
-      assumed.expansionMode === "global"
-        ? new Set(
-            Array.from({ length: assumed.expansionsPerCheck }, () =>
-              Math.floor(rand() * lairs.length),
-            ),
-          )
-        : null;
+    let chosen: Set<number> | null = null;
+    if (assumed.expansionMode === "global")
+      chosen = new Set(Array.from({ length: assumed.expansionsPerCheck }, () => Math.floor(rand() * lairs.length)));
+    else if (assumed.expansionMode === "perFaction") {
+      // each expanding faction, with factionChance, picks one of its lairs that has a squad ready
+      const byOwner = new Map<string, number[]>();
+      for (const l of lairs) {
+        if (!l.active || !world.expanding.has(l.owner)) continue;
+        const ready = l.units.filter((u) => u.need >= 100).length;
+        if (ready < fromMod.minSquad || l.units.length - assumed.keepHome < fromMod.minSquad) continue;
+        byOwner.set(l.owner, [...(byOwner.get(l.owner) ?? []), l.i]);
+      }
+      chosen = new Set();
+      for (const [owner, ids] of byOwner)
+        if (rand() < assumed.factionChance * (buff(world.group(owner))?.speed ?? 1)) chosen.add(ids[Math.floor(rand() * ids.length)]);
+    }
     for (const l of lairs) {
       if (!l.active || !l.units.length) continue;
       let ready = 0;
@@ -209,7 +258,7 @@ export function simulate(world: World, opt: Options) {
       if (ready < fromMod.minSquad || !world.expanding.has(l.owner)) continue;
       const size = Math.min(
         ready,
-        maxSquad(l.group, world.isMutant(l.owner)),
+        opt.s4Solo && speciesTier(l.group, world.isMutant(l.owner)) === 4 ? 1 : (buff(l.group)?.squad ?? maxSquad(l.group, world.isMutant(l.owner))),
         l.units.length - assumed.keepHome,
       );
       if (size < fromMod.minSquad) continue;
@@ -280,23 +329,28 @@ export function simulate(world: World, opt: Options) {
         continue;
       }
       counters.battles++;
-      const A = power(q.units);
-      const D = power(l.units);
-      const k_ = assumed.battleExponent;
-      const attackerWins = rand() < A ** k_ / (A ** k_ + D ** k_);
-      const [win, lose, winPow, losePow] = attackerWins
-        ? [q.units, l.units, A, D]
-        : [l.units, q.units, D, A];
-      const winLoss = Math.round(win.length * Math.min(1, (losePow / winPow) * assumed.lossScale));
-      kill(attackerWins ? l.group : world.group(q.faction), lose.length);
-      kill(attackerWins ? world.group(q.faction) : l.group, winLoss);
-      counters.battleDeaths += lose.length + winLoss;
-      removeRandom(win, winLoss);
+      // Duels (combat.mts) until one side is gone. Assumed: units pair up at random, and wounds last for the battle
+      // only (the winner of one duel fights the next one wounded, then heals).
+      const att = q.units.map((u) => ({ u, f: { ...u.f } }));
+      const def = l.units.map((u) => ({ u, f: { ...u.f } }));
+      while (att.length && def.length) {
+        const ai = Math.floor(rand() * att.length);
+        const di = Math.floor(rand() * def.length);
+        const r = duel(att[ai].f, def[di].f, combat, rand);
+        if (r !== "t") def.splice(di, 1);
+        if (r !== "a") att.splice(ai, 1);
+      }
+      const attackerWins = att.length > 0;
+      kill(l.group, l.units.length - def.length);
+      kill(world.group(q.faction), q.units.length - att.length);
+      counters.battleDeaths += l.units.length - def.length + q.units.length - att.length;
+      const win = (attackerWins ? att : def).map((x) => x.u);
+      if (!attackerWins) l.units = win;
       events.push({ t, kind: "battle", lair: l.id, from, to: q.faction, won: attackerWins, dist });
       if (attackerWins && win.length) {
         l.fresh = null;
+        l.units = win; // before setOwner: the capacity roll never goes below the units already there
         setOwner(l, q.faction);
-        l.units = win;
         l.wipedAt = null;
         l.lastRefill = t;
         counters.attackerWins++;
@@ -329,14 +383,14 @@ export function simulate(world: World, opt: Options) {
       }
       if (l.units.length === 0) {
         if (l.wipedAt === null) l.wipedAt = t;
-        else if (t - l.wipedAt >= fromMod.fullWipeRefillCooldown) {
+        else if (t - l.wipedAt >= fromMod.fullWipeRefillCooldown * refillMult(l)) {
           const n = Math.max(1, Math.round(l.cap * assumed.fullWipeRespawnShare));
           for (let k = 0; k < n; k++) l.units.push(newUnit(l));
           l.wipedAt = null;
           l.lastRefill = t;
           counters.respawned += n;
         }
-      } else if (l.units.length < l.cap && t - l.lastRefill >= fromMod.partialWipeRefillCooldown) {
+      } else if (l.units.length < l.cap && t - l.lastRefill >= fromMod.partialWipeRefillCooldown * refillMult(l)) {
         l.units.push(newUnit(l));
         l.lastRefill = t;
         counters.refilled++;

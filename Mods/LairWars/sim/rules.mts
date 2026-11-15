@@ -14,8 +14,10 @@ import {
   EXPANSION_MAX_INCREASE_PER_MINUTE,
   EXPANSION_MIN_SQUAD_SIZE,
   LONER_SQUAD_SIZE,
+  BIG_MUTANT_SQUAD_SIZE,
+  MONOLITH_SQUAD_SIZE,
 } from "../transformNPCNeedsPresetPrototypes.mts";
-import { tierMultiplier, MUTANT_COOLDOWN_DIVISOR_BY_RANK, RANKS } from "../lairTiers.mts";
+import { RANKS } from "../lairTiers.mts";
 
 /**
  * Rules of the simulation. `fromMod` values are imported from the LairWars transformers, so they follow the build.
@@ -57,26 +59,22 @@ export const assumed = {
   /**
    * How often a lair with ready inhabitants actually sends a squad. "perLair": each lair, each check, with
    * `expansionChance`. "global": the population manager looks at `expansionsPerCheck` random lairs per check.
-   * Unknown; fitted against recordings (see calibrate.mts).
+   * "perFaction": each check, every expanding faction sends from one of its lairs with ready inhabitants, with
+   * `factionChance` (ALifePopulationManagerFactionPrototypes lists factions one by one, and in game even
+   * one-lair factions travel and expand). Unknown; fitted against recordings (see calibrate.mts).
    */
   /** Unit of ALifeLairExpansionTime (mod 5, vanilla 50): real seconds or game minutes. Unknown. */
   checkUnit: "seconds" as "seconds" | "gameMinutes",
-  expansionMode: "perLair" as "perLair" | "global",
+  expansionMode: "perFaction" as "perLair" | "global" | "perFaction",
   // fitted: 0.0003 per 5 s check matches 16.8 captures/h over 8 recordings (calibrate.mts, 2026-11-14)
   expansionChance: 0.0003,
   expansionsPerCheck: 1,
+  // fitted: 0.0035 per 5 s check gives ~17 captures/h over the 8 recordings (16.8 recorded; calibrate.mts, 2026-11-14)
+  factionChance: 0.0035,
   /** Inhabitants a lair keeps at home when a squad forms. The mod's design says home is never left empty. */
   keepHome: 1,
   /** A squad that finds no target: its members' need drops back to the start value. */
   resetNeedWithoutTarget: true,
-  /**
-   * Offline battle: P(attacker wins) = A^k / (A^k + D^k), A and D the summed power of each side. The winner loses
-   * min(1, (loser / winner) * lossScale) of its units. Not known from the binary: a Lanchester-style guess.
-   */
-  battleExponent: 1.5,
-  lossScale: 0.6,
-  /** What-if: a mutant that takes a lair holds as many as its own species' lair would (not the lair's size). */
-  sizeByOccupant: false,
   /** A lair coming back after a full wipe spawns this share of its capacity at once; the rest refills one by one. */
   fullWipeRespawnShare: 1,
   /** Starting expansion need of the inhabitants at the start of a run: random in [0, startNeedMax). */
@@ -93,8 +91,10 @@ const LONERS = new Set([
   "Deer",
   "Rat",
 ]);
+/** Chimeras, pseudogiants and deer have their own preset (transformNPCNeedsPresetPrototypes.mts). */
+const BIG_MUTANTS = new Set(["Chimera", "Pseudogiant", "Deer"]);
 export const maxSquad = (faction: string, isMutant: boolean) =>
-  LONERS.has(faction) ? fromMod.lonerMaxSquad : faction === "Zombie" ? 5 : isMutant ? 4 : 4;
+  faction === "Monolith" ? MONOLITH_SQUAD_SIZE.max : BIG_MUTANTS.has(faction) ? BIG_MUTANT_SQUAD_SIZE.max : LONERS.has(faction) ? fromMod.lonerMaxSquad : faction === "Zombie" ? 5 : isMutant ? 4 : 4;
 
 /**
  * Power of one inhabitant: BetterQuestRewards' base reward per enemy (Mods/BetterQuestRewards quest table),
@@ -130,13 +130,6 @@ const BASE_POWER: Record<string, number> = {
   Corpus: 350, // (assumed)
   Scientists: 150, // (assumed)
 };
-
-/** Humans and weak mutants get the tier HP multiplier; strong mutants the attack-speed divisor (lairTiers.mts). */
-export function unitPower(group: string, tier: number, isMutant: boolean) {
-  const base = BASE_POWER[group] ?? 300;
-  const weak = !isMutant || base <= 250;
-  return base * (weak ? tierMultiplier(tier) : MUTANT_COOLDOWN_DIVISOR_BY_RANK[RANKS[tier]]);
-}
 
 /** Species tier S1-S4 (BetterQuestRewards bands), for the report. Humans get 0. */
 export function speciesTier(group: string, isMutant: boolean) {
