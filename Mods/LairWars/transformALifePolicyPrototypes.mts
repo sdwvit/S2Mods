@@ -8,14 +8,14 @@ import type { Struct } from "s2cfgtojson";
  * Wiped lairs refill slower: 30 min after a full wipe, 10 min after a partial one (vanilla 6 min and 2 min; real
  * seconds, the 133 s median measured between refills matched vanilla's 2 min).
  *
- * Vanilla refills a lair only while the player is 200-250 m away (Min/MaxRefillDistance). MinRefillDistance 0 lets a
- * lair refill right next to the player. MaxRefillDistance stays vanilla.
+ * Vanilla refills a lair only while the player is 200-250 m away (Min/MaxRefillDistance). MinRefillDistance 25 m lets a
+ * lair refill while the player is close, but not on top of them. MaxRefillDistance stays vanilla.
  */
 export const TRIGGER_EXTINCTION = 15000;
 export const STOP_EXTINCTION = 14900;
 export const FULL_WIPE_REFILL_COOLDOWN = 1800;
 export const PARTIAL_WIPE_REFILL_COOLDOWN = 600;
-export const MIN_REFILL_DISTANCE = 0;
+export const MIN_REFILL_DISTANCE = 2500;
 
 export function transformALifePolicyPrototypes(struct: Struct) {
   if (struct.SID !== "Default") {

@@ -76,7 +76,7 @@ Final `MaxSpawnQuantity`, Newbie / Experienced / Veteran / Master. Region varian
 
 - Lair refill timers are vanilla: 180 s to the start count, 480 s to full, 480 s after a wipe.
 - Wiped lairs come back after 30 min (full wipe) or 10 min (partial). Vanilla is 6 min and 2 min.
-- `MinRefillDistance` is 0, so lairs refill even next to the player.
+- `MinRefillDistance` is 25 m, so lairs refill while the player is close, but not within 25 m.
 - Culling (extinction) starts at 15,000 living units and stops at 14,900. Vanilla is 2,000. One session had 8,800 alive, and a 4,000 cap culled them all session.
 
 ## Wild lairs

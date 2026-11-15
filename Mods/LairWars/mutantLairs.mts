@@ -58,6 +58,11 @@ import { Struct } from "s2cfgtojson";
  *   Hand edits and WildField lairs keep their species.
  * - Then half the pseudodog and bayun lairs (worst habitat fit first) became S1 where the region allows it (best
  *   fit, least common first), else snorks: 139 -> 69 pseudodogs, 79 -> 39 bayuns.
+ * - Then snorks gave way in R3 and R4: S1 rose to 20% of R3 and 15% of R4 lairs, spread so each region's S1 share
+ *   evens out, and the S2 left in each tier split snork .45 / pseudodog .35 / bayun .2. Only snork lairs changed,
+ *   the most crowded first (snork neighbours within 500 m). S1 species by distance to the nearest region or hub
+ *   centre (tracker places.json, terciles): far boar / blind dog, mid tushkan / flesh, near zombie / flesh, the one
+ *   least present within 1.5 km; new bayuns nearest the centres, pseudodogs farthest. Snorks 341 -> 171.
  *
  * Hand edits (applied to the lair nearest each position)
  * - 7239, 5380 m: a controller lair, with a zombie lair 25 m away at 7253, 5359 m; boss lairs within 300 m of it
@@ -66,7 +71,7 @@ import { Struct } from "s2cfgtojson";
  *
  * Each lair becomes three cfg-only spawn actors shaped like a median vanilla mutant lair: the lair spawner, a core
  * volume (where it spawns) and a territory volume. SIDs come from `seed`: the lair's owner and position when it was
- * first placed, kept when its species changes (422 owners changed since), so saves keep the same lairs.
+ * first placed, kept when its species changes (592 owners changed since), so saves keep the same lairs.
  */
 /** `seed`: the SID seed. It keeps the lair's first owner, so a lair whose species changed keeps its SID. */
 type MutantLair = { owner: string; faction: string; x: number; y: number; z: number; seed: string };
@@ -76,8 +81,9 @@ type MutantLair = { owner: string; faction: string; x: number; y: number; z: num
  * applied-mod version differs and spawn it again from the new prototype, so it never duplicates and never keeps a
  * stale species. Version 1: region prototypes and species by region (saves from before had no version).
  * Version 2: half the pseudodog and bayun lairs changed species.
+ * Version 3: 170 R3/R4 snork lairs became S1, pseudodogs and bayuns.
  */
-const ADDED_LAIR_VERSION = 2;
+const ADDED_LAIR_VERSION = 3;
 
 /** Median vanilla mutant lair: spawner about 7 m over the ground, core volume just above it. */
 const LAIR_ABOVE_GROUND = 700;

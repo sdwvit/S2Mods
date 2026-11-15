@@ -34,7 +34,7 @@ Every faction and mutant species can spread across the Zone and take over other 
 [/list]
 [*] Over 800 new mutant lairs, placed in the wild away from hubs, camps and anomalies. Each starts with a species suited to the region: tushkans, fleshes, dogs and boars near the starting areas; bloodsuckers and controllers farther in; chimeras and pseudogiants mostly in the north.
 [*] Lair populations depend on the species and grow with your rank. Tushkans and blind dogs gather in large numbers; fleshes and boars around a dozen; snorks 15–20; pseudodogs and bayuns 3–5; bloodsuckers 4–6; burers 3–5; poltergeists 2–4; controllers 2–8; deer 3–6; chimeras and pseudogiants 2–6; rats 2–3. Human camps also hold more people than in vanilla. Guard posts and rat swarms are unchanged.
-[*] Lairs refill even while you're nearby: 30 minutes after a full wipe, or 10 minutes after a partial wipe.
+[*] Lairs refill even while you're nearby (but never within 25 m of you): 30 minutes after a full wipe, or 10 minutes after a partial wipe.
 [*] The Zone can support up to 15,000 living units, so roaming squads aren't removed before they reach their destination.
 [/list]
 `,
@@ -53,7 +53,7 @@ Same as the main file, with these differences:
 
 Guard posts and rat nests are unchanged. Install only one version.
 `,
-  changenote: "Far regions now start tougher, wild lairs suit their region, lair sizes follow mutant strength even in captured lairs, offline fights no longer favour any species, the biggest mutants roam in ones and twos, Noon and the military now attack lairs too, the Monolith fields bigger, tougher squads and holds bigger camps, camps with their own guest list (Pripyat Monolith, resting camps) now follow the lair rules, wiped lairs refill slower and bayuns can be killed again.",
+  changenote: "Far regions have far fewer snork lairs with weaker mutants mixed in, and lairs no longer refill within 25 m of you.",
   structTransformers: [
     transformNPCNeedsPresetPrototypes,
     transformGenericLairPrototypes,
