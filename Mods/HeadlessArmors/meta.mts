@@ -53,7 +53,7 @@ export const meta: MetaType = {
     [u]XStartQuestNodeBySID Skif_ItemGen_Skif_All_Gdocs_Armors[/u]
 `,
 
-  changenote: `Suit and helmet descriptions now show durability, with stats lined up in a column and protection on a 0-5 scale.`,
+  changenote: `New mod logo.`,
   structTransformers: [
     transformArmorPrototypes,
     transformItemGenerators,
@@ -328,7 +328,7 @@ export function createArmorPrototype(SID: string, referenceMap: Record<string, A
 
 export const NPC_AVG_DURABILITY = 0.25;
 
-function shouldProcessStruct(struct: ItemGeneratorPrototype) {
+export function shouldProcessStruct(struct: ItemGeneratorPrototype) {
   if (!struct?.ItemGenerator) {
     return false;
   }
@@ -617,34 +617,29 @@ function doOnce(extraStructs: any[]) {
 }
 
 const loggedMissedDrops = {};
-/**
- * Removes existing armor/helmet generation buckets and injects armor sub-item selectors by faction+rank.
- */
-export async function transformItemGenerators(struct: ItemGeneratorPrototype, { filePath }) {
-  if (!shouldProcessStruct(struct)) {
-    return;
-  }
 
-  const extraStructs = [];
-  if (!once && filePath.endsWith("/ItemGeneratorPrototypes.cfg")) {
-    doOnce(extraStructs);
+/** Builds the faction+rank armor maps outside the transformer run (compat patches import this). */
+export function ensureArmorCombos() {
+  if (!once) {
+    doOnce([]);
     once = true;
-    return extraStructs;
   }
-  await waitFor(() => once);
+}
 
+/**
+ * Per player rank, the PlayerRank-keyed SubItemGenerator entry that rolls this NPC generator's
+ * armor and helmet combos. Null for generators the mod leaves alone. Needs the combos built first.
+ */
+export function getArmorEntriesByRank(struct: ItemGeneratorPrototype) {
   const igFaction = getFactionFromItemGeneratorSID(struct.SID);
   if (struct.SID.includes("Guard") || struct.SID.includes("Zombie")) {
-    return;
+    return null;
   }
   if (!igFaction) {
     logger.warn(`Can't guess faction, ${struct.SID}`);
-    return;
+    return null;
   }
-  const fork = struct.fork();
-  fork.ItemGenerator = new Struct().fork() as any;
-  resetCss(struct, fork);
-
+  const entries: [ERank, ItemGeneratorPrototypeItemGeneratorItem][] = [];
   ALL_RANKS_ARR.forEach((rank) => {
     const perFaction = armorSIDSubItemGenInjectedPerFactionPerRankMap[rank as ERank];
     if (perFaction && igFaction === "Noon") {
@@ -664,16 +659,13 @@ export async function transformItemGenerators(struct: ItemGeneratorPrototype, { 
         );
       }
     }
-    const relevantCombosLenght = Object.keys(relevantCombos).length;
-
-    if (!relevantCombosLenght) {
+    if (!Object.keys(relevantCombos).length) {
       if (!loggedMissedDrops[igFaction + rank]) {
         loggedMissedDrops[igFaction + rank] = true;
         logger.warn(`No armors to drop for igFaction '${igFaction}' at rank ${rank}`);
       }
       return;
     }
-
     const igItem = new Struct() as ItemGeneratorPrototypeItemGeneratorItem;
     igItem.Category = "EItemGenerationCategory::SubItemGenerator";
     igItem.PlayerRank = rank;
@@ -684,6 +676,34 @@ export async function transformItemGenerators(struct: ItemGeneratorPrototype, { 
       possibleItem.Weight = 1;
       igItem.PossibleItems.addNode(possibleItem, igSID);
     }
+    entries.push([rank as ERank, igItem]);
+  });
+  return entries;
+}
+/**
+ * Removes existing armor/helmet generation buckets and injects armor sub-item selectors by faction+rank.
+ */
+export async function transformItemGenerators(struct: ItemGeneratorPrototype, { filePath }) {
+  if (!shouldProcessStruct(struct)) {
+    return;
+  }
+
+  const extraStructs = [];
+  if (!once && filePath.endsWith("/ItemGeneratorPrototypes.cfg")) {
+    doOnce(extraStructs);
+    once = true;
+    return extraStructs;
+  }
+  await waitFor(() => once);
+
+  const armorEntries = getArmorEntriesByRank(struct);
+  if (!armorEntries) {
+    return;
+  }
+  const fork = struct.fork();
+  fork.ItemGenerator = new Struct().fork() as any;
+  resetCss(struct, fork);
+  armorEntries.forEach(([rank, igItem]) => {
     fork.ItemGenerator.addNode(igItem, `Armors_for_${rank.split("::").pop()}`);
   });
 
@@ -697,7 +717,7 @@ export async function transformItemGenerators(struct: ItemGeneratorPrototype, { 
 /**
  * Removes any existing item generators
  */
-function resetCss(struct: ItemGeneratorPrototype, fork: ItemGeneratorPrototype) {
+export function resetCss(struct: ItemGeneratorPrototype, fork: ItemGeneratorPrototype) {
   const dummy = new Struct() as ItemGeneratorPrototypeItemGeneratorItem;
   struct.ItemGenerator.forEach(([igIndex, ig]) => {
     if (
