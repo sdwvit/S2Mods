@@ -171,24 +171,27 @@ export class Zone {
   private sidRvas: { pos: number; neg: number } | null = null;
 
   /**
-   * A SID block table: its first 4 entries point at 1024-entry blocks of 32-byte records whose FStrings look like SIDs
-   * (checked at entries 1, 2 and 1000 of block 0 and entry 1 of blocks 1-3). Other .data arrays of FString blocks
-   * passed a weaker check (2026-11-19).
+   * A SID block table: the start of an array of block pointers (the qword before it is not a heap pointer) whose
+   * first 4 blocks hold 32-byte records with printable FStrings at entry 1. Entries are not all SID-like: mod patch
+   * paths ("../../../Stalker2/...cfg") sit among them, which made a stricter text check skip the real table and
+   * accept one starting 15 blocks later (exe+0xb10f600 instead of 0xb10f588, 2026-11-19): every name was then
+   * read 15*1024 entries off.
    */
   private async validSidTable(addr: number): Promise<boolean> {
-    const sidLike = (s: string | null) => !!s && /^[A-Za-z0-9_]+$/.test(s);
-    const head = await this.read(addr, 32);
-    if (!head) return false;
-    const blocks = [0, 8, 16, 24].map((o) => u64(head, o));
-    if (!blocks.every(isHeapPtr)) return false;
-    for (const i of [1, 2, 1000]) if (!sidLike(await this.fstring(blocks[0] + i * 32, 256))) return false;
-    for (const b of blocks.slice(1)) if (!sidLike(await this.fstring(b + 32, 256))) return false;
+    const printable = (s: string | null) => !!s && /^[\x20-\x7e]+$/.test(s);
+    // Blocks are 64 KB-aligned allocations; the qword before the table is not one (0x460000006e there).
+    const isBlock = (p: number) => isHeapPtr(p) && p % 0x10000 === 0;
+    const head = await this.read(addr - 8, 40);
+    if (!head || isBlock(u64(head, 0))) return false;
+    const blocks = [8, 16, 24, 32].map((o) => u64(head, o));
+    if (!blocks.every(isBlock)) return false;
+    for (const b of blocks) if (!printable(await this.fstring(b + 32, 512))) return false;
     return true;
   }
 
   /**
    * SID string tables (positive and negative index). The layout RVAs are hints: on 2026-11-19 the positive table
-   * sat 0x778 past its hint (the hint then held unrelated field-name FStrings), so it is validated, searched for
+   * sat 0x700 past its hint (the hint then held unrelated field-name FStrings), so it is validated, searched for
    * near the hint on a miss, and the hit kept for the run and in the build cache (`sidTables`). The negative
    * table is taken at the same shift.
    */

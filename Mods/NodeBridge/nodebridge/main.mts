@@ -52,8 +52,9 @@ const ENDPOINTS = [
   { path: "/menu", usage: "GET /menu", doc: "screen (init/popup/menu/game-ui/game), active popup, init screen, view stacks, visible widgets/buttons/key hints (with input action)" },
   { path: "/menu/options", usage: "GET /menu/options", doc: "main-menu option buttons top to bottom: buttonAction (LoadLastSaveAction = Continue) and highlighted" },
   { path: "/menu/select", usage: "GET /menu/select?action=LoadLastSaveAction&press=1", doc: "move the highlight onto that option with Up/Down, checking each step; press=1 then presses Enter on it" },
-  { path: "/menu/key", usage: "GET /menu/key?k=Enter|Escape|F|Up|F13|num5|ctrl|vk:0x41...&hold=60", doc: "press any key through the game window's message queue (hold ms); vk:<code> for any virtual-key code" },
+  { path: "/menu/key", usage: "GET /menu/key?k=Enter|Escape|F|Up|F13|num5|ctrl|vk:0x41...&hold=60&real=1&n=1&gap=400", doc: "press any key (n times, gap ms apart) via the game window's message queue (works unfocused: menus, dialogs, popups); real=1 uses SendInput (needs the game focused); vk:<code> for any virtual-key code" },
   { path: "/menu/click", usage: "GET /menu/click?name=<widget>|x=&y=&b=left|right|middle|x1|x2&hold=60", doc: "click a visible widget's centre, window-client x/y, or (no target) press where the cursor/crosshair is; any mouse button; real input via SendInput on DLL v0.2.33+" },
+  { path: "/menu/focus", usage: "GET /menu/focus", doc: "focus the game window with one real click near the bottom centre (not in play); needed before real=1 keys" },
   { path: "/menu/wheel", usage: "GET /menu/wheel?x=&y=&n=1", doc: "mouse wheel notches at window-client x/y (n>0 up)" },
   { path: "/dialog", usage: "GET /dialog", doc: "active dialog: current phrase SID and the NPC's spawn-actor SID (DialogManager+0x350)" },
   { path: "/npc/talk", usage: "GET /npc/talk?uid=<n>", doc: "start the NPC's conversation as if the player pressed Use (native interact handler); NPC must be loaded" },
@@ -78,7 +79,13 @@ const ENDPOINTS = [
 ];
 
 let menuInstance: Menu | null = null;
-const menu = (bridge: Bridge) => (menuInstance ??= new Menu(bridge));
+const menu = (bridge: Bridge) => {
+  if (!menuInstance) {
+    menuInstance = new Menu(bridge);
+    menuInstance.sid = async (i) => (await getZone(bridge)).sid(i);
+  }
+  return menuInstance;
+};
 
 let zone: Promise<Zone> | null = null;
 function getZone(bridge: Bridge): Promise<Zone> {
@@ -158,7 +165,14 @@ function startCommandServer(bridge: Bridge): void {
       }
       if (url.pathname === "/menu/key") {
         if (!q("k")) return reply(400, { error: "k required" });
-        const r = await menu(bridge).key(q("k")!, Number(q("hold") ?? 60));
+        // n>1: repeat with a gap (default 400 ms; 250 ms still dropped one Up of two, 2026-11-19); back-to-back posted keys get dropped (14 Downs moved 2 rows).
+        const n = Math.min(Math.max(Number(q("n") ?? 1), 1), 50);
+        let r: unknown;
+        for (let i = 0; i < n; i++) {
+          if (i) await new Promise((res) => setTimeout(res, Number(q("gap") ?? 400)));
+          r = await menu(bridge).key(q("k")!, Number(q("hold") ?? 60), flag("real"));
+        }
+        if (n > 1) r = { ...(r as object), n };
         bridge.log(`[http] menu key ${q("k")}`);
         return reply(200, r);
       }
@@ -173,6 +187,17 @@ function startCommandServer(bridge: Bridge): void {
             : await m.press(b, hold); // no target: press where the cursor/crosshair is
         bridge.log(`[http] menu click ${JSON.stringify(r)}`);
         return reply(200, r);
+      }
+      if (url.pathname === "/menu/focus") {
+        // Real input (real=1) only reaches the focused window; a SendInput click on the game focuses it under
+        // Wine/Wayland (2026-11-19). Refused in play, where a left click fires the weapon.
+        const m = menu(bridge);
+        const st = await m.state();
+        if (st.screen === "game") return reply(409, { error: "in play a click would shoot; focus the game by hand" });
+        const win = await bridge.game.getWindow();
+        if ("error" in win) return reply(500, win);
+        const r = await m.clickAt(Math.round(win.width / 2), Math.round(win.height * 0.97), "left", 40);
+        return reply(200, { focused: true, screen: st.screen, click: r });
       }
       if (url.pathname === "/menu/wheel") return reply(200, await menu(bridge).wheel(Number(q("x")), Number(q("y")), Number(q("n") ?? 1)));
       if (url.pathname === "/dialog") return reply(200, await currentDialog(bridge, await getZone(bridge)));

@@ -72,43 +72,66 @@ export async function talkTo(bridge: Bridge, zone: Zone, uid: number) {
 
 // Active dialog record (DialogManager+0x350), live probe 2026-11-19 while talking to Viktoria (RSQ01):
 // +0x8 -> struct whose int32 at +0xc is the current phrase's SID index (RSQ01_Dialog_Warlock_RSQ_confirm_26957_4);
-// +0x1c0 int32 = SID index of the NPC's spawn actor (a GUID SID). DialogManager+0x120 is a TArray of running
+// +0x1c0 int32 = SID index of the last chosen reply; +0x148 int32 = the NPC's A-Life uid. DialogManager+0x120 is a TArray of running
 // dialogs (count at +0x128); +0x350 is the one currently playing, which can be an NPC conversation near the player.
 const DIALOG_PHRASE_REF = 0x8;
 const PHRASE_SID = 0xc;
-const DIALOG_NPC_SID = 0x1c0;
+const DIALOG_NPC_SID = 0x1c0; // actually the last chosen reply's SID index (EQ197_QD_Orders_New_73037 after picking it)
+const DIALOG_NPC_UID = 0x148; // int32 A-Life uid of the NPC (864 = ScientistViktoriaDoroznuk, 2026-11-19)
 
+const DIALOG_LIST = 0x120; // DialogManager: TArray<Dialog*> of running dialogs (data, num @+0x128)
+
+/**
+ * Running dialogs with their current phrase and NPC spawn SID. `current` is DialogManager+0x350. Ambient NPC
+ * conversations near the player run here too (2026-11-19: Sidorovich's RSQ06 lines and a hub guard's bark showed
+ * up during another conversation), so the player's own conversation is the one whose phrase belongs to it;
+ * a phrase of null means between lines or waiting for the player's reply.
+ */
 export async function currentDialog(bridge: Bridge, zone: Zone) {
   const L = LAYOUTS[await getBuildId(bridge)];
   if (!L) return { active: false, reason: "no dialog layout for this game build" };
   const base = await getExeBase(bridge);
   const dm = (await readU64At(bridge, base + L.dialogManager)) ?? 0;
   if (!dm) return { active: false, reason: "DialogManager not found" };
-  const d = (await readU64At(bridge, dm + ACTIVE_DIALOG)) ?? 0;
-  if (!d) return { active: false };
   const i32 = async (a: number) => {
     const r = await bridge.game.readMemory(a, 4);
     if (!("hex" in r)) return null;
     const b = parseHex(r.hex);
     return new DataView(b.buffer, b.byteOffset, 4).getInt32(0, true);
   };
-  // The record changes between lines (phrase index 0 in the gap) and two reads can straddle a change:
-  // read until two passes agree.
-  const pass = async () => {
-    const ref = (await readU64At(bridge, d + DIALOG_PHRASE_REF)) ?? 0;
-    return [ref ? await i32(ref + PHRASE_SID) : null, await i32(d + DIALOG_NPC_SID)] as const;
-  };
-  let [phraseIdx, npcIdx] = await pass();
-  for (let n = 0; n < 4; n++) {
-    const [p2, n2] = await pass();
-    if (p2 === phraseIdx && n2 === npcIdx) break;
-    [phraseIdx, npcIdx] = [p2, n2];
-  }
   const name = async (i: number | null) => (i ? await zone.sid(i) : null); // 0 = between lines
-  return {
-    active: true,
-    phrase: await name(phraseIdx),
-    npcSpawnSid: await name(npcIdx),
-    raw: { dialog: `0x${d.toString(16)}`, phraseIdx, npcIdx },
+  const describe = async (d: number) => {
+    // The record changes between lines and two reads can straddle a change: read until two passes agree.
+    const pass = async () => {
+      const ref = (await readU64At(bridge, d + DIALOG_PHRASE_REF)) ?? 0;
+      return [ref ? await i32(ref + PHRASE_SID) : null, await i32(d + DIALOG_NPC_SID)] as const;
+    };
+    let [p, n] = await pass();
+    for (let k = 0; k < 4; k++) {
+      const [p2, n2] = await pass();
+      if (p2 === p && n2 === n) break;
+      [p, n] = [p2, n2];
+    }
+    const uid = await i32(d + DIALOG_NPC_UID);
+    const npc = uid && uid > 0 ? await zone.npcByUid(uid, false) : null;
+    return {
+      dialog: `0x${d.toString(16)}`,
+      character: uid && uid > 0 ? { uid, sid: npc?.sid ?? null } : null,
+      node: await name(p),
+      lastReply: await name(n),
+      raw: { nodeIdx: p, lastReplyIdx: n },
+    };
   };
+  const cur = (await readU64At(bridge, dm + ACTIVE_DIALOG)) ?? 0;
+  const data = (await readU64At(bridge, dm + DIALOG_LIST)) ?? 0;
+  const count = (await i32(dm + DIALOG_LIST + 8)) ?? 0;
+  const ptrs: number[] = [];
+  for (let i = 0; data && i < Math.min(count, 16); i++) {
+    const p = (await readU64At(bridge, data + i * 8)) ?? 0;
+    if (p) ptrs.push(p);
+  }
+  if (cur && !ptrs.includes(cur)) ptrs.unshift(cur);
+  const dialogs = [];
+  for (const p of ptrs) dialogs.push({ current: p === cur, ...(await describe(p)) });
+  return { active: dialogs.length > 0, dialogs };
 }

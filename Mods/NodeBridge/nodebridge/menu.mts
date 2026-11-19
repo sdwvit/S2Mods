@@ -22,6 +22,9 @@ import {
 
 const VISIBILITY = ["Visible", "Collapsed", "Hidden", "HitTestInvisible", "SelfHitTestInvisible"];
 const UWIDGET_VISIBILITY = 0xdc; // UWidget.Visibility (ESlateVisibility, 1 byte)
+const UWIDGET_COLOR = 0x170; // UUserWidget.ColorAndOpacity (FLinearColor, R first)
+const LOADING_SCAN_WINDOW = 20000; // newest GUObjectArray slots searched for the loading widget
+const REPLY_SID = 0x300; // W_DialogueAnswer_Itr2_C: int32 SID index of the reply's DialogPrototype
 /** Live for the whole run. */
 const REQUIRED = ["PopupManager", "UIMainMenuManager", "UIManagerEx"];
 /**
@@ -55,6 +58,9 @@ export class Menu {
   private singletons: Record<string, number> | null = null;
   private offsets = new Map<string, number | null>();
 
+  /** SID index -> SID string (Zone.sid); set by main.mts. */
+  sid: (index: number) => Promise<string | null> = async () => null;
+
   constructor(bridge: Bridge) {
     this.bridge = bridge;
   }
@@ -71,6 +77,35 @@ export class Menu {
   private async className(obj: number): Promise<string> {
     const cls = await this.ptr(obj + 0x10);
     return cls ? getObjectName(this.bridge, cls) : "";
+  }
+
+  private classNames = new Map<number, string>();
+  /** Newest live object of class `cls` among the last `window` GUObjectArray slots (bulk slot reads, class names cached). */
+  private async findNewest(cls: string, window: number): Promise<number> {
+    const arr = (await getBuildAddrs(this.bridge)).guObjectArray;
+    const num = await this.u32(arr + 0x24);
+    const chunks = await this.ptr(arr + 0x10);
+    if (!num || !chunks) return 0;
+    const ITEM = 0x18, PER_CHUNK = 64 * 1024, PER_READ = 170;
+    for (let hi = num; hi > Math.max(0, num - window); ) {
+      const c = Math.floor((hi - 1) / PER_CHUNK);
+      const lo = Math.max(c * PER_CHUNK, hi - PER_READ, num - window);
+      const chunk = await this.ptr(chunks + c * 8);
+      const r = chunk ? await this.bridge.game.readMemory(chunk + (lo - c * PER_CHUNK) * ITEM, (hi - lo) * ITEM) : null;
+      const b = r && "hex" in r ? parseHex(r.hex) : null;
+      for (let k = hi - lo - 1; b && k >= 0; k--) {
+        const lo32 = readU32LE(b, k * ITEM), hi32 = readU32LE(b, k * ITEM + 4);
+        const obj = hi32 * 0x100000000 + lo32;
+        if (!obj) continue;
+        const cp = await this.ptr(obj + 0x10);
+        if (!cp) continue;
+        let n = this.classNames.get(cp);
+        if (n == null) this.classNames.set(cp, (n = await getObjectName(this.bridge, cp)));
+        if (n === cls) return obj;
+      }
+      hi = lo;
+    }
+    return 0;
   }
 
   /** Property offset by name on the object's class chain (cached per class). */
@@ -172,9 +207,9 @@ export class Menu {
       gameViews: string[];
       items: MenuItem[];
       loading: null | { done: boolean; waitingForKey: boolean };
+      needsRealInput?: boolean;
+      dialogReplies?: Array<{ index: number; sid: string | null; name: string; addr: string; y: number; highlighted: boolean; tint: number[] | null }>;
     } = { screen: "game", popup: null, initScreen: null, menuViews: [], gameViews: [], items: [], loading: null };
-    const ls = await this.loadingScreen();
-    res.loading = ls && (ls.waitingForKey || !ls.done) ? ls : null; // a finished screen fades out over the HUD
     const view = s.PopupManager ? await this.prop(s.PopupManager, "PopupView") : 0;
     const popup = view ? await this.prop(view, "ActivePopupWidget") : 0;
     // ActivePopupWidget stays set after a popup closes (its own Visibility too); the PopupView container is what
@@ -197,24 +232,35 @@ export class Menu {
     for (const v of s.UIManagerEx ? await this.array(s.UIManagerEx, "OpenViews") : []) {
       if (v) res.gameViews.push(await this.className(v));
     }
+    const ls = await this.loadingScreen(!res.popup && res.initScreen == null && !res.menuViews.length && !res.gameViews.length);
+    res.loading = ls && (ls.waitingForKey || !ls.done) ? ls : null; // a finished screen fades out over the HUD
     res.screen = res.popup ? "popup" : res.loading ? "loading" : res.initScreen != null ? "init" : res.menuViews.length ? "menu" : res.gameViews.length ? "game-ui" : "game";
+    // Screens that read Enhanced Input directly ignore posted keys: the idle/shader screen (IA_Jump skip, 2026-11-19)
+    // and play itself. Use /menu/focus, then real=1 keys.
+    res.needsRealInput = res.screen === "game" || [res.initScreen, ...res.menuViews.slice(-1)].includes("W_IdleScreenView_C");
     // Items of the topmost layer only: what the player can act on now.
     const top = popup && res.popup ? popup : res.initScreen != null ? init : 0;
     const topViews = top ? [top] : res.menuViews.length ? (await this.array(s.UIMainMenuManager, "OpenViews")).slice(-1) : (await this.array(s.UIManagerEx, "OpenViews")).slice(-1);
     for (const v of topViews) await this.walk(v, "", res.items);
+    const dialogue = s.UIManagerEx ? (await Promise.all((await this.array(s.UIManagerEx, "OpenViews")).map(async (v) => ((await this.className(v)) === "W_DialogueView_C" ? v : 0)))).find(Boolean) : 0;
+    if (dialogue) res.dialogReplies = await this.replies(dialogue);
     return res;
   }
 
   /**
    * W_LoadingScreen_C (outer BP_SML_C): visible while a level loads; when loading finishes the progress bar
-   * collapses and PressAnyButtonText shows ("press any key to continue"). Found by a cached object index
-   * (build cache `loadingScreenIndex`, checked by class); no scans: a stale index means no loading screen.
+   * collapses and PressAnyButtonText shows ("press any key to continue"). No manager or subsystem holds a pointer
+   * to it (2026-11-19: LoadingScreenManager, Game/GlobalLoadingSubsystem, UIManagerEx, PopupManager checked
+   * during a load), and it is created per run. So: keep the last found address (checked by class every call);
+   * when it is gone, look for it only in the loading state (`mayBeLoading`: no menu, init or game views) and
+   * only in the newest LOADING_SCAN_WINDOW object slots, where a freshly created widget sits.
    */
-  private async loadingScreen(): Promise<{ done: boolean; waitingForKey: boolean } | null> {
-    const idx: number | undefined = (await readBuildCache(this.bridge)).loadingScreenIndex;
-    if (idx == null) return null;
-    const w = await getObjectAt(this.bridge, idx);
-    if (!w || (await this.className(w)) !== "W_LoadingScreen_C") return null;
+  private loadingWidget = 0;
+  private async loadingScreen(mayBeLoading: boolean): Promise<{ done: boolean; waitingForKey: boolean } | null> {
+    let w = this.loadingWidget;
+    if (w && (await this.className(w)) !== "W_LoadingScreen_C") w = this.loadingWidget = 0;
+    if (!w && mayBeLoading) w = this.loadingWidget = await this.findNewest("W_LoadingScreen_C", LOADING_SCAN_WINDOW);
+    if (!w) return null;
     if ([1, 2].includes(await this.u8(w + UWIDGET_VISIBILITY))) return null;
     const vis = async (prop: string) => {
       const c = await this.prop(w, prop);
@@ -222,6 +268,59 @@ export class Menu {
     };
     const waitingForKey = await vis("PressAnyButtonText");
     return { done: !(await vis("LoadingProgressBar")), waitingForKey };
+  }
+
+  /**
+   * Visible player replies of the open dialogue view, top to bottom. W_DialogueView_C.AnswerContainer (ScrollBox) holds
+   * W_DialogFolder_C folders; the visible folder's AnswerContainer (VerticalBox) holds W_DialogueAnswer_Itr2_C replies.
+   * Each reply's DialogPrototype SID index is the int32 at +0x300 (verified 2026-11-19 in Viktoria's dialog:
+   * EQ197_QD_Orders_New_73037, SQ93_Dialog_QuestPack_Details_67579). Highlight: the highlighted reply's `Action`
+   * child is tinted dark (ColorAndOpacity ~0.01) while the others are light (~0.8). The SelectedAnswerMark position
+   * test reported the wrong row after a Down press.
+   */
+  private async replies(view: number) {
+    const out: Array<{ index: number; sid: string | null; name: string; addr: string; y: number; highlighted: boolean; tint: number[] | null }> = [];
+    const folders = await this.prop(view, "AnswerContainer");
+    for (const fs of folders ? await this.array(folders, "Slots") : []) {
+      const folder = fs ? await this.prop(fs, "Content") : 0;
+      if (!folder || !(await this.shown(folder))) continue;
+      const box = await this.prop(folder, "AnswerContainer");
+      for (const as of box ? await this.array(box, "Slots") : []) {
+        const w = as ? await this.prop(as, "Content") : 0;
+        if (!w || !(await this.shown(w))) continue;
+        const g = await this.geometry(w).catch(() => null);
+        if (!g || g.size.y * g.scale < 1) continue;
+        const idx = await this.u32(w + REPLY_SID);
+        const action = await this.prop(w, "Action");
+        let tint: number[] | null = null;
+        if (action) {
+          const r = await this.bridge.game.readMemory(action + UWIDGET_COLOR, 16);
+          if ("hex" in r) {
+            const b = parseHex(r.hex);
+            const dv = new DataView(b.buffer, b.byteOffset, 16);
+            tint = [0, 4, 8, 12].map((o) => Math.round(dv.getFloat32(o, true) * 1000) / 1000);
+          }
+        }
+        const highlighted = false;
+        out.push({
+          index: out.length,
+          sid: idx ? await this.sid(idx) : null,
+          name: await getObjectName(this.bridge, w),
+          addr: `0x${w.toString(16)}`,
+          y: Math.round(g.abs.y + (g.size.y * g.scale) / 2),
+          highlighted,
+          tint,
+        });
+      }
+    }
+    // Highlight = the reply whose Action text is drawn clearly darker than every other (normal ~0.8, highlighted
+    // ~0.01). Relative, because special replies (item hand-in) use their own tint: an absolute R < 0.3 test missed
+    // a highlighted Done_73060 on 2026-11-19. With one reply, dark means highlighted.
+    const lum = out.map((o) => (o.tint ? (o.tint[0] + o.tint[1] + o.tint[2]) / 3 : NaN));
+    const order = lum.map((l, i) => [l, i] as const).filter(([l]) => !isNaN(l)).sort((a, b) => a[0] - b[0]);
+    if (order.length === 1) out[order[0][1]].highlighted = order[0][0] < 0.3;
+    else if (order.length > 1 && order[0][0] < order[1][0] * 0.5) out[order[0][1]].highlighted = true;
+    return out;
   }
 
   /** Slate laid the widget out with a nonzero size (UWidget::GetCachedGeometry, a read-only getter). */
@@ -276,9 +375,15 @@ export class Menu {
     return true;
   }
 
-  async key(name: string, holdMs = 60) {
+  /**
+   * Press a key. Default: posted window messages, which reach the game without focus (menus, dialogs, popups).
+   * `real`: SendInput (true OS input, needed where the game reads raw input, e.g. in play). It goes to the
+   * foreground window; under Wayland Wine cannot take focus from a native window (2026-11-19: with the user's
+   * console focused, SendInput keys went to the console), so the game must already be focused.
+   */
+  async key(name: string, holdMs = 60, real = false) {
     const k = keyCode(name);
-    if (k) {
+    if (k && real) {
       const modUps = MODIFIER_VKS.includes(k.vk) ? [] : MODIFIERS.map((m) => ({ type: "key", vk: m.vk, scan: m.scan, ext: !!m.ext, up: true }));
       if (await this.input([...modUps, { type: "key", vk: k.vk, scan: k.scan, ext: !!k.ext }])) {
         await new Promise((r) => setTimeout(r, holdMs));
