@@ -55,6 +55,7 @@ export function createBridge(rpc, modName) {
     virtualProtect: (addr, size, protect) => call("game.virtualProtect", { addr, size, protect }),
     scanAOB: (pattern) => call("game.scanAOB", { pattern }),
     getWindow: () => call("game.getWindow", {}),
+    setCursor: (x, y) => call("game.setCursor", { x, y }),
     windowMessage: (msg, wparam = 0, lparam = 0, post = true) => call("game.windowMessage", { msg, wparam, lparam, post }),
     mainExeBase: () => call("game.mainExeBase"),
     fnameToString: (comp, num) => call("game.fnameToString", { comp, num: num ?? 0 }),

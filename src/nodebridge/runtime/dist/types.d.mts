@@ -199,6 +199,24 @@ export interface GameApi {
     } | {
         error: string;
     }>;
+    /** The game's top-level UnrealWindow: handle, client size, whether it has focus. */
+    getWindow(): Promise<{
+        hwnd: number;
+        left: number;
+        top: number;
+        width: number;
+        height: number;
+        foreground: boolean;
+    } | {
+        error: string;
+    }>;
+    /** PostMessage (or SendMessage with post=false) a raw Win32 message to the game window: WM_KEYDOWN, WM_LBUTTONDOWN... */
+    windowMessage(msg: number, wparam?: number, lparam?: number, post?: boolean): Promise<{
+        ok: boolean;
+        result?: number;
+    } | {
+        error: string;
+    }>;
     /** AOB scan over the main exe. Returns hit address or 0. */
     scanAOB(pattern: string): Promise<{
         pattern: string;

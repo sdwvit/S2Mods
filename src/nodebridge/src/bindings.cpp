@@ -668,6 +668,15 @@ json game_window_message(const json& params) {
   return {{"ok", true}, {"result", static_cast<int64_t>(SendMessageW(h, msg, wp, lp))}};
 }
 
+// params: {x, y} in game-window client pixels; moves the real OS cursor there.
+json game_set_cursor(const json& params) {
+  HWND h = nb_game_window();
+  if (!h) return {{"error", "no UnrealWindow"}};
+  POINT pt{params.value("x", 0), params.value("y", 0)};
+  ClientToScreen(h, &pt);
+  return {{"ok", SetCursorPos(pt.x, pt.y) != 0}, {"screenX", pt.x}, {"screenY", pt.y}};
+}
+
 void install(nb::rpc::Router& router) {
   router.handle("game.isReady", game_is_ready);
   router.handle("game.getEngineVersion", game_get_engine_version);
@@ -696,6 +705,7 @@ void install(nb::rpc::Router& router) {
   router.handle("game.installProcessEventHook", game_install_process_event_hook);
   router.handle("game.getWindow", game_get_window);
   router.handle("game.windowMessage", game_window_message);
+  router.handle("game.setCursor", game_set_cursor);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
 

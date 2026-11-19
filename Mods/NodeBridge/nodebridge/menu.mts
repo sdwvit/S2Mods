@@ -97,7 +97,11 @@ export class Menu {
     if (SINGLETONS.every((k) => out[k])) return out;
     const objects = await getObjectPointers(this.bridge);
     const indices: Record<string, number> = {};
-    for (let i = 0; i < objects.length && !SINGLETONS.every((k) => out[k]); i++) {
+    // UI singletons are created during startup, in the 30k-60k slot range in this build; scan that first.
+    const order = [...Array(objects.length).keys()];
+    order.sort((a, b) => Number(!(a >= 30000 && a < 60000)) - Number(!(b >= 30000 && b < 60000)));
+    for (const i of order) {
+      if (SINGLETONS.every((k) => out[k])) break;
       if (!objects[i]) continue;
       const name = await getObjectName(this.bridge, objects[i]);
       const k = SINGLETONS.find((s) => !out[s] && name.startsWith(`${s}_`));
@@ -133,7 +137,8 @@ export class Menu {
   }
 
   async state() {
-    const s = (this.singletons ??= await this.getSingletons());
+    if (!this.singletons || !SINGLETONS.every((k) => this.singletons![k])) this.singletons = await this.getSingletons();
+    const s = this.singletons;
     const res: {
       screen: string;
       popup: string | null;
@@ -221,6 +226,7 @@ export class Menu {
   /** Left-click at window-client coordinates: move, button down, button up. */
   async clickAt(x: number, y: number) {
     const lp = ((y & 0xffff) << 16) | (x & 0xffff);
+    if (this.bridge.game.setCursor) await this.bridge.game.setCursor(x, y); // older DLLs lack it
     await this.msg(0x200, 0, lp); // WM_MOUSEMOVE
     await new Promise((r) => setTimeout(r, 50));
     await this.msg(0x201, 1, lp); // WM_LBUTTONDOWN (MK_LBUTTON)
@@ -238,7 +244,7 @@ export class Menu {
     if (!hit) throw new Error(`no visible widget named ${name}`);
     const button = items.find((i) => i.path.startsWith(hit.path + "/") && i.class === "Button") ?? hit;
     const c = await this.widgetCenter(Number(button.addr));
-    return { clicked: button.path, ...(await this.clickAt(c.x, c.y)) };
+    return { clicked: button.path, geometry: { size: c.size, scale: c.scale, abs: c.abs }, window: c.window, ...(await this.clickAt(c.x, c.y)) };
   }
 
   private hooked = false;
