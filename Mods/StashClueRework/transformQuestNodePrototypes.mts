@@ -8,29 +8,13 @@ import { waitFor } from "../../src/wait-for.mts";
 import { allStashes, finalizeStashes, transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.mts";
 import { precision } from "../../src/precision.mts";
 import { getLaunchers } from "../../src/struct-utils.mts";
+import { getMalahitHandInNodes } from "./transformMalahitHandIn.mts";
 
 let oncePerTransformer = false;
 
 const RandomStashQuestName = modName;
 const RandomStashQuestNodePrefix = modName;
 const randomNodeSID = `${RandomStashQuestNodePrefix}_Random`;
-export const MalachiteMutantQuestPartsQuestsDoneNode = "BodyParts_Malahit_SetDialog_EQ197_QD_Orders";
-export const MalachiteMutantQuestPartsQuestsDoneDialogs = [
-  "EQ197_QD_Orders_Done_73061",
-  "EQ197_QD_Orders_Done2_73167",
-  "EQ197_QD_Orders_Done3_73169",
-  "EQ197_QD_Orders_Done_73061_1",
-  "EQ197_QD_Orders_Done2_73167_1",
-  "EQ197_QD_Orders_Done3_73169_1",
-  "EQ197_QD_Orders_Done_73061_2",
-  "EQ197_QD_Orders_Done2_73167_2",
-  "EQ197_QD_Orders_Done3_73169_2",
-  "EQ197_QD_Orders_Done_73061_3",
-  "EQ197_QD_Orders_Done2_73167_3",
-  "EQ197_QD_Orders_Done3_73169_3",
-  "EQ197_QD_Orders_Done_73061_4",
-  "EQ197_QD_Orders_Done2_73167_4",
-];
 let oncePerBodyParts_Malahit = false;
 /**
  * Removes timeout for repeating quests.
@@ -45,7 +29,7 @@ export async function transformQuestNodePrototypes(
     promises.push(hookStashSpawners(struct, finishedTransformers));
   }
 
-  if (!oncePerTransformer && context.filePath.endsWith("/A-life_interrupts.cfg")) {
+  if (!oncePerTransformer && context.filePath.endsWith("/MalahitRadio.cfg")) {
     oncePerTransformer = true;
     promises.push(injectMassiveRNGQuestNodes(finishedTransformers));
   }
@@ -59,16 +43,13 @@ export async function transformQuestNodePrototypes(
     }
   }
 
-  if (!oncePerBodyParts_Malahit && context.filePath.endsWith("/BodyParts_Malahit.cfg")) {
+  // Own patch files: on 2026-11-19 this mod's new nodes did not load (/sid) in BodyParts_Malahit and
+  // A-life_interrupts, where other installed mods also add new nodes; in files only this mod adds to
+  // (Malahit_SQ_L, MalahitRadio, the RSQ hooks) they loaded.
+  if (!oncePerBodyParts_Malahit && context.filePath.endsWith("/Malahit_SQ_L.cfg")) {
     oncePerBodyParts_Malahit = true;
 
-    promises.push(
-      Promise.resolve(
-        MalachiteMutantQuestPartsQuestsDoneDialogs.map((dialog) =>
-          hookRewardStashClue({ SID: MalachiteMutantQuestPartsQuestsDoneNode, QuestSID: struct.QuestSID }, dialog),
-        ),
-      ),
-    );
+    promises.push(Promise.resolve(getMalahitHandInNodes(QuestRollSID)));
   }
 
   return Promise.all(promises).then((results) => results.flat());
@@ -84,8 +65,22 @@ export async function injectMassiveRNGQuestNodes(finishedTransformers: Set<strin
   const questStart = getQuestStart();
   const questEnd = getQuestEnd();
   extraStructs.push(questStart);
-  extraStructs.push(questEnd);
-  const randomNode = getRandomNode(questStart.SID);
+  extraStructs.push(
+    new Struct({
+      __internal__: { isRoot: true, rawName: `${RandomStashQuestName}_KickMalahitLoop` },
+      SID: `${RandomStashQuestName}_KickMalahitLoop`,
+      QuestSID: RandomStashQuestName,
+      NodeType: "EQuestNodeType::ConsoleCommand",
+      Repeatable: true,
+      ConsoleCommand: "XStartQuestNodeBySID BodyParts_Malahit_StashClueRework_Kick",
+      Launchers: getLaunchers([{ SID: QuestStartSID }]),
+    }) as QuestNodePrototypeConsoleCommand,
+  );
+  // No End node: it fired after the first clue and stopped the quest, so every later hook's
+  // XStartQuestNodeBySID _Roll did nothing until the next world load.
+  void questEnd;
+  extraStructs.push(getQuestRoll());
+  const randomNode = getRandomNode(QuestRollSID);
   extraStructs.push(randomNode);
 
   allStashes.forEach((i, stashId) => {
@@ -113,7 +108,7 @@ export function hookRewardStashClue(struct: { SID: string; QuestSID: string }, N
     NodeType: "EQuestNodeType::ConsoleCommand" satisfies EQuestNodeType,
     Repeatable: true,
     Launchers: getLaunchers([{ SID: struct.SID, Name }]),
-    ConsoleCommand: `XStartQuestNodeBySID ${QuestStartSID}`,
+    ConsoleCommand: `XStartQuestNodeBySID ${QuestRollSID}`,
   }) as QuestNodePrototypeConsoleCommand;
   node.__internal__.isRoot = true;
   node.__internal__.rawName = SID;
@@ -230,13 +225,30 @@ function getRandomNode(launcherSid: string) {
   return node;
 }
 const QuestStartSID = `${RandomStashQuestName}_Start`;
+/**
+ * Hooks start the clue roll here, by SID. Since the 2026-09-11 update a quest a mod adds is not running
+ * until something starts it, and XStartQuestNodeBySID on a node of a stopped quest does nothing, so
+ * meta.gameStartCommand starts the quest on every world load. _Start (LaunchOnQuestStart) therefore no
+ * longer rolls, or every load would hand out a clue.
+ */
+export const QuestRollSID = `${RandomStashQuestName}_Roll`;
+function getQuestRoll() {
+  return new Struct({
+    __internal__: { isRoot: true, rawName: QuestRollSID },
+    SID: QuestRollSID,
+    QuestSID: RandomStashQuestName,
+    NodeType: "EQuestNodeType::Technical",
+    Repeatable: true,
+    StartDelay: 0,
+  }) as QuestNodePrototypeTechnical;
+}
 function getQuestStart() {
   return new Struct({
     __internal__: { isRoot: true, rawName: QuestStartSID },
     SID: QuestStartSID,
     QuestSID: RandomStashQuestName,
     NodeType: "EQuestNodeType::Technical",
-    StartDelay: 0,
+    StartDelay: 5,
     LaunchOnQuestStart: true,
   }) as QuestNodePrototypeTechnical;
 }
@@ -259,6 +271,8 @@ function getQuestEnd() {
 
 transformQuestNodePrototypes.files = [
   "/QuestNodePrototypes/A-life_interrupts.cfg",
+  "/QuestNodePrototypes/Malahit_SQ_L.cfg",
+  "/QuestNodePrototypes/MalahitRadio.cfg",
   "/QuestNodePrototypes/ANCQ01.cfg",
   "/QuestNodePrototypes/ANCQ01_P.cfg",
   "/QuestNodePrototypes/ANCQ27.cfg",

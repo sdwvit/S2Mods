@@ -5,6 +5,7 @@ import { transformSpawnActorPrototypes } from "./transformSpawnActorPrototypes.m
 import { transformCluePrototypes } from "./transformCluePrototypes.mts";
 import { transformQuestNodePrototypes } from "./transformQuestNodePrototypes.mts";
 import { transformQuestPrototypes } from "./transformQuestPrototypes.mts";
+import { transformGlobalVariablePrototypes, transformMalahitDialog } from "./transformMalahitHandIn.mts";
 export const finishedTransformers = new Set<string>();
 
 export const meta: MetaType = {
@@ -18,13 +19,19 @@ Once you finish any recurring quest from base vendors, apart from monetary rewar
 [hr][/hr]
 bPatches: SpawnActorPrototypes/WorldMap_WP/*.cfg, CluePrototypes.cfg,
 `,
-  changenote: "Fixed quest safes that hold or move your gear, like the arena lockers, getting hidden and breaking their quests.",
+  changenote: "Fixed mutant loot turn-ins not giving stash clues.",
+  // On every world load: starts the mod's quest (hooks start its _Roll node by SID, which does nothing while
+  // the quest is stopped); its _Start node then kicks the Malachite poll loop after a delay. Starting the
+  // loop node directly from here did nothing on load (2026-11-19), likely too early for BodyParts_Malahit.
+  gameStartCommand: "XStartQuestBySID StashClueRework",
   structTransformers: [
     transformObjPrototypes,
     transformSpawnActorPrototypes,
     transformQuestPrototypes,
     transformCluePrototypes,
     transformQuestNodePrototypes,
+    transformGlobalVariablePrototypes,
+    transformMalahitDialog,
   ],
   onTransformerFinish(transformer) {
     finishedTransformers.add(transformer.name);
