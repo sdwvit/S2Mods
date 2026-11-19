@@ -13,6 +13,8 @@ Defined in `nodebridge/main.mts` (`ENDPOINTS`); `GET /` lists them.
 - `/obj?addr=<n>`, `/props?struct=<n>`, `/mem?addr=<n>&n=256`: inspect a UObject, a struct's properties, raw memory.
 - `/npc?uid=<n>` or `/npc?sid=<SID>`: A-Life unit (sid, faction, relation subject id, state, health, rank, position).
   `/npcs?sid=&faction=&alive=1&limit=`: filtered pool scan.
+- `/gv?sid=<SID>` or `/gv?q=<substr>`: global variable values, read from `UGlobalVariableManager` (static pointer
+  `globalVariableManager` in zone.mts `BUILD_LAYOUTS`). String values are SID indices, decoded to the SID.
 - `/relation?a=&b=` (a/b: `player`, `uid:N`, `sid:X` or a bare SID, or a relation subject id), `/relations?of=player`,
   `/relation/set?a=&b=&value=` (writes the record directly, bypassing the game's change hooks),
   `/relation/factions?a=&b=&value=` (`XSetRelationBetweenFactions`), `/relation/radius?r=500&value=-500`.
@@ -29,7 +31,7 @@ Defined in `nodebridge/main.mts` (`ENDPOINTS`); `GET /` lists them.
   scan quests crashed the game (null write in exe+0x3b8b9f, 2026-10-29).
 - To debug a quest graph, start one node at a time with `/cmd?c=XStartQuestNodeBySID <SID>` and ask the
   player one yes/no question per step.
-- Console command names and arguments: repo-root `stalker_commands.txt`. `XPrintGlobalVariable` prints nothing.
+- Console command names and arguments: repo-root `stalker_commands.txt`. `XPrintGlobalVariable` prints nothing; read global variables with `/gv`.
 
 ## Build
 - `npm run inject-nodebridge` (hot-reload is wired). Log: `$STALKER2_FOLDER/Stalker2/Binaries/Win64/NodeBridge/logs/bridge.log`.

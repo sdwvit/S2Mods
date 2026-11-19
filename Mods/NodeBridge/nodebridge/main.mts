@@ -20,6 +20,7 @@ import {
   writeBuildCache,
 } from "@nodebridge/runtime";
 import { Zone } from "./zone.mts";
+import { Menu } from "./menu.mts";
 
 const COMMAND_PORT = 47811;
 
@@ -42,6 +43,14 @@ const ENDPOINTS = [
     usage: "GET /npc?uid=<n> | /npc?sid=<SID>[&fresh=1]",
     doc: "A-Life unit(s) by uid or SID: sid, faction, relation subject, state, health, rank, position (record re-read every call)",
   },
+  {
+    path: "/gv",
+    usage: "GET /gv?sid=<SID> | /gv?q=<substr>",
+    doc: "global variable value(s) read from UGlobalVariableManager (type Int/Bool/String; String values decode the stored SID index)",
+  },
+  { path: "/menu", usage: "GET /menu", doc: "screen (init/popup/menu/game-ui/game), active popup, init screen, view stacks, visible widgets/buttons/key hints (with input action)" },
+  { path: "/menu/key", usage: "GET /menu/key?k=Enter|Escape|F|Up...&hold=60", doc: "press a key through the game window's message queue (hold ms)" },
+  { path: "/menu/click", usage: "GET /menu/click?name=<widget name or path suffix> | ?x=&y=", doc: "left-click a visible widget's centre (hints click their button), or window-client x/y" },
   { path: "/npcs", usage: "GET /npcs?sid=<substr>&faction=<substr>&alive=1&limit=100", doc: "scan the unit pool with filters" },
   {
     path: "/relation",
@@ -61,6 +70,9 @@ const ENDPOINTS = [
   },
   { path: "/relation/radius", usage: "GET /relation/radius?r=500&value=-500", doc: "console XSetRelationsInRadius (player vs NPCs within r cm)" },
 ];
+
+let menuInstance: Menu | null = null;
+const menu = (bridge: Bridge) => (menuInstance ??= new Menu(bridge));
 
 let zone: Promise<Zone> | null = null;
 function getZone(bridge: Bridge): Promise<Zone> {
@@ -131,6 +143,28 @@ function startCommandServer(bridge: Bridge): void {
       if (url.pathname === "/npcs") {
         const alive = q("alive") == null ? undefined : flag("alive");
         return reply(200, await (await getZone(bridge)).npcs({ sid: q("sid") ?? undefined, faction: q("faction") ?? undefined, alive, limit: Number(q("limit") ?? 100) }));
+      }
+      if (url.pathname === "/menu") return reply(200, await menu(bridge).state());
+      if (url.pathname === "/menu/key") {
+        if (!q("k")) return reply(400, { error: "k required" });
+        const r = await menu(bridge).key(q("k")!, Number(q("hold") ?? 60));
+        bridge.log(`[http] menu key ${q("k")}`);
+        return reply(200, r);
+      }
+      if (url.pathname === "/menu/click") {
+        const m = menu(bridge);
+        const r = q("name") ? await m.click(q("name")!) : await m.clickAt(Number(q("x")), Number(q("y")));
+        bridge.log(`[http] menu click ${JSON.stringify(r)}`);
+        return reply(200, r);
+      }
+      if (url.pathname === "/gv") {
+        const z = await getZone(bridge);
+        if (q("sid")) {
+          const hit = (await z.globalVariables(q("sid")!)).find((v) => v.sid === q("sid"));
+          return hit ? reply(200, hit) : reply(404, { error: "no global variable with that SID" });
+        }
+        const all = await z.globalVariables(q("q") ?? undefined);
+        return reply(200, { count: all.length, items: all });
       }
       if (url.pathname === "/relation") {
         if (!q("a") || !q("b")) return reply(400, { error: "a and b required" });

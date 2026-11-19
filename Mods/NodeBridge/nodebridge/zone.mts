@@ -18,6 +18,7 @@ export interface BuildLayout {
   sidNegative: number;
   factionBucketCount: number;
   factionBuckets: number;
+  globalVariableManager: number; // RVA of the UGlobalVariableManager* static (101 code refs)
 }
 
 /** Keyed by getBuildId ("<PE TimeDateStamp>-<SizeOfImage>"). */
@@ -29,6 +30,7 @@ export const BUILD_LAYOUTS: Record<string, BuildLayout> = {
     sidNegative: 0xb12ee18,
     factionBucketCount: 0xb0f5f18,
     factionBuckets: 0xb0f5f10,
+    globalVariableManager: 0xa2c85f0,
   },
 };
 
@@ -48,6 +50,17 @@ const U = {
 };
 const R = { next: 0x0, a: 0x28, b: 0x30, value: 0x38, size: 0x40 };
 const RELATION_SELF = 100000;
+
+// UGlobalVariableManager: TSet of {FName SID, int32 value, int32 type} at +0x80 (live probe 2026-11-19).
+// TSparseArray: data ptr, num, max @+0x80; TBitArray allocation flags inline @+0x90 (4 dwords) or heap ptr @+0xa0, bits @+0xa8.
+const GV = { set: 0x80, flagsInline: 0x90, flagsHeap: 0xa0, numBits: 0xa8, stride: 0x1c, value: 8, type: 0xc };
+const GV_TYPES = ["Int", "String", "Bool"] as const; // EGlobalVariableType order in memory; String values are SID indices
+export interface GlobalVariable {
+  sid: string;
+  type: (typeof GV_TYPES)[number] | number;
+  value: number | boolean | string | null;
+  raw: number;
+}
 
 export function relationLevel(v: number): string {
   if (v === RELATION_SELF) return "Self";
@@ -484,6 +497,47 @@ export class Zone {
       }
     }
     return null;
+  }
+
+  private gvNames = new Map<number, string>(); // FName comparison index -> string, static per run
+
+  /** Every global variable (live values from UGlobalVariableManager), optionally filtered by SID substring. */
+  async globalVariables(filter?: string): Promise<GlobalVariable[]> {
+    const mgr = await this.ptr(this.deps.exeBase + this.need().globalVariableManager);
+    if (!isHeapPtr(mgr)) throw new Error("GlobalVariableManager not created yet (load a save)");
+    const h = await this.read(mgr + GV.set, 0x30);
+    if (!h) throw new Error("GlobalVariableManager unreadable");
+    const data = u64(h, 0),
+      num = i32(h, 8);
+    if (!isHeapPtr(data) || !(num >= 0 && num < 100000)) throw new Error(`GlobalVariableManager set looks wrong (num ${num})`);
+    const flagsHeap = u64(h, GV.flagsHeap - GV.set);
+    const flags = isHeapPtr(flagsHeap) ? await this.read(flagsHeap, Math.ceil(num / 32) * 4) : h.subarray(GV.flagsInline - GV.set, GV.flagsInline - GV.set + 16);
+    if (!flags) throw new Error("GlobalVariableManager flags unreadable");
+    const needle = filter?.toLowerCase();
+    const out: GlobalVariable[] = [];
+    const perRead = Math.floor(4096 / GV.stride);
+    for (let i = 0; i < num; i += perRead) {
+      const n = Math.min(perRead, num - i);
+      const b = await this.read(data + i * GV.stride, n * GV.stride);
+      if (!b) continue;
+      for (let k = 0; k < n; k++) {
+        const idx = i + k;
+        if (!((flags[idx >> 3] >> (idx & 7)) & 1)) continue;
+        const o = k * GV.stride;
+        const comp = u32(b, o),
+          fnum = u32(b, o + 4);
+        let sid = this.gvNames.get(comp);
+        if (sid == null) this.gvNames.set(comp, (sid = await this.deps.decodeFName(comp, 0)));
+        if (fnum) sid = `${sid}_${fnum - 1}`;
+        if (needle && !sid.toLowerCase().includes(needle)) continue;
+        const raw = i32(b, o + GV.value),
+          t = i32(b, o + GV.type);
+        const type = GV_TYPES[t] ?? t;
+        const value = type === "Bool" ? raw !== 0 : type === "String" ? await this.sid(raw) : raw;
+        out.push({ sid, type, value, raw });
+      }
+    }
+    return out;
   }
 
   async relation(aRef: string, bRef: string) {
