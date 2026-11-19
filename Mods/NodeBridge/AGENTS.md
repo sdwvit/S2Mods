@@ -20,6 +20,14 @@ Defined in `nodebridge/main.mts` (`ENDPOINTS`); `GET /` lists them.
   `/relation/factions?a=&b=&value=` (`XSetRelationBetweenFactions`), `/relation/radius?r=500&value=-500`.
   Code and layouts: `nodebridge/zone.mts`. Relation records live in a hash set whose bucket array is in exe .data;
   it is found once per build (~2 s scan) and kept in the build cache as `relationBuckets`.
+- Menus (`nodebridge/menu.mts`): `/menu` (screen, popup, views, visible widgets; key hints carry their input action,
+  e.g. `ConfirmHint` = `IA_UI_PopupConfirm`), `/menu/options` (main-menu buttons top to bottom with `buttonAction`
+  and `highlighted`), `/menu/select?action=` (moves the highlight with Up/Down, checks every step; `&press=1` presses
+  Enter once the highlight is confirmed), `/menu/key?k=Enter|Escape|Up|F&hold=ms`, `/menu/click?name=` (needs the cursor-moving DLL, v0.2.31+).
+  Continue = `LoadLastSaveAction`, Quit = `QuitAction`; `GotoViewAction_N` buttons open sub-views (New Game among them).
+  Identify a button by its action before acting; never press a menu button by position. Popups close with Enter
+  (`IA_UI_PopupConfirm`). The shader-cooking screen ends by itself.
+  Full notes (startup flow, how widgets are found, input): `eng-runtime-integration` skill, "Game menus".
 - `/find?q=<substring>&limit=200`: live UObjects by name/class. Slow: it reads names one memory read at a
   time and timed out after 2 min on the full object table. Don't use it for triage.
 

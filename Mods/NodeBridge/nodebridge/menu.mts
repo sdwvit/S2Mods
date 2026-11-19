@@ -10,19 +10,28 @@ import {
   findPropertyOffset,
   findUFunction,
   getBuildAddrs,
+  getBuildId,
+  getExeBase,
   getObjectAt,
   getObjectName,
-  getObjectPointers,
   parseHex,
   readBuildCache,
   readU32LE,
   readU64At,
-  writeBuildCache,
 } from "@nodebridge/runtime";
 
 const VISIBILITY = ["Visible", "Collapsed", "Hidden", "HitTestInvisible", "SelfHitTestInvisible"];
 const UWIDGET_VISIBILITY = 0xdc; // UWidget.Visibility (ESlateVisibility, 1 byte)
-const SINGLETONS = ["PopupManager", "UIMainMenuManager", "UIManagerEx", "WC_InitScreensViewController_C", "LoadingScreenManager"];
+/** Live for the whole run. */
+const REQUIRED = ["PopupManager", "UIMainMenuManager", "UIManagerEx"];
+/**
+ * RVAs of the UI managers in the exe's game-singleton pointer table (exe+0xa2c8598.. holds ~70 managers:
+ * SoundManager, TimeManager, GlobalVariableManager @0xa2c85f0, ...). Keyed by getBuildId. Re-find after a game
+ * update: search exe .data for qwords equal to the live manager addresses.
+ */
+const SINGLETON_RVAS: Record<string, Record<string, number>> = {
+  "2b1aeebf-b954000": { UIMainMenuManager: 0xa2c8618, UIManagerEx: 0xa2c8640, PopupManager: 0xa2c8718 },
+};
 
 export interface MenuItem {
   name: string;
@@ -31,8 +40,15 @@ export interface MenuItem {
   visibility: string;
   /** Input action of a key hint (W_HintInputController_C), e.g. IA_UI_PopupConfirm. */
   action?: string;
+  /** Menu option buttons (W_PushOptionButton_C): ButtonAction class, e.g. LoadLastSaveAction = Continue. */
+  buttonAction?: string;
+  /** Menu option buttons: highlighted now (HoverBackground opacity > 0.5). */
+  highlighted?: boolean;
   addr: string;
 }
+
+/** Main-menu ButtonAction classes, top to bottom in this build (2026-11-19). GotoViewAction_N open sub-views. */
+export const MENU_ACTIONS = { continue: "LoadLastSaveAction", quit: "QuitAction" };
 
 export class Menu {
   private bridge: Bridge;
@@ -86,30 +102,27 @@ export class Menu {
     return Array.from({ length: n }, (_, i) => readU32LE(b, i * 8) + readU32LE(b, i * 8 + 4) * 0x100000000);
   }
 
-  /** UI manager singletons; object indices cached per build and checked by name. */
+  /**
+   * UI manager singletons, read from the exe's singleton pointer table (static per exe build, like the Living
+   * Zone Tracker's native_layout.json: exe base + RVA survives restarts; only heap addresses change).
+   * The init-screen controller is not in that table: it comes from build cache `menuIndices` (startup only,
+   * checked by name; stale = not there). No object-table scans.
+   */
   private async getSingletons(): Promise<Record<string, number>> {
-    const cached: Record<string, number> = (await readBuildCache(this.bridge)).menuIndices ?? {};
+    const build = await getBuildId(this.bridge);
+    const rvas = SINGLETON_RVAS[build];
+    if (!rvas) throw new Error(`no UI singleton table for game build ${build}; find it again (see eng-runtime-integration skill)`);
+    const base = await getExeBase(this.bridge);
     const out: Record<string, number> = {};
-    for (const [k, idx] of Object.entries(cached)) {
-      const obj = await getObjectAt(this.bridge, idx);
+    for (const [k, rva] of Object.entries(rvas)) {
+      const obj = await this.ptr(base + rva);
       if (obj && (await getObjectName(this.bridge, obj)).startsWith(`${k}_`)) out[k] = obj;
     }
-    if (SINGLETONS.every((k) => out[k])) return out;
-    const objects = await getObjectPointers(this.bridge);
-    const indices: Record<string, number> = {};
-    // UI singletons are created during startup, in the 30k-60k slot range in this build; scan that first.
-    const order = [...Array(objects.length).keys()];
-    order.sort((a, b) => Number(!(a >= 30000 && a < 60000)) - Number(!(b >= 30000 && b < 60000)));
-    for (const i of order) {
-      if (SINGLETONS.every((k) => out[k])) break;
-      if (!objects[i]) continue;
-      const name = await getObjectName(this.bridge, objects[i]);
-      const k = SINGLETONS.find((s) => !out[s] && name.startsWith(`${s}_`));
-      if (!k) continue;
-      out[k] = objects[i];
-      indices[k] = i;
+    const idx: number | undefined = (await readBuildCache(this.bridge)).menuIndices?.WC_InitScreensViewController_C;
+    if (idx != null) {
+      const obj = await getObjectAt(this.bridge, idx);
+      if (obj && (await getObjectName(this.bridge, obj)).startsWith("WC_InitScreensViewController_C_")) out.WC_InitScreensViewController_C = obj;
     }
-    await writeBuildCache(this.bridge, { menuIndices: { ...cached, ...indices } });
     return out;
   }
 
@@ -127,6 +140,15 @@ export class Menu {
         const o = await this.off(root, "ControllerSettings");
         if (o != null) item.action = await decodeFName(this.bridge, await this.u32(root + o), 0);
       }
+      if (cls === "W_PushOptionButton_C") {
+        const act = await this.prop(root, "ButtonAction");
+        if (act) item.buttonAction = await getObjectName(this.bridge, act);
+        const hover = await this.prop(root, "HoverBackground");
+        if (hover) {
+          const r = await this.bridge.game.readMemory(hover + 0xe0, 4); // UWidget.RenderOpacity
+          if ("hex" in r) item.highlighted = new DataView(parseHex(r.hex).buffer).getFloat32(0, true) > 0.5;
+        }
+      }
       out.push(item);
     }
     const tree = await this.prop(root, "WidgetTree");
@@ -137,7 +159,10 @@ export class Menu {
   }
 
   async state() {
-    if (!this.singletons || !SINGLETONS.every((k) => this.singletons![k])) this.singletons = await this.getSingletons();
+    if (!this.singletons || !REQUIRED.every((k) => this.singletons![k])) this.singletons = await this.getSingletons();
+    else if (this.singletons.WC_InitScreensViewController_C && !(await getObjectName(this.bridge, this.singletons.WC_InitScreensViewController_C)).startsWith("WC_InitScreensViewController_C_")) {
+      delete this.singletons.WC_InitScreensViewController_C; // destroyed after startup
+    }
     const s = this.singletons;
     const res: {
       screen: string;
@@ -146,7 +171,10 @@ export class Menu {
       menuViews: string[];
       gameViews: string[];
       items: MenuItem[];
-    } = { screen: "game", popup: null, initScreen: null, menuViews: [], gameViews: [], items: [] };
+      loading: null | { done: boolean; waitingForKey: boolean };
+    } = { screen: "game", popup: null, initScreen: null, menuViews: [], gameViews: [], items: [], loading: null };
+    const ls = await this.loadingScreen();
+    res.loading = ls && (ls.waitingForKey || !ls.done) ? ls : null; // a finished screen fades out over the HUD
     const view = s.PopupManager ? await this.prop(s.PopupManager, "PopupView") : 0;
     const popup = view ? await this.prop(view, "ActivePopupWidget") : 0;
     if (popup && ![1, 2].includes(await this.u8(popup + UWIDGET_VISIBILITY))) {
@@ -165,12 +193,31 @@ export class Menu {
     for (const v of s.UIManagerEx ? await this.array(s.UIManagerEx, "OpenViews") : []) {
       if (v) res.gameViews.push(await this.className(v));
     }
-    res.screen = res.popup ? "popup" : res.initScreen != null ? "init" : res.menuViews.length ? "menu" : res.gameViews.length ? "game-ui" : "game";
+    res.screen = res.popup ? "popup" : res.loading ? "loading" : res.initScreen != null ? "init" : res.menuViews.length ? "menu" : res.gameViews.length ? "game-ui" : "game";
     // Items of the topmost layer only: what the player can act on now.
     const top = popup && res.popup ? popup : res.initScreen != null ? init : 0;
     const topViews = top ? [top] : res.menuViews.length ? (await this.array(s.UIMainMenuManager, "OpenViews")).slice(-1) : (await this.array(s.UIManagerEx, "OpenViews")).slice(-1);
     for (const v of topViews) await this.walk(v, "", res.items);
     return res;
+  }
+
+  /**
+   * W_LoadingScreen_C (outer BP_SML_C): visible while a level loads; when loading finishes the progress bar
+   * collapses and PressAnyButtonText shows ("press any key to continue"). Found by a cached object index
+   * (build cache `loadingScreenIndex`, checked by class); no scans: a stale index means no loading screen.
+   */
+  private async loadingScreen(): Promise<{ done: boolean; waitingForKey: boolean } | null> {
+    const idx: number | undefined = (await readBuildCache(this.bridge)).loadingScreenIndex;
+    if (idx == null) return null;
+    const w = await getObjectAt(this.bridge, idx);
+    if (!w || (await this.className(w)) !== "W_LoadingScreen_C") return null;
+    if ([1, 2].includes(await this.u8(w + UWIDGET_VISIBILITY))) return null;
+    const vis = async (prop: string) => {
+      const c = await this.prop(w, prop);
+      return c ? ![1, 2].includes(await this.u8(c + UWIDGET_VISIBILITY)) : false;
+    };
+    const waitingForKey = await vis("PressAnyButtonText");
+    return { done: !(await vis("LoadingProgressBar")), waitingForKey };
   }
 
   // ---------------------------------------------------------------------------
@@ -191,6 +238,36 @@ export class Menu {
     await new Promise((r) => setTimeout(r, holdMs));
     await this.msg(0x101, k.vk, (lp | 0xc0000000) >>> 0); // WM_KEYUP
     return { key: name, vk: k.vk };
+  }
+
+  /** Visible menu option buttons in on-screen order (top to bottom). */
+  async options() {
+    const { items } = await this.state();
+    return items.filter((i) => i.class === "W_PushOptionButton_C");
+  }
+
+  /**
+   * Move the menu highlight onto the option whose ButtonAction starts with `action` (e.g. "LoadLastSaveAction",
+   * "GotoViewAction_1") with Up/Down, re-reading the highlight after every press. With `press`, presses Enter
+   * only after the highlight is confirmed on that option.
+   */
+  async select(action: string, press = false) {
+    const steps: string[] = [];
+    for (let n = 0; n < 12; n++) {
+      const opts = await this.options();
+      const target = opts.findIndex((o) => o.buttonAction?.startsWith(action));
+      if (target < 0) throw new Error(`no visible menu option with action ${action}; have ${opts.map((o) => o.buttonAction).join(", ")}`);
+      const cur = opts.findIndex((o) => o.highlighted);
+      if (cur === target) {
+        if (press) await this.key("Enter");
+        return { selected: opts[target].buttonAction, pressed: press, steps };
+      }
+      const k = cur < 0 || cur > target ? "Up" : "Down";
+      await this.key(k);
+      steps.push(k);
+      await new Promise((r) => setTimeout(r, 300));
+    }
+    throw new Error(`highlight did not reach ${action} after ${steps.length} presses`);
   }
 
   /** Hold a key for `ms` (hold-to-confirm hints). */

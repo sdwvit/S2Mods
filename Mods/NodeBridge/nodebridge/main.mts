@@ -49,6 +49,8 @@ const ENDPOINTS = [
     doc: "global variable value(s) read from UGlobalVariableManager (type Int/Bool/String; String values decode the stored SID index)",
   },
   { path: "/menu", usage: "GET /menu", doc: "screen (init/popup/menu/game-ui/game), active popup, init screen, view stacks, visible widgets/buttons/key hints (with input action)" },
+  { path: "/menu/options", usage: "GET /menu/options", doc: "main-menu option buttons top to bottom: buttonAction (LoadLastSaveAction = Continue) and highlighted" },
+  { path: "/menu/select", usage: "GET /menu/select?action=LoadLastSaveAction&press=1", doc: "move the highlight onto that option with Up/Down, checking each step; press=1 then presses Enter on it" },
   { path: "/menu/key", usage: "GET /menu/key?k=Enter|Escape|F|Up...&hold=60", doc: "press a key through the game window's message queue (hold ms)" },
   { path: "/menu/click", usage: "GET /menu/click?name=<widget name or path suffix> | ?x=&y=", doc: "left-click a visible widget's centre (hints click their button), or window-client x/y" },
   { path: "/npcs", usage: "GET /npcs?sid=<substr>&faction=<substr>&alive=1&limit=100", doc: "scan the unit pool with filters" },
@@ -145,6 +147,11 @@ function startCommandServer(bridge: Bridge): void {
         return reply(200, await (await getZone(bridge)).npcs({ sid: q("sid") ?? undefined, faction: q("faction") ?? undefined, alive, limit: Number(q("limit") ?? 100) }));
       }
       if (url.pathname === "/menu") return reply(200, await menu(bridge).state());
+      if (url.pathname === "/menu/options") return reply(200, await menu(bridge).options());
+      if (url.pathname === "/menu/select") {
+        if (!q("action")) return reply(400, { error: "action required" });
+        return reply(200, await menu(bridge).select(q("action")!, flag("press")));
+      }
       if (url.pathname === "/menu/key") {
         if (!q("k")) return reply(400, { error: "k required" });
         const r = await menu(bridge).key(q("k")!, Number(q("hold") ?? 60));
