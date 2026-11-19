@@ -623,6 +623,51 @@ json stub_set_property(const json&) {
 
 }  // namespace
 
+// Input primitives: the game's top-level UnrealWindow and raw window messages to it.
+// Messages go through the window's normal queue, the same path real keyboard/mouse input takes.
+static BOOL CALLBACK nb_find_unreal_window(HWND h, LPARAM out) {
+  DWORD pid = 0;
+  GetWindowThreadProcessId(h, &pid);
+  if (pid != GetCurrentProcessId() || !IsWindowVisible(h)) return TRUE;
+  char cls[64] = {};
+  GetClassNameA(h, cls, sizeof(cls));
+  if (strcmp(cls, "UnrealWindow") != 0) return TRUE;
+  *reinterpret_cast<HWND*>(out) = h;
+  return FALSE;
+}
+
+static HWND nb_game_window() {
+  HWND h = nullptr;
+  EnumWindows(nb_find_unreal_window, reinterpret_cast<LPARAM>(&h));
+  return h;
+}
+
+json game_get_window(const json&) {
+  HWND h = nb_game_window();
+  if (!h) return {{"error", "no UnrealWindow"}};
+  RECT rc{};
+  GetClientRect(h, &rc);
+  POINT origin{0, 0};
+  ClientToScreen(h, &origin);
+  return {{"hwnd", reinterpret_cast<uint64_t>(h)},
+          {"left", origin.x},
+          {"top", origin.y},
+          {"width", rc.right - rc.left},
+          {"height", rc.bottom - rc.top},
+          {"foreground", GetForegroundWindow() == h}};
+}
+
+// params: {msg, wparam, lparam, post (default true)}
+json game_window_message(const json& params) {
+  HWND h = nb_game_window();
+  if (!h) return {{"error", "no UnrealWindow"}};
+  UINT msg = params.value("msg", 0u);
+  WPARAM wp = static_cast<WPARAM>(params.value("wparam", 0ULL));
+  LPARAM lp = static_cast<LPARAM>(params.value("lparam", 0LL));
+  if (params.value("post", true)) return {{"ok", PostMessageW(h, msg, wp, lp) != 0}};
+  return {{"ok", true}, {"result", static_cast<int64_t>(SendMessageW(h, msg, wp, lp))}};
+}
+
 void install(nb::rpc::Router& router) {
   router.handle("game.isReady", game_is_ready);
   router.handle("game.getEngineVersion", game_get_engine_version);
@@ -649,6 +694,8 @@ void install(nb::rpc::Router& router) {
   router.handle("game.installFnameCtorAddr", game_install_fname_ctor_addr);
   router.handle("game.processEvent", game_process_event);
   router.handle("game.installProcessEventHook", game_install_process_event_hook);
+  router.handle("game.getWindow", game_get_window);
+  router.handle("game.windowMessage", game_window_message);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
 
