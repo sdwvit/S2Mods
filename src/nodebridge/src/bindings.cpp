@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <cstdio>
 #include <future>
@@ -189,6 +190,50 @@ extern "C" int nb_try_invoke_pe(uint64_t fn, uint64_t target, uint64_t func, voi
   } __except (*out_excode = GetExceptionCode(), EXCEPTION_EXECUTE_HANDLER) {
     return 0;
   }
+}
+
+extern "C" int nb_try_call_native(uint64_t fn, const uint64_t* a, uint64_t* out, unsigned long* out_excode) {
+  using Fn = uint64_t (*)(uint64_t, uint64_t, uint64_t, uint64_t);
+  __try {
+    *out = reinterpret_cast<Fn>(fn)(a[0], a[1], a[2], a[3]);
+    return 1;
+  } __except (*out_excode = GetExceptionCode(), EXCEPTION_EXECUTE_HANDLER) {
+    return 0;
+  }
+}
+
+// params: {addr, args: [up to 4 integers/pointers]}. Calls a native (non-UFunction) function on the game
+// thread (needs the ProcessEvent hook so the queue drains there). Returns rax. Win64 ABI: args in rcx, rdx, r8, r9.
+json game_call_native(const json& params) {
+  if (!nb::ue::is_ready()) return unresolved_reason("not ready");
+  uint64_t fn = params.value("addr", 0ULL);
+  if (!fn) return {{"ok", false}, {"reason", "missing addr"}};
+  auto args = std::make_shared<std::array<uint64_t, 4>>();
+  args->fill(0);
+  if (params.contains("args")) {
+    const auto& a = params["args"];
+    if (!a.is_array() || a.size() > 4) return {{"ok", false}, {"reason", "args must be an array of at most 4"}};
+    for (size_t i = 0; i < a.size(); i++) (*args)[i] = a[i].get<uint64_t>();
+  }
+  if (!nb::gt::process_event_hooked()) return {{"ok", false}, {"reason", "ProcessEvent hook not installed (game thread queue not draining)"}};
+  struct Res { bool ok; uint64_t ret; unsigned long code; };
+  auto done = std::make_shared<std::promise<Res>>();
+  auto fut = done->get_future();
+  nb::gt::schedule([done, fn, args] {
+    Res r{false, 0, 0};
+    r.ok = nb_try_call_native(fn, args->data(), &r.ret, &r.code) != 0;
+    done->set_value(r);
+  });
+  if (fut.wait_for(std::chrono::seconds(10)) != std::future_status::ready) {
+    return {{"ok", false}, {"reason", "game thread did not run the call within 10s"}};
+  }
+  auto r = fut.get();
+  if (!r.ok) {
+    char rsn[96];
+    snprintf(rsn, sizeof(rsn), "native call faulted (exc=0x%08lx)", r.code);
+    return {{"ok", false}, {"reason", std::string(rsn)}};
+  }
+  return {{"ok", true}, {"ret", r.ret}};
 }
 
 json game_process_event(const json& params) {
@@ -677,6 +722,45 @@ json game_set_cursor(const json& params) {
   return {{"ok", SetCursorPos(pt.x, pt.y) != 0}, {"screenX", pt.x}, {"screenY", pt.y}};
 }
 
+// params: {focus (default true), events: [{type:"key", vk, scan, up, ext} | {type:"mouse", flags, dx, dy, data}]}
+// Real OS input through SendInput (keyboard + mouse, also produces raw input, which the game reads in play).
+// SendInput goes to the foreground window, so by default the game window is brought to the front first.
+json game_send_input(const json& params) {
+  HWND h = nb_game_window();
+  if (!h) return {{"error", "no UnrealWindow"}};
+  if (params.value("focus", true) && GetForegroundWindow() != h) {
+    SetForegroundWindow(h);
+    Sleep(50);
+  }
+  if (!params.contains("events") || !params["events"].is_array()) return {{"error", "events array required"}};
+  const auto& evs = params["events"];
+  if (evs.size() > 64) return {{"error", "at most 64 events"}};
+  std::vector<INPUT> in(evs.size());
+  for (size_t i = 0; i < evs.size(); i++) {
+    const auto& e = evs[i];
+    INPUT& x = in[i];
+    ZeroMemory(&x, sizeof(x));
+    if (e.value("type", std::string{}) == "key") {
+      x.type = INPUT_KEYBOARD;
+      x.ki.wVk = static_cast<WORD>(e.value("vk", 0));
+      x.ki.wScan = static_cast<WORD>(e.value("scan", 0));
+      DWORD f = 0;
+      if (e.value("up", false)) f |= KEYEVENTF_KEYUP;
+      if (e.value("ext", false)) f |= KEYEVENTF_EXTENDEDKEY;
+      if (e.value("scanOnly", false)) f |= KEYEVENTF_SCANCODE;
+      x.ki.dwFlags = f;
+    } else {
+      x.type = INPUT_MOUSE;
+      x.mi.dx = e.value("dx", 0);
+      x.mi.dy = e.value("dy", 0);
+      x.mi.mouseData = static_cast<DWORD>(e.value("data", 0));
+      x.mi.dwFlags = static_cast<DWORD>(e.value("flags", 0));
+    }
+  }
+  UINT sent = SendInput(static_cast<UINT>(in.size()), in.data(), sizeof(INPUT));
+  return {{"ok", sent == in.size()}, {"sent", sent}, {"foreground", GetForegroundWindow() == h}};
+}
+
 void install(nb::rpc::Router& router) {
   router.handle("game.isReady", game_is_ready);
   router.handle("game.getEngineVersion", game_get_engine_version);
@@ -702,10 +786,12 @@ void install(nb::rpc::Router& router) {
   router.handle("game.fnameFromString", game_fname_from_string);
   router.handle("game.installFnameCtorAddr", game_install_fname_ctor_addr);
   router.handle("game.processEvent", game_process_event);
+  router.handle("game.callNative", game_call_native);
   router.handle("game.installProcessEventHook", game_install_process_event_hook);
   router.handle("game.getWindow", game_get_window);
   router.handle("game.windowMessage", game_window_message);
   router.handle("game.setCursor", game_set_cursor);
+  router.handle("game.sendInput", game_send_input);
   router.handle("game.setProperty", stub_set_property);
   router.handle("game.callFunction", stub_call_function);
 

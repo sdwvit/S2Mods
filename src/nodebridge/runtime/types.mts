@@ -92,6 +92,15 @@ export interface GameApi {
   virtualFree(addr: number): Promise<{ ok: true; addr: number } | { ok: false; lastError: number } | { error: string }>;
   /** Change page protection on a previously allocated region. */
   virtualProtect(addr: number, size: number, protect: number): Promise<{ ok: true; addr: number; size: number; protect: number; oldProtect: number } | { ok: false; lastError: number } | { error: string }>;
+  /** Call a native function at `addr` on the game thread with up to 4 integer/pointer args (Win64 ABI); returns rax.
+   *  Needs the ProcessEvent hook. Faults are caught and reported. */
+  callNative(addr: number, args?: number[]): Promise<{ ok: true; ret: number } | { ok: false; reason: string } | Unresolved>;
+  /** Real OS input via SendInput (brings the game window to the front unless focus=false). Mouse flags are
+   *  MOUSEEVENTF_* (e.g. 0x8/0x10 right down/up); key events take vk/scan/up/ext. */
+  sendInput(
+    events: Array<{ type: "key"; vk: number; scan?: number; up?: boolean; ext?: boolean; scanOnly?: boolean } | { type: "mouse"; flags: number; dx?: number; dy?: number; data?: number }>,
+    focus?: boolean,
+  ): Promise<{ ok: boolean; sent: number; foreground: boolean } | { error: string }>;
   /** The game's top-level UnrealWindow: handle, client size, whether it has focus. */
   getWindow(): Promise<{ hwnd: number; left: number; top: number; width: number; height: number; foreground: boolean } | { error: string }>;
   /** Move the real OS cursor to game-window client pixels (Slate hit-tests at the real cursor). */

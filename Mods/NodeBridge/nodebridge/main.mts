@@ -21,6 +21,7 @@ import {
 } from "@nodebridge/runtime";
 import { Zone } from "./zone.mts";
 import { Menu } from "./menu.mts";
+import { currentDialog, talkTo } from "./talk.mts";
 
 const COMMAND_PORT = 47811;
 
@@ -51,8 +52,11 @@ const ENDPOINTS = [
   { path: "/menu", usage: "GET /menu", doc: "screen (init/popup/menu/game-ui/game), active popup, init screen, view stacks, visible widgets/buttons/key hints (with input action)" },
   { path: "/menu/options", usage: "GET /menu/options", doc: "main-menu option buttons top to bottom: buttonAction (LoadLastSaveAction = Continue) and highlighted" },
   { path: "/menu/select", usage: "GET /menu/select?action=LoadLastSaveAction&press=1", doc: "move the highlight onto that option with Up/Down, checking each step; press=1 then presses Enter on it" },
-  { path: "/menu/key", usage: "GET /menu/key?k=Enter|Escape|F|Up...&hold=60", doc: "press a key through the game window's message queue (hold ms)" },
-  { path: "/menu/click", usage: "GET /menu/click?name=<widget name or path suffix> | ?x=&y=", doc: "left-click a visible widget's centre (hints click their button), or window-client x/y" },
+  { path: "/menu/key", usage: "GET /menu/key?k=Enter|Escape|F|Up|F13|num5|ctrl|vk:0x41...&hold=60", doc: "press any key through the game window's message queue (hold ms); vk:<code> for any virtual-key code" },
+  { path: "/menu/click", usage: "GET /menu/click?name=<widget>|x=&y=&b=left|right|middle|x1|x2&hold=60", doc: "click a visible widget's centre, window-client x/y, or (no target) press where the cursor/crosshair is; any mouse button; real input via SendInput on DLL v0.2.33+" },
+  { path: "/menu/wheel", usage: "GET /menu/wheel?x=&y=&n=1", doc: "mouse wheel notches at window-client x/y (n>0 up)" },
+  { path: "/dialog", usage: "GET /dialog", doc: "active dialog: current phrase SID and the NPC's spawn-actor SID (DialogManager+0x350)" },
+  { path: "/npc/talk", usage: "GET /npc/talk?uid=<n>", doc: "start the NPC's conversation as if the player pressed Use (native interact handler); NPC must be loaded" },
   { path: "/npcs", usage: "GET /npcs?sid=<substr>&faction=<substr>&alive=1&limit=100", doc: "scan the unit pool with filters" },
   {
     path: "/relation",
@@ -160,9 +164,23 @@ function startCommandServer(bridge: Bridge): void {
       }
       if (url.pathname === "/menu/click") {
         const m = menu(bridge);
-        const r = q("name") ? await m.click(q("name")!) : await m.clickAt(Number(q("x")), Number(q("y")));
+        const b = q("b") ?? "left";
+        const hold = Number(q("hold") ?? 60);
+        const r = q("name")
+          ? await m.click(q("name")!, b)
+          : q("x") != null && q("y") != null
+            ? await m.clickAt(Number(q("x")), Number(q("y")), b, hold)
+            : await m.press(b, hold); // no target: press where the cursor/crosshair is
         bridge.log(`[http] menu click ${JSON.stringify(r)}`);
         return reply(200, r);
+      }
+      if (url.pathname === "/menu/wheel") return reply(200, await menu(bridge).wheel(Number(q("x")), Number(q("y")), Number(q("n") ?? 1)));
+      if (url.pathname === "/dialog") return reply(200, await currentDialog(bridge, await getZone(bridge)));
+      if (url.pathname === "/npc/talk") {
+        if (q("uid") == null) return reply(400, { error: "uid required" });
+        const r = await talkTo(bridge, await getZone(bridge), Number(q("uid")));
+        bridge.log(`[http] npc talk ${q("uid")}: ${JSON.stringify(r)}`);
+        return reply(r.ok ? 200 : 409, r);
       }
       if (url.pathname === "/gv") {
         const z = await getZone(bridge);

@@ -168,12 +168,60 @@ export class Zone {
     return s ? Buffer.from(s).toString("utf16le").replace(/\0+$/, "") : null;
   }
 
+  private sidRvas: { pos: number; neg: number } | null = null;
+
+  /**
+   * A SID block table: its first 4 entries point at 1024-entry blocks of 32-byte records whose FStrings look like SIDs
+   * (checked at entries 1, 2 and 1000 of block 0 and entry 1 of blocks 1-3). Other .data arrays of FString blocks
+   * passed a weaker check (2026-11-19).
+   */
+  private async validSidTable(addr: number): Promise<boolean> {
+    const sidLike = (s: string | null) => !!s && /^[A-Za-z0-9_]+$/.test(s);
+    const head = await this.read(addr, 32);
+    if (!head) return false;
+    const blocks = [0, 8, 16, 24].map((o) => u64(head, o));
+    if (!blocks.every(isHeapPtr)) return false;
+    for (const i of [1, 2, 1000]) if (!sidLike(await this.fstring(blocks[0] + i * 32, 256))) return false;
+    for (const b of blocks.slice(1)) if (!sidLike(await this.fstring(b + 32, 256))) return false;
+    return true;
+  }
+
+  /**
+   * SID string tables (positive and negative index). The layout RVAs are hints: on 2026-11-19 the positive table
+   * sat 0x778 past its hint (the hint then held unrelated field-name FStrings), so it is validated, searched for
+   * near the hint on a miss, and the hit kept for the run and in the build cache (`sidTables`). The negative
+   * table is taken at the same shift.
+   */
+  private async sidTables(): Promise<{ pos: number; neg: number } | null> {
+    const exe = this.deps.exeBase;
+    if (this.sidRvas) return this.sidRvas;
+    const L = this.need();
+    const cached = (await this.deps.readCache()).sidTables as { pos: number; neg: number } | undefined;
+    const tries = [cached, { pos: L.sidPositive, neg: L.sidNegative }].filter((x): x is { pos: number; neg: number } => !!x);
+    for (const t of tries) if (await this.validSidTable(exe + t.pos)) return (this.sidRvas = t);
+    const hint = exe + L.sidPositive;
+    // Outward from the hint, nearest first.
+    for (let d = 0; d < 0x10000; d += 8) {
+      for (const cand of d ? [hint + d, hint - d] : [hint]) {
+        if (!(await this.validSidTable(cand))) continue;
+        const pos = cand - exe;
+        this.sidRvas = { pos, neg: L.sidNegative + (pos - L.sidPositive) };
+        this.bridge.log(`[sid] tables at RVA 0x${pos.toString(16)} / 0x${this.sidRvas.neg.toString(16)} (hint 0x${L.sidPositive.toString(16)})`);
+        await this.deps.writeCache({ sidTables: this.sidRvas });
+        return this.sidRvas;
+      }
+    }
+    this.bridge.log("[sid] SID tables not found near the hint");
+    return null;
+  }
+
   async sid(index: number): Promise<string | null> {
     const hit = this.sidCache.get(index);
     if (hit != null) return hit;
     if (Math.abs(index) > 2_000_000) return null;
-    const L = this.need();
-    const table = this.deps.exeBase + (index < 0 ? L.sidNegative : L.sidPositive);
+    const T = await this.sidTables();
+    if (!T) return null;
+    const table = this.deps.exeBase + (index < 0 ? T.neg : T.pos);
     const a = Math.abs(index);
     const block = await this.ptr(table + Math.floor(a / 1024) * 8);
     if (!isHeapPtr(block)) return null;
@@ -218,9 +266,80 @@ export class Zone {
   // ---------------------------------------------------------------------------
   // unit pool
 
+  private poolRva: number | null = null;
+
+  /**
+   * A first chunk: int32 count 3..1024 at +8; records 0, 1, 2 and the last one carry their own index as uid; the next
+   * pointer is 0 or a chunk whose first record has uid 1024. A weaker check (count + uids 0/1) accepted a
+   * different .data array on 2026-11-19 and every scan then failed with "bad chunk count".
+   */
+  private async validPool(addr: number): Promise<boolean> {
+    const hdr = await this.read(addr, 12);
+    if (!hdr) return false;
+    const next = u64(hdr, 0),
+      n = i32(hdr, 8);
+    if (!(n >= 3 && n <= 1024)) return false;
+    for (const i of [0, 1, 2, n - 1]) {
+      const r = await this.read(addr + 16 + i * UNIT_STRIDE + U.uid, 4);
+      if (!r || u32(r, 0) !== i) return false;
+    }
+    if (next) {
+      if (!isHeapPtr(next) || n !== 1024) return false;
+      const r = await this.read(next + 16 + U.uid, 4);
+      if (!r || u32(r, 0) !== 1024) return false;
+    }
+    return true;
+  }
+
+  /** Forget the pool location (bad chunk seen): the next lookup validates and searches again. */
+  private async dropPool() {
+    this.poolRva = null;
+    this.chunks = [];
+    await this.deps.writeCache({ unitPool: null });
+  }
+
+  /**
+   * First unit-pool chunk. The layout RVA is a hint: on 2026-11-19 the pool sat 0x6c0 past it (exe+0xa2f80c0) in
+   * some runs. Validated each time; on a miss, searched outward from the hint (nearest first, +-0x10000), then all
+   * of .data; the hit is kept for this run and in the build cache.
+   */
+  private async poolBase(): Promise<number> {
+    const exe = this.deps.exeBase;
+    if (this.poolRva != null && (await this.validPool(exe + this.poolRva))) return exe + this.poolRva;
+    const cached = (await this.deps.readCache()).unitPool as number | null | undefined;
+    const hint = this.need().unitPool;
+    for (const rva of [cached, hint, hint + 0x6c0]) {
+      if (typeof rva === "number" && (await this.validPool(exe + rva))) return this.keepPool(rva, hint);
+    }
+    for (let d = 8; d < 0x10000; d += 8) {
+      for (const rva of [hint + d, hint - d]) if (await this.validPool(exe + rva)) return this.keepPool(rva, hint);
+    }
+    const { start: ds, size } = await this.dataSection();
+    for (let off = ds; off < ds + size; off += 4096) {
+      const page = await this.read(off, Math.min(4096, ds + size - off));
+      if (!page) continue;
+      for (let j = 0; j + 12 <= page.length; j += 8) {
+        const n = i32(page, j + 8);
+        if (n >= 3 && n <= 1024 && (await this.validPool(off + j))) return this.keepPool(off + j - exe, hint);
+      }
+    }
+    this.bridge.log(`[units] pool not found (no save loaded?)`);
+    return 0;
+  }
+
+  private async keepPool(rva: number, hint: number): Promise<number> {
+    if (this.poolRva !== rva) {
+      this.bridge.log(`[units] pool at RVA 0x${rva.toString(16)} (hint 0x${hint.toString(16)})`);
+      await this.deps.writeCache({ unitPool: rva });
+    }
+    this.poolRva = rva;
+    return this.deps.exeBase + rva;
+  }
+
   /** Chunk address for chunk index `ci` (uid >> 10). Cached; a cached entry is re-checked through its predecessor's next pointer. */
   private async chunk(ci: number): Promise<number> {
-    const base = this.deps.exeBase + this.need().unitPool;
+    const base = await this.poolBase();
+    if (!base) return 0;
     if (this.chunks[0] !== base) this.chunks = [base];
     for (let i = 1; i <= ci; i++) {
       const next = await this.ptr(this.chunks[i - 1]);
@@ -275,7 +394,10 @@ export class Zone {
       if (!c) break;
       const hdr = await this.read(c, 12);
       const n = hdr ? i32(hdr, 8) : 0;
-      if (!(n >= 0 && n <= 1024)) throw new Error("unit pool: bad chunk count");
+      if (!(n >= 0 && n <= 1024)) {
+        await this.dropPool();
+        throw new Error("unit pool: bad chunk count (location dropped; retry)");
+      }
       for (let i = 0; i < n; i++) {
         const addr = c + 16 + i * UNIT_STRIDE;
         const raw = await this.read(addr, UNIT_READ);
