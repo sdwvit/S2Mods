@@ -11,6 +11,13 @@ Defined in `nodebridge/main.mts` (`ENDPOINTS`); `GET /` lists them.
 - `/pos`: player location.
 - `/squad?faction=Spark&size=5`: spawn a squad at the player.
 - `/obj?addr=<n>`, `/props?struct=<n>`, `/mem?addr=<n>&n=256`: inspect a UObject, a struct's properties, raw memory.
+- `/npc?uid=<n>` or `/npc?sid=<SID>`: A-Life unit (sid, faction, relation subject id, state, health, rank, position).
+  `/npcs?sid=&faction=&alive=1&limit=`: filtered pool scan.
+- `/relation?a=&b=` (a/b: `player`, `uid:N`, `sid:X` or a bare SID, or a relation subject id), `/relations?of=player`,
+  `/relation/set?a=&b=&value=` (writes the record directly, bypassing the game's change hooks),
+  `/relation/factions?a=&b=&value=` (`XSetRelationBetweenFactions`), `/relation/radius?r=500&value=-500`.
+  Code and layouts: `nodebridge/zone.mts`. Relation records live in a hash set whose bucket array is in exe .data;
+  it is found once per build (~2 s scan) and kept in the build cache as `relationBuckets`.
 - `/find?q=<substring>&limit=200`: live UObjects by name/class. Slow: it reads names one memory read at a
   time and timed out after 2 min on the full object table. Don't use it for triage.
 

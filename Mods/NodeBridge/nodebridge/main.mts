@@ -5,6 +5,8 @@ import http from "node:http";
 import type { Bridge, ModInit } from "@nodebridge/runtime";
 import {
   decodeFName,
+  getBuildId,
+  getExeBase,
   getObjectName,
   getObjectPointers,
   getPlayerPawnLocation,
@@ -12,9 +14,12 @@ import {
   readU32LE,
   readU64At,
   readU64LE,
+  readBuildCache,
   runConsoleCommand,
   waitForReflection,
+  writeBuildCache,
 } from "@nodebridge/runtime";
+import { Zone } from "./zone.mts";
 
 const COMMAND_PORT = 47811;
 
@@ -32,7 +37,46 @@ const ENDPOINTS = [
   { path: "/obj", usage: "GET /obj?addr=<n>", doc: "name, class and outer path of the UObject at addr" },
   { path: "/pos", usage: "GET /pos", doc: "player location" },
   { path: "/squad", usage: "GET /squad?faction=Spark&size=5", doc: "spawnSquad at the player" },
+  {
+    path: "/npc",
+    usage: "GET /npc?uid=<n> | /npc?sid=<SID>[&fresh=1]",
+    doc: "A-Life unit(s) by uid or SID: sid, faction, relation subject, state, health, rank, position (record re-read every call)",
+  },
+  { path: "/npcs", usage: "GET /npcs?sid=<substr>&faction=<substr>&alive=1&limit=100", doc: "scan the unit pool with filters" },
+  {
+    path: "/relation",
+    usage: "GET /relation?a=player&b=uid:896",
+    doc: "relation value and level both ways. a/b: player | uid:N | sid:X (or bare SID) | subject id",
+  },
+  { path: "/relations", usage: "GET /relations?of=player&limit=200&fresh=1", doc: "every relation record that involves a subject" },
+  {
+    path: "/relation/set",
+    usage: "GET /relation/set?a=player&b=uid:896&value=-1000&both=1",
+    doc: "write the relation value straight into the record(s) (-99999..99999); bypasses the game's change hooks",
+  },
+  {
+    path: "/relation/factions",
+    usage: "GET /relation/factions?a=Bandits&b=Player&value=-1000",
+    doc: "console XSetRelationBetweenFactions a b value",
+  },
+  { path: "/relation/radius", usage: "GET /relation/radius?r=500&value=-500", doc: "console XSetRelationsInRadius (player vs NPCs within r cm)" },
 ];
+
+let zone: Promise<Zone> | null = null;
+function getZone(bridge: Bridge): Promise<Zone> {
+  zone ??= (async () =>
+    new Zone(bridge, {
+      exeBase: await getExeBase(bridge),
+      buildId: await getBuildId(bridge),
+      decodeFName: (c, n) => decodeFName(bridge, c, n),
+      readCache: () => readBuildCache(bridge),
+      writeCache: (p) => writeBuildCache(bridge, p),
+    }))().catch((e) => {
+    zone = null;
+    throw e;
+  });
+  return zone;
+}
 
 /**
  * Local control server, so one bridge process serves a whole play session: the object-table
@@ -72,6 +116,45 @@ function startCommandServer(bridge: Bridge): void {
         const faction = url.searchParams.get("faction") ?? "Spark";
         const size = Number(url.searchParams.get("size") ?? 5);
         return reply(200, { ok: true, ran: await spawnSquad(bridge, faction, size) });
+      }
+      const q = (k: string) => url.searchParams.get(k);
+      const flag = (k: string) => q(k) === "1" || q(k) === "true";
+      if (url.pathname === "/npc") {
+        const z = await getZone(bridge);
+        if (q("uid") != null) {
+          const n = await z.npcByUid(Number(q("uid")));
+          return n ? reply(200, n) : reply(404, { error: "no live unit with that uid" });
+        }
+        if (q("sid")) return reply(200, await z.npcsBySid(q("sid")!, flag("fresh")));
+        return reply(400, { error: "uid or sid required" });
+      }
+      if (url.pathname === "/npcs") {
+        const alive = q("alive") == null ? undefined : flag("alive");
+        return reply(200, await (await getZone(bridge)).npcs({ sid: q("sid") ?? undefined, faction: q("faction") ?? undefined, alive, limit: Number(q("limit") ?? 100) }));
+      }
+      if (url.pathname === "/relation") {
+        if (!q("a") || !q("b")) return reply(400, { error: "a and b required" });
+        return reply(200, await (await getZone(bridge)).relation(q("a")!, q("b")!));
+      }
+      if (url.pathname === "/relations") {
+        return reply(200, await (await getZone(bridge)).relationsOf(q("of") ?? "player", Number(q("limit") ?? 200), flag("fresh")));
+      }
+      if (url.pathname === "/relation/set") {
+        if (!q("a") || !q("b") || q("value") == null) return reply(400, { error: "a, b and value required" });
+        const r = await (await getZone(bridge)).setRelation(q("a")!, q("b")!, Number(q("value")), q("both") !== "0");
+        bridge.log(`[http] relation ${q("a")} ${q("b")} = ${q("value")}: ${JSON.stringify(r.written)}`);
+        return reply(200, r);
+      }
+      if (url.pathname === "/relation/factions" || url.pathname === "/relation/radius") {
+        const v = Number(q("value"));
+        if (!Number.isInteger(v)) return reply(400, { error: "integer value required" });
+        const cmd =
+          url.pathname === "/relation/radius"
+            ? `XSetRelationsInRadius ${Number(q("r") ?? 500)} ${v}`
+            : `XSetRelationBetweenFactions ${(q("a") ?? "").replace(/\s/g, "")} ${(q("b") ?? "").replace(/\s/g, "")} ${v}`;
+        await runConsoleCommand(bridge, cmd);
+        bridge.log(`[http] ran: ${cmd}`);
+        return reply(200, { ok: true, ran: cmd });
       }
       return reply(404, { error: "unknown path", endpoints: ENDPOINTS });
     } catch (e) {
